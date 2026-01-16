@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
-import { getTVShowDetails, getImageUrl, TVShow } from "../../src/lib/tmdb";
+import { getTVShowDetails, getTVSeasonDetails, getImageUrl, TVShow, Season, Episode } from "../../src/lib/tmdb";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { supabase, Profile } from "../../src/lib/supabase";
@@ -32,6 +32,12 @@ export default function TVDetailScreen() {
     const [users, setUsers] = useState<Profile[]>([]);
     const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
     const [sendingRecommendation, setSendingRecommendation] = useState(false);
+
+    // Season Details State
+    const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number | null>(null);
+    const [seasonEpisodes, setSeasonEpisodes] = useState<any[]>([]); // Use correct type if available
+    const [loadingSeason, setLoadingSeason] = useState(false);
+    const [showSeasonModal, setShowSeasonModal] = useState(false);
 
     const { user } = useAuthStore();
     const {
@@ -122,6 +128,24 @@ export default function TVDetailScreen() {
             alert("Error al enviar recomendación");
         } finally {
             setSendingRecommendation(false);
+        }
+    };
+
+    const openSeasonDetails = async (seasonNumber: number) => {
+        if (!tvShow) return;
+
+        setSelectedSeasonNumber(seasonNumber);
+        setShowSeasonModal(true);
+        setLoadingSeason(true);
+
+        try {
+            const data = await getTVSeasonDetails(tvShow.id, seasonNumber);
+            setSeasonEpisodes(data.episodes);
+        } catch (err) {
+            console.error("Error loading season details:", err);
+            alert("Error al cargar episodios");
+        } finally {
+            setLoadingSeason(false);
         }
     };
 
@@ -287,6 +311,87 @@ export default function TVDetailScreen() {
                         </Text>
                     </View>
 
+                    {/* Cast */}
+                    {tvShow.credits && tvShow.credits.cast.length > 0 && (
+                        <View style={styles.sectionContainer}>
+                            <Text
+                                style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                            >
+                                Reparto
+                            </Text>
+                            <FlatList
+                                data={tvShow.credits.cast}
+                                keyExtractor={(item) => item.id.toString()}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.castList}
+                                renderItem={({ item }) => (
+                                    <View style={styles.castItem}>
+                                        {item.profile_path ? (
+                                            <Image
+                                                source={{ uri: getImageUrl(item.profile_path, "w200") ?? undefined }}
+                                                style={styles.castImage}
+                                                contentFit="cover"
+                                            />
+                                        ) : (
+                                            <View style={styles.castPlaceholder}>
+                                                <Text style={styles.castPlaceholderIcon}>👤</Text>
+                                            </View>
+                                        )}
+                                        <Text style={styles.castName} numberOfLines={2}>
+                                            {item.name}
+                                        </Text>
+                                        <Text style={styles.castCharacter} numberOfLines={2}>
+                                            {item.character}
+                                        </Text>
+                                    </View>
+                                )}
+                            />
+                        </View>
+                    )}
+
+                    {/* Seasons */}
+                    {tvShow.seasons && tvShow.seasons.length > 0 && (
+                        <View style={styles.sectionContainer}>
+                            <Text
+                                style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                            >
+                                Temporadas
+                            </Text>
+                            <FlatList
+                                data={tvShow.seasons}
+                                keyExtractor={(item) => item.id.toString()}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.seasonList}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        style={styles.seasonItem}
+                                        onPress={() => openSeasonDetails(item.season_number)}
+                                    >
+                                        {item.poster_path ? (
+                                            <Image
+                                                source={{ uri: getImageUrl(item.poster_path, "w200") ?? undefined }}
+                                                style={styles.seasonImage}
+                                                contentFit="cover"
+                                            />
+                                        ) : (
+                                            <View style={styles.seasonPlaceholder}>
+                                                <Text style={styles.seasonPlaceholderIcon}>📺</Text>
+                                            </View>
+                                        )}
+                                        <Text style={styles.seasonName} numberOfLines={1}>
+                                            {item.name}
+                                        </Text>
+                                        <Text style={styles.seasonEpisodes}>
+                                            {item.episode_count} eps
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                            />
+                        </View>
+                    )}
+
                     <View style={{ height: 32 }} />
                 </View>
             </ScrollView>
@@ -409,6 +514,65 @@ export default function TVDetailScreen() {
                             </Text>
                         )}
                     </TouchableOpacity>
+                </View>
+            </Modal>
+
+            {/* Season Details Modal */}
+            <Modal
+                visible={showSeasonModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowSeasonModal(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalHeader}>
+                        <Text
+                            style={[styles.modalTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                        >
+                            {selectedSeasonNumber !== null ? `Temporada ${selectedSeasonNumber}` : "Episodios"}
+                        </Text>
+                        <TouchableOpacity onPress={() => setShowSeasonModal(false)}>
+                            <Text style={styles.closeButtonText}>✕</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {loadingSeason ? (
+                        <View style={styles.centerContainer}>
+                            <ActivityIndicator size="large" color="#dc2626" />
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={seasonEpisodes}
+                            keyExtractor={(item) => item.id.toString()}
+                            contentContainerStyle={{ paddingBottom: 20 }}
+                            renderItem={({ item }: { item: Episode }) => (
+                                <View style={styles.episodeItem}>
+                                    {item.still_path ? (
+                                        <Image
+                                            source={{ uri: getImageUrl(item.still_path, "w300") ?? undefined }}
+                                            style={styles.episodeImage}
+                                            contentFit="cover"
+                                        />
+                                    ) : (
+                                        <View style={styles.episodePlaceholder}>
+                                            <Text style={styles.episodePlaceholderIcon}>📺</Text>
+                                        </View>
+                                    )}
+                                    <View style={styles.episodeContent}>
+                                        <Text style={styles.episodeTitle}>
+                                            {item.episode_number}. {item.name}
+                                        </Text>
+                                        <Text style={styles.episodeOverview} numberOfLines={3}>
+                                            {item.overview || "Sin descripción."}
+                                        </Text>
+                                        <Text style={styles.episodeMeta}>
+                                            ⭐ {item.vote_average.toFixed(1)} • {item.air_date}
+                                        </Text>
+                                    </View>
+                                </View>
+                            )}
+                        />
+                    )}
                 </View>
             </Modal>
         </SafeAreaView>
@@ -666,5 +830,128 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         textTransform: "uppercase",
+    },
+    sectionContainer: {
+        marginTop: 24,
+    },
+    sectionTitle: {
+        color: "#f4f4f5",
+        fontSize: 18,
+        marginBottom: 12,
+    },
+    castList: {
+        gap: 12,
+    },
+    castItem: {
+        width: 100,
+        marginRight: 12,
+    },
+    castImage: {
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    castPlaceholder: {
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+        backgroundColor: Colors.metalGray,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 8,
+    },
+    castPlaceholderIcon: {
+        fontSize: 32,
+    },
+    castName: {
+        color: "#f4f4f5",
+        fontSize: 12,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    castCharacter: {
+        color: Colors.metalSilver,
+        fontSize: 10,
+        textAlign: "center",
+        marginTop: 2,
+    },
+    seasonList: {
+        gap: 12,
+    },
+    seasonItem: {
+        width: 100,
+        marginRight: 12,
+    },
+    seasonImage: {
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    seasonPlaceholder: {
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+        backgroundColor: Colors.metalGray,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 8,
+    },
+    seasonPlaceholderIcon: {
+        fontSize: 32,
+    },
+    seasonName: {
+        color: "#f4f4f5",
+        fontSize: 12,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    seasonEpisodes: {
+        color: Colors.metalSilver,
+        fontSize: 10,
+        textAlign: "center",
+        marginTop: 2,
+    },
+    episodeItem: {
+        flexDirection: "row",
+        marginBottom: 16,
+        backgroundColor: Colors.metalGray,
+        borderRadius: 8,
+        overflow: "hidden",
+    },
+    episodeImage: {
+        width: 120,
+        height: 80,
+    },
+    episodePlaceholder: {
+        width: 120,
+        height: 80,
+        backgroundColor: Colors.metalBlack,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    episodePlaceholderIcon: {
+        fontSize: 24,
+    },
+    episodeContent: {
+        flex: 1,
+        padding: 8,
+        justifyContent: "center",
+    },
+    episodeTitle: {
+        color: "#f4f4f5",
+        fontWeight: "bold",
+        fontSize: 14,
+        marginBottom: 4,
+    },
+    episodeOverview: {
+        color: Colors.metalSilver,
+        fontSize: 12,
+        marginBottom: 4,
+    },
+    episodeMeta: {
+        color: Colors.metalGold,
+        fontSize: 10,
     },
 });

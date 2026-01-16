@@ -198,6 +198,7 @@ export default function MovieDetailScreen() {
                             </Text>
                             <Text style={styles.yearText}>
                                 {movie.release_date?.split("-")[0]}
+                                {movie.runtime ? ` • ${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m` : ""}
                             </Text>
                             <Text style={styles.ratingText}>
                                 ⭐ {movie.vote_average.toFixed(1)}/10
@@ -287,6 +288,45 @@ export default function MovieDetailScreen() {
                             {movie.overview || "Sin descripción disponible"}
                         </Text>
                     </View>
+
+                    {/* Cast */}
+                    {movie.credits && movie.credits.cast.length > 0 && (
+                        <View style={styles.sectionContainer}>
+                            <Text
+                                style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                            >
+                                Reparto
+                            </Text>
+                            <FlatList
+                                data={movie.credits.cast}
+                                keyExtractor={(item) => item.id.toString()}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.castList}
+                                renderItem={({ item }) => (
+                                    <View style={styles.castItem}>
+                                        {item.profile_path ? (
+                                            <Image
+                                                source={{ uri: getImageUrl(item.profile_path, "w200") ?? undefined }}
+                                                style={styles.castImage}
+                                                contentFit="cover"
+                                            />
+                                        ) : (
+                                            <View style={styles.castPlaceholder}>
+                                                <Text style={styles.castPlaceholderIcon}>👤</Text>
+                                            </View>
+                                        )}
+                                        <Text style={styles.castName} numberOfLines={2}>
+                                            {item.name}
+                                        </Text>
+                                        <Text style={styles.castCharacter} numberOfLines={2}>
+                                            {item.character}
+                                        </Text>
+                                    </View>
+                                )}
+                            />
+                        </View>
+                    )}
 
                     <View style={{ height: 32 }} />
                 </View>
@@ -667,5 +707,50 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         textTransform: "uppercase",
+    },
+    sectionContainer: {
+        marginTop: 24,
+    },
+    sectionTitle: {
+        color: "#f4f4f5",
+        fontSize: 18,
+        marginBottom: 12,
+    },
+    castList: {
+        gap: 12,
+    },
+    castItem: {
+        width: 100,
+        marginRight: 12,
+    },
+    castImage: {
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    castPlaceholder: {
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+        backgroundColor: Colors.metalGray,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 8,
+    },
+    castPlaceholderIcon: {
+        fontSize: 32,
+    },
+    castName: {
+        color: "#f4f4f5",
+        fontSize: 12,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    castCharacter: {
+        color: Colors.metalSilver,
+        fontSize: 10,
+        textAlign: "center",
+        marginTop: 2,
     },
 });
