@@ -10,9 +10,16 @@ import Animated, {
     withSequence,
 } from 'react-native-reanimated';
 import { Image } from 'expo-image';
+import * as Crypto from 'expo-crypto';
 
 const { width, height } = Dimensions.get('window');
 const SMOKE_IMAGE = require('../../assets/smoke.png');
+
+const getSecureRandom = () => {
+    const array = new Uint32Array(1);
+    Crypto.getRandomValues(array);
+    return array[0] / 4294967295; // Max Uint32 value
+};
 
 interface SmokePuffProps {
     delay: number;
@@ -28,7 +35,7 @@ const SmokePuff = ({ delay, duration, startX, startY, scaleStart, scaleEnd }: Sm
     const translateX = useSharedValue(startX);
     const translateY = useSharedValue(startY);
     const scale = useSharedValue(scaleStart);
-    const rotate = useSharedValue(Math.random() * 360);
+    const rotate = useSharedValue(getSecureRandom() * 360);
 
     useEffect(() => {
         opacity.value = withDelay(
@@ -45,7 +52,7 @@ const SmokePuff = ({ delay, duration, startX, startY, scaleStart, scaleEnd }: Sm
         // Subtle sideways movement
         translateX.value = withDelay(
             delay,
-            withRepeat(withTiming(startX + (Math.random() * 100 - 50), { duration: duration, easing: Easing.linear }), -1, true)
+            withRepeat(withTiming(startX + (getSecureRandom() * 100 - 50), { duration: duration, easing: Easing.linear }), -1, true)
         );
 
         // Upward drift
