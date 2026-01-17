@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { getImageUrl, Movie, TVShow } from "../lib/tmdb";
 import { Colors } from "../constants/Colors";
 
@@ -86,7 +87,11 @@ export default function MovieCard({
                                     }}
                                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                                 >
-                                    <Text style={styles.actionIcon}>{isFavorite ? "❤️" : "🤍"}</Text>
+                                    <Ionicons
+                                        name={isFavorite ? "skull" : "skull-outline"}
+                                        size={22}
+                                        color={isFavorite ? Colors.bloodRed : "#f4f4f5"}
+                                    />
                                 </TouchableOpacity>
                             )}
                             {onToggleWatchlist && (
@@ -97,7 +102,11 @@ export default function MovieCard({
                                     }}
                                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                                 >
-                                    <Text style={styles.actionIcon}>{inWatchlist ? "📌" : "📍"}</Text>
+                                    <MaterialCommunityIcons
+                                        name={inWatchlist ? "sword-cross" : "sword"}
+                                        size={22}
+                                        color={inWatchlist ? Colors.bloodRed : "#f4f4f5"}
+                                    />
                                 </TouchableOpacity>
                             )}
                         </View>

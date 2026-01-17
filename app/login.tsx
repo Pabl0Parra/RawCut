@@ -9,6 +9,7 @@ import {
     ScrollView,
     ActivityIndicator,
     StyleSheet,
+    Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
@@ -44,6 +45,23 @@ export default function LoginScreen() {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            {/* Logo/Title - Static Header */}
+            <View style={styles.logoContainer}>
+                <Text
+                    style={[styles.logoText, { fontFamily: "BebasNeue_400Regular" }]}
+                >
+                    CortoCrudo
+                </Text>
+                <Image
+                    source={require("../assets/corto-crudo-logo.png")}
+                    style={styles.logoImage}
+                    resizeMode="contain"
+                />
+                <Text style={styles.logoSubtitle}>
+                    Tu guía de cine y series
+                </Text>
+            </View>
+
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.keyboardAvoidingView}
@@ -53,18 +71,6 @@ export default function LoginScreen() {
                     keyboardShouldPersistTaps="handled"
                 >
                     <View style={styles.contentContainer}>
-                        {/* Logo/Title */}
-                        <View style={styles.logoContainer}>
-                            <Text
-                                style={[styles.logoText, { fontFamily: "BebasNeue_400Regular" }]}
-                            >
-                                CortoCrudo
-                            </Text>
-                            <Text style={styles.logoSubtitle}>
-                                Tu guía de cine y series
-                            </Text>
-                        </View>
-
                         {/* Error Message */}
                         {error && (
                             <View style={styles.errorContainer}>
@@ -181,25 +187,35 @@ const styles = StyleSheet.create({
     },
     scrollViewContent: {
         flexGrow: 1,
+        justifyContent: "center",
     },
     contentContainer: {
-        flex: 1,
         paddingHorizontal: 24,
-        justifyContent: "center",
+        paddingBottom: 24,
+        width: "100%",
     },
     logoContainer: {
         alignItems: "center",
-        marginBottom: 48,
+        marginTop: 24,
+        marginBottom: 12,
+        // Ensure static header doesn't shrink
+        flexShrink: 0,
     },
     logoText: {
         color: Colors.bloodRed,
         fontSize: 48,
         lineHeight: 52,
+        marginBottom: 8,
+    },
+    logoImage: {
+        width: 180,
+        height: 180,
+        marginBottom: 8,
     },
     logoSubtitle: {
         color: Colors.metalSilver,
         fontSize: 14,
-        marginTop: 8,
+        marginTop: 0,
     },
     errorContainer: {
         backgroundColor: "rgba(220, 38, 38, 0.2)",

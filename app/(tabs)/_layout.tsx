@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import { View, Text, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "../../src/constants/Colors";
 
 export default function TabLayout() {
@@ -42,7 +43,7 @@ export default function TabLayout() {
                     title: "Inicio",
                     headerTitle: "CortoCrudo",
                     tabBarIcon: ({ color }) => (
-                        <Text style={{ fontSize: 20 }}>🏠</Text>
+                        <MaterialIcons name="castle" size={24} color={color} />
                     ),
                 }}
             />
@@ -51,7 +52,7 @@ export default function TabLayout() {
                 options={{
                     title: "Favoritos",
                     tabBarIcon: ({ color }) => (
-                        <Text style={{ fontSize: 20 }}>❤️</Text>
+                        <Ionicons name="skull-outline" size={24} color={color} />
                     ),
                 }}
             />
@@ -60,7 +61,7 @@ export default function TabLayout() {
                 options={{
                     title: "Watchlist",
                     tabBarIcon: ({ color }) => (
-                        <Text style={{ fontSize: 20 }}>📌</Text>
+                        <MaterialCommunityIcons name="sword" size={24} color={color} />
                     ),
                 }}
             />
@@ -69,7 +70,7 @@ export default function TabLayout() {
                 options={{
                     title: "Recomen...",
                     tabBarIcon: ({ color }) => (
-                        <Text style={{ fontSize: 20 }}>💌</Text>
+                        <MaterialCommunityIcons name="email-outline" size={24} color={color} />
                     ),
                 }}
             />
@@ -78,7 +79,7 @@ export default function TabLayout() {
                 options={{
                     title: "Perfil",
                     tabBarIcon: ({ color }) => (
-                        <Text style={{ fontSize: 20 }}>👤</Text>
+                        <MaterialCommunityIcons name="shield-sword-outline" size={24} color={color} />
                     ),
                 }}
             />

@@ -12,6 +12,7 @@ import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
 import { supabase } from "../src/lib/supabase";
 import { useAuthStore } from "../src/stores/authStore";
 import { Colors } from "../src/constants/Colors";
+import VideoSplash from "../src/components/VideoSplash"; // Import VideoSplash
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -21,6 +22,7 @@ export default function RootLayout() {
     const segments = useSegments();
     const router = useRouter();
     const [isReady, setIsReady] = useState(false);
+    const [isSplashFinished, setIsSplashFinished] = useState(false); // Splash state
 
     const [fontsLoaded, fontError] = useFonts({
         Inter_400Regular,
@@ -53,12 +55,14 @@ export default function RootLayout() {
         return () => subscription.unsubscribe();
     }, []);
 
-    // Handle font loading
+    // Handle Native Splash hiding
     useEffect(() => {
-        if ((fontsLoaded || fontError) && isReady) {
+        // Hide native splash once fonts are loaded
+        // We don't wait for isReady here because we want to show our VideoSplash ASAP
+        if (fontsLoaded || fontError) {
             SplashScreen.hideAsync();
         }
-    }, [fontsLoaded, fontError, isReady]);
+    }, [fontsLoaded, fontError]);
 
     // Auth-based routing
     useEffect(() => {
@@ -80,13 +84,17 @@ export default function RootLayout() {
         return null;
     }
 
-    if (!isReady) {
-        return null;
-    }
+    // We no longer return null if !isReady, because we want to show the Splash
+    // But we only render Slot when isReady is true
 
     return (
         <View style={styles.container}>
-            <Slot />
+            {isReady && <Slot />}
+            {!isSplashFinished && (
+                <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]}>
+                    <VideoSplash onFinish={() => setIsSplashFinished(true)} />
+                </View>
+            )}
         </View>
     );
 }
