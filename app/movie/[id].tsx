@@ -47,7 +47,7 @@ export default function MovieDetailScreen() {
 
     useEffect(() => {
         if (id) {
-            loadMovie(parseInt(id));
+            loadMovie(Number.parseInt(id));
         }
     }, [id]);
 

@@ -56,7 +56,7 @@ export default function TVDetailScreen() {
 
     useEffect(() => {
         if (id) {
-            loadTVShow(parseInt(id));
+            loadTVShow(Number.parseInt(id));
         }
     }, [id]);
 
