@@ -10,9 +10,17 @@ export interface CastMember {
     profile_path: string | null;
 }
 
+export interface CrewMember {
+    id: number;
+    name: string;
+    job: string;
+    department: string;
+    profile_path: string | null;
+}
+
 export interface Credits {
     cast: CastMember[];
-    crew: any[];
+    crew: CrewMember[];
 }
 
 export interface Episode {
@@ -68,6 +76,11 @@ export interface TVShow {
     seasons?: Season[];
     episode_run_time?: number[];
     credits?: Credits;
+    created_by?: {
+        id: number;
+        name: string;
+        profile_path: string | null;
+    }[];
 }
 
 export interface TMDbResponse<T> {
@@ -127,6 +140,10 @@ export const getTVSeasonDetails = async (tvId: number, seasonNumber: number): Pr
 
 export const getRelatedMovies = async (id: number): Promise<TMDbResponse<Movie>> => {
     return fetchTMDb<TMDbResponse<Movie>>(`/movie/${id}/similar`);
+};
+
+export const getRelatedTVShows = async (id: number): Promise<TMDbResponse<TVShow>> => {
+    return fetchTMDb<TMDbResponse<TVShow>>(`/tv/${id}/similar`);
 };
 
 // Helper function to get full image URL

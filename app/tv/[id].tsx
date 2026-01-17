@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { getTVShowDetails, getTVSeasonDetails, getImageUrl, TVShow, Season, Episode } from "../../src/lib/tmdb";
+import { getTVShowDetails, getRelatedTVShows, getTVSeasonDetails, getImageUrl, TVShow, Season, Episode } from "../../src/lib/tmdb";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { supabase, Profile } from "../../src/lib/supabase";
@@ -26,6 +26,7 @@ const { width } = Dimensions.get("window");
 export default function TVDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const [tvShow, setTVShow] = useState<(TVShow & { genres: { id: number; name: string }[] }) | null>(null);
+    const [relatedTVShows, setRelatedTVShows] = useState<TVShow[]>([]);
     const [loading, setLoading] = useState(true);
     const [showRecommendModal, setShowRecommendModal] = useState(false);
     const [recommendMessage, setRecommendMessage] = useState("");
@@ -65,6 +66,9 @@ export default function TVDetailScreen() {
         try {
             const data = await getTVShowDetails(tvId);
             setTVShow(data);
+
+            const related = await getRelatedTVShows(tvId);
+            setRelatedTVShows(related.results);
         } catch (err) {
             console.error("Error loading TV show:", err);
         } finally {
@@ -333,6 +337,33 @@ export default function TVDetailScreen() {
                         </Text>
                     </View>
 
+                    {/* Crew Info (Creators & Producers) */}
+                    <View style={styles.sectionContainer}>
+                        {tvShow.created_by && tvShow.created_by.length > 0 && (
+                            <View style={{ marginBottom: 12 }}>
+                                <Text style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular", fontSize: 16, marginBottom: 4 }]}>
+                                    Creación
+                                </Text>
+                                <Text style={{ color: "#f4f4f5", fontSize: 14 }}>
+                                    {tvShow.created_by.map(c => c.name).join(", ")}
+                                </Text>
+                            </View>
+                        )}
+                        {tvShow.credits && tvShow.credits.crew.filter(c => c.job === "Producer" || c.job === "Executive Producer").length > 0 && (
+                            <View>
+                                <Text style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular", fontSize: 16, marginBottom: 4 }]}>
+                                    Producción
+                                </Text>
+                                <Text style={{ color: "#f4f4f5", fontSize: 14 }}>
+                                    {tvShow.credits.crew
+                                        .filter(c => c.job === "Producer" || c.job === "Executive Producer")
+                                        .slice(0, 3) // Limit to 3 producers for brevity
+                                        .map(p => p.name).join(", ")}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
                     {/* Seasons */}
                     {tvShow.seasons && tvShow.seasons.length > 0 && (
                         <View style={styles.sectionContainer}>
@@ -409,6 +440,48 @@ export default function TVDetailScreen() {
                                             {item.character}
                                         </Text>
                                     </View>
+                                )}
+                            />
+                        </View>
+                    )}
+
+                    {/* Related TV Shows */}
+                    {relatedTVShows.length > 0 && (
+                        <View style={styles.sectionContainer}>
+                            <Text
+                                style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                            >
+                                Relacionadas
+                            </Text>
+                            <FlatList
+                                data={relatedTVShows}
+                                keyExtractor={(item) => item.id.toString()}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.castList}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        style={styles.castItem}
+                                        onPress={() => router.push(`/tv/${item.id}`)}
+                                    >
+                                        {item.poster_path ? (
+                                            <Image
+                                                source={{ uri: getImageUrl(item.poster_path, "w300") ?? undefined }}
+                                                style={styles.castImage}
+                                                contentFit="cover"
+                                            />
+                                        ) : (
+                                            <View style={styles.castPlaceholder}>
+                                                <Text style={styles.castPlaceholderIcon}>📺</Text>
+                                            </View>
+                                        )}
+                                        <Text style={styles.castName} numberOfLines={2}>
+                                            {item.name}
+                                        </Text>
+                                        <Text style={styles.castCharacter} numberOfLines={1}>
+                                            ⭐ {item.vote_average.toFixed(1)}
+                                        </Text>
+                                    </TouchableOpacity>
                                 )}
                             />
                         </View>

@@ -311,6 +311,35 @@ export default function MovieDetailScreen() {
                         </Text>
                     </View>
 
+                    {/* Crew Info (Directors & Producers) */}
+                    {movie.credits && (
+                        <View style={styles.sectionContainer}>
+                            {movie.credits.crew.filter(c => c.job === "Director").length > 0 && (
+                                <View style={{ marginBottom: 12 }}>
+                                    <Text style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular", fontSize: 16, marginBottom: 4 }]}>
+                                        Dirección
+                                    </Text>
+                                    <Text style={{ color: "#f4f4f5", fontSize: 14 }}>
+                                        {movie.credits.crew.filter(c => c.job === "Director").map(d => d.name).join(", ")}
+                                    </Text>
+                                </View>
+                            )}
+                            {movie.credits.crew.filter(c => c.job === "Producer" || c.job === "Executive Producer").length > 0 && (
+                                <View>
+                                    <Text style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular", fontSize: 16, marginBottom: 4 }]}>
+                                        Producción
+                                    </Text>
+                                    <Text style={{ color: "#f4f4f5", fontSize: 14 }}>
+                                        {movie.credits.crew
+                                            .filter(c => c.job === "Producer" || c.job === "Executive Producer")
+                                            .slice(0, 3) // Limit to 3 producers for brevity
+                                            .map(p => p.name).join(", ")}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    )}
+
                     {/* Cast */}
                     {movie.credits && movie.credits.cast.length > 0 && (
                         <View style={styles.sectionContainer}>
