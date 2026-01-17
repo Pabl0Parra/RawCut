@@ -193,7 +193,7 @@ export default function FavoritesScreen() {
                     <Text
                         style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
                     >
-                        Mis Favoritos
+                        Mi Cementerio
                     </Text>
                     <Ionicons name="skull" size={28} color="#f4f4f5" />
                 </View>

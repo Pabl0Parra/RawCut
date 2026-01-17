@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { getMovieDetails, getImageUrl, Movie } from "../../src/lib/tmdb";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -230,15 +231,22 @@ export default function MovieDetailScreen() {
                                 ]}
                                 onPress={handleToggleFavorite}
                             >
-                                <Text
-                                    style={
-                                        isFavorite(movie.id, "movie")
-                                            ? styles.activeButtonText
-                                            : styles.inactiveButtonText
-                                    }
-                                >
-                                    {isFavorite(movie.id, "movie") ? "❤️ Favorito" : "🤍 Añadir"}
-                                </Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                    <Ionicons
+                                        name={isFavorite(movie.id, "movie") ? "skull" : "skull-outline"}
+                                        size={20}
+                                        color={isFavorite(movie.id, "movie") ? Colors.white : "#f4f4f5"}
+                                    />
+                                    <Text
+                                        style={
+                                            isFavorite(movie.id, "movie")
+                                                ? styles.activeButtonText
+                                                : styles.inactiveButtonText
+                                        }
+                                    >
+                                        {isFavorite(movie.id, "movie") ? "Favorito" : "Añadir"}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -250,17 +258,24 @@ export default function MovieDetailScreen() {
                                 ]}
                                 onPress={handleToggleWatchlist}
                             >
-                                <Text
-                                    style={
-                                        isInWatchlist(movie.id, "movie")
-                                            ? styles.activeButtonText
-                                            : styles.inactiveButtonText
-                                    }
-                                >
-                                    {isInWatchlist(movie.id, "movie")
-                                        ? "📌 En lista"
-                                        : "📍 Watchlist"}
-                                </Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                    <MaterialCommunityIcons
+                                        name={isInWatchlist(movie.id, "movie") ? "sword-cross" : "sword"}
+                                        size={20}
+                                        color={isInWatchlist(movie.id, "movie") ? Colors.white : "#f4f4f5"}
+                                    />
+                                    <Text
+                                        style={
+                                            isInWatchlist(movie.id, "movie")
+                                                ? styles.activeButtonText
+                                                : styles.inactiveButtonText
+                                        }
+                                    >
+                                        {isInWatchlist(movie.id, "movie")
+                                            ? "En Lista"
+                                            : "Watchlist"}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -271,9 +286,12 @@ export default function MovieDetailScreen() {
                             style={styles.recommendButton}
                             onPress={() => setShowRecommendModal(true)}
                         >
-                            <Text style={styles.recommendButtonText}>
-                                💌 Recomendar
-                            </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                                <MaterialCommunityIcons name="email-outline" size={24} color={Colors.white} />
+                                <Text style={styles.recommendButtonText}>
+                                    Recomendar
+                                </Text>
+                            </View>
                         </TouchableOpacity>
                     )}
 
@@ -479,8 +497,10 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     backButtonText: {
-        fontSize: 20,
+        fontSize: 28,
         color: "#fff",
+        fontWeight: "900",
+        top: -5,
     },
     backdropPlaceholder: {
         backgroundColor: Colors.metalGray,
@@ -703,7 +723,7 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     sendButtonText: {
-        color: Colors.metalBlack,
+        color: 'white',
         fontWeight: "bold",
         textAlign: "center",
         textTransform: "uppercase",

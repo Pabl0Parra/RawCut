@@ -355,7 +355,7 @@ export default function HomeScreen() {
                     onPress={() => setShowFilterModal(true)}
                 >
                     <Text style={[styles.filterButtonText, filtersActive && styles.activeFilterButtonText]}>
-                        {filtersActive ? "Filtros Activos (X)" : "Filtrar Contenido"} ☰
+                        {filtersActive ? "Filtros Activos" : "Filtrar Contenido"} ☰
                     </Text>
                 </TouchableOpacity>
                 {filtersActive && (

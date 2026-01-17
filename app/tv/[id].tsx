@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { getTVShowDetails, getTVSeasonDetails, getImageUrl, TVShow, Season, Episode } from "../../src/lib/tmdb";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -35,9 +36,13 @@ export default function TVDetailScreen() {
 
     // Season Details State
     const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number | null>(null);
-    const [seasonEpisodes, setSeasonEpisodes] = useState<any[]>([]); // Use correct type if available
+    const [seasonEpisodes, setSeasonEpisodes] = useState<Episode[]>([]); // Use correct type if available
     const [loadingSeason, setLoadingSeason] = useState(false);
     const [showSeasonModal, setShowSeasonModal] = useState(false);
+
+    // Episode Details Modal State
+    const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
+    const [showEpisodeModal, setShowEpisodeModal] = useState(false);
 
     const { user } = useAuthStore();
     const {
@@ -252,15 +257,22 @@ export default function TVDetailScreen() {
                                 ]}
                                 onPress={handleToggleFavorite}
                             >
-                                <Text
-                                    style={
-                                        isFavorite(tvShow.id, "tv")
-                                            ? styles.activeButtonText
-                                            : styles.inactiveButtonText
-                                    }
-                                >
-                                    {isFavorite(tvShow.id, "tv") ? "❤️ Favorito" : "🤍 Añadir"}
-                                </Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                    <Ionicons
+                                        name={isFavorite(tvShow.id, "tv") ? "skull" : "skull-outline"}
+                                        size={20}
+                                        color={isFavorite(tvShow.id, "tv") ? Colors.white : "#f4f4f5"}
+                                    />
+                                    <Text
+                                        style={
+                                            isFavorite(tvShow.id, "tv")
+                                                ? styles.activeButtonText
+                                                : styles.inactiveButtonText
+                                        }
+                                    >
+                                        {isFavorite(tvShow.id, "tv") ? "Favorito" : "Añadir"}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -272,17 +284,24 @@ export default function TVDetailScreen() {
                                 ]}
                                 onPress={handleToggleWatchlist}
                             >
-                                <Text
-                                    style={
-                                        isInWatchlist(tvShow.id, "tv")
-                                            ? styles.activeButtonText
-                                            : styles.inactiveButtonText
-                                    }
-                                >
-                                    {isInWatchlist(tvShow.id, "tv")
-                                        ? "📌 En lista"
-                                        : "📍 Watchlist"}
-                                </Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                    <MaterialCommunityIcons
+                                        name={isInWatchlist(tvShow.id, "tv") ? "sword-cross" : "sword"}
+                                        size={20}
+                                        color={isInWatchlist(tvShow.id, "tv") ? Colors.white : "#f4f4f5"}
+                                    />
+                                    <Text
+                                        style={
+                                            isInWatchlist(tvShow.id, "tv")
+                                                ? styles.activeButtonText
+                                                : styles.inactiveButtonText
+                                        }
+                                    >
+                                        {isInWatchlist(tvShow.id, "tv")
+                                            ? "En Lista"
+                                            : "Watchlist"}
+                                    </Text>
+                                </View>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -293,9 +312,12 @@ export default function TVDetailScreen() {
                             style={styles.recommendButton}
                             onPress={() => setShowRecommendModal(true)}
                         >
-                            <Text style={styles.recommendButtonText}>
-                                💌 Recomendar
-                            </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                                <MaterialCommunityIcons name="email-outline" size={24} color={Colors.white} />
+                                <Text style={styles.recommendButtonText}>
+                                    Recomendar
+                                </Text>
+                            </View>
                         </TouchableOpacity>
                     )}
 
@@ -310,45 +332,6 @@ export default function TVDetailScreen() {
                             {tvShow.overview || "Sin descripción disponible"}
                         </Text>
                     </View>
-
-                    {/* Cast */}
-                    {tvShow.credits && tvShow.credits.cast.length > 0 && (
-                        <View style={styles.sectionContainer}>
-                            <Text
-                                style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
-                            >
-                                Reparto
-                            </Text>
-                            <FlatList
-                                data={tvShow.credits.cast}
-                                keyExtractor={(item) => item.id.toString()}
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={styles.castList}
-                                renderItem={({ item }) => (
-                                    <View style={styles.castItem}>
-                                        {item.profile_path ? (
-                                            <Image
-                                                source={{ uri: getImageUrl(item.profile_path, "w200") ?? undefined }}
-                                                style={styles.castImage}
-                                                contentFit="cover"
-                                            />
-                                        ) : (
-                                            <View style={styles.castPlaceholder}>
-                                                <Text style={styles.castPlaceholderIcon}>👤</Text>
-                                            </View>
-                                        )}
-                                        <Text style={styles.castName} numberOfLines={2}>
-                                            {item.name}
-                                        </Text>
-                                        <Text style={styles.castCharacter} numberOfLines={2}>
-                                            {item.character}
-                                        </Text>
-                                    </View>
-                                )}
-                            />
-                        </View>
-                    )}
 
                     {/* Seasons */}
                     {tvShow.seasons && tvShow.seasons.length > 0 && (
@@ -387,6 +370,45 @@ export default function TVDetailScreen() {
                                             {item.episode_count} eps
                                         </Text>
                                     </TouchableOpacity>
+                                )}
+                            />
+                        </View>
+                    )}
+
+                    {/* Cast */}
+                    {tvShow.credits && tvShow.credits.cast.length > 0 && (
+                        <View style={styles.sectionContainer}>
+                            <Text
+                                style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                            >
+                                Reparto
+                            </Text>
+                            <FlatList
+                                data={tvShow.credits.cast}
+                                keyExtractor={(item) => item.id.toString()}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.castList}
+                                renderItem={({ item }) => (
+                                    <View style={styles.castItem}>
+                                        {item.profile_path ? (
+                                            <Image
+                                                source={{ uri: getImageUrl(item.profile_path, "w200") ?? undefined }}
+                                                style={styles.castImage}
+                                                contentFit="cover"
+                                            />
+                                        ) : (
+                                            <View style={styles.castPlaceholder}>
+                                                <Text style={styles.castPlaceholderIcon}>👤</Text>
+                                            </View>
+                                        )}
+                                        <Text style={styles.castName} numberOfLines={2}>
+                                            {item.name}
+                                        </Text>
+                                        <Text style={styles.castCharacter} numberOfLines={2}>
+                                            {item.character}
+                                        </Text>
+                                    </View>
                                 )}
                             />
                         </View>
@@ -546,7 +568,13 @@ export default function TVDetailScreen() {
                             keyExtractor={(item) => item.id.toString()}
                             contentContainerStyle={{ paddingBottom: 20 }}
                             renderItem={({ item }: { item: Episode }) => (
-                                <View style={styles.episodeItem}>
+                                <TouchableOpacity
+                                    style={styles.episodeItem}
+                                    onPress={() => {
+                                        setSelectedEpisode(item);
+                                        setShowEpisodeModal(true);
+                                    }}
+                                >
                                     {item.still_path ? (
                                         <Image
                                             source={{ uri: getImageUrl(item.still_path, "w300") ?? undefined }}
@@ -569,9 +597,62 @@ export default function TVDetailScreen() {
                                             ⭐ {item.vote_average.toFixed(1)} • {item.air_date}
                                         </Text>
                                     </View>
-                                </View>
+                                </TouchableOpacity>
                             )}
                         />
+                    )}
+                </View>
+            </Modal>
+
+            {/* Episode Details Modal */}
+            <Modal
+                visible={showEpisodeModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowEpisodeModal(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalHeader}>
+                        <Text
+                            style={[styles.modalTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                        >
+                            {selectedEpisode ? `${selectedEpisode.episode_number}. ${selectedEpisode.name}` : "Detalle del Episodio"}
+                        </Text>
+                        <TouchableOpacity onPress={() => setShowEpisodeModal(false)}>
+                            <Text style={styles.closeButtonText}>✕</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {selectedEpisode && (
+                        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+                            {selectedEpisode.still_path ? (
+                                <Image
+                                    source={{ uri: getImageUrl(selectedEpisode.still_path, "w500") ?? undefined }}
+                                    style={{ width: '100%', height: 200, borderRadius: 8, marginBottom: 16 }}
+                                    contentFit="cover"
+                                />
+                            ) : (
+                                <View style={{ width: '100%', height: 200, borderRadius: 8, marginBottom: 16, backgroundColor: Colors.metalGray, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Text style={{ fontSize: 40 }}>📺</Text>
+                                </View>
+                            )}
+
+                            <Text style={styles.episodeMeta}>
+                                Emitido: {selectedEpisode.air_date}
+                            </Text>
+                            <Text style={styles.ratingText}>
+                                ⭐ {selectedEpisode.vote_average.toFixed(1)}/10
+                            </Text>
+
+                            <Text
+                                style={[styles.descriptionTitle, { fontFamily: "BebasNeue_400Regular", marginTop: 24 }]}
+                            >
+                                Sinopsis
+                            </Text>
+                            <Text style={styles.descriptionText}>
+                                {selectedEpisode.overview || "Sin descripción disponible para este episodio."}
+                            </Text>
+                        </ScrollView>
                     )}
                 </View>
             </Modal>
@@ -602,8 +683,10 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     backButtonText: {
-        fontSize: 20,
+        fontSize: 28,
         color: "#fff",
+        fontWeight: "900",
+        top: -5,
     },
     backdropPlaceholder: {
         backgroundColor: Colors.metalGray,
@@ -729,6 +812,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 24,
+        marginHorizontal: 16,
     },
     modalTitle: {
         color: "#f4f4f5", // zinc-100
@@ -737,6 +821,7 @@ const styles = StyleSheet.create({
     closeButtonText: {
         color: Colors.bloodRed,
         fontSize: 18,
+        marginRight: 16,
     },
     previewContainer: {
         flexDirection: "row",
@@ -826,7 +911,7 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     sendButtonText: {
-        color: Colors.metalBlack,
+        color: 'white',
         fontWeight: "bold",
         textAlign: "center",
         textTransform: "uppercase",

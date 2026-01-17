@@ -194,7 +194,7 @@ export default function WatchlistScreen() {
                     <Text
                         style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
                     >
-                        Lista para ver
+                        Watchlist
                     </Text>
                     <MaterialCommunityIcons name="sword-cross" size={28} color="#f4f4f5" />
                 </View>

@@ -57,7 +57,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="favorites"
                 options={{
-                    title: "Favoritos",
+                    title: "Cementerio",
                     headerLeft: () => (
                         <Image
                             source={require('../../assets/icons/metal-hand.png')}
@@ -73,7 +73,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="watchlist"
                 options={{
-                    title: "Lista pa ver",
+                    title: "Watchlist",
                     headerLeft: () => (
                         <Image
                             source={require('../../assets/icons/metal-hand.png')}
