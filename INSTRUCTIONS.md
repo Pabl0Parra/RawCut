@@ -1,6 +1,6 @@
 # **Project Overview**
 
-Build a React Native (Expo) movie/TV recommendation app called RawCut with social features and gamification. Users discover content via TMDb API, share recommendations with comments, and earn points. **All UI text in Spanish, all api responses in Spanish.**
+Build a React Native (Expo) movie/TV recommendation app called CortoCrudo with social features and gamification. Users discover content via TMDb API, share recommendations with comments, and earn points. **All UI text in Spanish, all api responses in Spanish.**
 
 ## **Tech Stack**
 

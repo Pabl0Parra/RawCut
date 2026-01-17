@@ -1,4 +1,4 @@
-# RawCut - Movie/TV Recommendation App
+# CortoCrudo - Movie/TV Recommendation App
 
 A React Native (Expo) movie and TV recommendation app with social features and gamification. Built with TypeScript, NativeWind, and Supabase.
 
@@ -38,7 +38,7 @@ A React Native (Expo) movie and TV recommendation app with social features and g
 
 1. **Clone and install dependencies**:
    ```bash
-   cd RawCut
+   cd CortoCrudo
    npm install
    ```
 
@@ -70,7 +70,7 @@ A React Native (Expo) movie and TV recommendation app with social features and g
 ## Project Structure
 
 ```
-RawCut/
+CortoCrudo/
 ├── app/                    # Expo Router screens
 │   ├── (tabs)/            # Tab navigator screens
 │   │   ├── index.tsx      # Home (Movies/TV)
@@ -113,4 +113,4 @@ This is a personal project. Feel free to fork and modify!
 ## License
 
 MIT
-# RawCut
+# CortoCrudo

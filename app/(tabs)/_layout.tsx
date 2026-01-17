@@ -26,11 +26,13 @@ export default function TabLayout() {
                 },
                 headerStyle: {
                     backgroundColor: Colors.metalBlack,
+
                 },
                 headerTintColor: Colors.white,
                 headerTitleStyle: {
                     fontFamily: "BebasNeue_400Regular",
-                    fontSize: 24,
+                    fontSize: 28,
+
                 },
             }}
         >
@@ -38,7 +40,7 @@ export default function TabLayout() {
                 name="index"
                 options={{
                     title: "Inicio",
-                    headerTitle: "RawCut",
+                    headerTitle: "CortoCrudo",
                     tabBarIcon: ({ color }) => (
                         <Text style={{ fontSize: 20 }}>🏠</Text>
                     ),

@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "RawCut",
-    "slug": "RawCut",
+    "name": "CortoCrudo",
+    "slug": "CortoCrudo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
-    "scheme": "rawcut",
+    "scheme": "CortoCrudo",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rawcut.app"
+      "bundleIdentifier": "com.CortoCrudo.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +24,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.rawcut.app"
+      "package": "com.CortoCrudo.app"
     },
     "web": {
       "favicon": "./assets/favicon.png",

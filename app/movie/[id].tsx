@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.metalSilver,
     },
     activeButtonText: {
-        color: Colors.metalBlack,
+        color: Colors.white,
         fontWeight: "bold",
     },
     inactiveButtonText: {
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
     },
     recommendButtonText: {
-        color: Colors.metalBlack,
+        color: Colors.white,
         fontWeight: "bold",
         textAlign: "center",
         textTransform: "uppercase",

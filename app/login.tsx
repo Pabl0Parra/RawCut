@@ -58,7 +58,7 @@ export default function LoginScreen() {
                             <Text
                                 style={[styles.logoText, { fontFamily: "BebasNeue_400Regular" }]}
                             >
-                                RawCut
+                                CortoCrudo
                             </Text>
                             <Text style={styles.logoSubtitle}>
                                 Tu guía de cine y series

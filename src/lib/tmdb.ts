@@ -130,3 +130,49 @@ export const getImageUrl = (path: string | null, size: "w200" | "w300" | "w500" 
     if (!path) return null;
     return `https://image.tmdb.org/t/p/${size}${path}`;
 };
+
+
+export interface Genre {
+    id: number;
+    name: string;
+}
+
+export interface DiscoverParams {
+    with_genres?: string;
+    primary_release_year?: string; // For Movies
+    first_air_date_year?: string; // For TV
+    sort_by?: string;
+    page?: number;
+}
+
+export const getMovieGenres = async (): Promise<{ genres: Genre[] }> => {
+    return fetchTMDb<{ genres: Genre[] }>("/genre/movie/list");
+};
+
+export const getTVGenres = async (): Promise<{ genres: Genre[] }> => {
+    return fetchTMDb<{ genres: Genre[] }>("/genre/tv/list");
+};
+
+export const discoverMovies = async (params: DiscoverParams): Promise<TMDbResponse<Movie>> => {
+    const queryParams: Record<string, string> = {
+        page: (params.page || 1).toString(),
+        sort_by: params.sort_by || "popularity.desc",
+    };
+
+    if (params.with_genres) queryParams.with_genres = params.with_genres;
+    if (params.primary_release_year) queryParams.primary_release_year = params.primary_release_year;
+
+    return fetchTMDb<TMDbResponse<Movie>>("/discover/movie", queryParams);
+};
+
+export const discoverTVShows = async (params: DiscoverParams): Promise<TMDbResponse<TVShow>> => {
+    const queryParams: Record<string, string> = {
+        page: (params.page || 1).toString(),
+        sort_by: params.sort_by || "popularity.desc",
+    };
+
+    if (params.with_genres) queryParams.with_genres = params.with_genres;
+    if (params.first_air_date_year) queryParams.first_air_date_year = params.first_air_date_year;
+
+    return fetchTMDb<TMDbResponse<TVShow>>("/discover/tv", queryParams);
+};

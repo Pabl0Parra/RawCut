@@ -61,7 +61,7 @@ export default function RegisterScreen() {
                             <Text
                                 style={[styles.logoText, { fontFamily: "BebasNeue_400Regular" }]}
                             >
-                                RawCut
+                                CortoCrudo
                             </Text>
                             <Text style={styles.logoSubtitle}>
                                 Crea tu cuenta

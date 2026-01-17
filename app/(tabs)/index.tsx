@@ -8,6 +8,10 @@ import {
     TextInput,
     RefreshControl,
     StyleSheet,
+    Modal,
+    ScrollView,
+    ViewStyle,
+    TextStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
@@ -17,8 +21,13 @@ import {
     getPopularTVShows,
     searchMovies,
     searchTVShows,
+    getMovieGenres,
+    getTVGenres,
+    discoverMovies,
+    discoverTVShows,
     Movie,
     TVShow,
+    Genre,
 } from "../../src/lib/tmdb";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -35,6 +44,14 @@ export default function HomeScreen() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
 
+    // Filter State
+    const [showFilterModal, setShowFilterModal] = useState(false);
+    const [genres, setGenres] = useState<Genre[]>([]);
+    const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
+    const [selectedYear, setSelectedYear] = useState<string>("");
+    const [sortBy, setSortBy] = useState<string>("popularity.desc");
+    const [filtersActive, setFiltersActive] = useState(false);
+
     const { user } = useAuthStore();
     const {
         fetchUserContent,
@@ -49,6 +66,7 @@ export default function HomeScreen() {
     // Fetch content on mount
     useEffect(() => {
         loadContent();
+        loadGenres();
     }, []);
 
     // Fetch user content when screen focuses
@@ -60,38 +78,100 @@ export default function HomeScreen() {
         }, [user])
     );
 
-    // Load content when tab changes
+    // Load content and genres when tab changes
     useEffect(() => {
         setPage(1);
         setHasMore(true);
         setSearchQuery("");
+        // Reset filters when changing tabs to avoid confusion
+        resetFilters(false);
         loadContent(true);
+        loadGenres();
     }, [activeTab]);
+
+    const loadGenres = async () => {
+        try {
+            const data = activeTab === "movies" ? await getMovieGenres() : await getTVGenres();
+            setGenres(data.genres);
+        } catch (err) {
+            console.error("Error loading genres:", err);
+        }
+    };
+
+    const resetFilters = (reload: boolean = true) => {
+        setSelectedGenre(null);
+        setSelectedYear("");
+        setSortBy("popularity.desc");
+        setFiltersActive(false);
+        if (reload) {
+            loadContent(true);
+        }
+    };
+
+    const applyFilters = () => {
+        setFiltersActive(true);
+        setShowFilterModal(false);
+        setPage(1);
+        setHasMore(true);
+        // Delay slightly to allow modal to close smoothly
+        setTimeout(() => loadContent(true), 100);
+    };
 
     const loadContent = async (reset: boolean = false) => {
         if (!reset && (!hasMore || loading)) return;
 
         setLoading(true);
         try {
-            if (activeTab === "movies") {
-                const response = await getPopularMovies(reset ? 1 : page);
-                if (reset) {
-                    setMovies(response.results);
+            let results: any[] = [];
+            let totalPages = 1;
+            const currentPage = reset ? 1 : page;
+
+            if (filtersActive && !searchQuery) {
+                // Use Discover API
+                const params = {
+                    page: currentPage,
+                    sort_by: sortBy,
+                    with_genres: selectedGenre ? selectedGenre.toString() : undefined,
+                    primary_release_year: activeTab === "movies" ? selectedYear : undefined,
+                    first_air_date_year: activeTab === "tv" ? selectedYear : undefined,
+                };
+
+                if (activeTab === "movies") {
+                    const response = await discoverMovies(params);
+                    results = response.results;
+                    totalPages = response.total_pages;
                 } else {
-                    setMovies((prev) => [...prev, ...response.results]);
+                    const response = await discoverTVShows(params);
+                    results = response.results;
+                    totalPages = response.total_pages;
                 }
-                setHasMore(response.page < response.total_pages);
-                setPage(reset ? 2 : page + 1);
+            } else if (activeTab === "movies") {
+                const response = await getPopularMovies(currentPage);
+                results = response.results;
+                totalPages = response.total_pages;
             } else {
-                const response = await getPopularTVShows(reset ? 1 : page);
-                if (reset) {
-                    setTVShows(response.results);
-                } else {
-                    setTVShows((prev) => [...prev, ...response.results]);
-                }
-                setHasMore(response.page < response.total_pages);
-                setPage(reset ? 2 : page + 1);
+                const response = await getPopularTVShows(currentPage);
+                results = response.results;
+                totalPages = response.total_pages;
             }
+
+            if (activeTab === "movies") {
+                if (reset) {
+                    setMovies(results);
+                } else {
+                    setMovies((prev) => [...prev, ...results]);
+                }
+            } else {
+                if (reset) {
+                    setTVShows(results);
+                } else {
+                    setTVShows((prev) => [...prev, ...results]);
+                }
+            }
+
+            setHasMore(currentPage < totalPages);
+            setPage(reset ? 2 : currentPage + 1);
+
         } catch (err) {
             console.error("Error loading content:", err);
         } finally {
@@ -101,7 +181,7 @@ export default function HomeScreen() {
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
-            loadContent(true);
+            loadContent(true); // Will use filters if active
             return;
         }
 
@@ -188,26 +268,6 @@ export default function HomeScreen() {
 
     return (
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
-            {/* Search Bar */}
-            <View style={styles.searchContainer}>
-                <View style={styles.searchWrapper}>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Buscar..."
-                        placeholderTextColor="#71717a"
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        onSubmitEditing={handleSearch}
-                        returnKeyType="search"
-                    />
-                    <TouchableOpacity
-                        style={styles.searchButton}
-                        onPress={handleSearch}
-                    >
-                        <Text style={styles.searchIcon}>🔍</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
 
             {/* Pill Tab System */}
             <View style={styles.tabsContainer}>
@@ -252,6 +312,46 @@ export default function HomeScreen() {
                 </View>
             </View>
 
+            {/* Search Bar */}
+            <View style={styles.searchContainer}>
+                <View style={styles.searchWrapper}>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Buscar..."
+                        placeholderTextColor="#71717a"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        onSubmitEditing={handleSearch}
+                        returnKeyType="search"
+                    />
+                    <TouchableOpacity
+                        style={styles.searchButton}
+                        onPress={handleSearch}
+                    >
+                        <Text style={styles.searchIcon}>🔍</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {/* Filter Toggle Button */}
+            <View style={styles.filterHeader}>
+                <TouchableOpacity
+                    style={[styles.filterButton, filtersActive && styles.activeFilterButton]}
+                    onPress={() => setShowFilterModal(true)}
+                >
+                    <Text style={[styles.filterButtonText, filtersActive && styles.activeFilterButtonText]}>
+                        {filtersActive ? "Filtros Activos (X)" : "Filtrar Contenido"} ☰
+                    </Text>
+                </TouchableOpacity>
+                {filtersActive && (
+                    <TouchableOpacity onPress={() => resetFilters(true)}>
+                        <Text style={styles.clearFiltersText}>Limpiar</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+
+
+
             {/* Content List */}
             {loading && data.length === 0 ? (
                 <View style={styles.centerContainer}>
@@ -287,6 +387,79 @@ export default function HomeScreen() {
                     }
                 />
             )}
+
+            {/* Filter Modal */}
+            <Modal
+                visible={showFilterModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowFilterModal(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Filtrar</Text>
+                        <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+                            <Text style={styles.closeButtonText}>✕</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <ScrollView contentContainerStyle={styles.modalContent}>
+                        {/* Sort By */}
+                        <Text style={styles.sectionHeader}>Ordenar Por</Text>
+                        <View style={styles.optionsRow}>
+                            {[
+                                { label: "Popularidad", value: "popularity.desc" },
+                                { label: "Mejor Valorados", value: "vote_average.desc" },
+                                { label: "Más Recientes", value: "primary_release_date.desc" }
+                            ].map((opt) => (
+                                <TouchableOpacity
+                                    key={opt.value}
+                                    style={[styles.optionChip, sortBy === opt.value && styles.activeOptionChip]}
+                                    onPress={() => setSortBy(opt.value)}
+                                >
+                                    <Text style={[styles.optionText, sortBy === opt.value && styles.activeOptionText]}>
+                                        {opt.label}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        {/* Year */}
+                        <Text style={styles.sectionHeader}>Año de Lanzamiento</Text>
+                        <TextInput
+                            style={styles.yearInput}
+                            placeholder="Ej. 2023"
+                            placeholderTextColor="#52525b"
+                            keyboardType="number-pad"
+                            value={selectedYear}
+                            onChangeText={setSelectedYear}
+                            maxLength={4}
+                        />
+
+                        {/* Genres */}
+                        <Text style={styles.sectionHeader}>Género</Text>
+                        <View style={styles.genresRow}>
+                            {genres.map((genre) => (
+                                <TouchableOpacity
+                                    key={genre.id}
+                                    style={[styles.genreChip, selectedGenre === genre.id && styles.activeGenreChip]}
+                                    onPress={() => setSelectedGenre(selectedGenre === genre.id ? null : genre.id)}
+                                >
+                                    <Text style={[styles.genreChipText, selectedGenre === genre.id && styles.activeGenreText]}>
+                                        {genre.name}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </ScrollView>
+
+                    <View style={styles.modalFooter}>
+                        <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
+                            <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -295,12 +468,43 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: Colors.metalBlack,
-    },
+    } as ViewStyle,
+    filterHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingBottom: 8,
+    } as ViewStyle,
+    filterButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Colors.metalGray,
+        paddingVertical: 6,
+        paddingHorizontal: 16,
+        borderRadius: 9999,
+        borderWidth: 1,
+        borderColor: Colors.metalSilver,
+    } as ViewStyle,
+    activeFilterButton: {
+        backgroundColor: Colors.bloodRed,
+        borderColor: Colors.bloodRed,
+    } as ViewStyle,
+    filterButtonText: {
+        color: '#f4f4f5',
+        fontWeight: 'bold',
+    } as TextStyle,
+    activeFilterButtonText: {
+        color: Colors.white,
+    } as TextStyle,
+    clearFiltersText: {
+        color: Colors.metalSilver,
+        textDecorationLine: 'underline',
+    } as TextStyle,
     searchContainer: {
         paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 8,
-    },
+        paddingBottom: 12,
+    } as ViewStyle,
     searchWrapper: {
         flexDirection: "row",
         alignItems: "center",
@@ -308,76 +512,183 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderColor: Colors.metalSilver,
         borderWidth: 1,
-    },
+    } as ViewStyle,
     searchInput: {
         flex: 1,
         color: "#f4f4f5", // zinc-100
         paddingHorizontal: 16,
         paddingVertical: 12,
-    },
+    } as TextStyle,
     searchButton: {
         paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
+        paddingVertical: 6,
+    } as ViewStyle,
     searchIcon: {
         fontSize: 20,
-    },
+    } as TextStyle,
     tabsContainer: {
         paddingHorizontal: 16,
-        paddingBottom: 16,
-    },
+        paddingBottom: 12,
+        marginTop: -28,
+    } as ViewStyle,
     tabsWrapper: {
         flexDirection: "row",
         backgroundColor: Colors.metalGray,
-        padding: 4,
+
         borderRadius: 9999, // full rounded
-    },
+    } as ViewStyle,
     tab: {
         flex: 1,
         paddingVertical: 12,
         borderRadius: 9999,
-    },
+    } as ViewStyle,
     activeTab: {
         backgroundColor: Colors.bloodRed,
-    },
+    } as ViewStyle,
     inactiveTab: {
         backgroundColor: "transparent",
-    },
+    } as ViewStyle,
     tabText: {
         textAlign: "center",
         fontWeight: "bold",
-    },
+    } as TextStyle,
     activeTabText: {
-        color: Colors.metalBlack,
-    },
+        color: Colors.white,
+    } as TextStyle,
     inactiveTabText: {
         color: Colors.metalSilver,
-    },
+    } as TextStyle,
     centerContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-    },
+    } as ViewStyle,
     loadingText: {
         color: Colors.metalSilver,
         marginTop: 16,
-    },
+    } as TextStyle,
     emptyIcon: {
         fontSize: 60,
         marginBottom: 16,
-    },
+    } as TextStyle,
     emptyText: {
         color: Colors.metalSilver,
         fontSize: 18,
-    },
+    } as TextStyle,
     columnWrapper: {
         paddingHorizontal: 12,
         justifyContent: "space-between",
-    },
+    } as ViewStyle,
     listContent: {
         paddingBottom: 20,
-    },
+    } as ViewStyle,
     footerContainer: {
         paddingVertical: 16,
-    },
+    } as ViewStyle,
+    // Modal Styles
+    modalContainer: {
+        flex: 1,
+        backgroundColor: Colors.metalBlack,
+        padding: 16,
+    } as ViewStyle,
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 24,
+    } as ViewStyle,
+    modalTitle: {
+        color: "#f4f4f5",
+        fontSize: 24,
+        fontWeight: "bold",
+        fontFamily: "BebasNeue_400Regular",
+    } as TextStyle,
+    closeButtonText: {
+        color: Colors.bloodRed,
+        fontSize: 20,
+    } as TextStyle,
+    modalContent: {
+        paddingBottom: 40,
+    } as ViewStyle,
+    sectionHeader: {
+        color: Colors.metalSilver,
+        fontSize: 14,
+        textTransform: "uppercase",
+        letterSpacing: 1,
+        marginBottom: 12,
+        marginTop: 16,
+    } as TextStyle,
+    optionsRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    } as ViewStyle,
+    optionChip: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 9999,
+        backgroundColor: Colors.metalGray,
+        borderWidth: 1,
+        borderColor: Colors.metalSilver,
+    } as ViewStyle,
+    activeOptionChip: {
+        backgroundColor: Colors.bloodRed,
+        borderColor: Colors.bloodRed,
+    } as ViewStyle,
+    optionText: {
+        color: '#f4f4f5',
+    } as TextStyle,
+    activeOptionText: {
+        color: Colors.white,
+        fontWeight: "bold",
+    } as TextStyle,
+    yearInput: {
+        backgroundColor: Colors.metalGray,
+        borderWidth: 1,
+        borderColor: Colors.metalSilver,
+        borderRadius: 8,
+        padding: 12,
+        color: '#f4f4f5',
+        fontSize: 16,
+    } as TextStyle,
+    genresRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    } as ViewStyle,
+    genreChip: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 8,
+        backgroundColor: Colors.metalGray,
+        borderWidth: 1,
+        borderColor: Colors.metalSilver,
+    } as ViewStyle,
+    activeGenreChip: {
+        backgroundColor: Colors.bloodRed,
+        borderColor: Colors.bloodRed,
+    } as ViewStyle,
+    genreChipText: {
+        color: '#f4f4f5',
+        fontSize: 12,
+    } as TextStyle,
+    activeGenreText: {
+        color: Colors.white,
+        fontWeight: 'bold',
+    } as TextStyle,
+    modalFooter: {
+        paddingTop: 16,
+    } as ViewStyle,
+    applyButton: {
+        backgroundColor: Colors.bloodRed,
+        paddingVertical: 16,
+        borderRadius: 8,
+        alignItems: 'center',
+    } as ViewStyle,
+    applyButtonText: {
+        color: Colors.white,
+        fontWeight: 'bold',
+        fontSize: 16,
+        textTransform: 'uppercase',
+    } as TextStyle,
 });
