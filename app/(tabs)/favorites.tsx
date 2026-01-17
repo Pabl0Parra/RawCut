@@ -233,7 +233,7 @@ export default function FavoritesScreen() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
+        backgroundColor: "transparent",
     },
     headerContainer: {
         paddingHorizontal: 16,

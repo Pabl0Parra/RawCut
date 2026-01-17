@@ -13,7 +13,7 @@ import {
     ViewStyle,
     TextStyle,
 } from "react-native";
-import { MaterialCommunityIcons, Feather, Entypo } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Feather, Entypo, Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 import MovieCard from "../../src/components/MovieCard";
@@ -354,9 +354,16 @@ export default function HomeScreen() {
                     style={[styles.filterButton, filtersActive && styles.activeFilterButton]}
                     onPress={() => setShowFilterModal(true)}
                 >
-                    <Text style={[styles.filterButtonText, filtersActive && styles.activeFilterButtonText]}>
-                        {filtersActive ? "Filtros Activos" : "Filtrar"} ☰
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Ionicons
+                            name="filter"
+                            size={18}
+                            color={filtersActive ? Colors.white : Colors.metalSilver}
+                        />
+                        <Text style={[styles.filterButtonText, filtersActive && styles.activeFilterButtonText]}>
+                            {filtersActive ? "Filtros Activos" : "Filtrar"}
+                        </Text>
+                    </View>
                 </TouchableOpacity>
                 {filtersActive && (
                     <TouchableOpacity onPress={() => resetFilters(true)}>

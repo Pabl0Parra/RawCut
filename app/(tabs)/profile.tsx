@@ -178,7 +178,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
+        backgroundColor: "transparent",
     },
     container: {
         alignItems: "center",

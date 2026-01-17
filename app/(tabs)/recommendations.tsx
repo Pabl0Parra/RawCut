@@ -364,7 +364,7 @@ export default function RecommendationsScreen() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
+        backgroundColor: "transparent",
     },
     keyboardAvoidingView: {
         flex: 1,
