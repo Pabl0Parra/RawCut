@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { getMovieDetails, getImageUrl, Movie } from "../../src/lib/tmdb";
+import { getMovieDetails, getRelatedMovies, getImageUrl, Movie } from "../../src/lib/tmdb";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { supabase, Profile } from "../../src/lib/supabase";
@@ -26,6 +26,7 @@ const { width } = Dimensions.get("window");
 export default function MovieDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const [movie, setMovie] = useState<(Movie & { genres: { id: number; name: string }[] }) | null>(null);
+    const [relatedMovies, setRelatedMovies] = useState<Movie[]>([]);
     const [loading, setLoading] = useState(true);
     const [showRecommendModal, setShowRecommendModal] = useState(false);
     const [recommendMessage, setRecommendMessage] = useState("");
@@ -55,6 +56,9 @@ export default function MovieDetailScreen() {
         try {
             const data = await getMovieDetails(movieId);
             setMovie(data);
+
+            const related = await getRelatedMovies(movieId);
+            setRelatedMovies(related.results);
         } catch (err) {
             console.error("Error loading movie:", err);
         } finally {
@@ -244,7 +248,7 @@ export default function MovieDetailScreen() {
                                                 : styles.inactiveButtonText
                                         }
                                     >
-                                        {isFavorite(movie.id, "movie") ? "Favorito" : "Añadir"}
+                                        {isFavorite(movie.id, "movie") ? "Favorito" : "Añadir a cementerio"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -341,6 +345,48 @@ export default function MovieDetailScreen() {
                                             {item.character}
                                         </Text>
                                     </View>
+                                )}
+                            />
+                        </View>
+                    )}
+
+                    {/* Related Movies */}
+                    {relatedMovies.length > 0 && (
+                        <View style={styles.sectionContainer}>
+                            <Text
+                                style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                            >
+                                Relacionadas
+                            </Text>
+                            <FlatList
+                                data={relatedMovies}
+                                keyExtractor={(item) => item.id.toString()}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.castList}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        style={styles.castItem}
+                                        onPress={() => router.push(`/movie/${item.id}`)}
+                                    >
+                                        {item.poster_path ? (
+                                            <Image
+                                                source={{ uri: getImageUrl(item.poster_path, "w300") ?? undefined }}
+                                                style={styles.castImage}
+                                                contentFit="cover"
+                                            />
+                                        ) : (
+                                            <View style={styles.castPlaceholder}>
+                                                <Text style={styles.castPlaceholderIcon}>🎬</Text>
+                                            </View>
+                                        )}
+                                        <Text style={styles.castName} numberOfLines={2}>
+                                            {item.title}
+                                        </Text>
+                                        <Text style={styles.castCharacter} numberOfLines={1}>
+                                            ⭐ {item.vote_average.toFixed(1)}
+                                        </Text>
+                                    </TouchableOpacity>
                                 )}
                             />
                         </View>

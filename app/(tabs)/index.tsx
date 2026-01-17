@@ -355,7 +355,7 @@ export default function HomeScreen() {
                     onPress={() => setShowFilterModal(true)}
                 >
                     <Text style={[styles.filterButtonText, filtersActive && styles.activeFilterButtonText]}>
-                        {filtersActive ? "Filtros Activos" : "Filtrar Contenido"} ☰
+                        {filtersActive ? "Filtros Activos" : "Filtrar"} ☰
                     </Text>
                 </TouchableOpacity>
                 {filtersActive && (
@@ -482,7 +482,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
+        backgroundColor: 'transparent',
     } as ViewStyle,
     filterHeader: {
         flexDirection: 'row',

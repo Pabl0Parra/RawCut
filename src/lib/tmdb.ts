@@ -125,6 +125,10 @@ export const getTVSeasonDetails = async (tvId: number, seasonNumber: number): Pr
     return fetchTMDb(`/tv/${tvId}/season/${seasonNumber}`);
 };
 
+export const getRelatedMovies = async (id: number): Promise<TMDbResponse<Movie>> => {
+    return fetchTMDb<TMDbResponse<Movie>>(`/movie/${id}/similar`);
+};
+
 // Helper function to get full image URL
 export const getImageUrl = (path: string | null, size: "w200" | "w300" | "w500" | "original" = "w500"): string | null => {
     if (!path) return null;

@@ -13,9 +13,19 @@ import { supabase } from "../src/lib/supabase";
 import { useAuthStore } from "../src/stores/authStore";
 import { Colors } from "../src/constants/Colors";
 import VideoSplash from "../src/components/VideoSplash"; // Import VideoSplash
+import SmokeBackground from "../src/components/SmokeBackground";
+import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
+
+const TransparentTheme = {
+    ...DarkTheme,
+    colors: {
+        ...DarkTheme.colors,
+        background: 'transparent',
+    },
+};
 
 export default function RootLayout() {
     const { user, setSession, fetchProfile } = useAuthStore();
@@ -88,22 +98,27 @@ export default function RootLayout() {
     // But we only render Slot when isReady is true
 
     return (
-        <View style={styles.container}>
-            {isReady && (
-                <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.metalBlack } }}>
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen name="movie/[id]" options={{ headerShown: false }} />
-                    <Stack.Screen name="tv/[id]" options={{ headerShown: false }} />
-                    <Stack.Screen name="login" options={{ headerShown: false }} />
-                    <Stack.Screen name="register" options={{ headerShown: false }} />
-                </Stack>
-            )}
-            {!isSplashFinished && (
-                <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]}>
-                    <VideoSplash onFinish={() => setIsSplashFinished(true)} />
-                </View>
-            )}
-        </View>
+        <ThemeProvider value={TransparentTheme}>
+            <View style={styles.container}>
+                {isReady && (
+                    <>
+                        <SmokeBackground />
+                        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
+                            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                            <Stack.Screen name="movie/[id]" options={{ headerShown: false }} />
+                            <Stack.Screen name="tv/[id]" options={{ headerShown: false }} />
+                            <Stack.Screen name="login" options={{ headerShown: false }} />
+                            <Stack.Screen name="register" options={{ headerShown: false }} />
+                        </Stack>
+                    </>
+                )}
+                {!isSplashFinished && (
+                    <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]}>
+                        <VideoSplash onFinish={() => setIsSplashFinished(true)} />
+                    </View>
+                )}
+            </View>
+        </ThemeProvider>
     );
 }
 

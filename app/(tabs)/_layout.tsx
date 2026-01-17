@@ -36,6 +36,8 @@ export default function TabLayout() {
 
                 },
             }}
+            // @ts-ignore
+            sceneContainerStyle={{ backgroundColor: 'transparent' }}
         >
             <Tabs.Screen
                 name="index"
