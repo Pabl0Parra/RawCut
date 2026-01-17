@@ -13,6 +13,7 @@ import {
     ViewStyle,
     TextStyle,
 } from "react-native";
+import { MaterialCommunityIcons, Feather, Entypo } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 import MovieCard from "../../src/components/MovieCard";
@@ -279,16 +280,23 @@ export default function HomeScreen() {
                         ]}
                         onPress={() => setActiveTab("movies")}
                     >
-                        <Text
-                            style={[
-                                styles.tabText,
-                                activeTab === "movies"
-                                    ? styles.activeTabText
-                                    : styles.inactiveTabText,
-                            ]}
-                        >
-                            🎬 Películas
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                            <MaterialCommunityIcons
+                                name="movie-open-play-outline"
+                                size={24}
+                                color={activeTab === "movies" ? Colors.white : Colors.metalSilver}
+                            />
+                            <Text
+                                style={[
+                                    styles.tabText,
+                                    activeTab === "movies"
+                                        ? styles.activeTabText
+                                        : styles.inactiveTabText,
+                                ]}
+                            >
+                                Películas
+                            </Text>
+                        </View>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -298,16 +306,23 @@ export default function HomeScreen() {
                         ]}
                         onPress={() => setActiveTab("tv")}
                     >
-                        <Text
-                            style={[
-                                styles.tabText,
-                                activeTab === "tv"
-                                    ? styles.activeTabText
-                                    : styles.inactiveTabText,
-                            ]}
-                        >
-                            📺 Series
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                            <Feather
+                                name="tv"
+                                size={24}
+                                color={activeTab === "tv" ? Colors.white : Colors.metalSilver}
+                            />
+                            <Text
+                                style={[
+                                    styles.tabText,
+                                    activeTab === "tv"
+                                        ? styles.activeTabText
+                                        : styles.inactiveTabText,
+                                ]}
+                            >
+                                Series
+                            </Text>
+                        </View>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -328,7 +343,7 @@ export default function HomeScreen() {
                         style={styles.searchButton}
                         onPress={handleSearch}
                     >
-                        <Text style={styles.searchIcon}>🔍</Text>
+                        <Entypo name="magnifying-glass" size={24} color="#71717a" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -491,7 +506,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.bloodRed,
     } as ViewStyle,
     filterButtonText: {
-        color: '#f4f4f5',
+        color: Colors.metalSilver,
         fontWeight: 'bold',
     } as TextStyle,
     activeFilterButtonText: {

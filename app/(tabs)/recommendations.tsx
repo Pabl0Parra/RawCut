@@ -11,6 +11,7 @@ import {
     StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, router } from "expo-router";
 import { Image } from "expo-image";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
@@ -274,11 +275,14 @@ export default function RecommendationsScreen() {
             >
                 {/* Header */}
                 <View style={styles.header}>
-                    <Text
-                        style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
-                    >
-                        Recomendaciones 💌
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Text
+                            style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                        >
+                            Recomendaciones
+                        </Text>
+                        <MaterialCommunityIcons name="email-outline" size={28} color="#f4f4f5" />
+                    </View>
                 </View>
 
                 {/* Tab switcher */}

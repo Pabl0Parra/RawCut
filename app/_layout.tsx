@@ -1,4 +1,4 @@
-import { Slot, SplashScreen, useRouter, useSegments } from "expo-router";
+import { Slot, Stack, SplashScreen, useRouter, useSegments } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import {
@@ -89,7 +89,15 @@ export default function RootLayout() {
 
     return (
         <View style={styles.container}>
-            {isReady && <Slot />}
+            {isReady && (
+                <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.metalBlack } }}>
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="movie/[id]" options={{ headerShown: false }} />
+                    <Stack.Screen name="tv/[id]" options={{ headerShown: false }} />
+                    <Stack.Screen name="login" options={{ headerShown: false }} />
+                    <Stack.Screen name="register" options={{ headerShown: false }} />
+                </Stack>
+            )}
             {!isSplashFinished && (
                 <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]}>
                     <VideoSplash onFinish={() => setIsSplashFinished(true)} />

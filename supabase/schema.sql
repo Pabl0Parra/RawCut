@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS user_content (
 -- Recommendations
 CREATE TABLE IF NOT EXISTS recommendations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  sender_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  receiver_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  sender_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
+  receiver_id UUID REFERENCES profiles(user_id) ON DELETE CASCADE,
   tmdb_id INT NOT NULL,
   media_type VARCHAR(10) NOT NULL CHECK (media_type IN ('movie', 'tv')),
   message TEXT CHECK (LENGTH(message) <= 200),

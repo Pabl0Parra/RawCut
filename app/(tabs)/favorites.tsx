@@ -6,10 +6,12 @@ import {
     ActivityIndicator,
     TouchableOpacity,
     StyleSheet,
+    Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, router } from "expo-router";
 import { Image } from "expo-image";
+import { Ionicons } from "@expo/vector-icons";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { getMovieDetails, getTVShowDetails, getImageUrl } from "../../src/lib/tmdb";
@@ -96,7 +98,13 @@ export default function FavoritesScreen() {
     };
 
     const handleRemove = async (tmdbId: number, mediaType: "movie" | "tv") => {
-        await removeFromFavorites(tmdbId, mediaType);
+        const success = await removeFromFavorites(tmdbId, mediaType);
+        if (!success) {
+            Alert.alert(
+                "Error",
+                "No se pudo eliminar de favoritos. Verifique sus permisos de base de datos (RLS Policies)."
+            );
+        }
     };
 
     const handlePress = (item: FavoriteItem) => {
@@ -143,10 +151,13 @@ export default function FavoritesScreen() {
                         </Text>
                     </View>
                     <TouchableOpacity
-                        onPress={() => handleRemove(item.tmdb_id, item.media_type)}
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            handleRemove(item.tmdb_id, item.media_type);
+                        }}
                         style={styles.removeButton}
                     >
-                        <Text style={styles.removeButtonText}>Quitar ❤️</Text>
+                        <Ionicons name="trash-outline" size={24} color={Colors.bloodRed} />
                     </TouchableOpacity>
                 </View>
             </TouchableOpacity>
@@ -176,13 +187,18 @@ export default function FavoritesScreen() {
 
     return (
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
+
             <View style={styles.headerContainer}>
-                <Text
-                    style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
-                >
-                    Mis Favoritos ❤️
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text
+                        style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                    >
+                        Mis Favoritos
+                    </Text>
+                    <Ionicons name="skull" size={28} color="#f4f4f5" />
+                </View>
                 <Text style={styles.headerSubtitle}>
+
                     {enrichedFavorites.length} elementos
                 </Text>
             </View>

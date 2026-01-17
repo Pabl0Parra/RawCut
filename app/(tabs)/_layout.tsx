@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { View, Text, Platform } from "react-native";
+import { View, Text, Platform, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "../../src/constants/Colors";
@@ -42,6 +42,13 @@ export default function TabLayout() {
                 options={{
                     title: "Inicio",
                     headerTitle: "CortoCrudo",
+                    headerLeft: () => (
+                        <Image
+                            source={require('../../assets/icons/metal-hand.png')}
+                            style={{ width: 40, height: 40, marginLeft: 16, tintColor: "#fff" }}
+                            resizeMode="contain"
+                        />
+                    ),
                     tabBarIcon: ({ color }) => (
                         <MaterialIcons name="castle" size={24} color={color} />
                     ),
@@ -51,6 +58,13 @@ export default function TabLayout() {
                 name="favorites"
                 options={{
                     title: "Favoritos",
+                    headerLeft: () => (
+                        <Image
+                            source={require('../../assets/icons/metal-hand.png')}
+                            style={{ width: 40, height: 40, marginLeft: 16, tintColor: "#fff" }}
+                            resizeMode="contain"
+                        />
+                    ),
                     tabBarIcon: ({ color }) => (
                         <Ionicons name="skull-outline" size={24} color={color} />
                     ),
@@ -59,7 +73,14 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="watchlist"
                 options={{
-                    title: "Watchlist",
+                    title: "Lista pa ver",
+                    headerLeft: () => (
+                        <Image
+                            source={require('../../assets/icons/metal-hand.png')}
+                            style={{ width: 40, height: 40, marginLeft: 16, tintColor: "#fff" }}
+                            resizeMode="contain"
+                        />
+                    ),
                     tabBarIcon: ({ color }) => (
                         <MaterialCommunityIcons name="sword" size={24} color={color} />
                     ),
@@ -68,7 +89,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="recommendations"
                 options={{
-                    title: "Recomen...",
+                    title: "Sugeridas",
                     tabBarIcon: ({ color }) => (
                         <MaterialCommunityIcons name="email-outline" size={24} color={color} />
                     ),

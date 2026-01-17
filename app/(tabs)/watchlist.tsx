@@ -6,11 +6,13 @@ import {
     ActivityIndicator,
     TouchableOpacity,
     StyleSheet,
+    Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, router } from "expo-router";
 import { useCallback } from "react";
 import { Image } from "expo-image";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { getMovieDetails, getTVShowDetails, getImageUrl } from "../../src/lib/tmdb";
@@ -97,7 +99,13 @@ export default function WatchlistScreen() {
     };
 
     const handleRemove = async (tmdbId: number, mediaType: "movie" | "tv") => {
-        await removeFromWatchlist(tmdbId, mediaType);
+        const success = await removeFromWatchlist(tmdbId, mediaType);
+        if (!success) {
+            Alert.alert(
+                "Error",
+                "No se pudo eliminar de la watchlist. Verifique sus permisos de base de datos (RLS Policies)."
+            );
+        }
     };
 
     const handlePress = (item: WatchlistItem) => {
@@ -144,10 +152,13 @@ export default function WatchlistScreen() {
                         </Text>
                     </View>
                     <TouchableOpacity
-                        onPress={() => handleRemove(item.tmdb_id, item.media_type)}
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            handleRemove(item.tmdb_id, item.media_type);
+                        }}
                         style={styles.removeButton}
                     >
-                        <Text style={styles.removeButtonText}>Quitar 📌</Text>
+                        <Ionicons name="trash-outline" size={24} color={Colors.bloodRed} />
                     </TouchableOpacity>
                 </View>
             </TouchableOpacity>
@@ -177,12 +188,16 @@ export default function WatchlistScreen() {
 
     return (
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
+
             <View style={styles.header}>
-                <Text
-                    style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
-                >
-                    Mi Watchlist 📌
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text
+                        style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                    >
+                        Lista para ver
+                    </Text>
+                    <MaterialCommunityIcons name="sword-cross" size={28} color="#f4f4f5" />
+                </View>
                 <Text style={styles.headerSubtitle}>
                     {enrichedWatchlist.length} elementos
                 </Text>
