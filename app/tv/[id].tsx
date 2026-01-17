@@ -10,12 +10,13 @@ import {
     TextInput,
     FlatList,
     StyleSheet,
+    Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { getTVShowDetails, getRelatedTVShows, getTVSeasonDetails, getImageUrl, TVShow, Season, Episode } from "../../src/lib/tmdb";
+import { getTVShowDetails, getRelatedTVShows, getTVSeasonDetails, getTVVideos, getImageUrl, TVShow, Season, Episode, Video } from "../../src/lib/tmdb";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { supabase, Profile } from "../../src/lib/supabase";
@@ -27,6 +28,7 @@ export default function TVDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const [tvShow, setTVShow] = useState<(TVShow & { genres: { id: number; name: string }[] }) | null>(null);
     const [relatedTVShows, setRelatedTVShows] = useState<TVShow[]>([]);
+    const [trailerKey, setTrailerKey] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [showRecommendModal, setShowRecommendModal] = useState(false);
     const [recommendMessage, setRecommendMessage] = useState("");
@@ -69,6 +71,15 @@ export default function TVDetailScreen() {
 
             const related = await getRelatedTVShows(tvId);
             setRelatedTVShows(related.results);
+
+            const videos = await getTVVideos(tvId);
+            const trailer = videos.results.find(
+                v => v.type === "Trailer" && v.site === "YouTube" && v.official
+            ) || videos.results.find(v => v.type === "Trailer" && v.site === "YouTube");
+
+            if (trailer) {
+                setTrailerKey(trailer.key);
+            }
         } catch (err) {
             console.error("Error loading TV show:", err);
         } finally {
@@ -178,6 +189,12 @@ export default function TVDetailScreen() {
         );
     }
 
+    const handleWatchTrailer = () => {
+        if (trailerKey) {
+            Linking.openURL(`https://www.youtube.com/watch?v=${trailerKey}`);
+        }
+    };
+
     const backdropUrl = getImageUrl(tvShow.backdrop_path, "original");
     const posterUrl = getImageUrl(tvShow.poster_path, "w300");
 
@@ -192,18 +209,30 @@ export default function TVDetailScreen() {
                     <Text style={styles.backButtonText}>←</Text>
                 </TouchableOpacity>
 
-                {/* Backdrop */}
-                {backdropUrl ? (
-                    <Image
-                        source={{ uri: backdropUrl }}
-                        style={{ width, height: width * 0.56 }}
-                        contentFit="cover"
-                    />
-                ) : (
-                    <View
-                        style={[styles.backdropPlaceholder, { width, height: width * 0.56 }]}
-                    />
-                )}
+                {/* Backdrop with Trailer Button */}
+                <View style={{ position: "relative" }}>
+                    {backdropUrl ? (
+                        <Image
+                            source={{ uri: backdropUrl }}
+                            style={{ width, height: width * 0.56 }}
+                            contentFit="cover"
+                        />
+                    ) : (
+                        <View
+                            style={[styles.backdropPlaceholder, { width, height: width * 0.56 }]}
+                        />
+                    )}
+
+                    {trailerKey && (
+                        <TouchableOpacity
+                            style={styles.playButtonOverlay}
+                            onPress={handleWatchTrailer}
+                        >
+                            <Ionicons name="play-circle" size={80} color="rgba(255,255,255,0.8)" />
+                            <Text style={styles.playTrailerText}>Ver Trailer</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
 
                 {/* Content */}
                 <View style={styles.contentContainer}>
@@ -1111,5 +1140,24 @@ const styles = StyleSheet.create({
     episodeMeta: {
         color: Colors.metalGold,
         fontSize: 10,
+    },
+    playButtonOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.2)", // Subtle darken
+    },
+    playTrailerText: {
+        color: "white",
+        fontSize: 14,
+        fontWeight: "bold",
+        marginTop: -10,
+        textShadowColor: "rgba(0,0,0,0.75)",
+        textShadowOffset: { width: -1, height: 1 },
+        textShadowRadius: 10,
     },
 });

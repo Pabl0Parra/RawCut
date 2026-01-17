@@ -146,6 +146,23 @@ export const getRelatedTVShows = async (id: number): Promise<TMDbResponse<TVShow
     return fetchTMDb<TMDbResponse<TVShow>>(`/tv/${id}/similar`);
 };
 
+export interface Video {
+    id: string;
+    key: string;
+    name: string;
+    site: string;
+    type: string;
+    official: boolean;
+}
+
+export const getMovieVideos = async (id: number): Promise<{ results: Video[] }> => {
+    return fetchTMDb(`/movie/${id}/videos`);
+};
+
+export const getTVVideos = async (id: number): Promise<{ results: Video[] }> => {
+    return fetchTMDb(`/tv/${id}/videos`);
+};
+
 // Helper function to get full image URL
 export const getImageUrl = (path: string | null, size: "w200" | "w300" | "w500" | "original" = "w500"): string | null => {
     if (!path) return null;
