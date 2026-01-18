@@ -14,7 +14,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Calculate height based on 16:9 aspect ratio
 const VIDEO_HEIGHT = (SCREEN_WIDTH - 32) * 9 / 16;
 
-export default function TrailerModal({ visible, videoKey, onClose }: TrailerModalProps) {
+export default function TrailerModal({ visible, videoKey, onClose }: Readonly<TrailerModalProps>) {
     const [playing, setPlaying] = useState(true);
     const [loading, setLoading] = useState(true);
 
