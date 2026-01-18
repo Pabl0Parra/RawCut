@@ -81,7 +81,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         try {
             // Check if username is available
-            const { data: existingUser, error: checkError } = await supabase
+            const { data: existingUser } = await supabase
                 .from("profiles")
                 .select("username")
                 .eq("username", username)
@@ -149,7 +149,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { user } = get();
         if (!user) return;
 
-        const { data, error } = await supabase
+        const { data } = await supabase
             .from("profiles")
             .select("*")
             .eq("user_id", user.id)
