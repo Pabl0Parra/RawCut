@@ -198,8 +198,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginTop: 24,
         marginBottom: 12,
-        // Ensure static header doesn't shrink
         flexShrink: 0,
+        gap: 4,
     },
     logoText: {
         color: Colors.bloodRed,
@@ -208,8 +208,8 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     logoImage: {
-        width: 180,
-        height: 180,
+        width: 200,
+        height: 200,
         marginBottom: 8,
     },
     logoSubtitle: {
