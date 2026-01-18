@@ -412,7 +412,7 @@ export default function TVDetailScreen() {
                                         }
                                         numberOfLines={1}
                                     >
-                                        {isWatched(tvShow.id, "tv") ? "Visto" : "Visto"}
+                                        {isWatched(tvShow.id, "tv") ? "Ya Visto" : "Marcar Visto"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>

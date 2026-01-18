@@ -357,7 +357,7 @@ export default function MovieDetailScreen() {
                                         }
                                         numberOfLines={1}
                                     >
-                                        {isWatched(movie.id, "movie") ? "Visto" : "Visto"}
+                                        {isWatched(movie.id, "movie") ? "Ya Visto" : "Marcar Visto"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
