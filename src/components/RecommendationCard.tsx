@@ -217,14 +217,22 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
                         {comments && comments.length > 0 ? (
                             <View style={styles.commentsList}>
-                                {comments.map((comment) => (
-                                    <View key={comment.id} style={styles.commentItem}>
-                                        <Text style={styles.commentUser}>
-                                            {comment.user_id === currentUserId ? "Tú" : (comment.user_id === sender?.user_id ? sender?.username : receiver?.username)}:
-                                        </Text>
-                                        <Text style={styles.commentText}>{comment.text}</Text>
-                                    </View>
-                                ))}
+                                {comments.map((comment) => {
+                                    const isCurrentUser = comment.user_id === currentUserId;
+                                    const isSender = comment.user_id === sender?.user_id;
+                                    const username = isCurrentUser
+                                        ? "Tú"
+                                        : (isSender ? sender?.username : receiver?.username);
+
+                                    return (
+                                        <View key={comment.id} style={styles.commentItem}>
+                                            <Text style={styles.commentUser}>
+                                                {username}:
+                                            </Text>
+                                            <Text style={styles.commentText}>{comment.text}</Text>
+                                        </View>
+                                    );
+                                })}
                             </View>
                         ) : (
                             <Text style={styles.noCommentsText}>No hay comentarios aún.</Text>

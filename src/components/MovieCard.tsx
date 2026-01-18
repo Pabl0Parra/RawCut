@@ -1,26 +1,80 @@
-import { View, Text, TouchableOpacity, Dimensions, StyleSheet, Modal, TouchableWithoutFeedback } from "react-native";
-import { useState } from "react";
+import React, { JSX } from "react";
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    type ViewStyle,
+    type TextStyle,
+    type ImageStyle,
+} from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Ionicons, MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
-import { getImageUrl, Movie, TVShow } from "../lib/tmdb";
+import { Ionicons } from "@expo/vector-icons";
+
+import { getImageUrl, type Movie, type TVShow } from "../lib/tmdb";
 import { Colors } from "../constants/Colors";
 
+/**
+ * Media type for content operations
+ */
+type MediaType = "movie" | "tv";
+
+/**
+ * Props for MovieCard component
+ * Marked as readonly to prevent mutation
+ */
 interface MovieCardProps {
-    item: Movie | TVShow;
-    mediaType: "movie" | "tv";
-    isFavorite?: boolean;
-    inWatchlist?: boolean;
-    isWatched?: boolean;
-    onToggleFavorite?: () => void;
-    onToggleWatchlist?: () => void;
-    onToggleWatched?: () => void;
-    onRecommend?: () => void;
+    readonly item: Movie | TVShow;
+    readonly mediaType: MediaType;
+    readonly isFavorite?: boolean;
+    readonly inWatchlist?: boolean;
+    readonly isWatched?: boolean;
+    readonly onToggleFavorite?: () => void;
+    readonly onToggleWatchlist?: () => void;
+    readonly onToggleWatched?: () => void;
+    readonly onRecommend?: () => void;
 }
 
-const { width } = Dimensions.get("window");
-const cardWidth = (width - 40) / 3; // Three columns with padding/gaps
+/**
+ * Type guard to check if item is a Movie
+ */
+const isMovie = (item: Movie | TVShow): item is Movie => {
+    return "title" in item;
+};
 
+/**
+ * Gets the display title for the content
+ */
+const getTitle = (item: Movie | TVShow): string => {
+    return isMovie(item) ? item.title : item.name;
+};
+
+/**
+ * Gets the release/air date for the content
+ */
+const getReleaseDate = (item: Movie | TVShow): string | undefined => {
+    return isMovie(item) ? item.release_date : item.first_air_date;
+};
+
+/**
+ * Extracts year from date string
+ */
+const extractYear = (date: string | undefined): string => {
+    if (!date) return "";
+    return date.split("-")[0];
+};
+
+/**
+ * Formats rating to single decimal
+ */
+const formatRating = (rating: number): string => {
+    return rating.toFixed(1);
+};
+
+/**
+ * Card component for displaying movie/TV show in a grid
+ */
 export default function MovieCard({
     item,
     mediaType,
@@ -30,251 +84,205 @@ export default function MovieCard({
     onToggleFavorite,
     onToggleWatchlist,
     onToggleWatched,
-    onRecommend,
-}: MovieCardProps) {
-    const [menuVisible, setMenuVisible] = useState(false);
-    const title = "title" in item ? item.title : item.name;
+}: Readonly<MovieCardProps>): JSX.Element {
     const posterUrl = getImageUrl(item.poster_path, "w300");
-    const rating = item.vote_average.toFixed(1);
+    const title = getTitle(item);
+    const year = extractYear(getReleaseDate(item));
+    const rating = formatRating(item.vote_average);
 
-    const handlePress = () => {
-        if (mediaType === "movie") {
-            router.push(`/movie/${item.id}`);
-        } else {
-            router.push(`/tv/${item.id}`);
-        }
+    const handlePress = (): void => {
+        const path = mediaType === "movie"
+            ? `/movie/${item.id}`
+            : `/tv/${item.id}`;
+        router.push(path as Parameters<typeof router.push>[0]);
     };
 
-    const toggleMenu = (e: any) => {
+    const handleToggleFavorite = (e: { stopPropagation: () => void }): void => {
         e.stopPropagation();
-        setMenuVisible(!menuVisible);
+        onToggleFavorite?.();
     };
 
-    const handleAction = (action?: () => void) => {
-        setMenuVisible(false);
-        if (action) action();
+    const handleToggleWatchlist = (e: { stopPropagation: () => void }): void => {
+        e.stopPropagation();
+        onToggleWatchlist?.();
+    };
+
+    const handleToggleWatched = (e: { stopPropagation: () => void }): void => {
+        e.stopPropagation();
+        onToggleWatched?.();
+    };
+
+    const renderPoster = (): JSX.Element => {
+        if (posterUrl) {
+            return (
+                <Image
+                    source={{ uri: posterUrl }}
+                    style={styles.poster}
+                    contentFit="cover"
+                />
+            );
+        }
+
+        return (
+            <View style={styles.posterPlaceholder}>
+                <Text style={styles.posterPlaceholderIcon}>
+                    {mediaType === "movie" ? "🎬" : "📺"}
+                </Text>
+            </View>
+        );
+    };
+
+    const renderWatchedOverlay = (): JSX.Element | null => {
+        if (!isWatched) return null;
+
+        return (
+            <View style={styles.watchedOverlay}>
+                <Ionicons name="checkmark-circle" size={24} color={Colors.white} />
+            </View>
+        );
+    };
+
+    const renderQuickActions = (): JSX.Element | null => {
+        if (!onToggleFavorite && !onToggleWatchlist && !onToggleWatched) {
+            return null;
+        }
+
+        return (
+            <View style={styles.quickActions}>
+                {onToggleFavorite && (
+                    <TouchableOpacity
+                        style={styles.quickActionButton}
+                        onPress={handleToggleFavorite}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                        <Ionicons
+                            name={isFavorite ? "skull" : "skull-outline"}
+                            size={16}
+                            color={isFavorite ? Colors.bloodRed : Colors.metalSilver}
+                        />
+                    </TouchableOpacity>
+                )}
+                {onToggleWatchlist && (
+                    <TouchableOpacity
+                        style={styles.quickActionButton}
+                        onPress={handleToggleWatchlist}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                        <Ionicons
+                            name={inWatchlist ? "bookmark" : "bookmark-outline"}
+                            size={16}
+                            color={inWatchlist ? Colors.bloodRed : Colors.metalSilver}
+                        />
+                    </TouchableOpacity>
+                )}
+                {onToggleWatched && (
+                    <TouchableOpacity
+                        style={styles.quickActionButton}
+                        onPress={handleToggleWatched}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                        <Ionicons
+                            name={isWatched ? "eye" : "eye-outline"}
+                            size={16}
+                            color={isWatched ? Colors.bloodRed : Colors.metalSilver}
+                        />
+                    </TouchableOpacity>
+                )}
+            </View>
+        );
     };
 
     return (
         <TouchableOpacity
+            style={styles.container}
             onPress={handlePress}
             activeOpacity={0.8}
-            style={[styles.container, { width: cardWidth }]}
         >
-            <View style={styles.card}>
-                {/* Poster Image */}
-                <View style={{ position: 'relative' }}>
-                    {posterUrl ? (
-                        <Image
-                            source={{ uri: posterUrl }}
-                            style={{ width: "100%", height: cardWidth * 1.2 }}
-                            contentFit="cover"
-                            transition={300}
-                        />
-                    ) : (
-                        <View
-                            style={[styles.placeholder, { height: cardWidth * 1.5 }]}
-                        >
-                            <Text style={styles.placeholderIcon}>🎬</Text>
-                        </View>
-                    )}
-
-                    {/* VISTO Overlay */}
-                    {isWatched && (
-                        <View style={styles.watchedOverlay}>
-                            <Ionicons name="checkmark-circle" size={32} color={Colors.white} />
-                            <Text style={styles.watchedText}>VISTO</Text>
-                        </View>
-                    )}
-
-                    {/* Three dots button */}
-                    <TouchableOpacity
-                        style={styles.moreButton}
-                        onPress={toggleMenu}
-                    >
-                        <Entypo name="dots-three-horizontal" size={16} color="white" />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Content */}
-                <View style={styles.content}>
-                    {/* Title */}
-                    <Text
-                        style={styles.title}
-                        numberOfLines={2}
-                        ellipsizeMode="tail"
-                    >
-                        {title}
-                    </Text>
-
-                    {/* Rating and Active Status Icons */}
-                    <View style={styles.metaContainer}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            <Text style={styles.rating}>⭐ {rating}</Text>
-                            <View style={styles.miniActions}>
-                                {isFavorite && (
-                                    <Ionicons name="skull" size={14} color={Colors.bloodRed} />
-                                )}
-                                {inWatchlist && (
-                                    <MaterialCommunityIcons name="sword-cross" size={14} color={Colors.bloodRed} />
-                                )}
-                            </View>
-                        </View>
-                    </View>
-                </View>
+            <View style={styles.posterContainer}>
+                {renderPoster()}
+                {renderWatchedOverlay()}
+                {renderQuickActions()}
             </View>
 
-            {/* Context Menu Modal */}
-            <Modal
-                transparent={true}
-                visible={menuVisible}
-                animationType="fade"
-                onRequestClose={() => setMenuVisible(false)}
-            >
-                <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.menuContainer}>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => handleAction(onToggleWatched)}>
-                                <Ionicons name={isWatched ? "eye" : "eye-outline"} size={20} color={isWatched ? Colors.bloodRed : "#52525b"} />
-                                <Text style={styles.menuItemText}>{isWatched ? "Quitar de vistos" : "Marcar como visto"}</Text>
-                            </TouchableOpacity>
-                            <View style={styles.separator} />
-
-                            <TouchableOpacity style={styles.menuItem} onPress={() => handleAction(() => { })}>
-                                <Ionicons name="list" size={20} color="#52525b" />
-                                <Text style={styles.menuItemText}>Añadir a la lista</Text>
-                            </TouchableOpacity>
-                            <View style={styles.separator} />
-
-                            <TouchableOpacity style={styles.menuItem} onPress={() => handleAction(onToggleFavorite)}>
-                                <Ionicons name={isFavorite ? "skull" : "skull-outline"} size={20} color={isFavorite ? Colors.bloodRed : "#52525b"} />
-                                <Text style={styles.menuItemText}>Favorito</Text>
-                            </TouchableOpacity>
-                            <View style={styles.separator} />
-
-                            <TouchableOpacity style={styles.menuItem} onPress={() => handleAction(onToggleWatchlist)}>
-                                <MaterialCommunityIcons name={inWatchlist ? "sword-cross" : "sword"} size={20} color={inWatchlist ? Colors.bloodRed : "#52525b"} />
-                                <Text style={styles.menuItemText}>Lista de seguimiento</Text>
-                            </TouchableOpacity>
-                            <View style={styles.separator} />
-
-                            <TouchableOpacity style={styles.menuItem} onPress={() => handleAction(() => { })}>
-                                <Ionicons name="star" size={20} color="#52525b" />
-                                <Text style={styles.menuItemText}>Tu valoración</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
+            <View style={styles.infoContainer}>
+                <Text style={styles.title} numberOfLines={2}>
+                    {title}
+                </Text>
+                <View style={styles.metaRow}>
+                    {year && <Text style={styles.year}>{year}</Text>}
+                    <Text style={styles.rating}>⭐ {rating}</Text>
+                </View>
+            </View>
         </TouchableOpacity>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
+        width: "31%",
         marginBottom: 16,
-    },
-    card: {
-        backgroundColor: Colors.metalGray,
+    } as ViewStyle,
+    posterContainer: {
+        position: "relative",
+        aspectRatio: 2 / 3,
         borderRadius: 8,
         overflow: "hidden",
-        borderColor: Colors.metalSilver,
-        borderWidth: 1,
-    },
-    placeholder: {
+    } as ViewStyle,
+    poster: {
         width: "100%",
-        backgroundColor: Colors.metalBlack,
+        height: "100%",
+    } as ImageStyle,
+    posterPlaceholder: {
+        width: "100%",
+        height: "100%",
+        backgroundColor: Colors.metalGray,
         alignItems: "center",
         justifyContent: "center",
-    },
-    placeholderIcon: {
-        fontSize: 36,
-    },
-    moreButton: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        backgroundColor: 'rgba(24, 1, 1, 0.6)',
-        borderRadius: 15,
-        width: 30,
-        height: 30,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    content: {
-        padding: 8,
-    },
+    } as ViewStyle,
+    posterPlaceholderIcon: {
+        fontSize: 32,
+    } as TextStyle,
+    watchedOverlay: {
+        position: "absolute",
+        top: 4,
+        right: 4,
+        backgroundColor: "rgba(220, 38, 38, 0.8)",
+        borderRadius: 12,
+        padding: 2,
+    } as ViewStyle,
+    quickActions: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        flexDirection: "row",
+        justifyContent: "space-around",
+        backgroundColor: "rgba(10, 10, 10, 0.8)",
+        paddingVertical: 6,
+    } as ViewStyle,
+    quickActionButton: {
+        padding: 4,
+    } as ViewStyle,
+    infoContainer: {
+        marginTop: 8,
+    } as ViewStyle,
     title: {
-        color: "#f4f4f5", // zinc-100
-        fontWeight: "bold",
+        color: "#f4f4f5",
         fontSize: 12,
-        height: 32, // Fixed height for 2 lines of text
-    },
-    metaContainer: {
+        fontWeight: "600",
+    } as TextStyle,
+    metaRow: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        marginTop: 6,
-    },
-    rating: {
-        color: "#eab308", // yellow-500
-        fontSize: 11,
-    },
-    miniActions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    menuContainer: {
-        backgroundColor: 'white',
-        borderRadius: 8,
-        width: 250,
-        padding: 4,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25, shadowRadius: 3.84,
-        elevation: 5,
-    },
-    menuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        gap: 12,
-    },
-    menuItemText: {
-        fontSize: 16,
-        color: '#18181b', // zinc-900
-    },
-    separator: {
-        height: 1,
-        backgroundColor: '#e4e4e7', // zinc-200
-        marginHorizontal: 4,
-    },
-    watchedOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(220, 38, 38, 0.4)", // bloodRed with opacity
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 5,
-    },
-    watchedText: {
-        color: Colors.white,
-        fontWeight: "bold",
-        fontSize: 14,
         marginTop: 4,
-        textShadowColor: "rgba(0, 0, 0, 0.75)",
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 10,
-    },
+    } as ViewStyle,
+    year: {
+        color: Colors.metalSilver,
+        fontSize: 10,
+    } as TextStyle,
+    rating: {
+        color: "#eab308",
+        fontSize: 10,
+    } as TextStyle,
 });
