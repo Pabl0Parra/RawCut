@@ -178,21 +178,7 @@ export default function WatchlistScreen() {
     }
 
     return (
-        <View style={styles.safeArea}>
-
-            <View style={styles.header}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text
-                        style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
-                    >
-                        Watchlist
-                    </Text>
-                    <MaterialCommunityIcons name="sword-cross" size={28} color="#f4f4f5" />
-                </View>
-                <Text style={styles.headerSubtitle}>
-                    {enrichedWatchlist.length} elementos
-                </Text>
-            </View>
+        <View style={[styles.safeArea, { paddingTop: 16 }]}>
 
             {loading ? (
                 <View style={styles.centerContainer}>
@@ -282,21 +268,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         paddingHorizontal: 16,
-    },
-    header: {
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 8,
-    },
-    headerTitle: {
-        color: "#f4f4f5", // zinc-100
-        fontSize: 24,
-        fontWeight: "bold",
-    },
-    headerSubtitle: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        marginTop: 4,
     },
     centerContainer: {
         flex: 1,

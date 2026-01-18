@@ -177,22 +177,7 @@ export default function FavoritesScreen() {
     }
 
     return (
-        <View style={styles.safeArea}>
-
-            <View style={styles.headerContainer}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text
-                        style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
-                    >
-                        Mi Cementerio
-                    </Text>
-                    <Ionicons name="skull" size={28} color="#f4f4f5" />
-                </View>
-                <Text style={styles.headerSubtitle}>
-
-                    {enrichedFavorites.length} elementos
-                </Text>
-            </View>
+        <View style={[styles.safeArea, { paddingTop: 16 }]}>
 
             {loading ? (
                 <View style={styles.centerContainer}>
@@ -225,21 +210,6 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: "transparent",
-    },
-    headerContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 8,
-    },
-    headerTitle: {
-        color: "#f4f4f5", // zinc-100
-        fontSize: 24,
-        fontWeight: "bold",
-    },
-    headerSubtitle: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        marginTop: 4,
     },
     centerContainer: {
         flex: 1,

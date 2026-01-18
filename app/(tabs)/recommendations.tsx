@@ -270,22 +270,11 @@ export default function RecommendationsScreen() {
     }
 
     return (
-        <View style={styles.safeArea}>
+        <View style={[styles.safeArea, { paddingTop: 16 }]}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.keyboardAvoidingView}
             >
-                {/* Header */}
-                <View style={styles.header}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <Text
-                            style={[styles.headerTitle, { fontFamily: "BebasNeue_400Regular" }]}
-                        >
-                            Recomendaciones
-                        </Text>
-                        <MaterialCommunityIcons name="email-outline" size={28} color="#f4f4f5" />
-                    </View>
-                </View>
 
                 {/* Tab switcher */}
                 <View style={styles.tabsContainer}>
@@ -370,16 +359,6 @@ const styles = StyleSheet.create({
     },
     keyboardAvoidingView: {
         flex: 1,
-    },
-    header: {
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 8,
-    },
-    headerTitle: {
-        color: "#f4f4f5", // zinc-100
-        fontSize: 24,
-        fontWeight: "bold",
     },
     tabsContainer: {
         paddingHorizontal: 16,

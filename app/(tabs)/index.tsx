@@ -276,7 +276,7 @@ export default function HomeScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <View style={[styles.safeArea, { paddingTop: 28 }]}>
 
             {/* Pill Tab System */}
             <View style={styles.tabsContainer}>
@@ -510,7 +510,7 @@ export default function HomeScreen() {
                     </View>
                 </View>
             </Modal>
-        </SafeAreaView>
+        </View>
     );
 }
 
