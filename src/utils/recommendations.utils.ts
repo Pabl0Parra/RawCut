@@ -96,41 +96,72 @@ export const getMediaTypeIcon = (mediaType: MediaType): string => {
 };
 
 /**
- * Gets the "other user" in a recommendation (sender for received, receiver for sent)
+ * Gets the sender of a received recommendation
  */
-export const getOtherUser = (
-    recommendation: RecommendationWithRelations,
-    isReceived: boolean
+export const getSenderFromReceived = (
+    recommendation: RecommendationWithRelations
 ): RecommendationWithRelations["sender"] => {
-    return isReceived ? recommendation.sender : recommendation.receiver;
+    return recommendation.sender;
 };
 
 /**
- * Formats the user display text for a recommendation
+ * Gets the receiver of a sent recommendation
  */
-export const formatUserDisplay = (
-    recommendation: RecommendationWithRelations,
-    isReceived: boolean
+export const getReceiverFromSent = (
+    recommendation: RecommendationWithRelations
+): RecommendationWithRelations["receiver"] => {
+    return recommendation.receiver;
+};
+
+/**
+ * Formats the user display text for a received recommendation
+ */
+export const formatReceivedUserDisplay = (
+    recommendation: RecommendationWithRelations
 ): string => {
-    const otherUser = getOtherUser(recommendation, isReceived);
-    const username = otherUser?.username ?? "desconocido";
-    const prefix = isReceived ? "De" : "Para";
-    return `${prefix}: @${username}`;
+    const sender = getSenderFromReceived(recommendation);
+    const username = sender?.username ?? "desconocido";
+    return `De: @${username}`;
 };
 
 /**
- * Checks if a recommendation has unread content
+ * Formats the user display text for a sent recommendation
  */
-export const hasUnreadContent = (
+export const formatSentUserDisplay = (
+    recommendation: RecommendationWithRelations
+): string => {
+    const receiver = getReceiverFromSent(recommendation);
+    const username = receiver?.username ?? "desconocido";
+    return `Para: @${username}`;
+};
+
+/**
+ * Checks if a received recommendation has unread content
+ */
+export const hasUnreadReceivedContent = (
     recommendation: RecommendationWithRelations,
-    isReceived: boolean,
     currentUserId: string | undefined
 ): boolean => {
-    // Unread if received and not read
-    if (isReceived && !recommendation.is_read) {
+    // Unread if not read
+    if (!recommendation.is_read) {
         return true;
     }
 
+    // Unread if there are unread comments from the other user
+    const hasUnreadComments = recommendation.comments?.some(
+        (comment) => comment.user_id !== currentUserId && !comment.is_read
+    );
+
+    return hasUnreadComments ?? false;
+};
+
+/**
+ * Checks if a sent recommendation has unread content
+ */
+export const hasUnreadSentContent = (
+    recommendation: RecommendationWithRelations,
+    currentUserId: string | undefined
+): boolean => {
     // Unread if there are unread comments from the other user
     const hasUnreadComments = recommendation.comments?.some(
         (comment) => comment.user_id !== currentUserId && !comment.is_read
@@ -174,13 +205,19 @@ export const canSendComment = (
 };
 
 /**
- * Checks if user can rate a recommendation
+ * Checks if user can rate a received recommendation
  */
-export const canRateRecommendation = (
-    isReceived: boolean,
+export const canRateReceivedRecommendation = (
     currentRating: number | undefined
 ): boolean => {
-    return isReceived && currentRating === undefined;
+    return currentRating === undefined;
+};
+
+/**
+ * Checks if user can rate a sent recommendation (always false)
+ */
+export const canRateSentRecommendation = (): boolean => {
+    return false;
 };
 
 /**
