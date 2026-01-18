@@ -38,7 +38,6 @@ import EpisodeModal from "../../../src/components/EpisodeModal";
 
 // Types & Utils
 import type {
-    TVShowWithDetails,
     TVDetailScreenState,
     NextEpisodeInfo,
 } from "../../../src/types/tvDetail.types";
