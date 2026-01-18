@@ -74,6 +74,10 @@ export default function RootLayout() {
                     refresh_token: queryParams.refresh_token as string,
                 });
 
+                if (error) {
+                    console.error("Deep link auth error:", error);
+                }
+
                 if (data.session) {
                     setSession(data.session);
                 }
