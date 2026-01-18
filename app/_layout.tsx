@@ -1,4 +1,4 @@
-import { Slot, Stack, SplashScreen, useRouter, useSegments } from "expo-router";
+import { Stack, SplashScreen, useRouter, useSegments } from "expo-router";
 import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
@@ -15,7 +15,7 @@ import { useAuthStore } from "../src/stores/authStore";
 import { Colors } from "../src/constants/Colors";
 import VideoSplash from "../src/components/VideoSplash"; // Import VideoSplash
 import SmokeBackground from "../src/components/SmokeBackground";
-import { ThemeProvider, DarkTheme, DefaultTheme } from "@react-navigation/native";
+import { ThemeProvider, DarkTheme } from "@react-navigation/native";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -122,9 +122,6 @@ export default function RootLayout() {
     if (!fontsLoaded && !fontError) {
         return null;
     }
-
-    // We no longer return null if !isReady, because we want to show the Splash
-    // But we only render Slot when isReady is true
 
     return (
         <ThemeProvider value={TransparentTheme}>

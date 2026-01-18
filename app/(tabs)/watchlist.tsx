@@ -3,7 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet, 
 import { useFocusEffect, router } from "expo-router";
 import { useCallback } from "react";
 import { Image } from "expo-image";
-import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { getMovieDetails, getTVShowDetails, getImageUrl } from "../../src/lib/tmdb";

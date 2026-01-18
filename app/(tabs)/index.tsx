@@ -15,7 +15,6 @@ import {
     ImageStyle,
 } from "react-native";
 import { MaterialCommunityIcons, Feather, Entypo, Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, router } from "expo-router";
 import MovieCard from "../../src/components/MovieCard";
 import { Image } from "expo-image";

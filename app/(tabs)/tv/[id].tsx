@@ -10,7 +10,6 @@ import {
     TextInput,
     FlatList,
     StyleSheet,
-    Linking,
     KeyboardAvoidingView,
     Platform,
 } from "react-native";

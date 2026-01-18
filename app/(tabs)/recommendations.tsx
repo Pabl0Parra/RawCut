@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, router } from "expo-router";
 import { Image } from "expo-image";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
@@ -9,18 +8,15 @@ import { getMovieDetails, getTVShowDetails, getImageUrl } from "../../src/lib/tm
 import { Colors } from "../../src/constants/Colors";
 
 export default function RecommendationsScreen() {
-    const { user, profile } = useAuthStore();
+    const { user } = useAuthStore();
     const {
         sent,
         received,
         isLoading,
-        unreadCount,
-        fetchRecommendations,
         addComment,
         addRating,
         markAllAsRead,
         markCommentsAsRead,
-        subscribeToRealtime,
     } = useRecommendationStore();
 
     const [activeTab, setActiveTab] = useState<"received" | "sent">("received");

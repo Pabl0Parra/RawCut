@@ -7,6 +7,23 @@ import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 
+const HeaderLeft = () => (
+    <Image
+        source={require('../../assets/icons/metal-hand.png')}
+        style={{ width: 40, height: 40, marginLeft: 16, tintColor: "#fff" }}
+        resizeMode="contain"
+    />
+);
+
+const HeaderRight = ({ onPress }: { onPress: () => void }) => (
+    <TouchableOpacity
+        onPress={onPress}
+        style={{ marginRight: 16 }}
+    >
+        <Ionicons name="person-circle-outline" size={32} color={Colors.white} />
+    </TouchableOpacity>
+);
+
 export default function TabLayout() {
     const insets = useSafeAreaInsets();
     const { user, profile, signOut } = useAuthStore();
@@ -67,21 +84,8 @@ export default function TabLayout() {
                     },
                     headerTitle: "CORTOCRUDO",
                     headerTitleAlign: 'center',
-                    headerLeft: () => (
-                        <Image
-                            source={require('../../assets/icons/metal-hand.png')}
-                            style={{ width: 40, height: 40, marginLeft: 16, tintColor: "#fff" }}
-                            resizeMode="contain"
-                        />
-                    ),
-                    headerRight: () => (
-                        <TouchableOpacity
-                            onPress={() => setMenuVisible(true)}
-                            style={{ marginRight: 16 }}
-                        >
-                            <Ionicons name="person-circle-outline" size={32} color={Colors.white} />
-                        </TouchableOpacity>
-                    ),
+                    headerLeft: () => <HeaderLeft />,
+                    headerRight: () => <HeaderRight onPress={() => setMenuVisible(true)} />,
                 }}
                 // @ts-ignore
                 sceneContainerStyle={{ backgroundColor: 'transparent' }}

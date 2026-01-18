@@ -1,7 +1,7 @@
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { StyleSheet, Animated } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 
 interface VideoSplashProps {
     onFinish: () => void;
