@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-    View,
-    Text,
-    FlatList,
-    ActivityIndicator,
-    TouchableOpacity,
-    StyleSheet,
-    Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { useCallback } from "react";
 import { Image } from "expo-image";
@@ -167,7 +158,7 @@ export default function WatchlistScreen() {
 
     if (!user) {
         return (
-            <SafeAreaView style={styles.safeArea} edges={["top"]}>
+            <View style={styles.safeArea}>
                 <View style={styles.emptyContainer}>
                     <Text style={styles.unauthIcon}>🔒</Text>
                     <Text style={styles.unauthText}>
@@ -182,12 +173,12 @@ export default function WatchlistScreen() {
                         </Text>
                     </TouchableOpacity>
                 </View>
-            </SafeAreaView>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <View style={styles.safeArea}>
 
             <View style={styles.header}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -226,7 +217,7 @@ export default function WatchlistScreen() {
                     showsVerticalScrollIndicator={false}
                 />
             )}
-        </SafeAreaView>
+        </View>
     );
 }
 
@@ -294,7 +285,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 16,
-        paddingTop: 16,
+        paddingTop: 8,
         paddingBottom: 8,
     },
     headerTitle: {

@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons, Feather, Entypo, Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, router } from "expo-router";
 import MovieCard from "../../src/components/MovieCard";
 import {
     getPopularMovies,
@@ -44,6 +44,7 @@ export default function HomeScreen() {
     const [hasMore, setHasMore] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
+    const [showProfileBanner, setShowProfileBanner] = useState(false);
 
     // Filter State
     const [showFilterModal, setShowFilterModal] = useState(false);
@@ -75,6 +76,13 @@ export default function HomeScreen() {
         useCallback(() => {
             if (user) {
                 fetchUserContent();
+                // Check if user has generic username
+                const { profile } = useAuthStore.getState();
+                if (profile?.username?.startsWith("user_")) {
+                    setShowProfileBanner(true);
+                } else {
+                    setShowProfileBanner(false);
+                }
             }
         }, [user])
     );
@@ -326,6 +334,28 @@ export default function HomeScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            {/* Profile Setup Banner */}
+            {showProfileBanner && (
+                <TouchableOpacity
+                    style={styles.profileBanner}
+                    onPress={() => router.push("/profile" as any)}
+                >
+                    <View style={styles.profileBannerContent}>
+                        <Ionicons name="sparkles" size={20} color={Colors.white} />
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.profileBannerTitle}>¡Dale estilo a tu cuenta!</Text>
+                            <Text style={styles.profileBannerSubtitle}>Cambia tu nombre de usuario genérico en tu perfil.</Text>
+                        </View>
+                        <TouchableOpacity onPress={(e) => {
+                            e.stopPropagation();
+                            setShowProfileBanner(false);
+                        }}>
+                            <Ionicons name="close" size={24} color="rgba(255,255,255,0.6)" />
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            )}
 
             {/* Search and Filter Row */}
             <View style={styles.controlsContainer}>
@@ -730,5 +760,31 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
         textTransform: 'uppercase',
+    } as TextStyle,
+    profileBanner: {
+        marginHorizontal: 16,
+        marginBottom: 16,
+        backgroundColor: Colors.bloodRed,
+        borderRadius: 8,
+        padding: 12,
+        elevation: 4,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    } as ViewStyle,
+    profileBannerContent: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    } as ViewStyle,
+    profileBannerTitle: {
+        color: Colors.white,
+        fontWeight: "bold",
+        fontSize: 14,
+    } as TextStyle,
+    profileBannerSubtitle: {
+        color: "rgba(255,255,255,0.9)",
+        fontSize: 12,
     } as TextStyle,
 });

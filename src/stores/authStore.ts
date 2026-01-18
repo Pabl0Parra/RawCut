@@ -35,28 +35,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             let email = identifier;
 
             if (!isEmail) {
-                // Look up email by username
-                const { data: profileData, error: profileError } = await supabase
-                    .from("profiles")
-                    .select("user_id")
-                    .eq("username", identifier)
-                    .single();
+                // Look up email by username using RPC
+                const { data: rpcData, error: rpcError } = await supabase.rpc(
+                    "get_email_by_username",
+                    { p_username: identifier }
+                );
 
-                if (profileError || !profileData) {
+                if (rpcError || !rpcData || rpcData.length === 0) {
                     set({ isLoading: false, error: "Usuario no encontrado" });
                     return false;
                 }
 
-                // Get user email from auth.users (we need to get it from the profile or sign in differently)
-                // For now, we'll require the email to contain @
-                // In production, you'd use a Supabase function or different approach
-                const { data: userData } = await supabase.auth.admin.getUserById(profileData.user_id);
-                if (userData?.user?.email) {
-                    email = userData.user.email;
-                } else {
-                    set({ isLoading: false, error: "Error al buscar el usuario" });
-                    return false;
-                }
+                email = rpcData[0].email;
             }
 
             const { data, error } = await supabase.auth.signInWithPassword({
@@ -108,6 +98,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 options: {
                     data: {
                         username,
+                        display_name: username,
+                        full_name: username,
                     },
                 },
             });

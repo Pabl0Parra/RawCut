@@ -8,6 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   username VARCHAR(20) UNIQUE NOT NULL,
+  display_name TEXT,
   avatar_url TEXT,
   points INT DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -171,10 +172,19 @@ CREATE TRIGGER on_rating_insert
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (user_id, username)
+  INSERT INTO public.profiles (user_id, username, display_name)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'username', 'user_' || substr(NEW.id::text, 1, 8))
+    COALESCE(
+      NEW.raw_user_meta_data->>'username',
+      SUBSTR(COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'display_name'), 1, 20),
+      'user_' || substr(NEW.id::text, 1, 8)
+    ),
+    COALESCE(
+      NEW.raw_user_meta_data->>'full_name',
+      NEW.raw_user_meta_data->>'display_name',
+      NEW.raw_user_meta_data->>'username'
+    )
   );
   RETURN NEW;
 END;
@@ -191,3 +201,15 @@ CREATE TRIGGER on_auth_user_created
 ALTER PUBLICATION supabase_realtime ADD TABLE recommendation_comments;
 ALTER PUBLICATION supabase_realtime ADD TABLE recommendations;
 ALTER PUBLICATION supabase_realtime ADD TABLE ratings;
+-- Function to get email by username (used for login)
+CREATE OR REPLACE FUNCTION get_email_by_username(p_username TEXT)
+RETURNS TABLE (email TEXT) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT u.email::TEXT
+  FROM auth.users u
+  JOIN public.profiles p ON u.id = p.user_id
+  WHERE LOWER(p.username) = LOWER(p_username) 
+     OR LOWER(p.display_name) = LOWER(p_username);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

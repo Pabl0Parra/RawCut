@@ -1,14 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-    View,
-    Text,
-    FlatList,
-    ActivityIndicator,
-    TouchableOpacity,
-    StyleSheet,
-    Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
@@ -166,7 +157,7 @@ export default function FavoritesScreen() {
 
     if (!user) {
         return (
-            <SafeAreaView style={styles.safeArea} edges={["top"]}>
+            <View style={styles.safeArea}>
                 <View style={styles.emptyStateContainer}>
                     <Text style={styles.emptyIcon}>🔒</Text>
                     <Text style={styles.emptyTitle}>
@@ -181,12 +172,12 @@ export default function FavoritesScreen() {
                         </Text>
                     </TouchableOpacity>
                 </View>
-            </SafeAreaView>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <View style={styles.safeArea}>
 
             <View style={styles.headerContainer}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -226,7 +217,7 @@ export default function FavoritesScreen() {
                     showsVerticalScrollIndicator={false}
                 />
             )}
-        </SafeAreaView>
+        </View>
     );
 }
 
@@ -237,7 +228,7 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         paddingHorizontal: 16,
-        paddingTop: 16,
+        paddingTop: 8,
         paddingBottom: 8,
     },
     headerTitle: {

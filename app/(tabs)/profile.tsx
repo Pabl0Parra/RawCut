@@ -1,17 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-    View,
-    Text,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../../src/stores/authStore";
 import { Colors } from "../../src/constants/Colors";
@@ -20,6 +8,8 @@ export default function ProfileScreen() {
     const { profile, user, updateUsername, signOut, isLoading, error, clearError } = useAuthStore();
     const [newUsername, setNewUsername] = useState(profile?.username || "");
     const [isEditing, setIsEditing] = useState(false);
+
+    const isGenericUsername = profile?.username?.startsWith("user_");
 
     useEffect(() => {
         if (profile?.username) {
@@ -57,7 +47,7 @@ export default function ProfileScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <View style={styles.safeArea}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
@@ -128,6 +118,15 @@ export default function ProfileScreen() {
                                     </View>
                                 )}
                             </View>
+                            {isGenericUsername && !isEditing && (
+                                <View style={styles.genericPrompt}>
+                                    <Ionicons name="information-circle-outline" size={16} color={Colors.bloodRed} />
+                                    <Text style={styles.genericPromptText}>
+                                        Aún tienes un nombre genérico. ¡Reclama tu identidad!
+                                    </Text>
+                                </View>
+                            )}
+
                             {error && isEditing && (
                                 <Text style={styles.errorText}>{error}</Text>
                             )}
@@ -139,10 +138,11 @@ export default function ProfileScreen() {
                         <Text style={styles.signOutText}>Cerrar Sesión</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.versionText}>RawCut v1.0.0</Text>
+                    <Text style={styles.versionText}>CortoCrudo v1.0.0</Text>
+                    <Text style={styles.authorText}>Author: Pabl0Parra</Text>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 }
 
@@ -157,8 +157,8 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: "center",
-        marginBottom: 40,
-        marginTop: 20,
+        marginBottom: 24,
+        marginTop: 8,
     },
     avatarContainer: {
         marginBottom: 16,
@@ -287,7 +287,29 @@ const styles = StyleSheet.create({
     },
     versionText: {
         color: "#444",
+        fontFamily: "BebasNeue_400Regular",
+        fontSize: 16,
+        marginTop: 40,
+        marginBottom: 20,
+    },
+    genericPrompt: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "rgba(220, 38, 38, 0.1)",
+        padding: 8,
+        borderRadius: 4,
+        marginTop: 12,
+        gap: 6,
+    },
+    genericPromptText: {
+        color: Colors.bloodRed,
         fontSize: 12,
+        fontWeight: "500",
+    },
+    authorText: {
+        color: "#444",
+        fontFamily: "BebasNeue_400Regular",
+        fontSize: 16,
         marginTop: 40,
         marginBottom: 20,
     },

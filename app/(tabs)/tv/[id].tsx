@@ -18,18 +18,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { getMovieDetails, getRelatedMovies, getMovieVideos, getImageUrl, Movie, Video } from "../../src/lib/tmdb";
-import { useContentStore } from "../../src/stores/contentStore";
-import { useAuthStore } from "../../src/stores/authStore";
-import { supabase, Profile } from "../../src/lib/supabase";
-import { Colors } from "../../src/constants/Colors";
+import { getTVShowDetails, getRelatedTVShows, getTVSeasonDetails, getTVVideos, getImageUrl, TVShow, Season, Episode, Video } from "../../../src/lib/tmdb";
+import { useContentStore } from "../../../src/stores/contentStore";
+import { useAuthStore } from "../../../src/stores/authStore";
+import { supabase, Profile } from "../../../src/lib/supabase";
+import { Colors } from "../../../src/constants/Colors";
 
 const { width } = Dimensions.get("window");
 
-export default function MovieDetailScreen() {
+export default function TVDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
-    const [movie, setMovie] = useState<(Movie & { genres: { id: number; name: string }[] }) | null>(null);
-    const [relatedMovies, setRelatedMovies] = useState<Movie[]>([]);
+    const [tvShow, setTVShow] = useState<(TVShow & { genres: { id: number; name: string }[] }) | null>(null);
+    const [relatedTVShows, setRelatedTVShows] = useState<TVShow[]>([]);
     const [trailerKey, setTrailerKey] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [showRecommendModal, setShowRecommendModal] = useState(false);
@@ -40,6 +40,16 @@ export default function MovieDetailScreen() {
     const [sendingRecommendation, setSendingRecommendation] = useState(false);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [showUserList, setShowUserList] = useState(true);
+
+    // Season Details State
+    const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number | null>(null);
+    const [seasonEpisodes, setSeasonEpisodes] = useState<Episode[]>([]); // Use correct type if available
+    const [loadingSeason, setLoadingSeason] = useState(false);
+    const [showSeasonModal, setShowSeasonModal] = useState(false);
+
+    // Episode Details Modal State
+    const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
+    const [showEpisodeModal, setShowEpisodeModal] = useState(false);
 
     const { user } = useAuthStore();
     const {
@@ -53,20 +63,20 @@ export default function MovieDetailScreen() {
 
     useEffect(() => {
         if (id) {
-            loadMovie(Number.parseInt(id));
+            loadTVShow(Number.parseInt(id));
         }
     }, [id]);
 
-    const loadMovie = async (movieId: number) => {
+    const loadTVShow = async (tvId: number) => {
         setLoading(true);
         try {
-            const data = await getMovieDetails(movieId);
-            setMovie(data);
+            const data = await getTVShowDetails(tvId);
+            setTVShow(data);
 
-            const related = await getRelatedMovies(movieId);
-            setRelatedMovies(related.results);
+            const related = await getRelatedTVShows(tvId);
+            setRelatedTVShows(related.results);
 
-            const videos = await getMovieVideos(movieId);
+            const videos = await getTVVideos(tvId);
             const trailer = videos.results.find(
                 v => v.type === "Trailer" && v.site === "YouTube" && v.official
             ) || videos.results.find(v => v.type === "Trailer" && v.site === "YouTube");
@@ -75,27 +85,27 @@ export default function MovieDetailScreen() {
                 setTrailerKey(trailer.key);
             }
         } catch (err) {
-            console.error("Error loading movie:", err);
+            console.error("Error loading TV show:", err);
         } finally {
             setLoading(false);
         }
     };
 
     const handleToggleFavorite = async () => {
-        if (!movie || !user) return;
-        if (isFavorite(movie.id, "movie")) {
-            await removeFromFavorites(movie.id, "movie");
+        if (!tvShow || !user) return;
+        if (isFavorite(tvShow.id, "tv")) {
+            await removeFromFavorites(tvShow.id, "tv");
         } else {
-            await addToFavorites(movie.id, "movie");
+            await addToFavorites(tvShow.id, "tv");
         }
     };
 
     const handleToggleWatchlist = async () => {
-        if (!movie || !user) return;
-        if (isInWatchlist(movie.id, "movie")) {
-            await removeFromWatchlist(movie.id, "movie");
+        if (!tvShow || !user) return;
+        if (isInWatchlist(tvShow.id, "tv")) {
+            await removeFromWatchlist(tvShow.id, "tv");
         } else {
-            await addToWatchlist(movie.id, "movie");
+            await addToWatchlist(tvShow.id, "tv");
         }
     };
 
@@ -120,7 +130,7 @@ export default function MovieDetailScreen() {
     };
 
     const handleSendRecommendation = async () => {
-        if (!movie || !user || !selectedUser) return;
+        if (!tvShow || !user || !selectedUser) return;
 
         setSendingRecommendation(true);
         try {
@@ -133,8 +143,8 @@ export default function MovieDetailScreen() {
             const { data, error } = await supabase.from("recommendations").insert({
                 sender_id: user.id,
                 receiver_id: selectedUser.user_id,
-                tmdb_id: movie.id,
-                media_type: "movie",
+                tmdb_id: tvShow.id,
+                media_type: "tv",
                 message: recommendMessage || null,
             }).select();
 
@@ -149,13 +159,30 @@ export default function MovieDetailScreen() {
             setRecommendMessage("");
             setSelectedUser(null);
             setSearchUsers("");
-            // Show success feedback
             alert("¡Recomendación enviada!");
         } catch (err) {
             console.error("Error sending recommendation:", err);
             alert("Error al enviar recomendación");
         } finally {
             setSendingRecommendation(false);
+        }
+    };
+
+    const openSeasonDetails = async (seasonNumber: number) => {
+        if (!tvShow) return;
+
+        setSelectedSeasonNumber(seasonNumber);
+        setShowSeasonModal(true);
+        setLoadingSeason(true);
+
+        try {
+            const data = await getTVSeasonDetails(tvShow.id, seasonNumber);
+            setSeasonEpisodes(data.episodes);
+        } catch (err) {
+            console.error("Error loading season details:", err);
+            alert("Error al cargar episodios");
+        } finally {
+            setLoadingSeason(false);
         }
     };
 
@@ -169,11 +196,11 @@ export default function MovieDetailScreen() {
         );
     }
 
-    if (!movie) {
+    if (!tvShow) {
         return (
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.centerContainer}>
-                    <Text style={styles.errorText}>Película no encontrada</Text>
+                    <Text style={styles.errorText}>Serie no encontrada</Text>
                 </View>
             </SafeAreaView>
         );
@@ -185,8 +212,8 @@ export default function MovieDetailScreen() {
         }
     };
 
-    const backdropUrl = getImageUrl(movie.backdrop_path, "original");
-    const posterUrl = getImageUrl(movie.poster_path, "w300");
+    const backdropUrl = getImageUrl(tvShow.backdrop_path, "original");
+    const posterUrl = getImageUrl(tvShow.poster_path, "w300");
 
     return (
         <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -200,7 +227,7 @@ export default function MovieDetailScreen() {
                 </TouchableOpacity>
 
                 {/* Backdrop with Trailer Button */}
-                <View style={{ position: 'relative' }}>
+                <View style={{ position: "relative" }}>
                     {backdropUrl ? (
                         <Image
                             source={{ uri: backdropUrl }}
@@ -236,7 +263,7 @@ export default function MovieDetailScreen() {
                             />
                         ) : (
                             <View style={styles.posterPlaceholder}>
-                                <Text style={styles.posterPlaceholderIcon}>🎬</Text>
+                                <Text style={styles.posterPlaceholderIcon}>📺</Text>
                             </View>
                         )}
 
@@ -245,21 +272,20 @@ export default function MovieDetailScreen() {
                             <Text
                                 style={[styles.title, { fontFamily: "BebasNeue_400Regular" }]}
                             >
-                                {movie.title}
+                                {tvShow.name}
                             </Text>
                             <Text style={styles.yearText}>
-                                {movie.release_date?.split("-")[0]}
-                                {movie.runtime ? ` • ${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m` : ""}
+                                {tvShow.first_air_date?.split("-")[0]}
                             </Text>
                             <Text style={styles.ratingText}>
-                                ⭐ {movie.vote_average.toFixed(1)}/10
+                                ⭐ {tvShow.vote_average.toFixed(1)}/10
                             </Text>
                         </View>
                     </View>
 
                     {/* Genres */}
                     <View style={styles.genresContainer}>
-                        {movie.genres?.map((genre) => (
+                        {tvShow.genres?.map((genre) => (
                             <View
                                 key={genre.id}
                                 style={styles.genreBadge}
@@ -275,7 +301,7 @@ export default function MovieDetailScreen() {
                             <TouchableOpacity
                                 style={[
                                     styles.actionButton,
-                                    isFavorite(movie.id, "movie")
+                                    isFavorite(tvShow.id, "tv")
                                         ? styles.activeButton
                                         : styles.inactiveButton,
                                 ]}
@@ -283,18 +309,18 @@ export default function MovieDetailScreen() {
                             >
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                                     <Ionicons
-                                        name={isFavorite(movie.id, "movie") ? "skull" : "skull-outline"}
+                                        name={isFavorite(tvShow.id, "tv") ? "skull" : "skull-outline"}
                                         size={20}
-                                        color={isFavorite(movie.id, "movie") ? Colors.white : "#f4f4f5"}
+                                        color={isFavorite(tvShow.id, "tv") ? Colors.white : "#f4f4f5"}
                                     />
                                     <Text
                                         style={
-                                            isFavorite(movie.id, "movie")
+                                            isFavorite(tvShow.id, "tv")
                                                 ? styles.activeButtonText
                                                 : styles.inactiveButtonText
                                         }
                                     >
-                                        {isFavorite(movie.id, "movie") ? "Favorito" : "Añadir a cementerio"}
+                                        {isFavorite(tvShow.id, "tv") ? "Favorito" : "Añadir"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -302,7 +328,7 @@ export default function MovieDetailScreen() {
                             <TouchableOpacity
                                 style={[
                                     styles.actionButton,
-                                    isInWatchlist(movie.id, "movie")
+                                    isInWatchlist(tvShow.id, "tv")
                                         ? styles.activeButton
                                         : styles.inactiveButton,
                                 ]}
@@ -310,18 +336,18 @@ export default function MovieDetailScreen() {
                             >
                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                                     <MaterialCommunityIcons
-                                        name={isInWatchlist(movie.id, "movie") ? "sword-cross" : "sword"}
+                                        name={isInWatchlist(tvShow.id, "tv") ? "sword-cross" : "sword"}
                                         size={20}
-                                        color={isInWatchlist(movie.id, "movie") ? Colors.white : "#f4f4f5"}
+                                        color={isInWatchlist(tvShow.id, "tv") ? Colors.white : "#f4f4f5"}
                                     />
                                     <Text
                                         style={
-                                            isInWatchlist(movie.id, "movie")
+                                            isInWatchlist(tvShow.id, "tv")
                                                 ? styles.activeButtonText
                                                 : styles.inactiveButtonText
                                         }
                                     >
-                                        {isInWatchlist(movie.id, "movie")
+                                        {isInWatchlist(tvShow.id, "tv")
                                             ? "En Lista"
                                             : "Watchlist"}
                                     </Text>
@@ -341,15 +367,6 @@ export default function MovieDetailScreen() {
                                 // Load all users immediately
                                 setLoadingUsers(true);
                                 try {
-                                    // Debug: Check current user ID
-                                    console.log("Current user ID:", user?.id);
-
-                                    // Debug: Check all profiles
-                                    const { data: allProfiles } = await supabase
-                                        .from("profiles")
-                                        .select("*");
-                                    console.log("All profiles in database:", allProfiles);
-
                                     const { data, error } = await supabase
                                         .from("profiles")
                                         .select("*")
@@ -389,41 +406,81 @@ export default function MovieDetailScreen() {
                             Sinopsis
                         </Text>
                         <Text style={styles.descriptionText}>
-                            {movie.overview || "Sin descripción disponible"}
+                            {tvShow.overview || "Sin descripción disponible"}
                         </Text>
                     </View>
 
-                    {/* Crew Info (Directors & Producers) */}
-                    {movie.credits && (
+                    {/* Crew Info (Creators & Producers) */}
+                    <View style={styles.sectionContainer}>
+                        {tvShow.created_by && tvShow.created_by.length > 0 && (
+                            <View style={{ marginBottom: 12 }}>
+                                <Text style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular", fontSize: 16, marginBottom: 4 }]}>
+                                    Creación
+                                </Text>
+                                <Text style={{ color: "#f4f4f5", fontSize: 14 }}>
+                                    {tvShow.created_by.map(c => c.name).join(", ")}
+                                </Text>
+                            </View>
+                        )}
+                        {tvShow.credits && tvShow.credits.crew.filter(c => c.job === "Producer" || c.job === "Executive Producer").length > 0 && (
+                            <View>
+                                <Text style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular", fontSize: 16, marginBottom: 4 }]}>
+                                    Producción
+                                </Text>
+                                <Text style={{ color: "#f4f4f5", fontSize: 14 }}>
+                                    {tvShow.credits.crew
+                                        .filter(c => c.job === "Producer" || c.job === "Executive Producer")
+                                        .slice(0, 3) // Limit to 3 producers for brevity
+                                        .map(p => p.name).join(", ")}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Seasons */}
+                    {tvShow.seasons && tvShow.seasons.length > 0 && (
                         <View style={styles.sectionContainer}>
-                            {movie.credits.crew.filter(c => c.job === "Director").length > 0 && (
-                                <View style={{ marginBottom: 12 }}>
-                                    <Text style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular", fontSize: 16, marginBottom: 4 }]}>
-                                        Dirección
-                                    </Text>
-                                    <Text style={{ color: "#f4f4f5", fontSize: 14 }}>
-                                        {movie.credits.crew.filter(c => c.job === "Director").map(d => d.name).join(", ")}
-                                    </Text>
-                                </View>
-                            )}
-                            {movie.credits.crew.filter(c => c.job === "Producer" || c.job === "Executive Producer").length > 0 && (
-                                <View>
-                                    <Text style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular", fontSize: 16, marginBottom: 4 }]}>
-                                        Producción
-                                    </Text>
-                                    <Text style={{ color: "#f4f4f5", fontSize: 14 }}>
-                                        {movie.credits.crew
-                                            .filter(c => c.job === "Producer" || c.job === "Executive Producer")
-                                            .slice(0, 3) // Limit to 3 producers for brevity
-                                            .map(p => p.name).join(", ")}
-                                    </Text>
-                                </View>
-                            )}
+                            <Text
+                                style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                            >
+                                Temporadas
+                            </Text>
+                            <FlatList
+                                data={tvShow.seasons}
+                                keyExtractor={(item) => item.id.toString()}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.seasonList}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        style={styles.seasonItem}
+                                        onPress={() => openSeasonDetails(item.season_number)}
+                                    >
+                                        {item.poster_path ? (
+                                            <Image
+                                                source={{ uri: getImageUrl(item.poster_path, "w200") ?? undefined }}
+                                                style={styles.seasonImage}
+                                                contentFit="cover"
+                                            />
+                                        ) : (
+                                            <View style={styles.seasonPlaceholder}>
+                                                <Text style={styles.seasonPlaceholderIcon}>📺</Text>
+                                            </View>
+                                        )}
+                                        <Text style={styles.seasonName} numberOfLines={1}>
+                                            {item.name}
+                                        </Text>
+                                        <Text style={styles.seasonEpisodes}>
+                                            {item.episode_count} eps
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                            />
                         </View>
                     )}
 
                     {/* Cast */}
-                    {movie.credits && movie.credits.cast.length > 0 && (
+                    {tvShow.credits && tvShow.credits.cast.length > 0 && (
                         <View style={styles.sectionContainer}>
                             <Text
                                 style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
@@ -431,7 +488,7 @@ export default function MovieDetailScreen() {
                                 Reparto
                             </Text>
                             <FlatList
-                                data={movie.credits.cast}
+                                data={tvShow.credits.cast}
                                 keyExtractor={(item) => item.id.toString()}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
@@ -461,8 +518,8 @@ export default function MovieDetailScreen() {
                         </View>
                     )}
 
-                    {/* Related Movies */}
-                    {relatedMovies.length > 0 && (
+                    {/* Related TV Shows */}
+                    {relatedTVShows.length > 0 && (
                         <View style={styles.sectionContainer}>
                             <Text
                                 style={[styles.sectionTitle, { fontFamily: "BebasNeue_400Regular" }]}
@@ -470,7 +527,7 @@ export default function MovieDetailScreen() {
                                 Relacionadas
                             </Text>
                             <FlatList
-                                data={relatedMovies}
+                                data={relatedTVShows}
                                 keyExtractor={(item) => item.id.toString()}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
@@ -478,7 +535,7 @@ export default function MovieDetailScreen() {
                                 renderItem={({ item }) => (
                                     <TouchableOpacity
                                         style={styles.castItem}
-                                        onPress={() => router.push(`/movie/${item.id}`)}
+                                        onPress={() => router.push(`/tv/${item.id}`)}
                                     >
                                         {item.poster_path ? (
                                             <Image
@@ -488,11 +545,11 @@ export default function MovieDetailScreen() {
                                             />
                                         ) : (
                                             <View style={styles.castPlaceholder}>
-                                                <Text style={styles.castPlaceholderIcon}>🎬</Text>
+                                                <Text style={styles.castPlaceholderIcon}>📺</Text>
                                             </View>
                                         )}
                                         <Text style={styles.castName} numberOfLines={2}>
-                                            {item.title}
+                                            {item.name}
                                         </Text>
                                         <Text style={styles.castCharacter} numberOfLines={1}>
                                             ⭐ {item.vote_average.toFixed(1)}
@@ -529,7 +586,7 @@ export default function MovieDetailScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    {/* Movie preview */}
+                    {/* TV preview */}
                     <View style={styles.previewContainer}>
                         {posterUrl && (
                             <Image
@@ -538,9 +595,9 @@ export default function MovieDetailScreen() {
                             />
                         )}
                         <View style={styles.previewInfo}>
-                            <Text style={styles.previewTitle}>{movie.title}</Text>
+                            <Text style={styles.previewTitle}>{tvShow.name}</Text>
                             <Text style={styles.previewYear}>
-                                {movie.release_date?.split("-")[0]}
+                                {tvShow.first_air_date?.split("-")[0]}
                             </Text>
                         </View>
                     </View>
@@ -554,7 +611,7 @@ export default function MovieDetailScreen() {
                         onPress={() => setShowUserList(!showUserList)}
                     >
                         <Text style={styles.dropdownButtonText}>
-                            {selectedUser ? `@${selectedUser.username}` : 'Toca para seleccionar usuario...'}
+                            {selectedUser ? (selectedUser.display_name || `@${selectedUser.username}`) : 'Toca para seleccionar usuario...'}
                         </Text>
                         <Ionicons
                             name={showUserList ? "chevron-up" : "chevron-down"}
@@ -588,7 +645,12 @@ export default function MovieDetailScreen() {
                                                 }}
                                             >
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                    <Text style={styles.searchResultText}>@{item.username}</Text>
+                                                    <View>
+                                                        {item.display_name && (
+                                                            <Text style={styles.searchResultText}>{item.display_name}</Text>
+                                                        )}
+                                                        <Text style={[styles.searchResultText, { fontSize: 12, opacity: 0.7 }]}>@{item.username}</Text>
+                                                    </View>
                                                     {selectedUser?.user_id === item.user_id && (
                                                         <Ionicons name="checkmark-circle" size={20} color={Colors.bloodRed} />
                                                     )}
@@ -627,22 +689,21 @@ export default function MovieDetailScreen() {
                     )}
 
                     {/* Message */}
-                    <Text style={styles.inputLabel}>
-                        Mensaje (opcional)
-                    </Text>
-                    <TextInput
-                        style={[styles.input, styles.multilineInput]}
-                        placeholder="¿Por qué recomiendas esto?"
-                        placeholderTextColor="#71717a"
-                        value={recommendMessage}
-                        onChangeText={setRecommendMessage}
-                        maxLength={200}
-                        multiline
-                        numberOfLines={3}
-                    />
-                    <Text style={styles.charCount}>
-                        {recommendMessage.length}/200
-                    </Text>
+                    <View style={{ flex: 1 }}>
+                        <TextInput
+                            style={[styles.input, styles.multilineInput]}
+                            placeholder="¿Por qué recomiendas esto?"
+                            placeholderTextColor="#71717a"
+                            value={recommendMessage}
+                            onChangeText={setRecommendMessage}
+                            maxLength={200}
+                            multiline
+                            numberOfLines={3}
+                        />
+                        <Text style={styles.charCount}>
+                            {recommendMessage.length}/200
+                        </Text>
+                    </View>
 
                     {/* Send button */}
                     <View style={{ paddingTop: 16 }}>
@@ -664,6 +725,124 @@ export default function MovieDetailScreen() {
                         </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>
+            </Modal>
+
+            {/* Season Details Modal */}
+            <Modal
+                visible={showSeasonModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowSeasonModal(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalHeader}>
+                        <Text
+                            style={[styles.modalTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                        >
+                            {selectedSeasonNumber !== null ? `Temporada ${selectedSeasonNumber}` : "Episodios"}
+                        </Text>
+                        <TouchableOpacity onPress={() => setShowSeasonModal(false)}>
+                            <Text style={styles.closeButtonText}>✕</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {loadingSeason ? (
+                        <View style={styles.centerContainer}>
+                            <ActivityIndicator size="large" color="#dc2626" />
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={seasonEpisodes}
+                            keyExtractor={(item) => item.id.toString()}
+                            contentContainerStyle={{ paddingBottom: 20 }}
+                            renderItem={({ item }: { item: Episode }) => (
+                                <TouchableOpacity
+                                    style={styles.episodeItem}
+                                    onPress={() => {
+                                        setSelectedEpisode(item);
+                                        setShowEpisodeModal(true);
+                                    }}
+                                >
+                                    {item.still_path ? (
+                                        <Image
+                                            source={{ uri: getImageUrl(item.still_path, "w300") ?? undefined }}
+                                            style={styles.episodeImage}
+                                            contentFit="cover"
+                                        />
+                                    ) : (
+                                        <View style={styles.episodePlaceholder}>
+                                            <Text style={styles.episodePlaceholderIcon}>📺</Text>
+                                        </View>
+                                    )}
+                                    <View style={styles.episodeContent}>
+                                        <Text style={styles.episodeTitle}>
+                                            {item.episode_number}. {item.name}
+                                        </Text>
+                                        <Text style={styles.episodeOverview} numberOfLines={3}>
+                                            {item.overview || "Sin descripción."}
+                                        </Text>
+                                        <Text style={styles.episodeMeta}>
+                                            ⭐ {item.vote_average.toFixed(1)} • {item.air_date}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                        />
+                    )}
+                </View>
+            </Modal>
+
+            {/* Episode Details Modal */}
+            <Modal
+                visible={showEpisodeModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowEpisodeModal(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalHeader}>
+                        <Text
+                            style={[styles.modalTitle, { fontFamily: "BebasNeue_400Regular" }]}
+                        >
+                            {selectedEpisode ? `${selectedEpisode.episode_number}. ${selectedEpisode.name}` : "Detalle del Episodio"}
+                        </Text>
+                        <TouchableOpacity onPress={() => setShowEpisodeModal(false)}>
+                            <Text style={styles.closeButtonText}>✕</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {selectedEpisode && (
+                        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+                            {selectedEpisode.still_path ? (
+                                <Image
+                                    source={{ uri: getImageUrl(selectedEpisode.still_path, "w500") ?? undefined }}
+                                    style={{ width: '100%', height: 200, borderRadius: 8, marginBottom: 16 }}
+                                    contentFit="cover"
+                                />
+                            ) : (
+                                <View style={{ width: '100%', height: 200, borderRadius: 8, marginBottom: 16, backgroundColor: Colors.metalGray, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Text style={{ fontSize: 40 }}>📺</Text>
+                                </View>
+                            )}
+
+                            <Text style={styles.episodeMeta}>
+                                Emitido: {selectedEpisode.air_date}
+                            </Text>
+                            <Text style={styles.ratingText}>
+                                ⭐ {selectedEpisode.vote_average.toFixed(1)}/10
+                            </Text>
+
+                            <Text
+                                style={[styles.descriptionTitle, { fontFamily: "BebasNeue_400Regular", marginTop: 24 }]}
+                            >
+                                Sinopsis
+                            </Text>
+                            <Text style={styles.descriptionText}>
+                                {selectedEpisode.overview || "Sin descripción disponible para este episodio."}
+                            </Text>
+                        </ScrollView>
+                    )}
+                </View>
             </Modal>
         </SafeAreaView>
     );
@@ -821,6 +1000,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 24,
+        marginHorizontal: 16,
     },
     modalTitle: {
         color: "#f4f4f5", // zinc-100
@@ -829,6 +1009,7 @@ const styles = StyleSheet.create({
     closeButtonText: {
         color: Colors.bloodRed,
         fontSize: 18,
+        marginRight: 16,
     },
     previewContainer: {
         flexDirection: "row",
@@ -1009,22 +1190,100 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginTop: 2,
     },
+    seasonList: {
+        gap: 12,
+    },
+    seasonItem: {
+        width: 100,
+        marginRight: 12,
+    },
+    seasonImage: {
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    seasonPlaceholder: {
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+        backgroundColor: Colors.metalGray,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 8,
+    },
+    seasonPlaceholderIcon: {
+        fontSize: 32,
+    },
+    seasonName: {
+        color: "#f4f4f5",
+        fontSize: 12,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    seasonEpisodes: {
+        color: Colors.metalSilver,
+        fontSize: 10,
+        textAlign: "center",
+        marginTop: 2,
+    },
+    episodeItem: {
+        flexDirection: "row",
+        marginBottom: 16,
+        backgroundColor: Colors.metalGray,
+        borderRadius: 8,
+        overflow: "hidden",
+    },
+    episodeImage: {
+        width: 120,
+        height: 80,
+    },
+    episodePlaceholder: {
+        width: 120,
+        height: 80,
+        backgroundColor: Colors.metalBlack,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    episodePlaceholderIcon: {
+        fontSize: 24,
+    },
+    episodeContent: {
+        flex: 1,
+        padding: 8,
+        justifyContent: "center",
+    },
+    episodeTitle: {
+        color: "#f4f4f5",
+        fontWeight: "bold",
+        fontSize: 14,
+        marginBottom: 4,
+    },
+    episodeOverview: {
+        color: Colors.metalSilver,
+        fontSize: 12,
+        marginBottom: 4,
+    },
+    episodeMeta: {
+        color: Colors.metalGold,
+        fontSize: 10,
+    },
     playButtonOverlay: {
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.2)', // Subtle darken
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.2)", // Subtle darken
     },
     playTrailerText: {
-        color: 'white',
+        color: "white",
         fontSize: 14,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         marginTop: -10,
-        textShadowColor: 'rgba(0,0,0,0.75)',
+        textShadowColor: "rgba(0,0,0,0.75)",
         textShadowOffset: { width: -1, height: 1 },
         textShadowRadius: 10,
     },

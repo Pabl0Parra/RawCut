@@ -134,8 +134,6 @@ export default function RootLayout() {
                         <SmokeBackground />
                         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
                             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                            <Stack.Screen name="movie/[id]" options={{ headerShown: false }} />
-                            <Stack.Screen name="tv/[id]" options={{ headerShown: false }} />
                             <Stack.Screen name="login" options={{ headerShown: false }} />
                             <Stack.Screen name="register" options={{ headerShown: false }} />
                         </Stack>

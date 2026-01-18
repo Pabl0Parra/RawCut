@@ -1,16 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-    View,
-    Text,
-    FlatList,
-    TouchableOpacity,
-    ActivityIndicator,
-    TextInput,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, router } from "expo-router";
 import { Image } from "expo-image";
@@ -261,7 +250,7 @@ export default function RecommendationsScreen() {
 
     if (!user) {
         return (
-            <SafeAreaView style={styles.safeArea} edges={["top"]}>
+            <View style={styles.safeArea}>
                 <View style={styles.emptyContainer}>
                     <Text style={styles.unauthIcon}>🔒</Text>
                     <Text style={styles.unauthText}>
@@ -276,12 +265,12 @@ export default function RecommendationsScreen() {
                         </Text>
                     </TouchableOpacity>
                 </View>
-            </SafeAreaView>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <View style={styles.safeArea}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.keyboardAvoidingView}
@@ -370,7 +359,7 @@ export default function RecommendationsScreen() {
                     />
                 )}
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 }
 
@@ -384,7 +373,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 16,
-        paddingTop: 16,
+        paddingTop: 8,
         paddingBottom: 8,
     },
     headerTitle: {
