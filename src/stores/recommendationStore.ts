@@ -71,7 +71,7 @@ const markRecCommentsRead = (
             ? {
                 ...rec,
                 comments: rec.comments.map((c) =>
-                    c.user_id !== userId ? { ...c, is_read: true } : c
+                    c.user_id === userId ? c : { ...c, is_read: true }
                 ),
             }
             : rec
