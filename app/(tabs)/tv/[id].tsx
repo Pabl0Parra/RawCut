@@ -5,7 +5,6 @@ import {
     ScrollView,
     TouchableOpacity,
     ActivityIndicator,
-    Dimensions,
     FlatList,
     StyleSheet,
     type ViewStyle,
@@ -39,6 +38,9 @@ import { ContentPoster } from "../../../src/components/ContentPoster";
 import { GenreList } from "../../../src/components/GenreList";
 import { ContentActionBar } from "../../../src/components/ContentActionBar";
 import { useContentActions } from "../../../src/hooks/useContentActions";
+import { detailScreenStyles } from "../../../src/styles/detailScreenStyles";
+import { CastMemberList } from "../../../src/components/CastMemberList";
+import { ContentHorizontalList } from "../../../src/components/ContentHorizontalList";
 
 // Types & Utils
 import type {
@@ -66,12 +68,6 @@ import {
 } from "../../../src/utils/tvDetail.utils";
 
 // ============================================================================
-// Constants
-// ============================================================================
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const BACKDROP_ASPECT_RATIO = 0.56;
-
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -235,17 +231,17 @@ export default function TVDetailScreen(): React.JSX.Element {
     // ========================================================================
 
     const renderLoadingState = (): React.JSX.Element => (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.centerContainer}>
+        <SafeAreaView style={detailScreenStyles.safeArea}>
+            <View style={detailScreenStyles.centerContainer}>
                 <ActivityIndicator size="large" color="#dc2626" />
             </View>
         </SafeAreaView>
     );
 
     const renderErrorState = (): React.JSX.Element => (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.centerContainer}>
-                <Text style={styles.errorText}>Serie no encontrada</Text>
+        <SafeAreaView style={detailScreenStyles.safeArea}>
+            <View style={detailScreenStyles.centerContainer}>
+                <Text style={detailScreenStyles.errorText}>Serie no encontrada</Text>
             </View>
         </SafeAreaView>
     );
@@ -264,131 +260,29 @@ export default function TVDetailScreen(): React.JSX.Element {
         );
     };
 
-    const renderBackdrop = (): React.JSX.Element => {
-        const backdropUrl = getBackdropUrl(tvShow?.backdrop_path ?? null);
-        const backdropHeight = SCREEN_WIDTH * BACKDROP_ASPECT_RATIO;
+    // Backdrop, poster, genres, and action buttons now use shared components
 
-        return (
-            <View style={styles.backdropContainer}>
-                {backdropUrl ? (
-                    <Image
-                        source={{ uri: backdropUrl }}
-                        style={{ width: SCREEN_WIDTH, height: backdropHeight }}
-                        contentFit="cover"
-                    />
-                ) : (
-                    <View
-                        style={[
-                            styles.backdropPlaceholder,
-                            { width: SCREEN_WIDTH, height: backdropHeight },
-                        ]}
-                    />
-                )}
 
-                {trailerKey && (
-                    <TouchableOpacity
-                        style={styles.playButtonOverlay}
-                        onPress={handleWatchTrailer}
-                    >
-                        <Ionicons
-                            name="play-circle"
-                            size={80}
-                            color="rgba(255,255,255,0.8)"
-                        />
-                        <Text style={styles.playTrailerText}>Ver Trailer</Text>
-                    </TouchableOpacity>
-                )}
-            </View>
-        );
-    };
 
-    const renderPoster = (): React.JSX.Element => {
-        const posterUrl = getPosterUrl(tvShow?.poster_path ?? null, "w300");
 
-        if (posterUrl) {
-            return (
-                <Image
-                    source={{ uri: posterUrl }}
-                    style={styles.poster}
-                    contentFit="cover"
-                />
-            );
-        }
 
-        return (
-            <View style={styles.posterPlaceholder}>
-                <Text style={styles.posterPlaceholderIcon}>📺</Text>
-            </View>
-        );
-    };
 
-    const renderGenres = (): React.JSX.Element | null => {
-        if (!tvShow?.genres || tvShow.genres.length === 0) return null;
-
-        return (
-            <View style={styles.genresContainer}>
-                {tvShow.genres.map((genre) => (
-                    <View key={genre.id} style={styles.genreBadge}>
-                        <Text style={styles.genreText}>{genre.name}</Text>
-                    </View>
-                ))}
-            </View>
-        );
-    };
-
-    const renderActionButtons = (): React.JSX.Element | null => {
-        if (!user || !tvShow) return null;
-
-        const showId = tvShow.id;
-
-        return (
-            <View style={styles.actionButtonsRow}>
-                <ActionButton
-                    isActive={isFavorite(showId, TV_MEDIA_TYPE)}
-                    activeIcon="skull"
-                    inactiveIcon="skull-outline"
-                    activeLabel="En Favoritos"
-                    inactiveLabel="Añadir"
-                    onPress={handleToggleFavorite}
-                    iconFamily="Ionicons"
-                />
-                <ActionButton
-                    isActive={isInWatchlist(showId, TV_MEDIA_TYPE)}
-                    activeIcon="sword-cross"
-                    inactiveIcon="sword"
-                    activeLabel="En Lista"
-                    inactiveLabel="Watchlist"
-                    onPress={handleToggleWatchlist}
-                    iconFamily="MaterialCommunityIcons"
-                />
-                <ActionButton
-                    isActive={isWatched(showId, TV_MEDIA_TYPE)}
-                    activeIcon="eye"
-                    inactiveIcon="eye-outline"
-                    activeLabel="Ya Visto"
-                    inactiveLabel="Marcar Visto"
-                    onPress={handleToggleWatched}
-                    iconFamily="Ionicons"
-                />
-            </View>
-        );
-    };
 
     const renderRecommendButton = (): React.JSX.Element | null => {
         if (!user) return null;
 
         return (
             <TouchableOpacity
-                style={styles.recommendButton}
+                style={detailScreenStyles.recommendButton}
                 onPress={handleOpenRecommendModal}
             >
-                <View style={styles.recommendButtonContent}>
+                <View style={detailScreenStyles.recommendButtonContent}>
                     <MaterialCommunityIcons
                         name="email-outline"
                         size={24}
                         color={Colors.white}
                     />
-                    <Text style={styles.recommendButtonText}>Recomendar</Text>
+                    <Text style={detailScreenStyles.recommendButtonText}>Recomendar</Text>
                 </View>
             </TouchableOpacity>
         );
@@ -403,19 +297,19 @@ export default function TVDetailScreen(): React.JSX.Element {
         if (!hasCreatorsSection && !hasProducersSection) return null;
 
         return (
-            <View style={styles.sectionContainer}>
+            <View style={detailScreenStyles.sectionContainer}>
                 {hasCreatorsSection && (
-                    <View style={styles.crewGroup}>
-                        <Text style={styles.crewLabel}>Creación</Text>
-                        <Text style={styles.crewNames}>
+                    <View style={detailScreenStyles.crewGroup}>
+                        <Text style={detailScreenStyles.crewLabel}>Creación</Text>
+                        <Text style={detailScreenStyles.crewNames}>
                             {getCreators(tvShow.created_by)}
                         </Text>
                     </View>
                 )}
                 {hasProducersSection && (
-                    <View style={styles.crewGroup}>
-                        <Text style={styles.crewLabel}>Producción</Text>
-                        <Text style={styles.crewNames}>
+                    <View style={detailScreenStyles.crewGroup}>
+                        <Text style={detailScreenStyles.crewLabel}>Producción</Text>
+                        <Text style={detailScreenStyles.crewNames}>
                             {formatCrewNames(getProducers(tvShow.credits?.crew))}
                         </Text>
                     </View>
@@ -437,110 +331,22 @@ export default function TVDetailScreen(): React.JSX.Element {
         if (!tvShow?.seasons || tvShow.seasons.length === 0) return null;
 
         return (
-            <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Temporadas</Text>
+            <View style={detailScreenStyles.sectionContainer}>
+                <Text style={detailScreenStyles.sectionTitle}>Temporadas</Text>
                 <FlatList
                     data={tvShow.seasons}
                     keyExtractor={(item, index) => `season-${item.id}-${index}`}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.horizontalList}
+                    contentContainerStyle={detailScreenStyles.horizontalList}
                     renderItem={renderSeasonItem}
                 />
             </View>
         );
     };
 
-    const renderCastItem = ({ item }: { item: CastMember }): React.JSX.Element => {
-        const profileUrl = getImageUrl(item.profile_path, "w200");
+    // Generic lists now use shared components
 
-        return (
-            <View style={styles.mediaItem}>
-                {profileUrl ? (
-                    <Image
-                        source={{ uri: profileUrl }}
-                        style={styles.mediaImage}
-                        contentFit="cover"
-                    />
-                ) : (
-                    <View style={styles.mediaPlaceholder}>
-                        <Text style={styles.mediaPlaceholderIcon}>👤</Text>
-                    </View>
-                )}
-                <Text style={styles.mediaName} numberOfLines={2}>
-                    {item.name}
-                </Text>
-                <Text style={styles.mediaSubtitle} numberOfLines={2}>
-                    {item.character}
-                </Text>
-            </View>
-        );
-    };
-
-    const renderCastSection = (): React.JSX.Element | null => {
-        if (!tvShow?.credits?.cast || tvShow.credits.cast.length === 0) return null;
-
-        return (
-            <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Reparto</Text>
-                <FlatList
-                    data={tvShow.credits.cast}
-                    keyExtractor={(item, index) => `cast-${item.id}-${index}`}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.horizontalList}
-                    renderItem={renderCastItem}
-                />
-            </View>
-        );
-    };
-
-    const renderRelatedShowItem = ({ item }: { item: TVShow }): React.JSX.Element => {
-        const posterUrl = getImageUrl(item.poster_path, "w300");
-
-        return (
-            <TouchableOpacity
-                style={styles.mediaItem}
-                onPress={() => router.push(`/tv/${item.id}`)}
-            >
-                {posterUrl ? (
-                    <Image
-                        source={{ uri: posterUrl }}
-                        style={styles.mediaImage}
-                        contentFit="cover"
-                    />
-                ) : (
-                    <View style={styles.mediaPlaceholder}>
-                        <Text style={styles.mediaPlaceholderIcon}>📺</Text>
-                    </View>
-                )}
-                <Text style={styles.mediaName} numberOfLines={2}>
-                    {item.name}
-                </Text>
-                <Text style={styles.mediaSubtitle} numberOfLines={1}>
-                    ⭐ {formatRating(item.vote_average)}
-                </Text>
-            </TouchableOpacity>
-        );
-    };
-
-    const renderRelatedShowsSection = (): React.JSX.Element | null => {
-        if (relatedShows.length === 0) return null;
-
-        return (
-            <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Relacionadas</Text>
-                <FlatList
-                    data={relatedShows}
-                    keyExtractor={(item, index) => `related-${item.id}-${index}`}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.horizontalList}
-                    renderItem={renderRelatedShowItem}
-                />
-            </View>
-        );
-    };
 
     // ========================================================================
     // Main Render
@@ -557,51 +363,67 @@ export default function TVDetailScreen(): React.JSX.Element {
     const posterUrl = getPosterUrl(tvShow.poster_path, "w300");
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <SafeAreaView style={detailScreenStyles.safeArea} edges={["top"]}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Back Button */}
                 <TouchableOpacity
-                    style={styles.backButton}
+                    style={detailScreenStyles.backButton}
                     onPress={() => router.back()}
                 >
-                    <Text style={styles.backButtonText}>←</Text>
+                    <Text style={detailScreenStyles.backButtonText}>←</Text>
                 </TouchableOpacity>
 
                 {/* Next Episode Badge */}
                 {renderNextEpisodeBadge()}
 
                 {/* Backdrop */}
-                {renderBackdrop()}
+                <ContentBackdrop
+                    backdropUrl={getBackdropUrl(tvShow.backdrop_path ?? null)}
+                    trailerKey={trailerKey}
+                    onPlayTrailer={handleWatchTrailer}
+                />
 
-                {/* Content */}
-                <View style={styles.contentContainer}>
+                <View style={detailScreenStyles.contentContainer}>
                     {/* Header Row */}
-                    <View style={styles.headerRow}>
-                        {renderPoster()}
-                        <View style={styles.infoContainer}>
-                            <Text style={styles.title}>{tvShow.name}</Text>
-                            <Text style={styles.yearText}>
+                    <View style={detailScreenStyles.headerRow}>
+                        <ContentPoster
+                            posterUrl={getPosterUrl(tvShow.poster_path ?? null, "w300")}
+                            placeholderIcon="📺"
+                        />
+                        <View style={detailScreenStyles.infoContainer}>
+                            <Text style={detailScreenStyles.title}>{tvShow.name}</Text>
+                            <Text style={detailScreenStyles.yearText}>
                                 {extractYear(tvShow.first_air_date)}
                             </Text>
-                            <Text style={styles.ratingText}>
+                            <Text style={detailScreenStyles.ratingText}>
                                 ⭐ {formatRating(tvShow.vote_average)}/10
                             </Text>
                         </View>
                     </View>
 
                     {/* Genres */}
-                    {renderGenres()}
+                    <GenreList genres={tvShow.genres || []} />
 
                     {/* Action Buttons */}
-                    {renderActionButtons()}
+                    <ContentActionBar
+                        contentId={tvShow.id}
+                        mediaType={TV_MEDIA_TYPE}
+                        isFavorite={isFavorite(tvShow.id, TV_MEDIA_TYPE)}
+                        isInWatchlist={isInWatchlist(tvShow.id, TV_MEDIA_TYPE)}
+                        isWatched={isWatched(tvShow.id, TV_MEDIA_TYPE)}
+                        onToggleFavorite={() => handleToggleFavorite(tvShow.id, TV_MEDIA_TYPE)}
+                        onToggleWatchlist={() => handleToggleWatchlist(tvShow.id, TV_MEDIA_TYPE)}
+                        onToggleWatched={() => handleToggleWatched(tvShow.id, TV_MEDIA_TYPE)}
+                        currentUserId={user?.id}
+                    />
 
                     {/* Recommend Button */}
                     {renderRecommendButton()}
 
                     {/* Description */}
-                    <View style={styles.descriptionContainer}>
-                        <Text style={styles.descriptionTitle}>Sinopsis</Text>
-                        <Text style={styles.descriptionText}>
+                    <View style={detailScreenStyles.descriptionContainer}>
+                        <Text style={detailScreenStyles.descriptionTitle}>Sinopsis</Text>
+                        <Text style={detailScreenStyles.descriptionText}>
                             {tvShow.overview || "Sin descripción disponible"}
                         </Text>
                     </View>
@@ -613,13 +435,17 @@ export default function TVDetailScreen(): React.JSX.Element {
                     {renderSeasonsSection()}
 
                     {/* Cast */}
-                    {renderCastSection()}
+                    <CastMemberList cast={tvShow.credits?.cast || []} />
 
                     {/* Related Shows */}
-                    {renderRelatedShowsSection()}
+                    <ContentHorizontalList
+                        data={relatedShows}
+                        title="Relacionadas"
+                        mediaType="tv"
+                    />
 
                     {/* Bottom Spacing */}
-                    <View style={styles.bottomSpacer} />
+                    <View style={detailScreenStyles.bottomSpacer} />
                 </View>
             </ScrollView>
 
@@ -661,7 +487,7 @@ export default function TVDetailScreen(): React.JSX.Element {
                 videoKey={trailerKey}
                 onClose={handleCloseTrailerModal}
             />
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -670,33 +496,7 @@ export default function TVDetailScreen(): React.JSX.Element {
 // ============================================================================
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: Colors.metalBlack,
-    } as ViewStyle,
-    centerContainer: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    } as ViewStyle,
-    errorText: {
-        color: Colors.metalSilver,
-    } as TextStyle,
-    backButton: {
-        position: "absolute",
-        top: 16,
-        left: 16,
-        zIndex: 10,
-        backgroundColor: "rgba(10, 10, 10, 0.5)",
-        borderRadius: 9999,
-        padding: 8,
-    } as ViewStyle,
-    backButtonText: {
-        fontSize: 28,
-        color: "#fff",
-        fontWeight: "900",
-        top: -5,
-    } as TextStyle,
+    // Only TV-specific styles or overrides not covered by detailScreenStyles
     nextBadgeContainer: {
         position: "absolute",
         top: 16,
@@ -721,75 +521,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: "BebasNeue_400Regular",
     } as TextStyle,
-    backdropContainer: {
-        position: "relative",
-    } as ViewStyle,
-    backdropPlaceholder: {
-        backgroundColor: Colors.metalGray,
-    } as ViewStyle,
-    playButtonOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(0,0,0,0.2)",
-    } as ViewStyle,
-    playTrailerText: {
-        color: "white",
-        fontSize: 14,
-        fontWeight: "bold",
-        marginTop: -10,
-        textShadowColor: "rgba(0,0,0,0.75)",
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 10,
-    } as TextStyle,
-    contentContainer: {
-        paddingHorizontal: 16,
-        marginTop: -64,
-    } as ViewStyle,
-    headerRow: {
-        flexDirection: "row",
-    } as ViewStyle,
-    poster: {
-        width: 120,
-        height: 180,
-        borderRadius: 8,
-    } as ImageStyle,
-    posterPlaceholder: {
-        backgroundColor: Colors.metalGray,
-        borderRadius: 8,
-        alignItems: "center",
-        justifyContent: "center",
-        width: 120,
-        height: 180,
-    } as ViewStyle,
-    posterPlaceholderIcon: {
-        fontSize: 36,
-    } as TextStyle,
-    infoContainer: {
-        flex: 1,
-        marginLeft: 16,
-        marginTop: 64,
-    } as ViewStyle,
-    title: {
-        color: "#f4f4f5",
-        fontSize: 20,
-        fontWeight: "bold",
-        fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
-    yearText: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        marginTop: 4,
-    } as TextStyle,
-    ratingText: {
-        color: "#eab308",
-        fontSize: 18,
-        marginTop: 8,
-    } as TextStyle,
     genresContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
@@ -808,102 +539,4 @@ const styles = StyleSheet.create({
         color: "#f4f4f5",
         fontSize: 12,
     } as TextStyle,
-    actionButtonsRow: {
-        flexDirection: "row",
-        gap: 16,
-        marginTop: 24,
-    } as ViewStyle,
-    recommendButton: {
-        backgroundColor: Colors.bloodRed,
-        paddingVertical: 16,
-        borderRadius: 4,
-        marginTop: 16,
-    } as ViewStyle,
-    recommendButtonContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-    } as ViewStyle,
-    recommendButtonText: {
-        color: Colors.white,
-        fontWeight: "bold",
-        textAlign: "center",
-        textTransform: "uppercase",
-    } as TextStyle,
-    descriptionContainer: {
-        marginTop: 24,
-    } as ViewStyle,
-    descriptionTitle: {
-        color: "#f4f4f5",
-        fontSize: 18,
-        marginBottom: 8,
-        fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
-    descriptionText: {
-        color: Colors.metalSilver,
-        lineHeight: 24,
-    } as TextStyle,
-    sectionContainer: {
-        marginTop: 24,
-    } as ViewStyle,
-    sectionTitle: {
-        color: "#f4f4f5",
-        fontSize: 18,
-        marginBottom: 12,
-        fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
-    crewGroup: {
-        marginBottom: 12,
-    } as ViewStyle,
-    crewLabel: {
-        color: "#f4f4f5",
-        fontSize: 16,
-        marginBottom: 4,
-        fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
-    crewNames: {
-        color: "#f4f4f5",
-        fontSize: 14,
-    } as TextStyle,
-    horizontalList: {
-        gap: 12,
-    } as ViewStyle,
-    mediaItem: {
-        width: 100,
-        marginRight: 12,
-    } as ViewStyle,
-    mediaImage: {
-        width: 100,
-        height: 150,
-        borderRadius: 8,
-        marginBottom: 8,
-    } as ImageStyle,
-    mediaPlaceholder: {
-        width: 100,
-        height: 150,
-        borderRadius: 8,
-        backgroundColor: Colors.metalGray,
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: 8,
-    } as ViewStyle,
-    mediaPlaceholderIcon: {
-        fontSize: 32,
-    } as TextStyle,
-    mediaName: {
-        color: "#f4f4f5",
-        fontSize: 12,
-        fontWeight: "bold",
-        textAlign: "center",
-    } as TextStyle,
-    mediaSubtitle: {
-        color: Colors.metalSilver,
-        fontSize: 10,
-        textAlign: "center",
-        marginTop: 2,
-    } as TextStyle,
-    bottomSpacer: {
-        height: 32,
-    } as ViewStyle,
 });

@@ -5,8 +5,6 @@ import {
     ScrollView,
     TouchableOpacity,
     ActivityIndicator,
-    Dimensions,
-    FlatList,
     StyleSheet,
     type ViewStyle,
     type TextStyle,
@@ -17,7 +15,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
-import { getImageUrl, type Movie, type CastMember } from "../../../src/lib/tmdb";
+import { getImageUrl, type Movie } from "../../../src/lib/tmdb";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { Colors } from "../../../src/constants/Colors";
 import TrailerModal from "../../../src/components/TrailerModal";
@@ -27,7 +25,9 @@ import { ContentPoster } from "../../../src/components/ContentPoster";
 import { GenreList } from "../../../src/components/GenreList";
 import { ContentActionBar } from "../../../src/components/ContentActionBar";
 import { useContentActions } from "../../../src/hooks/useContentActions";
-
+import { detailScreenStyles } from "../../../src/styles/detailScreenStyles";
+import { CastMemberList } from "../../../src/components/CastMemberList";
+import { ContentHorizontalList } from "../../../src/components/ContentHorizontalList";
 import type { MovieWithDetails } from "../../../src/types/movieDetail.types";
 import {
     loadMovieData,
@@ -38,13 +38,6 @@ import {
     formatRating,
     parseMovieId,
 } from "../../../src/utils/movieDetail.utils";
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const BACKDROP_ASPECT_RATIO = 0.56;
 
 // ============================================================================
 // Types
@@ -160,17 +153,17 @@ export default function MovieDetailScreen(): React.JSX.Element {
     // ========================================================================
 
     const renderLoadingState = (): React.JSX.Element => (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.centerContainer}>
+        <SafeAreaView style={detailScreenStyles.safeArea}>
+            <View style={detailScreenStyles.centerContainer}>
                 <ActivityIndicator size="large" color="#dc2626" />
             </View>
         </SafeAreaView>
     );
 
     const renderErrorState = (): React.JSX.Element => (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.centerContainer}>
-                <Text style={styles.errorText}>Película no encontrada</Text>
+        <SafeAreaView style={detailScreenStyles.safeArea}>
+            <View style={detailScreenStyles.centerContainer}>
+                <Text style={detailScreenStyles.errorText}>Película no encontrada</Text>
             </View>
         </SafeAreaView>
     );
@@ -188,16 +181,16 @@ export default function MovieDetailScreen(): React.JSX.Element {
 
         return (
             <TouchableOpacity
-                style={styles.recommendButton}
+                style={detailScreenStyles.recommendButton}
                 onPress={handleOpenRecommendModal}
             >
-                <View style={styles.recommendButtonContent}>
+                <View style={detailScreenStyles.recommendButtonContent}>
                     <MaterialCommunityIcons
                         name="email-outline"
                         size={24}
                         color={Colors.white}
                     />
-                    <Text style={styles.recommendButtonText}>Recomendar</Text>
+                    <Text style={detailScreenStyles.recommendButtonText}>Recomendar</Text>
                 </View>
             </TouchableOpacity>
         );
@@ -212,19 +205,19 @@ export default function MovieDetailScreen(): React.JSX.Element {
         if (directors.length === 0 && producers.length === 0) return null;
 
         return (
-            <View style={styles.sectionContainer}>
+            <View style={detailScreenStyles.sectionContainer}>
                 {directors.length > 0 && (
-                    <View style={styles.crewGroup}>
-                        <Text style={styles.crewLabel}>Dirección</Text>
-                        <Text style={styles.crewNames}>
+                    <View style={detailScreenStyles.crewGroup}>
+                        <Text style={detailScreenStyles.crewLabel}>Dirección</Text>
+                        <Text style={detailScreenStyles.crewNames}>
                             {formatCrewNames(directors)}
                         </Text>
                     </View>
                 )}
                 {producers.length > 0 && (
-                    <View style={styles.crewGroup}>
-                        <Text style={styles.crewLabel}>Producción</Text>
-                        <Text style={styles.crewNames}>
+                    <View style={detailScreenStyles.crewGroup}>
+                        <Text style={detailScreenStyles.crewLabel}>Producción</Text>
+                        <Text style={detailScreenStyles.crewNames}>
                             {formatCrewNames(producers)}
                         </Text>
                     </View>
@@ -233,96 +226,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
         );
     };
 
-    const renderCastItem = ({ item }: { item: CastMember }): React.JSX.Element => {
-        const profileUrl = getImageUrl(item.profile_path, "w200");
-
-        return (
-            <View style={styles.castItem}>
-                {profileUrl ? (
-                    <Image
-                        source={{ uri: profileUrl }}
-                        style={styles.castImage}
-                        contentFit="cover"
-                    />
-                ) : (
-                    <View style={styles.castPlaceholder}>
-                        <Text style={styles.castPlaceholderIcon}>👤</Text>
-                    </View>
-                )}
-                <Text style={styles.castName} numberOfLines={2}>
-                    {item.name}
-                </Text>
-                <Text style={styles.castCharacter} numberOfLines={2}>
-                    {item.character}
-                </Text>
-            </View>
-        );
-    };
-
-    const renderCastSection = (): React.JSX.Element | null => {
-        if (!movie?.credits?.cast || movie.credits.cast.length === 0) return null;
-
-        return (
-            <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Reparto</Text>
-                <FlatList
-                    data={movie.credits.cast}
-                    keyExtractor={(item, index) => `cast-${item.id}-${index}`}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.castList}
-                    renderItem={renderCastItem}
-                />
-            </View>
-        );
-    };
-
-    const renderRelatedMovieItem = ({ item }: { item: Movie }): React.JSX.Element => {
-        const posterUrl = getImageUrl(item.poster_path, "w300");
-
-        return (
-            <TouchableOpacity
-                style={styles.castItem}
-                onPress={() => router.push(`/movie/${item.id}`)}
-            >
-                {posterUrl ? (
-                    <Image
-                        source={{ uri: posterUrl }}
-                        style={styles.castImage}
-                        contentFit="cover"
-                    />
-                ) : (
-                    <View style={styles.castPlaceholder}>
-                        <Text style={styles.castPlaceholderIcon}>🎬</Text>
-                    </View>
-                )}
-                <Text style={styles.castName} numberOfLines={2}>
-                    {item.title}
-                </Text>
-                <Text style={styles.castCharacter} numberOfLines={1}>
-                    ⭐ {formatRating(item.vote_average)}
-                </Text>
-            </TouchableOpacity>
-        );
-    };
-
-    const renderRelatedMoviesSection = (): React.JSX.Element | null => {
-        if (relatedMovies.length === 0) return null;
-
-        return (
-            <View style={styles.sectionContainer}>
-                <Text style={styles.sectionTitle}>Relacionadas</Text>
-                <FlatList
-                    data={relatedMovies}
-                    keyExtractor={(item, index) => `related-${item.id}-${index}`}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.castList}
-                    renderItem={renderRelatedMovieItem}
-                />
-            </View>
-        );
-    };
+    // Generic lists now use shared components
 
     // ========================================================================
     // Main Render
@@ -339,14 +243,14 @@ export default function MovieDetailScreen(): React.JSX.Element {
     const posterUrl = getImageUrl(movie.poster_path, "w300");
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <SafeAreaView style={detailScreenStyles.safeArea} edges={["top"]}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Back Button */}
                 <TouchableOpacity
-                    style={styles.backButton}
+                    style={detailScreenStyles.backButton}
                     onPress={() => router.back()}
                 >
-                    <Text style={styles.backButtonText}>←</Text>
+                    <Text style={detailScreenStyles.backButtonText}>←</Text>
                 </TouchableOpacity>
 
                 {/* Backdrop */}
@@ -357,19 +261,19 @@ export default function MovieDetailScreen(): React.JSX.Element {
                 />
 
                 {/* Content */}
-                <View style={styles.contentContainer}>
+                <View style={detailScreenStyles.contentContainer}>
                     {/* Header Row */}
-                    <View style={styles.headerRow}>
+                    <View style={detailScreenStyles.headerRow}>
                         <ContentPoster
                             posterUrl={getImageUrl(movie.poster_path ?? null, "w300")}
                             placeholderIcon="🎬"
                         />
-                        <View style={styles.infoContainer}>
-                            <Text style={styles.title}>{movie.title}</Text>
-                            <Text style={styles.yearText}>
+                        <View style={detailScreenStyles.infoContainer}>
+                            <Text style={detailScreenStyles.title}>{movie.title}</Text>
+                            <Text style={detailScreenStyles.yearText}>
                                 {formatMovieMetadata(movie.release_date, movie.runtime)}
                             </Text>
-                            <Text style={styles.ratingText}>
+                            <Text style={detailScreenStyles.ratingText}>
                                 ⭐ {formatRating(movie.vote_average)}/10
                             </Text>
                         </View>
@@ -394,10 +298,12 @@ export default function MovieDetailScreen(): React.JSX.Element {
                     {/* Recommend Button */}
                     {renderRecommendButton()}
 
+
+
                     {/* Description */}
-                    <View style={styles.descriptionContainer}>
-                        <Text style={styles.descriptionTitle}>Sinopsis</Text>
-                        <Text style={styles.descriptionText}>
+                    <View style={detailScreenStyles.descriptionContainer}>
+                        <Text style={detailScreenStyles.descriptionTitle}>Sinopsis</Text>
+                        <Text style={detailScreenStyles.descriptionText}>
                             {movie.overview || "Sin descripción disponible"}
                         </Text>
                     </View>
@@ -406,13 +312,17 @@ export default function MovieDetailScreen(): React.JSX.Element {
                     {renderCrewSection()}
 
                     {/* Cast */}
-                    {renderCastSection()}
+                    <CastMemberList cast={movie.credits?.cast || []} />
 
                     {/* Related Movies */}
-                    {renderRelatedMoviesSection()}
+                    <ContentHorizontalList
+                        data={relatedMovies}
+                        title="Relacionadas"
+                        mediaType="movie"
+                    />
 
                     {/* Bottom Spacing */}
-                    <View style={styles.bottomSpacer} />
+                    <View style={detailScreenStyles.bottomSpacer} />
                 </View>
             </ScrollView>
 
@@ -442,33 +352,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
 // ============================================================================
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: Colors.metalBlack,
-    } as ViewStyle,
-    centerContainer: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    } as ViewStyle,
-    errorText: {
-        color: Colors.metalSilver,
-    } as TextStyle,
-    backButton: {
-        position: "absolute",
-        top: 16,
-        left: 16,
-        zIndex: 10,
-        backgroundColor: "rgba(10, 10, 10, 0.5)",
-        borderRadius: 9999,
-        padding: 8,
-    } as ViewStyle,
-    backButtonText: {
-        fontSize: 28,
-        color: "#fff",
-        fontWeight: "900",
-        top: -5,
-    } as TextStyle,
+    // Only movie-specific styles or overrides not covered by detailScreenStyles
     backdropContainer: {
         position: "relative",
     } as ViewStyle,
@@ -494,50 +378,6 @@ const styles = StyleSheet.create({
         textShadowOffset: { width: -1, height: 1 },
         textShadowRadius: 10,
     } as TextStyle,
-    contentContainer: {
-        paddingHorizontal: 16,
-        marginTop: -64,
-    } as ViewStyle,
-    headerRow: {
-        flexDirection: "row",
-    } as ViewStyle,
-    poster: {
-        width: 120,
-        height: 180,
-        borderRadius: 8,
-    } as ImageStyle,
-    posterPlaceholder: {
-        backgroundColor: Colors.metalGray,
-        borderRadius: 8,
-        alignItems: "center",
-        justifyContent: "center",
-        width: 120,
-        height: 180,
-    } as ViewStyle,
-    posterPlaceholderIcon: {
-        fontSize: 36,
-    } as TextStyle,
-    infoContainer: {
-        flex: 1,
-        marginLeft: 16,
-        marginTop: 64,
-    } as ViewStyle,
-    title: {
-        color: "#f4f4f5",
-        fontSize: 20,
-        fontWeight: "bold",
-        fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
-    yearText: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        marginTop: 4,
-    } as TextStyle,
-    ratingText: {
-        color: "#eab308",
-        fontSize: 18,
-        marginTop: 8,
-    } as TextStyle,
     genresContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
@@ -556,102 +396,4 @@ const styles = StyleSheet.create({
         color: "#f4f4f5",
         fontSize: 12,
     } as TextStyle,
-    actionButtonsRow: {
-        flexDirection: "row",
-        gap: 16,
-        marginTop: 24,
-    } as ViewStyle,
-    recommendButton: {
-        backgroundColor: Colors.bloodRed,
-        paddingVertical: 16,
-        borderRadius: 4,
-        marginTop: 16,
-    } as ViewStyle,
-    recommendButtonContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-    } as ViewStyle,
-    recommendButtonText: {
-        color: Colors.white,
-        fontWeight: "bold",
-        textAlign: "center",
-        textTransform: "uppercase",
-    } as TextStyle,
-    descriptionContainer: {
-        marginTop: 24,
-    } as ViewStyle,
-    descriptionTitle: {
-        color: "#f4f4f5",
-        fontSize: 18,
-        marginBottom: 8,
-        fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
-    descriptionText: {
-        color: Colors.metalSilver,
-        lineHeight: 24,
-    } as TextStyle,
-    sectionContainer: {
-        marginTop: 24,
-    } as ViewStyle,
-    sectionTitle: {
-        color: "#f4f4f5",
-        fontSize: 18,
-        marginBottom: 12,
-        fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
-    crewGroup: {
-        marginBottom: 12,
-    } as ViewStyle,
-    crewLabel: {
-        color: "#f4f4f5",
-        fontSize: 16,
-        marginBottom: 4,
-        fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
-    crewNames: {
-        color: "#f4f4f5",
-        fontSize: 14,
-    } as TextStyle,
-    castList: {
-        gap: 12,
-    } as ViewStyle,
-    castItem: {
-        width: 100,
-        marginRight: 12,
-    } as ViewStyle,
-    castImage: {
-        width: 100,
-        height: 150,
-        borderRadius: 8,
-        marginBottom: 8,
-    } as ImageStyle,
-    castPlaceholder: {
-        width: 100,
-        height: 150,
-        borderRadius: 8,
-        backgroundColor: Colors.metalGray,
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: 8,
-    } as ViewStyle,
-    castPlaceholderIcon: {
-        fontSize: 32,
-    } as TextStyle,
-    castName: {
-        color: "#f4f4f5",
-        fontSize: 12,
-        fontWeight: "bold",
-        textAlign: "center",
-    } as TextStyle,
-    castCharacter: {
-        color: Colors.metalSilver,
-        fontSize: 10,
-        textAlign: "center",
-        marginTop: 2,
-    } as TextStyle,
-    bottomSpacer: {
-        height: 32,
-    } as ViewStyle,
 });
