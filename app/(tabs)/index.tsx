@@ -103,9 +103,9 @@ const useContentLoading = (
 ): UseContentLoadingReturn => {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [tvShows, setTVShows] = useState<TVShow[]>([]);
-    const [localLoading, setLoading] = useState(true);
-    const [localPage, setPage] = useState(1);
-    const [localHasMore, setHasMore] = useState(true);
+    const [localLoading, setLocalLoading] = useState(true);
+    const [localPage, setLocalPage] = useState(1);
+    const [localHasMore, setLocalHasMore] = useState(true);
 
     const {
         activeTab,
@@ -125,7 +125,7 @@ const useContentLoading = (
                 return;
             }
 
-            setLoading(true);
+            setLocalLoading(true);
 
             try {
                 const discoverParams = buildDiscoverParams({
@@ -145,8 +145,8 @@ const useContentLoading = (
 
                     setMovies((prev) => mergeContentResults(prev, results, reset));
                     const pagination = calculatePaginationState(currentPage, totalPages, reset);
-                    setHasMore(pagination.hasMore);
-                    setPage(pagination.nextPage);
+                    setLocalHasMore(pagination.hasMore);
+                    setLocalPage(pagination.nextPage);
                 } else {
                     const { results, totalPages } = await fetchTVContent(
                         currentPage,
@@ -156,13 +156,13 @@ const useContentLoading = (
 
                     setTVShows((prev) => mergeContentResults(prev, results, reset));
                     const pagination = calculatePaginationState(currentPage, totalPages, reset);
-                    setHasMore(pagination.hasMore);
-                    setPage(pagination.nextPage);
+                    setLocalHasMore(pagination.hasMore);
+                    setLocalPage(pagination.nextPage);
                 }
             } catch (err) {
                 console.error("Error loading content:", err);
             } finally {
-                setLoading(false);
+                setLocalLoading(false);
             }
         },
         [
@@ -184,9 +184,9 @@ const useContentLoading = (
         tvShows,
         setMovies,
         setTVShows,
-        setPage,
-        setHasMore,
-        setLoading,
+        setPage: setLocalPage,
+        setHasMore: setLocalHasMore,
+        setLoading: setLocalLoading,
     };
 };
 
@@ -661,6 +661,16 @@ export default function HomeScreen(): JSX.Element {
         />
     );
 
+    const renderMainContent = (): JSX.Element => {
+        if (loading && data.length === 0) {
+            return renderLoadingState();
+        }
+        if (data.length === 0) {
+            return renderEmptyState();
+        }
+        return renderContentList();
+    };
+
     // ========================================================================
     // Main Render
     // ========================================================================
@@ -807,11 +817,7 @@ export default function HomeScreen(): JSX.Element {
             </View>
 
             {/* Content List */}
-            {loading && data.length === 0
-                ? renderLoadingState()
-                : data.length === 0
-                    ? renderEmptyState()
-                    : renderContentList()}
+            {renderMainContent()}
 
             {activeTab === "tv" && renderContinueWatching()}
 
