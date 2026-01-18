@@ -23,6 +23,7 @@ import { useContentStore } from "../../../src/stores/contentStore";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { supabase, Profile } from "../../../src/lib/supabase";
 import { Colors } from "../../../src/constants/Colors";
+import TrailerModal from "../../../src/components/TrailerModal";
 
 const { width } = Dimensions.get("window");
 
@@ -40,6 +41,7 @@ export default function MovieDetailScreen() {
     const [sendingRecommendation, setSendingRecommendation] = useState(false);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [showUserList, setShowUserList] = useState(true);
+    const [showTrailerModal, setShowTrailerModal] = useState(false);
 
     const { user } = useAuthStore();
     const {
@@ -181,7 +183,7 @@ export default function MovieDetailScreen() {
 
     const handleWatchTrailer = () => {
         if (trailerKey) {
-            Linking.openURL(`https://www.youtube.com/watch?v=${trailerKey}`);
+            setShowTrailerModal(true);
         }
     };
 
@@ -670,6 +672,12 @@ export default function MovieDetailScreen() {
                     </View>
                 </KeyboardAvoidingView>
             </Modal>
+
+            <TrailerModal
+                visible={showTrailerModal}
+                videoKey={trailerKey}
+                onClose={() => setShowTrailerModal(false)}
+            />
         </SafeAreaView>
     );
 }
@@ -778,7 +786,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     activeButton: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
     },
     inactiveButton: {
         backgroundColor: Colors.metalGray,

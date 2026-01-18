@@ -4,6 +4,7 @@ export const Colors = {
     metalSilver: "#71717a",
     metalGold: "#fbbf24",
     bloodRed: "#dc2626",
+    vibrantRed: "#fc3e20",
     white: "#FFFFFF",
     black: "#000000",
 };
