@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { getMovieDetails, getRelatedMovies, getMovieVideos, getImageUrl, Movie, Video } from "../../../src/lib/tmdb";
+import { getMovieDetails, getRelatedMovies, getMovieVideos, getImageUrl, Movie } from "../../../src/lib/tmdb";
 import { useContentStore } from "../../../src/stores/contentStore";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { supabase, Profile } from "../../../src/lib/supabase";

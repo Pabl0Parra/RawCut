@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useFocusEffect, router } from "expo-router";
-import { useCallback } from "react";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useContentStore } from "../../src/stores/contentStore";
@@ -80,6 +79,7 @@ export default function WatchlistScreen() {
                             };
                         }
                     } catch (err) {
+                        console.error("Error enriching watchlist:", err);
                         return {
                             id: item.id,
                             tmdb_id: item.tmdb_id,
@@ -187,14 +187,17 @@ export default function WatchlistScreen() {
         );
     }
 
-    return (
-        <View style={[styles.safeArea, { paddingTop: 16 }]}>
-
-            {loading && enrichedWatchlist.length === 0 ? (
+    const renderContent = () => {
+        if (loading && enrichedWatchlist.length === 0) {
+            return (
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color="#dc2626" />
                 </View>
-            ) : enrichedWatchlist.length === 0 ? (
+            );
+        }
+
+        if (enrichedWatchlist.length === 0) {
+            return (
                 <View style={styles.emptyContainer}>
                     <Text style={styles.emptyIcon}>📺</Text>
                     <Text style={styles.emptyText}>
@@ -204,15 +207,23 @@ export default function WatchlistScreen() {
                         Añade películas y series que quieras ver más tarde
                     </Text>
                 </View>
-            ) : (
-                <FlatList
-                    data={enrichedWatchlist}
-                    renderItem={renderItem}
-                    keyExtractor={(item, index) => `${item.id}-${index}`}
-                    contentContainerStyle={styles.listContent}
-                    showsVerticalScrollIndicator={false}
-                />
-            )}
+            );
+        }
+
+        return (
+            <FlatList
+                data={enrichedWatchlist}
+                renderItem={renderItem}
+                keyExtractor={(item, index) => `${item.id}-${index}`}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+            />
+        );
+    };
+
+    return (
+        <View style={[styles.safeArea, { paddingTop: 16 }]}>
+            {renderContent()}
         </View>
     );
 }
