@@ -7,7 +7,7 @@ interface VideoSplashProps {
     onFinish: () => void;
 }
 
-export default function VideoSplash({ onFinish }: VideoSplashProps) {
+export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
     const fadeAnim = useRef(new Animated.Value(1)).current;
 
     // Video asset

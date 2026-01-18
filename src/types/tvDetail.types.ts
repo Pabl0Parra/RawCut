@@ -1,5 +1,4 @@
-import type { TVShow, Season, Episode, Credits, Video, Genre, CastMember } from "../lib/tmdb";
-import type { Profile } from "../lib/supabase";
+import type { TVShow, Season, Episode, Genre } from "../lib/tmdb";
 
 /**
  * Extended TVShow type with full details from TMDb API

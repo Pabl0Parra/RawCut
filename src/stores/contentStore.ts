@@ -63,6 +63,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
 
             set({ favorites, watchlist, isLoading: false });
         } catch (err) {
+            console.error("Error al cargar contenido:", err);
             set({ isLoading: false, error: "Error al cargar contenido" });
         }
     },

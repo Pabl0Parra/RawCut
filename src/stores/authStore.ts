@@ -70,6 +70,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             await get().fetchProfile();
             return true;
         } catch (err) {
+            console.error("Error al iniciar sesión:", err);
             set({ isLoading: false, error: "Error de conexión" });
             return false;
         }
@@ -126,6 +127,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             await get().fetchProfile();
             return true;
         } catch (err) {
+            console.error("Error al registrar usuario:", err);
             set({ isLoading: false, error: "Error de conexión" });
             return false;
         }
@@ -208,6 +210,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
             return true;
         } catch (err) {
+            console.error("Error al actualizar nombre de usuario:", err);
             set({ isLoading: false, error: "Error de conexión" });
             return false;
         }
