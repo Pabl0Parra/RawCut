@@ -10,7 +10,6 @@ import {
     TextInput,
     FlatList,
     StyleSheet,
-    Linking,
     KeyboardAvoidingView,
     Platform,
 } from "react-native";
@@ -581,8 +580,23 @@ export default function MovieDetailScreen() {
 
                     {/* User search */}
                     <Text style={styles.inputLabel}>
-                        Seleccionar usuario
+                        Buscar usuario
                     </Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Escribe un nombre de usuario..."
+                        placeholderTextColor="#71717a"
+                        value={searchUsers}
+                        onChangeText={(text) => {
+                            setSearchUsers(text);
+                            if (text.length > 2) {
+                                searchForUsers(text);
+                            } else {
+                                setUsers([]);
+                            }
+                        }}
+                        onFocus={() => setShowUserList(true)}
+                    />
                     <TouchableOpacity
                         style={styles.dropdownButton}
                         onPress={() => setShowUserList(!showUserList)}
