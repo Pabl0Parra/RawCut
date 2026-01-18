@@ -781,6 +781,17 @@ export default function HomeScreen(): JSX.Element {
                             onSubmitEditing={handleSearch}
                             returnKeyType="search"
                         />
+                        {!!searchQuery && (
+                            <TouchableOpacity
+                                style={styles.clearButton}
+                                onPress={() => {
+                                    setSearchQuery("");
+                                    loadContent(true);
+                                }}
+                            >
+                                <Ionicons name="close-circle" size={20} color="#71717a" />
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity
                             style={styles.searchButton}
                             onPress={handleSearch}
@@ -965,6 +976,10 @@ const styles = StyleSheet.create({
     } as TextStyle,
     searchButton: {
         paddingHorizontal: 16,
+        paddingVertical: 6,
+    } as ViewStyle,
+    clearButton: {
+        paddingHorizontal: 8,
         paddingVertical: 6,
     } as ViewStyle,
     searchIcon: {

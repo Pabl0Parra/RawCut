@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     watchedOverlay: {
         position: "absolute",
         top: 4,
-        right: 4,
+        left: 4,
         backgroundColor: "rgba(220, 38, 38, 0.8)",
         borderRadius: 12,
         padding: 2,
