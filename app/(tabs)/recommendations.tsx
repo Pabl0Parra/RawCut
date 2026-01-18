@@ -1,13 +1,51 @@
-import { useEffect, useState, useCallback } from "react";
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+    View,
+    Text,
+    FlatList,
+    TouchableOpacity,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    type ViewStyle,
+    type TextStyle,
+} from "react-native";
 import { useFocusEffect, router } from "expo-router";
-import { Image } from "expo-image";
+
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 import { useAuthStore } from "../../src/stores/authStore";
-import { getMovieDetails, getTVShowDetails, getImageUrl } from "../../src/lib/tmdb";
 import { Colors } from "../../src/constants/Colors";
+import RecommendationCard from "../../src/components/RecommendationCard";
 
-export default function RecommendationsScreen() {
+import type {
+    RecommendationTab,
+    TmdbDataMap,
+    RecommendationWithRelations,
+    TmdbContentData,
+} from "../../src/types/recommendations.types";
+import {
+    INITIAL_RECOMMENDATIONS_STATE,
+    LOADING_TMDB_DATA,
+    createTmdbCacheKey,
+} from "../../src/types/recommendations.types";
+import { fetchTmdbDataBatch } from "../../src/utils/recommendations.utils";
+
+// ============================================================================
+// Types
+// ============================================================================
+
+interface RecommendationsState {
+    activeTab: RecommendationTab;
+    tmdbData: TmdbDataMap;
+    expandedId: string | null;
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export default function RecommendationsScreen(): React.JSX.Element {
     const { user } = useAuthStore();
     const {
         sent,
@@ -19,560 +57,343 @@ export default function RecommendationsScreen() {
         markCommentsAsRead,
     } = useRecommendationStore();
 
-    const [activeTab, setActiveTab] = useState<"received" | "sent">("received");
-    const [tmdbData, setTmdbData] = useState<
-        Record<string, { title: string; poster: string | null }>
-    >({});
-    const [expandedId, setExpandedId] = useState<string | null>(null);
-    const [newComment, setNewComment] = useState("");
-    const [sendingComment, setSendingComment] = useState(false);
+    const [state, setState] = useState<RecommendationsState>({
+        activeTab: "received",
+        tmdbData: {},
+        expandedId: null,
+    });
 
+    const { activeTab, tmdbData, expandedId } = state;
+
+    // ========================================================================
+    // State Helpers
+    // ========================================================================
+
+    const updateState = (updates: Partial<RecommendationsState>): void => {
+        setState((prev) => ({ ...prev, ...updates }));
+    };
+
+    // ========================================================================
+    // Effects
+    // ========================================================================
+
+    // Mark as read when screen focuses
     useFocusEffect(
         useCallback(() => {
             if (user && activeTab === "received") {
                 markAllAsRead();
             }
-        }, [user, activeTab])
+        }, [user, activeTab, markAllAsRead])
     );
 
-    // Fetch TMDb data for recommendations
+    // Fetch TMDb data for all recommendations
     useEffect(() => {
-        const fetchTmdbData = async () => {
-            const allRecs = [...sent, ...received];
-            const newData: Record<string, { title: string; poster: string | null }> =
-                {};
+        const loadTmdbData = async (): Promise<void> => {
+            // Cast to proper type - the store should return this shape
+            const allRecs = [
+                ...(sent as RecommendationWithRelations[]),
+                ...(received as RecommendationWithRelations[]),
+            ];
 
-            for (const rec of allRecs) {
-                const key = `${rec.media_type}-${rec.tmdb_id}`;
-                if (!tmdbData[key] && !newData[key]) {
-                    try {
-                        if (rec.media_type === "movie") {
-                            const details = await getMovieDetails(rec.tmdb_id);
-                            newData[key] = {
-                                title: details.title,
-                                poster: details.poster_path,
-                            };
-                        } else {
-                            const details = await getTVShowDetails(rec.tmdb_id);
-                            newData[key] = {
-                                title: details.name,
-                                poster: details.poster_path,
-                            };
-                        }
-                    } catch (err) {
-                        newData[key] = { title: "Sin título", poster: null };
-                    }
-                }
-            }
+            if (allRecs.length === 0) return;
+
+            const newData = await fetchTmdbDataBatch(allRecs, tmdbData);
 
             if (Object.keys(newData).length > 0) {
-                setTmdbData((prev) => ({ ...prev, ...newData }));
+                updateState({
+                    tmdbData: { ...tmdbData, ...newData },
+                });
             }
         };
 
-        fetchTmdbData();
+        loadTmdbData();
     }, [sent, received]);
 
-    const handleAddComment = async (recommendationId: string) => {
-        if (!newComment.trim()) return;
+    // ========================================================================
+    // Handlers
+    // ========================================================================
 
-        setSendingComment(true);
-        const success = await addComment(recommendationId, newComment);
-        if (success) {
-            setNewComment("");
-        }
-        setSendingComment(false);
+    const handleToggleExpand = (id: string): void => {
+        updateState({ expandedId: id || null });
     };
 
-    const handleAddRating = async (recommendationId: string, rating: number) => {
+    const handleAddComment = async (
+        recommendationId: string,
+        text: string
+    ): Promise<boolean> => {
+        return await addComment(recommendationId, text);
+    };
+
+    const handleAddRating = async (
+        recommendationId: string,
+        rating: number
+    ): Promise<void> => {
         await addRating(recommendationId, rating);
     };
 
-    const data = activeTab === "received" ? received : sent;
-
-    const renderStarRating = (
-        recommendationId: string,
-        currentRating?: { rating: number },
-        canRate: boolean = false
-    ) => {
-        const stars = [1, 2, 3, 4, 5];
-        const rating = currentRating?.rating || 0;
-
-        return (
-            <View style={styles.starsContainer}>
-                {stars.map((star) => (
-                    <TouchableOpacity
-                        key={star}
-                        onPress={() => canRate && handleAddRating(recommendationId, star)}
-                        disabled={!canRate || !!currentRating}
-                    >
-                        <Text style={styles.star}>
-                            {star <= rating ? "⭐" : "☆"}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-        );
+    const handleMarkCommentsRead = (recommendationId: string): void => {
+        markCommentsAsRead(recommendationId);
     };
 
-    const renderItem = ({ item }: { item: any }) => {
-        const key = `${item.media_type}-${item.tmdb_id}`;
-        const tmdb = tmdbData[key] || { title: "Cargando...", poster: null };
-        const posterUrl = getImageUrl(tmdb.poster, "w200");
-        const isExpanded = expandedId === item.id;
-        const isReceived = activeTab === "received";
-        const otherUser = isReceived ? item.sender : item.receiver;
+    const handleTabChange = (tab: RecommendationTab): void => {
+        updateState({ activeTab: tab });
+    };
 
-        return (
-            <View style={styles.card}>
-                {/* Main card */}
+    const handleNavigateToLogin = (): void => {
+        router.push("/login");
+    };
+
+    // ========================================================================
+    // Derived Data
+    // ========================================================================
+
+    const data = activeTab === "received"
+        ? (received as RecommendationWithRelations[])
+        : (sent as RecommendationWithRelations[]);
+
+    const isReceived = activeTab === "received";
+
+    // ========================================================================
+    // Render Helpers
+    // ========================================================================
+
+    const getTmdbDataForItem = (item: RecommendationWithRelations): TmdbContentData => {
+        const key = createTmdbCacheKey(item.media_type, item.tmdb_id);
+        return tmdbData[key] ?? LOADING_TMDB_DATA;
+    };
+
+    const renderItem = ({
+        item,
+    }: {
+        item: RecommendationWithRelations;
+    }): React.JSX.Element => (
+        <RecommendationCard
+            item={item}
+            tmdbData={getTmdbDataForItem(item)}
+            isExpanded={expandedId === item.id}
+            isReceived={isReceived}
+            currentUserId={user?.id}
+            onToggleExpand={handleToggleExpand}
+            onAddComment={handleAddComment}
+            onAddRating={handleAddRating}
+            onMarkCommentsRead={handleMarkCommentsRead}
+        />
+    );
+
+    const keyExtractor = (item: RecommendationWithRelations): string => item.id;
+
+    const renderUnauthenticatedState = (): React.JSX.Element => (
+        <View style={styles.safeArea}>
+            <View style={styles.emptyContainer}>
+                <Text style={styles.unauthIcon}>🔒</Text>
+                <Text style={styles.unauthText}>
+                    Inicia sesión para ver tus recomendaciones
+                </Text>
                 <TouchableOpacity
-                    onPress={() => {
-                        const newIsExpanded = !isExpanded;
-                        setExpandedId(newIsExpanded ? item.id : null);
-                        if (newIsExpanded) {
-                            markCommentsAsRead(item.id);
-                        }
-                    }}
-                    activeOpacity={0.8}
-                    style={styles.cardMain}
+                    style={styles.loginButton}
+                    onPress={handleNavigateToLogin}
                 >
-                    {posterUrl ? (
-                        <Image
-                            source={{ uri: posterUrl }}
-                            style={styles.cardImage}
-                            contentFit="cover"
-                        />
-                    ) : (
-                        <View style={styles.cardPlaceholder}>
-                            <Text style={styles.cardPlaceholderIcon}>
-                                {item.media_type === "movie" ? "🎬" : "📺"}
-                            </Text>
-                        </View>
-                    )}
-
-                    <View style={styles.cardContent}>
-                        <View style={styles.cardHeaderRow}>
-                            <Text style={styles.cardTitle} numberOfLines={1}>
-                                {tmdb.title}
-                            </Text>
-                            {((isReceived && !item.is_read) ||
-                                item.comments?.some((c: any) => c.user_id !== user?.id && !c.is_read)) && (
-                                    <View style={styles.unreadDot} />
-                                )}
-                        </View>
-                        <Text style={styles.cardMeta}>
-                            {isReceived ? `De: @${otherUser?.username}` : `Para: @${otherUser?.username}`}
-                        </Text>
-                        {item.message && (
-                            <Text
-                                style={styles.cardMessage}
-                                numberOfLines={2}
-                            >
-                                "{item.message}"
-                            </Text>
-                        )}
-
-                        {/* Rating display */}
-                        <View style={styles.ratingContainer}>
-                            {renderStarRating(item.id, item.rating, isReceived && !item.rating)}
-                        </View>
-                    </View>
+                    <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
                 </TouchableOpacity>
+            </View>
+        </View>
+    );
 
-                {/* Expanded section with comments */}
-                {isExpanded && (
-                    <View style={styles.expandedSection}>
-                        {/* Comments */}
-                        <Text style={styles.commentsTitle}>
-                            Comentarios ({item.comments?.length || 0})
-                        </Text>
+    const renderLoadingState = (): React.JSX.Element => (
+        <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color="#dc2626" />
+        </View>
+    );
 
-                        {item.comments?.map((comment: any) => (
-                            <View key={comment.id} style={styles.commentItem}>
-                                <Text style={styles.commentText}>
-                                    <Text style={styles.commentUser}>
-                                        {comment.user_id === user?.id ? "Tú" : `@${otherUser?.username}`}:
-                                    </Text>{" "}
-                                    {comment.text}
-                                </Text>
-                            </View>
-                        ))}
+    const renderEmptyState = (): React.JSX.Element => {
+        const isReceivedTab = activeTab === "received";
 
-                        {/* Add comment */}
-                        <View style={styles.addCommentContainer}>
-                            <TextInput
-                                style={styles.commentInput}
-                                placeholder="Añadir comentario..."
-                                placeholderTextColor="#71717a"
-                                value={newComment}
-                                onChangeText={setNewComment}
-                                maxLength={500}
-                            />
-                            <TouchableOpacity
-                                style={[
-                                    styles.sendButton,
-                                    (sendingComment || !newComment.trim()) && styles.disabledButton,
-                                ]}
-                                onPress={() => handleAddComment(item.id)}
-                                disabled={sendingComment || !newComment.trim()}
-                            >
-                                {sendingComment ? (
-                                    <ActivityIndicator size="small" color="#0a0a0a" />
-                                ) : (
-                                    <Text style={styles.sendButtonText}>Enviar</Text>
-                                )}
-                            </TouchableOpacity>
-                        </View>
-
-                        <TouchableOpacity
-                            style={styles.detailsButton}
-                            onPress={() => {
-                                const path = item.media_type === "movie"
-                                    ? `/movie/${item.tmdb_id}`
-                                    : `/tv/${item.tmdb_id}`;
-                                router.push(path as any);
-                            }}
-                        >
-                            <Text style={styles.detailsButtonText}>
-                                Ver detalles →
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
+        return (
+            <View style={styles.emptyContainer}>
+                <Text style={styles.emptyIcon}>📬</Text>
+                <Text style={styles.emptyText}>
+                    {isReceivedTab
+                        ? "No tienes recomendaciones"
+                        : "No has enviado recomendaciones"}
+                </Text>
+                <Text style={styles.emptySubtext}>
+                    {isReceivedTab
+                        ? "Cuando alguien te recomiende algo, aparecerá aquí"
+                        : "Explora películas y series para recomendar a tus amigos"}
+                </Text>
             </View>
         );
     };
+
+    const renderTab = (
+        tab: RecommendationTab,
+        label: string,
+        count: number
+    ): React.JSX.Element => {
+        const isActive = activeTab === tab;
+
+        return (
+            <TouchableOpacity
+                style={[styles.tab, isActive ? styles.activeTab : styles.inactiveTab]}
+                onPress={() => handleTabChange(tab)}
+            >
+                <Text
+                    style={[
+                        styles.tabText,
+                        isActive ? styles.activeTabText : styles.inactiveTabText,
+                    ]}
+                >
+                    {label} ({count})
+                </Text>
+            </TouchableOpacity>
+        );
+    };
+
+    const renderContent = (): React.JSX.Element => {
+        if (isLoading) {
+            return renderLoadingState();
+        }
+
+        if (data.length === 0) {
+            return renderEmptyState();
+        }
+
+        return (
+            <FlatList
+                data={data}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+            />
+        );
+    };
+
+    // ========================================================================
+    // Main Render
+    // ========================================================================
 
     if (!user) {
-        return (
-            <View style={styles.safeArea}>
-                <View style={styles.emptyContainer}>
-                    <Text style={styles.unauthIcon}>🔒</Text>
-                    <Text style={styles.unauthText}>
-                        Inicia sesión para ver tus recomendaciones
-                    </Text>
-                    <TouchableOpacity
-                        style={styles.loginButton}
-                        onPress={() => router.push("/login")}
-                    >
-                        <Text style={styles.loginButtonText}>
-                            Iniciar Sesión
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        );
+        return renderUnauthenticatedState();
     }
 
     return (
-        <View style={[styles.safeArea, { paddingTop: 16 }]}>
+        <View style={[styles.safeArea, styles.paddedTop]}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.keyboardAvoidingView}
             >
-
-                {/* Tab switcher */}
+                {/* Tab Switcher */}
                 <View style={styles.tabsContainer}>
                     <View style={styles.tabsWrapper}>
-                        <TouchableOpacity
-                            style={[
-                                styles.tab,
-                                activeTab === "received" ? styles.activeTab : styles.inactiveTab,
-                            ]}
-                            onPress={() => setActiveTab("received")}
-                        >
-                            <Text
-                                style={[
-                                    styles.tabText,
-                                    activeTab === "received"
-                                        ? styles.activeTabText
-                                        : styles.inactiveTabText,
-                                ]}
-                            >
-                                Recibidas ({received.length})
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[
-                                styles.tab,
-                                activeTab === "sent" ? styles.activeTab : styles.inactiveTab,
-                            ]}
-                            onPress={() => setActiveTab("sent")}
-                        >
-                            <Text
-                                style={[
-                                    styles.tabText,
-                                    activeTab === "sent"
-                                        ? styles.activeTabText
-                                        : styles.inactiveTabText,
-                                ]}
-                            >
-                                Enviadas ({sent.length})
-                            </Text>
-                        </TouchableOpacity>
+                        {renderTab("received", "Recibidas", received.length)}
+                        {renderTab("sent", "Enviadas", sent.length)}
                     </View>
                 </View>
 
                 {/* Content */}
-                {isLoading ? (
-                    <View style={styles.centerContainer}>
-                        <ActivityIndicator size="large" color="#dc2626" />
-                    </View>
-                ) : data.length === 0 ? (
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyIcon}>📬</Text>
-                        <Text style={styles.emptyText}>
-                            {activeTab === "received"
-                                ? "No tienes recomendaciones"
-                                : "No has enviado recomendaciones"}
-                        </Text>
-                        <Text style={styles.emptySubtext}>
-                            {activeTab === "received"
-                                ? "Cuando alguien te recomiende algo, aparecerá aquí"
-                                : "Explora películas y series para recomendar a tus amigos"}
-                        </Text>
-                    </View>
-                ) : (
-                    <FlatList
-                        data={data}
-                        renderItem={renderItem}
-                        keyExtractor={(item) => item.id}
-                        contentContainerStyle={styles.listContent}
-                        showsVerticalScrollIndicator={false}
-                    />
-                )}
+                {renderContent()}
             </KeyboardAvoidingView>
         </View>
     );
 }
 
+// ============================================================================
+// Styles
+// ============================================================================
+
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: "transparent",
-    },
+    } as ViewStyle,
+    paddedTop: {
+        paddingTop: 16,
+    } as ViewStyle,
     keyboardAvoidingView: {
         flex: 1,
-    },
+    } as ViewStyle,
     tabsContainer: {
         paddingHorizontal: 16,
         paddingBottom: 16,
-    },
+    } as ViewStyle,
     tabsWrapper: {
         flexDirection: "row",
         backgroundColor: Colors.metalGray,
         padding: 4,
-        borderRadius: 9999, // full rounded
-    },
+        borderRadius: 9999,
+    } as ViewStyle,
     tab: {
         flex: 1,
         paddingVertical: 8,
         borderRadius: 9999,
-    },
+    } as ViewStyle,
     activeTab: {
         backgroundColor: Colors.bloodRed,
-    },
+    } as ViewStyle,
     inactiveTab: {
         backgroundColor: "transparent",
-    },
+    } as ViewStyle,
     tabText: {
         textAlign: "center",
         fontWeight: "bold",
         fontSize: 14,
-    },
+    } as TextStyle,
     activeTabText: {
         color: Colors.metalBlack,
-    },
+    } as TextStyle,
     inactiveTabText: {
         color: Colors.metalSilver,
-    },
+    } as TextStyle,
     centerContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-    },
+    } as ViewStyle,
     emptyContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
         paddingHorizontal: 16,
-    },
+    } as ViewStyle,
     emptyIcon: {
         fontSize: 60,
         marginBottom: 16,
-    },
+    } as TextStyle,
     emptyText: {
         color: Colors.metalSilver,
         fontSize: 18,
         textAlign: "center",
-    },
+    } as TextStyle,
     emptySubtext: {
         color: Colors.metalSilver,
         fontSize: 14,
         textAlign: "center",
         marginTop: 8,
-    },
+    } as TextStyle,
     unauthIcon: {
         fontSize: 60,
         marginBottom: 16,
-    },
+    } as TextStyle,
     unauthText: {
-        color: "#f4f4f5", // zinc-100
+        color: "#f4f4f5",
         fontSize: 18,
         textAlign: "center",
         marginBottom: 8,
-    },
+    } as TextStyle,
     loginButton: {
         backgroundColor: Colors.bloodRed,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 4,
         marginTop: 16,
-    },
+    } as ViewStyle,
     loginButtonText: {
         color: Colors.metalBlack,
         fontWeight: "bold",
         textTransform: "uppercase",
-    },
-    card: {
-        backgroundColor: Colors.metalGray,
-        marginHorizontal: 16,
-        marginBottom: 16,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: Colors.metalSilver,
-        overflow: "hidden",
-    },
-    cardMain: {
-        flexDirection: "row",
-        padding: 12,
-    },
-    cardImage: {
-        width: 60,
-        height: 90,
-        borderRadius: 4,
-    },
-    cardPlaceholder: {
-        backgroundColor: Colors.metalBlack,
-        borderRadius: 4,
-        alignItems: "center",
-        justifyContent: "center",
-        width: 60,
-        height: 90,
-    },
-    cardPlaceholderIcon: {
-        fontSize: 24,
-    },
-    cardContent: {
-        flex: 1,
-        marginLeft: 12,
-    },
-    cardHeaderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingRight: 8,
-    },
-    unreadDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: Colors.bloodRed,
-    },
-    cardTitle: {
-        color: "#f4f4f5", // zinc-100
-        fontWeight: "bold",
-        fontSize: 16,
-        flex: 1,
-    },
-    cardMeta: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        marginTop: 2,
-    },
-    cardMessage: {
-        color: "#d4d4d8", // zinc-300
-        fontSize: 14,
-        marginTop: 8,
-        fontStyle: "italic",
-    },
-    ratingContainer: {
-        marginTop: 8,
-    },
-    starsContainer: {
-        flexDirection: "row",
-        gap: 4,
-    },
-    star: {
-        fontSize: 20,
-    },
-    expandedSection: {
-        borderTopWidth: 1,
-        borderTopColor: Colors.metalSilver,
-        padding: 12,
-    },
-    commentsTitle: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        marginBottom: 8,
-    },
-    commentItem: {
-        marginBottom: 8,
-        paddingLeft: 8,
-        borderLeftWidth: 2,
-        borderLeftColor: Colors.metalSilver,
-    },
-    commentText: {
-        color: "#d4d4d8", // zinc-300
-    },
-    commentUser: {
-        fontWeight: "bold",
-        color: "#f4f4f5", // zinc-100
-    },
-    addCommentContainer: {
-        flexDirection: "row",
-        gap: 8,
-        marginTop: 8,
-    },
-    commentInput: {
-        flex: 1,
-        backgroundColor: Colors.metalBlack,
-        borderWidth: 1,
-        borderColor: Colors.metalSilver,
-        color: "#f4f4f5", // zinc-100
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 4,
-        fontSize: 14,
-    },
-    sendButton: {
-        backgroundColor: Colors.bloodRed,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 4,
-        justifyContent: "center",
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-    sendButtonText: {
-        color: Colors.metalBlack,
-        fontWeight: "bold",
-    },
-    detailsButton: {
-        marginTop: 12,
-        paddingVertical: 8,
-        backgroundColor: "rgba(161, 161, 170, 0.2)", // metal-silver/20
-        borderRadius: 4,
-    },
-    detailsButtonText: {
-        color: "#f4f4f5", // zinc-100
-        textAlign: "center",
-        fontSize: 14,
-    },
+    } as TextStyle,
     listContent: {
         paddingBottom: 20,
-    },
+    } as ViewStyle,
 });
