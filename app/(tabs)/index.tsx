@@ -364,7 +364,17 @@ export default function HomeScreen() {
     };
 
     const renderContinueWatching = () => {
-        if (activeTab !== "tv" || continueWatching.length === 0 || !showContinueSection) return null;
+        if (activeTab !== "tv" || !showContinueSection) return null;
+
+        if (loadingContinue) {
+            return (
+                <View style={[styles.continueSection, { height: 160, justifyContent: 'center' }]}>
+                    <ActivityIndicator size="small" color={Colors.bloodRed} />
+                </View>
+            );
+        }
+
+        if (continueWatching.length === 0) return null;
 
         return (
             <View style={styles.continueSection}>
