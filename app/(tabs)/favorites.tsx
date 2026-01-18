@@ -36,6 +36,16 @@ export default function FavoritesScreen() {
     }, [favorites]);
 
     const enrichFavorites = async () => {
+        // Optimization: Check if the content actually changed to avoid re-fetching
+        if (favorites.length > 0 && enrichedFavorites.length > 0) {
+            const isSame = favorites.length === enrichedFavorites.length &&
+                favorites.every(f =>
+                    enrichedFavorites.some(ef => ef.tmdb_id === f.tmdb_id && ef.media_type === f.media_type)
+                );
+
+            if (isSame) return;
+        }
+
         if (favorites.length === 0) {
             setEnrichedFavorites([]);
             setLoading(false);
@@ -179,7 +189,7 @@ export default function FavoritesScreen() {
     return (
         <View style={[styles.safeArea, { paddingTop: 16 }]}>
 
-            {loading ? (
+            {loading && enrichedFavorites.length === 0 ? (
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color="#dc2626" />
                 </View>

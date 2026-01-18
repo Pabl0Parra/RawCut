@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Tabs, router } from "expo-router";
-import { View, Text, Platform, Image, TouchableOpacity, Modal, StyleSheet, Pressable, Alert } from "react-native";
+import { View, Text, Platform, TouchableOpacity, Modal, StyleSheet, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";

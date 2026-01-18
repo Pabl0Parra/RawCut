@@ -37,6 +37,16 @@ export default function WatchlistScreen() {
     }, [watchlist]);
 
     const enrichWatchlist = async () => {
+        // Optimization: Check if the content actually changed to avoid re-fetching
+        if (watchlist.length > 0 && enrichedWatchlist.length > 0) {
+            const isSame = watchlist.length === enrichedWatchlist.length &&
+                watchlist.every(item =>
+                    enrichedWatchlist.some(ei => ei.tmdb_id === item.tmdb_id && ei.media_type === item.media_type)
+                );
+
+            if (isSame) return;
+        }
+
         if (watchlist.length === 0) {
             setEnrichedWatchlist([]);
             setLoading(false);
@@ -180,7 +190,7 @@ export default function WatchlistScreen() {
     return (
         <View style={[styles.safeArea, { paddingTop: 16 }]}>
 
-            {loading ? (
+            {loading && enrichedWatchlist.length === 0 ? (
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color="#dc2626" />
                 </View>
