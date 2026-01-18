@@ -12,11 +12,13 @@ import {
     ScrollView,
     ViewStyle,
     TextStyle,
+    ImageStyle,
 } from "react-native";
 import { MaterialCommunityIcons, Feather, Entypo, Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, router } from "expo-router";
 import MovieCard from "../../src/components/MovieCard";
+import { Image } from "expo-image";
 import {
     getPopularMovies,
     getPopularTVShows,
@@ -26,6 +28,8 @@ import {
     getTVGenres,
     discoverMovies,
     discoverTVShows,
+    getTVShowDetails,
+    getImageUrl,
     Movie,
     TVShow,
     Genre,
@@ -45,6 +49,9 @@ export default function HomeScreen() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const [showProfileBanner, setShowProfileBanner] = useState(false);
+    const [continueWatching, setContinueWatching] = useState<{ show: TVShow, progress: { watched: number, total: number } }[]>([]);
+    const [loadingContinue, setLoadingContinue] = useState(false);
+    const [showContinueSection, setShowContinueSection] = useState(true);
 
     // Filter State
     const [showFilterModal, setShowFilterModal] = useState(false);
@@ -63,6 +70,8 @@ export default function HomeScreen() {
         removeFromFavorites,
         addToWatchlist,
         removeFromWatchlist,
+        tvProgress,
+        fetchTVProgress,
     } = useContentStore();
 
     // Fetch content on mount
@@ -76,6 +85,7 @@ export default function HomeScreen() {
         useCallback(() => {
             if (user) {
                 fetchUserContent();
+                fetchTVProgress();
                 // Check if user has generic username
                 const { profile } = useAuthStore.getState();
                 if (profile?.username?.startsWith("user_")) {
@@ -86,6 +96,44 @@ export default function HomeScreen() {
             }
         }, [user])
     );
+
+    // Filter shows for "Continue Watching"
+    useEffect(() => {
+        if (activeTab === "tv" && user && tvProgress.length > 0) {
+            loadContinueWatching();
+        } else {
+            setContinueWatching([]);
+        }
+    }, [activeTab, tvProgress.length, user]);
+
+    const loadContinueWatching = async () => {
+        setLoadingContinue(true);
+        try {
+            // Get unique show IDs from progress
+            const showIds = [...new Set(tvProgress.map(p => p.tmdb_id))];
+
+            const showsWithDetails = await Promise.all(
+                showIds.slice(0, 10).map(async (id) => {
+                    const show = await getTVShowDetails(id);
+                    const watchedCount = tvProgress.filter(p => p.tmdb_id === id).length;
+                    return {
+                        show,
+                        progress: {
+                            watched: watchedCount,
+                            total: show.number_of_episodes || 0
+                        }
+                    };
+                })
+            );
+
+            // Filter out finished shows if we wanted, but for now just show them
+            setContinueWatching(showsWithDetails);
+        } catch (err) {
+            console.error("Error loading continue watching:", err);
+        } finally {
+            setLoadingContinue(false);
+        }
+    };
 
     // Load content and genres when tab changes
     useEffect(() => {
@@ -275,6 +323,59 @@ export default function HomeScreen() {
         );
     };
 
+    const renderContinueWatching = () => {
+        if (activeTab !== "tv" || continueWatching.length === 0 || !showContinueSection) return null;
+
+        return (
+            <View style={styles.continueSection}>
+                <View style={styles.continueHeader}>
+                    <Text style={styles.continueTitle}>Continuar Viendo</Text>
+                    <TouchableOpacity onPress={() => setShowContinueSection(false)}>
+                        <Ionicons name="close-circle" size={24} color={Colors.metalSilver} />
+                    </TouchableOpacity>
+                </View>
+                <FlatList
+                    data={continueWatching}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    keyExtractor={(item) => item.show.id.toString()}
+                    contentContainerStyle={styles.continueList}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            style={styles.continueCard}
+                            onPress={() => router.push(`/tv/${item.show.id}`)}
+                        >
+                            <Image
+                                source={{ uri: getImageUrl(item.show.poster_path, "w300") || undefined }}
+                                style={styles.continueImage}
+                                contentFit="cover"
+                            />
+                            <View style={styles.progressBarBg}>
+                                <View
+                                    style={[
+                                        styles.progressBarFill,
+                                        { width: `${(item.progress.watched / Math.max(1, item.progress.total)) * 100}%` }
+                                    ]}
+                                />
+                            </View>
+                            <Text style={styles.continueText} numberOfLines={1}>{item.show.name}</Text>
+                            <Text style={styles.continueProgress}>
+                                {item.progress.watched}/{item.progress.total} eps
+                            </Text>
+                            {item.show.next_episode_to_air && (
+                                <View style={styles.nextEpisodeBadge}>
+                                    <Text style={styles.nextEpisodeText}>
+                                        S{item.show.next_episode_to_air.season_number} E{item.show.next_episode_to_air.episode_number}
+                                    </Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    )}
+                />
+            </View>
+        );
+    };
+
     return (
         <View style={[styles.safeArea, { paddingTop: 28 }]}>
 
@@ -437,6 +538,8 @@ export default function HomeScreen() {
                     }
                 />
             )}
+
+            {activeTab === 'tv' && renderContinueWatching()}
 
             {/* Filter Modal */}
             <Modal
@@ -786,5 +889,75 @@ const styles = StyleSheet.create({
     profileBannerSubtitle: {
         color: "rgba(255,255,255,0.9)",
         fontSize: 12,
+    } as TextStyle,
+    continueSection: {
+        paddingVertical: 12,
+        backgroundColor: "rgba(0,0,0,0.4)",
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: "rgba(255,255,255,0.1)",
+        marginBottom: 4,
+    } as ViewStyle,
+    continueHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        marginBottom: 8,
+    } as ViewStyle,
+    continueTitle: {
+        color: Colors.white,
+        fontSize: 14,
+        fontFamily: "BebasNeue_400Regular",
+        letterSpacing: 1,
+    } as TextStyle,
+    continueList: {
+        paddingHorizontal: 16,
+        gap: 12,
+    } as ViewStyle,
+    continueCard: {
+        width: 80,
+    } as ViewStyle,
+    continueImage: {
+        width: 60,
+        height: 80,
+        borderRadius: 4,
+        backgroundColor: Colors.metalGray,
+    } as ImageStyle,
+    progressBarBg: {
+        height: 3,
+        backgroundColor: "rgba(255,255,255,0.2)",
+        borderRadius: 1.5,
+        marginTop: 6,
+        overflow: 'hidden',
+    } as ViewStyle,
+    progressBarFill: {
+        height: '100%',
+        backgroundColor: Colors.bloodRed,
+    } as ViewStyle,
+    continueText: {
+        color: Colors.white,
+        fontSize: 10,
+        fontWeight: 'bold',
+        marginTop: 4,
+    } as TextStyle,
+    continueProgress: {
+        color: Colors.metalSilver,
+        fontSize: 9,
+        marginTop: 1,
+    } as TextStyle,
+    nextEpisodeBadge: {
+        backgroundColor: "rgba(234, 179, 8, 0.2)",
+        padding: 2,
+        borderRadius: 2,
+        marginTop: 4,
+        borderWidth: 0.5,
+        borderColor: "rgba(234, 179, 8, 0.5)",
+    } as ViewStyle,
+    nextEpisodeText: {
+        color: "#ffffffff",
+        fontSize: 11,
+        fontWeight: "bold",
+        textAlign: 'center',
     } as TextStyle,
 });

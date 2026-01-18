@@ -61,13 +61,21 @@ export default function TVDetailScreen() {
         removeFromFavorites,
         addToWatchlist,
         removeFromWatchlist,
+        fetchTVProgress,
+        isEpisodeWatched,
+        isSeasonWatched,
+        getNextEpisodeToWatch,
+        toggleEpisodeWatched,
     } = useContentStore();
 
     useEffect(() => {
         if (id) {
             loadTVShow(Number.parseInt(id));
+            if (user) {
+                fetchTVProgress();
+            }
         }
-    }, [id]);
+    }, [id, user]);
 
     const loadTVShow = async (tvId: number) => {
         setLoading(true);
@@ -188,6 +196,11 @@ export default function TVDetailScreen() {
         }
     };
 
+    const handleToggleEpisode = async (episodeNumber: number) => {
+        if (!tvShow || !selectedSeasonNumber) return;
+        await toggleEpisodeWatched(tvShow.id, selectedSeasonNumber, episodeNumber);
+    };
+
     if (loading) {
         return (
             <SafeAreaView style={styles.safeArea}>
@@ -227,6 +240,22 @@ export default function TVDetailScreen() {
                 >
                     <Text style={styles.backButtonText}>←</Text>
                 </TouchableOpacity>
+
+                {/* Next episode badge */}
+                {tvShow.seasons && (
+                    (() => {
+                        const next = getNextEpisodeToWatch(tvShow.id, tvShow.seasons.map(s => ({
+                            season_number: s.season_number,
+                            episode_count: s.episode_count
+                        })));
+                        return next ? (
+                            <View style={styles.nextBadgeContainer}>
+                                <Text style={styles.nextBadgeLabel}>SIGUIENTE</Text>
+                                <Text style={styles.nextBadgeValue}>S{next.season} E{next.episode}</Text>
+                            </View>
+                        ) : null;
+                    })()
+                )}
 
                 {/* Backdrop with Trailer Button */}
                 <View style={{ position: "relative" }}>
@@ -459,14 +488,27 @@ export default function TVDetailScreen() {
                                         onPress={() => openSeasonDetails(item.season_number)}
                                     >
                                         {item.poster_path ? (
-                                            <Image
-                                                source={{ uri: getImageUrl(item.poster_path, "w200") ?? undefined }}
-                                                style={styles.seasonImage}
-                                                contentFit="cover"
-                                            />
+                                            <View style={styles.seasonImageContainer}>
+                                                <Image
+                                                    source={{ uri: getImageUrl(item.poster_path, "w200") ?? undefined }}
+                                                    style={styles.seasonImage}
+                                                    contentFit="cover"
+                                                />
+                                                {isSeasonWatched(tvShow.id, item.season_number, item.episode_count) && (
+                                                    <View style={styles.seasonWatchedOverlay}>
+                                                        <Ionicons name="checkmark-circle" size={32} color={Colors.white} />
+                                                        <Text style={styles.seasonWatchedText}>VISTO</Text>
+                                                    </View>
+                                                )}
+                                            </View>
                                         ) : (
                                             <View style={styles.seasonPlaceholder}>
                                                 <Text style={styles.seasonPlaceholderIcon}>📺</Text>
+                                                {isSeasonWatched(tvShow.id, item.season_number, item.episode_count) && (
+                                                    <View style={styles.seasonWatchedOverlay}>
+                                                        <Ionicons name="checkmark-circle" size={32} color={Colors.white} />
+                                                    </View>
+                                                )}
                                             </View>
                                         )}
                                         <Text style={styles.seasonName} numberOfLines={1}>
@@ -787,6 +829,16 @@ export default function TVDetailScreen() {
                                             ⭐ {item.vote_average.toFixed(1)} • {item.air_date}
                                         </Text>
                                     </View>
+                                    <TouchableOpacity
+                                        style={styles.watchedToggle}
+                                        onPress={() => handleToggleEpisode(item.episode_number)}
+                                    >
+                                        <Ionicons
+                                            name={isEpisodeWatched(tvShow.id, selectedSeasonNumber!, item.episode_number) ? "checkbox" : "square-outline"}
+                                            size={24}
+                                            color={isEpisodeWatched(tvShow.id, selectedSeasonNumber!, item.episode_number) ? Colors.vibrantRed : Colors.metalSilver}
+                                        />
+                                    </TouchableOpacity>
                                 </TouchableOpacity>
                             )}
                         />
@@ -852,7 +904,7 @@ export default function TVDetailScreen() {
                 videoKey={trailerKey}
                 onClose={() => setShowTrailerModal(false)}
             />
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
@@ -883,6 +935,30 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "900",
         top: -5,
+    },
+    nextBadgeContainer: {
+        position: "absolute",
+        top: 16,
+        right: 16,
+        zIndex: 10,
+        backgroundColor: "rgba(10, 10, 10, 0.7)",
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderWidth: 1,
+        borderColor: Colors.bloodRed,
+        alignItems: 'center',
+    },
+    nextBadgeLabel: {
+        color: Colors.metalSilver,
+        fontSize: 10,
+        fontWeight: "bold",
+        letterSpacing: 1,
+    },
+    nextBadgeValue: {
+        color: Colors.white,
+        fontSize: 16,
+        fontFamily: "BebasNeue_400Regular",
     },
     backdropPlaceholder: {
         backgroundColor: Colors.metalGray,
@@ -1235,6 +1311,32 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginTop: 2,
     },
+    seasonImageContainer: {
+        position: 'relative',
+        width: 100,
+        height: 150,
+        borderRadius: 8,
+        overflow: 'hidden',
+        marginBottom: 8,
+    },
+    seasonWatchedOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(220, 38, 38, 0.4)', // bloodRed with opacity
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    seasonWatchedText: {
+        color: Colors.white,
+        fontSize: 12,
+        fontWeight: 'bold',
+        marginTop: 4,
+        fontFamily: "BebasNeue_400Regular",
+        letterSpacing: 1,
+    },
     episodeItem: {
         flexDirection: "row",
         marginBottom: 16,
@@ -1275,6 +1377,11 @@ const styles = StyleSheet.create({
     episodeMeta: {
         color: Colors.metalGold,
         fontSize: 10,
+    },
+    watchedToggle: {
+        padding: 12,
+        justifyContent: "center",
+        alignItems: "center",
     },
     playButtonOverlay: {
         position: "absolute",

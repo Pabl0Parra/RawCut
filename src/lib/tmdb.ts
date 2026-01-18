@@ -75,6 +75,11 @@ export interface TVShow {
     popularity: number;
     seasons?: Season[];
     episode_run_time?: number[];
+    next_episode_to_air?: Episode | null;
+    last_episode_to_air?: Episode | null;
+    status?: string;
+    number_of_episodes?: number;
+    number_of_seasons?: number;
     credits?: Credits;
     created_by?: {
         id: number;

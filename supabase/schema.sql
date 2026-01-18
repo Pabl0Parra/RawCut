@@ -25,6 +25,17 @@ CREATE TABLE IF NOT EXISTS user_content (
   UNIQUE(user_id, tmdb_id, media_type, list_type)
 );
 
+-- TV Show Progress
+CREATE TABLE IF NOT EXISTS tv_progress (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  tmdb_id INT NOT NULL,
+  season_number INT NOT NULL,
+  episode_number INT NOT NULL,
+  watched_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, tmdb_id, season_number, episode_number)
+);
+
 -- Recommendations
 CREATE TABLE IF NOT EXISTS recommendations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -63,6 +74,7 @@ ALTER TABLE user_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recommendations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recommendation_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ratings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tv_progress ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 
@@ -129,6 +141,16 @@ CREATE POLICY "View ratings" ON ratings
         AND auth.uid() IN (r.sender_id, r.receiver_id)
     )
   );
+
+-- TV Progress: Users CRUD own
+CREATE POLICY "Users can view their own tv progress" ON tv_progress
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own tv progress" ON tv_progress
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own tv progress" ON tv_progress
+  FOR DELETE USING (auth.uid() = user_id);
 
 -- Trigger function to update sender points on rating
 CREATE OR REPLACE FUNCTION update_sender_points()

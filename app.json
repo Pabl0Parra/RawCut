@@ -10,7 +10,8 @@
     "scheme": "CortoCrudo",
     "splash": {
       "image": "./assets/corto-crudo-logo.png",
-      "resizeMode": "cover"
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": true,
@@ -18,7 +19,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/corto-crudo-logo.png"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
