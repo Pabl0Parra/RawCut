@@ -92,6 +92,13 @@ export default function TabLayout() {
                 name="recommendations"
                 options={{
                     title: "Sugeridas",
+                    headerLeft: () => (
+                        <Image
+                            source={require('../../assets/icons/metal-hand.png')}
+                            style={{ width: 40, height: 40, marginLeft: 16, tintColor: "#fff" }}
+                            resizeMode="contain"
+                        />
+                    ),
                     tabBarIcon: ({ color }) => (
                         <MaterialCommunityIcons name="email-outline" size={24} color={color} />
                     ),

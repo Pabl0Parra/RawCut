@@ -16,7 +16,7 @@ interface MovieCardProps {
 }
 
 const { width } = Dimensions.get("window");
-const cardWidth = (width - 48) / 2; // Two columns with padding
+const cardWidth = (width - 40) / 3; // Three columns with padding/gaps
 
 export default function MovieCard({
     item,
@@ -89,7 +89,7 @@ export default function MovieCard({
                                 >
                                     <Ionicons
                                         name={isFavorite ? "skull" : "skull-outline"}
-                                        size={22}
+                                        size={18}
                                         color={isFavorite ? Colors.bloodRed : "#f4f4f5"}
                                     />
                                 </TouchableOpacity>
@@ -104,7 +104,7 @@ export default function MovieCard({
                                 >
                                     <MaterialCommunityIcons
                                         name={inWatchlist ? "sword-cross" : "sword"}
-                                        size={22}
+                                        size={18}
                                         color={inWatchlist ? Colors.bloodRed : "#f4f4f5"}
                                     />
                                 </TouchableOpacity>
@@ -138,12 +138,13 @@ const styles = StyleSheet.create({
         fontSize: 36, // ~text-4xl
     },
     content: {
-        padding: 12,
+        padding: 8,
     },
     title: {
         color: "#f4f4f5", // zinc-100
         fontWeight: "bold",
-        fontSize: 14,
+        fontSize: 12,
+        height: 32, // Fixed height for 2 lines of text
     },
     metaContainer: {
         flexDirection: "row",
@@ -153,7 +154,7 @@ const styles = StyleSheet.create({
     },
     rating: {
         color: "#eab308", // yellow-500
-        fontSize: 14,
+        fontSize: 11,
     },
     actions: {
         flexDirection: "row",

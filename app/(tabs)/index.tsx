@@ -327,47 +327,45 @@ export default function HomeScreen() {
                 </View>
             </View>
 
-            {/* Search Bar */}
-            <View style={styles.searchContainer}>
-                <View style={styles.searchWrapper}>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Buscar..."
-                        placeholderTextColor="#71717a"
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        onSubmitEditing={handleSearch}
-                        returnKeyType="search"
-                    />
-                    <TouchableOpacity
-                        style={styles.searchButton}
-                        onPress={handleSearch}
-                    >
-                        <Entypo name="magnifying-glass" size={24} color="#71717a" />
-                    </TouchableOpacity>
-                </View>
-            </View>
+            {/* Search and Filter Row */}
+            <View style={styles.controlsContainer}>
+                <View style={styles.searchAndFilterRow}>
+                    <View style={styles.searchWrapper}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Buscar..."
+                            placeholderTextColor="#71717a"
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            onSubmitEditing={handleSearch}
+                            returnKeyType="search"
+                        />
+                        <TouchableOpacity
+                            style={styles.searchButton}
+                            onPress={handleSearch}
+                        >
+                            <Entypo name="magnifying-glass" size={24} color="#71717a" />
+                        </TouchableOpacity>
+                    </View>
 
-            {/* Filter Toggle Button */}
-            <View style={styles.filterHeader}>
-                <TouchableOpacity
-                    style={[styles.filterButton, filtersActive && styles.activeFilterButton]}
-                    onPress={() => setShowFilterModal(true)}
-                >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <TouchableOpacity
+                        style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
+                        onPress={() => setShowFilterModal(true)}
+                    >
                         <Ionicons
                             name="filter"
-                            size={18}
+                            size={20}
                             color={filtersActive ? Colors.white : Colors.metalSilver}
                         />
-                        <Text style={[styles.filterButtonText, filtersActive && styles.activeFilterButtonText]}>
-                            {filtersActive ? "Filtros Activos" : "Filtrar"}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
+                    </TouchableOpacity>
+                </View>
+
                 {filtersActive && (
-                    <TouchableOpacity onPress={() => resetFilters(true)}>
-                        <Text style={styles.clearFiltersText}>Limpiar</Text>
+                    <TouchableOpacity
+                        style={styles.clearFiltersContainer}
+                        onPress={() => resetFilters(true)}
+                    >
+                        <Text style={styles.clearFiltersText}>Limpiar filtros activos</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -392,7 +390,7 @@ export default function HomeScreen() {
                     data={data}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id.toString()}
-                    numColumns={2}
+                    numColumns={3}
                     columnWrapperStyle={styles.columnWrapper}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
@@ -523,11 +521,30 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
         textDecorationLine: 'underline',
     } as TextStyle,
-    searchContainer: {
+    controlsContainer: {
         paddingHorizontal: 16,
         paddingBottom: 12,
     } as ViewStyle,
+    searchAndFilterRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    } as ViewStyle,
+    filterButtonCompact: {
+        backgroundColor: Colors.metalGray,
+        padding: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: Colors.metalSilver,
+        justifyContent: 'center',
+        alignItems: 'center',
+    } as ViewStyle,
+    clearFiltersContainer: {
+        marginTop: 4,
+        alignSelf: 'flex-end',
+    } as ViewStyle,
     searchWrapper: {
+        flex: 1,
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: Colors.metalGray,
@@ -598,8 +615,9 @@ const styles = StyleSheet.create({
         fontSize: 18,
     } as TextStyle,
     columnWrapper: {
-        paddingHorizontal: 12,
-        justifyContent: "space-between",
+        paddingHorizontal: 8,
+        justifyContent: "flex-start",
+        gap: 8,
     } as ViewStyle,
     listContent: {
         paddingBottom: 20,

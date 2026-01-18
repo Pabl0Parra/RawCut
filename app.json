@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "scheme": "CortoCrudo",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/corto-crudo-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#0a0a0a"
     },
@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/corto-crudo-logo.png",
         "backgroundColor": "#0a0a0a"
       },
       "edgeToEdgeEnabled": true,
