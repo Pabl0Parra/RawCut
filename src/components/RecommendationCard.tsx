@@ -220,9 +220,8 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                                 {comments.map((comment) => {
                                     const isCurrentUser = comment.user_id === currentUserId;
                                     const isSender = comment.user_id === sender?.user_id;
-                                    const username = isCurrentUser
-                                        ? "Tú"
-                                        : (isSender ? sender?.username : receiver?.username);
+                                    const otherUserName = isSender ? sender?.username : receiver?.username;
+                                    const username = isCurrentUser ? "Tú" : otherUserName;
 
                                     return (
                                         <View key={comment.id} style={styles.commentItem}>
