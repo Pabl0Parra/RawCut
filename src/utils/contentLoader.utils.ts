@@ -14,7 +14,6 @@ import type {
     ContentTab,
     ContinueWatchingItem,
     EpisodeProgress,
-    DEFAULT_SORT_VALUE,
 } from "../types/homeScreen.types";
 
 /**

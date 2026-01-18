@@ -4,7 +4,6 @@ import {
     getTVSeasonDetails,
     getTVVideos,
     getImageUrl,
-    type TVShow,
     type Video,
     type Episode,
     type Season,
