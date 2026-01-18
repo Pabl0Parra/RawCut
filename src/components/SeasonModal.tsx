@@ -30,18 +30,18 @@ export const SeasonModal: React.FC<SeasonModalProps> = ({
     onSelectEpisode,
     isEpisodeWatched,
 }) => {
-    const modalTitle = seasonNumber !== null
-        ? `Temporada ${seasonNumber}`
-        : "Episodios";
+    const modalTitle = seasonNumber === null
+        ? "Episodios"
+        : `Temporada ${seasonNumber}`;
 
     const handleToggleEpisode = async (episodeNumber: number): Promise<void> => {
         await onToggleEpisode(episodeNumber);
     };
 
     const renderEpisodeItem = ({ item }: { item: Episode }): React.JSX.Element => {
-        const watched = seasonNumber !== null
-            ? isEpisodeWatched(seasonNumber, item.episode_number)
-            : false;
+        const watched = seasonNumber === null
+            ? false
+            : isEpisodeWatched(seasonNumber, item.episode_number);
 
         return (
             <EpisodeListItem
