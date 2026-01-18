@@ -23,6 +23,7 @@ import type {
     TmdbDataMap,
     RecommendationWithRelations,
     TmdbContentData,
+    RecommendationsScreenState,
 } from "../../src/types/recommendations.types";
 import {
     INITIAL_RECOMMENDATIONS_STATE,
@@ -30,16 +31,6 @@ import {
     createTmdbCacheKey,
 } from "../../src/types/recommendations.types";
 import { fetchTmdbDataBatch } from "../../src/utils/recommendations.utils";
-
-// ============================================================================
-// Types
-// ============================================================================
-
-interface RecommendationsState {
-    activeTab: RecommendationTab;
-    tmdbData: TmdbDataMap;
-    expandedId: string | null;
-}
 
 // ============================================================================
 // Main Component
@@ -57,11 +48,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
         markCommentsAsRead,
     } = useRecommendationStore();
 
-    const [state, setState] = useState<RecommendationsState>({
-        activeTab: "received",
-        tmdbData: {},
-        expandedId: null,
-    });
+    const [state, setState] = useState<RecommendationsScreenState>(INITIAL_RECOMMENDATIONS_STATE);
 
     const { activeTab, tmdbData, expandedId } = state;
 
@@ -69,7 +56,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
     // State Helpers
     // ========================================================================
 
-    const updateState = (updates: Partial<RecommendationsState>): void => {
+    const updateState = (updates: Partial<RecommendationsScreenState>): void => {
         setState((prev) => ({ ...prev, ...updates }));
     };
 
