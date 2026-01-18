@@ -1,176 +1,147 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../../src/stores/authStore";
 import { Colors } from "../../src/constants/Colors";
 
 export default function ProfileScreen() {
-    const { user, profile, signOut, isLoading } = useAuthStore();
+    const { profile, user, updateUsername, signOut, isLoading, error, clearError } = useAuthStore();
+    const [newUsername, setNewUsername] = useState(profile?.username || "");
+    const [isEditing, setIsEditing] = useState(false);
 
-    // Beer milestone calculation
-    const getBeerBadge = (points: number) => {
-        if (points >= 50) return "🍺🍺🍺";
-        if (points >= 25) return "🍺🍺";
-        if (points >= 10) return "🍺";
-        return "";
+    useEffect(() => {
+        if (profile?.username) {
+            setNewUsername(profile.username);
+        }
+    }, [profile]);
+
+    const handleUpdateUsername = async () => {
+        if (!newUsername.trim()) {
+            Alert.alert("Error", "El nombre de usuario no puede estar vacío");
+            return;
+        }
+
+        if (newUsername.trim() === profile?.username) {
+            setIsEditing(false);
+            return;
+        }
+
+        const success = await updateUsername(newUsername.trim());
+        if (success) {
+            Alert.alert("Éxito", "Nombre de usuario actualizado correctamente");
+            setIsEditing(false);
+        }
     };
 
-    const handleSignOut = async () => {
-        await signOut();
-        router.replace("/login");
+    const handleSignOut = () => {
+        Alert.alert(
+            "Cerrar sesión",
+            "¿Estás seguro de que quieres cerrar sesión?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Cerrar sesión", style: "destructive", onPress: signOut },
+            ]
+        );
     };
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={["top"]}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.container}>
-                    {/* Avatar placeholder */}
-                    <View style={styles.avatarContainer}>
-                        <Text style={styles.avatarIcon}>👤</Text>
-                    </View>
-
-                    {/* Username */}
-                    <Text
-                        style={[styles.username, { fontFamily: "BebasNeue_400Regular" }]}
-                    >
-                        {profile?.username || user?.email || "Usuario"}
-                    </Text>
-
-                    {/* Email */}
-                    {user?.email && (
-                        <Text style={styles.emailText}>
-                            {user.email}
-                        </Text>
-                    )}
-
-                    {/* Points */}
-                    <View style={styles.pointsContainer}>
-                        <Text style={styles.pointsText}>
-                            🏆 {profile?.points || 0} puntos
-                        </Text>
-                    </View>
-
-                    {/* Beer badge */}
-                    {(profile?.points || 0) >= 10 && (
-                        <View style={styles.badgeContainer}>
-                            <Text style={styles.badgeText}>
-                                Este usuario merece una cerveza{" "}
-                                {getBeerBadge(profile?.points || 0)}
-                            </Text>
+        <SafeAreaView style={styles.safeArea}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={styles.container}>
+                    <View style={styles.header}>
+                        <View style={styles.avatarContainer}>
+                            <Ionicons name="person-circle" size={100} color={Colors.metalSilver} />
                         </View>
-                    )}
-
-                    {/* Action buttons */}
-                    <View style={styles.actionButtonsContainer}>
-                        {!user ? (
-                            <>
-                                <TouchableOpacity
-                                    style={styles.primaryButton}
-                                    onPress={() => router.push("/login")}
-                                >
-                                    <Text style={styles.primaryButtonText}>
-                                        Iniciar Sesión
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.secondaryButton}
-                                    onPress={() => router.push("/register")}
-                                >
-                                    <Text style={styles.secondaryButtonText}>
-                                        Registrarse
-                                    </Text>
-                                </TouchableOpacity>
-                            </>
-                        ) : (
-                            <TouchableOpacity
-                                style={[
-                                    styles.logoutButton,
-                                    isLoading && styles.disabledButton,
-                                ]}
-                                onPress={handleSignOut}
-                                disabled={isLoading}
-                            >
-                                <Text style={styles.logoutButtonText}>
-                                    Cerrar Sesión
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-
-                    {/* Stats section */}
-                    <View style={styles.statsSection}>
-                        <Text style={styles.sectionTitle}>
-                            Estadísticas
-                        </Text>
-                        <View style={styles.statsCard}>
-                            <View style={styles.statRow}>
-                                <Text style={styles.statLabel}>Favoritos</Text>
-                                <Text style={styles.statValue}>0</Text>
-                            </View>
-                            <View style={[styles.statRow, styles.statBorder]}>
-                                <Text style={styles.statLabel}>Watchlist</Text>
-                                <Text style={styles.statValue}>0</Text>
-                            </View>
-                            <View style={[styles.statRow, styles.statBorder]}>
-                                <Text style={styles.statLabel}>Recomendaciones enviadas</Text>
-                                <Text style={styles.statValue}>0</Text>
-                            </View>
-                            <View style={[styles.statRow, styles.statBorder]}>
-                                <Text style={styles.statLabel}>Recomendaciones recibidas</Text>
-                                <Text style={styles.statValue}>0</Text>
-                            </View>
+                        <Text style={styles.emailText}>{user?.email}</Text>
+                        <View style={styles.pointsBadge}>
+                            <Ionicons name="flash" size={16} color="#fbbf24" />
+                            <Text style={styles.pointsText}>{profile?.points || 0} puntos</Text>
                         </View>
                     </View>
 
-                    {/* Point milestones */}
-                    <View style={styles.milestoneSection}>
-                        <Text style={styles.sectionTitle}>
-                            Hitos de Cerveza 🍺
-                        </Text>
-                        <View style={styles.statsCard}>
-                            <View style={styles.milestoneRow}>
-                                <Text style={styles.milestoneIcon}>🍺</Text>
-                                <Text style={styles.milestoneText}>10 puntos</Text>
-                                <Text
-                                    style={
-                                        (profile?.points || 0) >= 10
-                                            ? styles.milestoneCompleted
-                                            : styles.milestonePending
-                                    }
-                                >
-                                    {(profile?.points || 0) >= 10 ? "✓" : `${profile?.points || 0}/10`}
-                                </Text>
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Información del Perfil</Text>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Nombre de Usuario</Text>
+                            <View style={styles.usernameContainer}>
+                                {isEditing ? (
+                                    <View style={styles.editContainer}>
+                                        <TextInput
+                                            style={styles.input}
+                                            value={newUsername}
+                                            onChangeText={setNewUsername}
+                                            autoCapitalize="none"
+                                            autoCorrect={false}
+                                            maxLength={20}
+                                            placeholder="Nombre de usuario"
+                                            placeholderTextColor="#71717a"
+                                        />
+                                        <View style={styles.editButtons}>
+                                            <TouchableOpacity
+                                                style={styles.saveButton}
+                                                onPress={handleUpdateUsername}
+                                                disabled={isLoading}
+                                            >
+                                                {isLoading ? (
+                                                    <ActivityIndicator size="small" color="white" />
+                                                ) : (
+                                                    <Ionicons name="checkmark" size={24} color="white" />
+                                                )}
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                style={styles.cancelButton}
+                                                onPress={() => {
+                                                    setNewUsername(profile?.username || "");
+                                                    setIsEditing(false);
+                                                    clearError();
+                                                }}
+                                            >
+                                                <Ionicons name="close" size={24} color="white" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                ) : (
+                                    <View style={styles.displayContainer}>
+                                        <Text style={styles.usernameText}>@{profile?.username}</Text>
+                                        <TouchableOpacity
+                                            style={styles.editIconButton}
+                                            onPress={() => setIsEditing(true)}
+                                        >
+                                            <Ionicons name="create-outline" size={20} color={Colors.bloodRed} />
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
                             </View>
-                            <View style={[styles.milestoneRow, styles.statBorder]}>
-                                <Text style={styles.milestoneIcon}>🍺🍺</Text>
-                                <Text style={styles.milestoneText}>25 puntos</Text>
-                                <Text
-                                    style={
-                                        (profile?.points || 0) >= 25
-                                            ? styles.milestoneCompleted
-                                            : styles.milestonePending
-                                    }
-                                >
-                                    {(profile?.points || 0) >= 25 ? "✓" : `${profile?.points || 0}/25`}
-                                </Text>
-                            </View>
-                            <View style={[styles.milestoneRow, styles.statBorder]}>
-                                <Text style={styles.milestoneIcon}>🍺🍺🍺</Text>
-                                <Text style={styles.milestoneText}>50 puntos</Text>
-                                <Text
-                                    style={
-                                        (profile?.points || 0) >= 50
-                                            ? styles.milestoneCompleted
-                                            : styles.milestonePending
-                                    }
-                                >
-                                    {(profile?.points || 0) >= 50 ? "✓" : `${profile?.points || 0}/50`}
-                                </Text>
-                            </View>
+                            {error && isEditing && (
+                                <Text style={styles.errorText}>{error}</Text>
+                            )}
                         </View>
                     </View>
-                </View>
-            </ScrollView>
+
+                    <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+                        <Ionicons name="log-out-outline" size={20} color="white" />
+                        <Text style={styles.signOutText}>Cerrar Sesión</Text>
+                    </TouchableOpacity>
+
+                    <Text style={styles.versionText}>RawCut v1.0.0</Text>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
@@ -178,164 +149,146 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "transparent",
+        backgroundColor: "#0a0a0a",
     },
     container: {
+        padding: 20,
         alignItems: "center",
-        padding: 24,
+    },
+    header: {
+        alignItems: "center",
+        marginBottom: 40,
+        marginTop: 20,
     },
     avatarContainer: {
-        width: 96,
-        height: 96,
-        backgroundColor: Colors.metalGray,
-        borderRadius: 48,
-        alignItems: "center",
-        justifyContent: "center",
         marginBottom: 16,
-        borderWidth: 2,
-        borderColor: Colors.bloodRed,
-    },
-    avatarIcon: {
-        fontSize: 36, // ~text-4xl
-    },
-    username: {
-        color: "#f4f4f5", // zinc-100
-        fontSize: 24,
-        fontWeight: "bold",
     },
     emailText: {
         color: Colors.metalSilver,
         fontSize: 14,
-        marginTop: 4,
+        marginBottom: 12,
     },
-    pointsContainer: {
+    pointsBadge: {
         flexDirection: "row",
         alignItems: "center",
-        marginTop: 16,
+        backgroundColor: "rgba(251, 191, 36, 0.1)",
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: "rgba(251, 191, 36, 0.3)",
     },
     pointsText: {
-        color: Colors.metalGold,
-        fontSize: 20,
-    },
-    badgeContainer: {
-        marginTop: 16,
-        backgroundColor: Colors.metalGray,
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        borderRadius: 8,
-    },
-    badgeText: {
-        color: "#f97316", // orange-500
-        fontSize: 18,
-        textAlign: "center",
-    },
-    actionButtonsContainer: {
-        width: "100%",
-        marginTop: 32,
-        paddingHorizontal: 16,
-    },
-    primaryButton: {
-        backgroundColor: Colors.bloodRed,
-        paddingHorizontal: 24,
-        paddingVertical: 16,
-        borderRadius: 4,
-        marginBottom: 16,
-    },
-    primaryButtonText: {
-        color: Colors.metalBlack,
+        color: "#fbbf24",
         fontWeight: "bold",
-        textAlign: "center",
-        textTransform: "uppercase",
+        marginLeft: 6,
+        fontSize: 14,
     },
-    secondaryButton: {
+    section: {
+        width: "100%",
         backgroundColor: Colors.metalGray,
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 40,
+        borderWidth: 1,
         borderColor: Colors.metalSilver,
-        borderWidth: 1,
-        paddingHorizontal: 24,
-        paddingVertical: 16,
-        borderRadius: 4,
-    },
-    secondaryButtonText: {
-        color: "#f4f4f5", // zinc-100
-        fontWeight: "bold",
-        textAlign: "center",
-        textTransform: "uppercase",
-    },
-    logoutButton: {
-        backgroundColor: Colors.metalGray,
-        borderColor: Colors.bloodRed,
-        borderWidth: 1,
-        paddingHorizontal: 24,
-        paddingVertical: 16,
-        borderRadius: 4,
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-    logoutButtonText: {
-        color: Colors.bloodRed,
-        fontWeight: "bold",
-        textAlign: "center",
-        textTransform: "uppercase",
-    },
-    statsSection: {
-        width: "100%",
-        marginTop: 32,
-        paddingHorizontal: 16,
     },
     sectionTitle: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        textTransform: "uppercase",
-        letterSpacing: 0.5, // tracking-wider
-        marginBottom: 16,
-    },
-    statsCard: {
-        backgroundColor: Colors.metalGray,
-        borderRadius: 8,
-        padding: 16,
-        borderColor: Colors.metalSilver,
-        borderWidth: 1,
-    },
-    statRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingVertical: 8,
-    },
-    statBorder: {
-        borderTopColor: Colors.metalSilver,
-        borderTopWidth: 1,
-    },
-    statLabel: {
-        color: Colors.metalSilver,
-    },
-    statValue: {
-        color: "#f4f4f5", // zinc-100
+        color: "#f4f4f5",
+        fontSize: 18,
         fontWeight: "bold",
+        marginBottom: 20,
     },
-    milestoneSection: {
+    inputGroup: {
         width: "100%",
-        marginTop: 32,
-        paddingHorizontal: 16,
-        marginBottom: 32,
     },
-    milestoneRow: {
+    label: {
+        color: Colors.metalSilver,
+        fontSize: 12,
+        marginBottom: 8,
+        textTransform: "uppercase",
+        letterSpacing: 1,
+    },
+    usernameContainer: {
+        minHeight: 50,
+        justifyContent: "center",
+    },
+    displayContainer: {
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 8,
+        justifyContent: "space-between",
     },
-    milestoneIcon: {
+    usernameText: {
+        color: "white",
         fontSize: 20,
-        marginRight: 12,
+        fontWeight: "600",
     },
-    milestoneText: {
-        color: "#f4f4f5", // zinc-100
+    editIconButton: {
+        padding: 8,
+    },
+    editContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    input: {
         flex: 1,
+        backgroundColor: "#18181b",
+        borderWidth: 1,
+        borderColor: Colors.bloodRed,
+        borderRadius: 8,
+        color: "white",
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        fontSize: 16,
     },
-    milestoneCompleted: {
-        color: "#22c55e", // green-500
+    editButtons: {
+        flexDirection: "row",
+        marginLeft: 12,
+        gap: 8,
     },
-    milestonePending: {
-        color: Colors.metalSilver,
+    saveButton: {
+        backgroundColor: "#22c55e",
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    cancelButton: {
+        backgroundColor: Colors.bloodRed,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    errorText: {
+        color: Colors.bloodRed,
+        fontSize: 12,
+        marginTop: 8,
+    },
+    signOutButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(220, 38, 38, 0.1)",
+        borderWidth: 1,
+        borderColor: Colors.bloodRed,
+        paddingVertical: 14,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        width: "100%",
+    },
+    signOutText: {
+        color: "white",
+        fontWeight: "bold",
+        marginLeft: 10,
+        fontSize: 16,
+    },
+    versionText: {
+        color: "#444",
+        fontSize: 12,
+        marginTop: 40,
+        marginBottom: 20,
     },
 });

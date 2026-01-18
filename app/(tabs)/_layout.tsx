@@ -1,11 +1,24 @@
+import { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { View, Text, Platform, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors } from "../../src/constants/Colors";
+import { useAuthStore } from "../../src/stores/authStore";
+import { useRecommendationStore } from "../../src/stores/recommendationStore";
 
 export default function TabLayout() {
     const insets = useSafeAreaInsets();
+    const { user } = useAuthStore();
+    const { unreadCount, fetchRecommendations, subscribeToRealtime } = useRecommendationStore();
+
+    useEffect(() => {
+        if (user) {
+            fetchRecommendations();
+            const unsubscribe = subscribeToRealtime();
+            return unsubscribe;
+        }
+    }, [user]);
 
     return (
         <Tabs
@@ -102,12 +115,20 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => (
                         <MaterialCommunityIcons name="email-outline" size={24} color={color} />
                     ),
+                    tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
                 }}
             />
             <Tabs.Screen
                 name="profile"
                 options={{
                     title: "Perfil",
+                    headerLeft: () => (
+                        <Image
+                            source={require('../../assets/icons/metal-hand.png')}
+                            style={{ width: 40, height: 40, marginLeft: 16, tintColor: "#fff" }}
+                            resizeMode="contain"
+                        />
+                    ),
                     tabBarIcon: ({ color }) => (
                         <MaterialCommunityIcons name="shield-sword-outline" size={24} color={color} />
                     ),

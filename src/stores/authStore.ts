@@ -14,6 +14,7 @@ interface AuthState {
     signUp: (email: string, password: string, username: string) => Promise<boolean>;
     signOut: () => Promise<void>;
     fetchProfile: () => Promise<void>;
+    updateUsername: (newUsername: string) => Promise<boolean>;
     setSession: (session: Session | null) => void;
     clearError: () => void;
 }
@@ -120,18 +121,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 return false;
             }
 
-            // Create profile
-            if (data.user) {
-                const { error: profileError } = await supabase.from("profiles").insert({
-                    user_id: data.user.id,
-                    username,
-                    points: 0,
-                });
-
-                if (profileError) {
-                    console.error("Error creating profile:", profileError);
-                }
-            }
+            // Profile is created automatically by database trigger 'on_auth_user_created'
+            // which executes 'handle_new_user()' in Supabase.
 
             set({
                 user: data.user,
@@ -180,6 +171,54 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             session,
             user: session?.user || null,
         });
+    },
+
+    updateUsername: async (newUsername: string) => {
+        set({ isLoading: true, error: null });
+        const { user, profile } = get();
+
+        if (!user || !profile) {
+            set({ isLoading: false, error: "No hay sesión activa" });
+            return false;
+        }
+
+        try {
+            // Check if username is available
+            const { data: existingUser } = await supabase
+                .from("profiles")
+                .select("username")
+                .eq("username", newUsername)
+                .neq("user_id", user.id)
+                .single();
+
+            if (existingUser) {
+                set({ isLoading: false, error: "Este nombre de usuario ya está en uso" });
+                return false;
+            }
+
+            // Update username
+            const { error } = await supabase
+                .from("profiles")
+                .update({ username: newUsername })
+                .eq("user_id", user.id);
+
+            if (error) {
+                set({ isLoading: false, error: "Error al actualizar nombre de usuario" });
+                return false;
+            }
+
+            // Update local profile
+            set({
+                profile: { ...profile, username: newUsername },
+                isLoading: false,
+                error: null,
+            });
+
+            return true;
+        } catch (err) {
+            set({ isLoading: false, error: "Error de conexión" });
+            return false;
+        }
     },
 
     clearError: () => set({ error: null }),

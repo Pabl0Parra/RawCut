@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS recommendations (
   tmdb_id INT NOT NULL,
   media_type VARCHAR(10) NOT NULL CHECK (media_type IN ('movie', 'tv')),
   message TEXT CHECK (LENGTH(message) <= 200),
+  is_read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   CHECK (sender_id != receiver_id)
 );
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS recommendation_comments (
   recommendation_id UUID REFERENCES recommendations(id) ON DELETE CASCADE,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   text TEXT NOT NULL CHECK (LENGTH(text) <= 500),
+  is_read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

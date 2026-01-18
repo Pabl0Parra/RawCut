@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterInput } from "../src/schemas/auth";
@@ -159,7 +160,11 @@ export default function RegisterScreen() {
                                     style={styles.eyeIcon}
                                     onPress={() => setShowPassword(!showPassword)}
                                 >
-                                    <Text style={styles.eyeIconText}>{showPassword ? "👁️" : "👁️‍🗨️"}</Text>
+                                    <Ionicons
+                                        name={showPassword ? "eye-off-outline" : "eye-outline"}
+                                        size={24}
+                                        color={Colors.metalSilver}
+                                    />
                                 </TouchableOpacity>
                             </View>
                             {errors.password && (
@@ -195,9 +200,11 @@ export default function RegisterScreen() {
                                     style={styles.eyeIcon}
                                     onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                                 >
-                                    <Text style={styles.eyeIconText}>
-                                        {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
-                                    </Text>
+                                    <Ionicons
+                                        name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                                        size={24}
+                                        color={Colors.metalSilver}
+                                    />
                                 </TouchableOpacity>
                             </View>
                             {errors.confirmPassword && (

@@ -25,9 +25,12 @@ export default function RecommendationsScreen() {
         sent,
         received,
         isLoading,
+        unreadCount,
         fetchRecommendations,
         addComment,
         addRating,
+        markAllAsRead,
+        markCommentsAsRead,
         subscribeToRealtime,
     } = useRecommendationStore();
 
@@ -41,12 +44,10 @@ export default function RecommendationsScreen() {
 
     useFocusEffect(
         useCallback(() => {
-            if (user) {
-                fetchRecommendations();
-                const unsubscribe = subscribeToRealtime();
-                return unsubscribe;
+            if (user && activeTab === "received") {
+                markAllAsRead();
             }
-        }, [user])
+        }, [user, activeTab])
     );
 
     // Fetch TMDb data for recommendations
@@ -141,7 +142,13 @@ export default function RecommendationsScreen() {
             <View style={styles.card}>
                 {/* Main card */}
                 <TouchableOpacity
-                    onPress={() => setExpandedId(isExpanded ? null : item.id)}
+                    onPress={() => {
+                        const newIsExpanded = !isExpanded;
+                        setExpandedId(newIsExpanded ? item.id : null);
+                        if (newIsExpanded) {
+                            markCommentsAsRead(item.id);
+                        }
+                    }}
                     activeOpacity={0.8}
                     style={styles.cardMain}
                 >
@@ -160,9 +167,15 @@ export default function RecommendationsScreen() {
                     )}
 
                     <View style={styles.cardContent}>
-                        <Text style={styles.cardTitle} numberOfLines={2}>
-                            {tmdb.title}
-                        </Text>
+                        <View style={styles.cardHeaderRow}>
+                            <Text style={styles.cardTitle} numberOfLines={1}>
+                                {tmdb.title}
+                            </Text>
+                            {((isReceived && !item.is_read) ||
+                                item.comments?.some((c: any) => c.user_id !== user?.id && !c.is_read)) && (
+                                    <View style={styles.unreadDot} />
+                                )}
+                        </View>
                         <Text style={styles.cardMeta}>
                             {isReceived ? `De: @${otherUser?.username}` : `Para: @${otherUser?.username}`}
                         </Text>
@@ -492,15 +505,28 @@ const styles = StyleSheet.create({
         flex: 1,
         marginLeft: 12,
     },
+    cardHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingRight: 8,
+    },
+    unreadDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: Colors.bloodRed,
+    },
     cardTitle: {
         color: "#f4f4f5", // zinc-100
         fontWeight: "bold",
         fontSize: 16,
+        flex: 1,
     },
     cardMeta: {
         color: Colors.metalSilver,
         fontSize: 14,
-        marginTop: 4,
+        marginTop: 2,
     },
     cardMessage: {
         color: "#d4d4d8", // zinc-300

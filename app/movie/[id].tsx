@@ -11,6 +11,8 @@ import {
     FlatList,
     StyleSheet,
     Linking,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -36,6 +38,8 @@ export default function MovieDetailScreen() {
     const [users, setUsers] = useState<Profile[]>([]);
     const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
     const [sendingRecommendation, setSendingRecommendation] = useState(false);
+    const [loadingUsers, setLoadingUsers] = useState(false);
+    const [showUserList, setShowUserList] = useState(true);
 
     const { user } = useAuthStore();
     const {
@@ -96,20 +100,22 @@ export default function MovieDetailScreen() {
     };
 
     const searchForUsers = async (query: string) => {
-        if (query.length < 2) {
-            setUsers([]);
-            return;
-        }
+        setLoadingUsers(true);
+        try {
+            const { data, error } = await supabase
+                .from("profiles")
+                .select("*")
+                .ilike("username", `%${query}%`)
+                .neq("user_id", user?.id)
+                .limit(10);
 
-        const { data, error } = await supabase
-            .from("profiles")
-            .select("*")
-            .ilike("username", `%${query}%`)
-            .neq("user_id", user?.id)
-            .limit(10);
-
-        if (data) {
-            setUsers(data);
+            if (data) {
+                setUsers(data);
+            }
+        } catch (err) {
+            console.error("Error searching users:", err);
+        } finally {
+            setLoadingUsers(false);
         }
     };
 
@@ -118,15 +124,26 @@ export default function MovieDetailScreen() {
 
         setSendingRecommendation(true);
         try {
-            const { error } = await supabase.from("recommendations").insert({
+            // Debug logs
+            const { data: sessionData } = await supabase.auth.getSession();
+            console.log("Current Auth ID:", sessionData.session?.user?.id);
+            console.log("Sending Recommendation as:", user.id);
+            console.log("To Receiver:", selectedUser.user_id);
+
+            const { data, error } = await supabase.from("recommendations").insert({
                 sender_id: user.id,
                 receiver_id: selectedUser.user_id,
                 tmdb_id: movie.id,
                 media_type: "movie",
                 message: recommendMessage || null,
-            });
+            }).select();
 
-            if (error) throw error;
+            if (error) {
+                console.error("Supabase insert error details:", error);
+                throw error;
+            }
+
+            console.log("Insert success data:", data);
 
             setShowRecommendModal(false);
             setRecommendMessage("");
@@ -317,7 +334,43 @@ export default function MovieDetailScreen() {
                     {user && (
                         <TouchableOpacity
                             style={styles.recommendButton}
-                            onPress={() => setShowRecommendModal(true)}
+                            onPress={async () => {
+                                setSelectedUser(null);
+                                setSearchUsers("");
+                                setShowRecommendModal(true);
+                                // Load all users immediately
+                                setLoadingUsers(true);
+                                try {
+                                    // Debug: Check current user ID
+                                    console.log("Current user ID:", user?.id);
+
+                                    // Debug: Check all profiles
+                                    const { data: allProfiles } = await supabase
+                                        .from("profiles")
+                                        .select("*");
+                                    console.log("All profiles in database:", allProfiles);
+
+                                    const { data, error } = await supabase
+                                        .from("profiles")
+                                        .select("*")
+                                        .neq("user_id", user?.id)
+                                        .order("username", { ascending: true })
+                                        .limit(50);
+
+                                    if (error) {
+                                        console.error("Supabase error loading users:", error);
+                                        alert(`Error loading users: ${error.message}`);
+                                    } else {
+                                        console.log("Loaded users:", data?.length || 0);
+                                        setUsers(data || []);
+                                    }
+                                } catch (err) {
+                                    console.error("Error loading users:", err);
+                                    alert("Error loading users");
+                                } finally {
+                                    setLoadingUsers(false);
+                                }
+                            }}
                         >
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                                 <MaterialCommunityIcons name="email-outline" size={24} color={Colors.white} />
@@ -461,7 +514,10 @@ export default function MovieDetailScreen() {
                 presentationStyle="pageSheet"
                 onRequestClose={() => setShowRecommendModal(false)}
             >
-                <View style={styles.modalContainer}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={styles.modalContainer}
+                >
                     <View style={styles.modalHeader}>
                         <Text
                             style={[styles.modalTitle, { fontFamily: "BebasNeue_400Regular" }]}
@@ -491,37 +547,70 @@ export default function MovieDetailScreen() {
 
                     {/* User search */}
                     <Text style={styles.inputLabel}>
-                        Buscar usuario
+                        Seleccionar usuario
                     </Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Nombre de usuario..."
-                        placeholderTextColor="#71717a"
-                        value={searchUsers}
-                        onChangeText={(text) => {
-                            setSearchUsers(text);
-                            searchForUsers(text);
-                        }}
-                    />
+                    <TouchableOpacity
+                        style={styles.dropdownButton}
+                        onPress={() => setShowUserList(!showUserList)}
+                    >
+                        <Text style={styles.dropdownButtonText}>
+                            {selectedUser ? `@${selectedUser.username}` : 'Toca para seleccionar usuario...'}
+                        </Text>
+                        <Ionicons
+                            name={showUserList ? "chevron-up" : "chevron-down"}
+                            size={20}
+                            color={Colors.metalSilver}
+                        />
+                    </TouchableOpacity>
 
                     {/* User results */}
-                    {users.length > 0 && !selectedUser && (
-                        <View style={styles.searchResults}>
-                            <FlatList
-                                data={users}
-                                keyExtractor={(item) => item.user_id}
-                                renderItem={({ item }) => (
-                                    <TouchableOpacity
-                                        style={styles.searchResultItem}
-                                        onPress={() => {
-                                            setSelectedUser(item);
-                                            setSearchUsers(item.username);
-                                        }}
-                                    >
-                                        <Text style={styles.searchResultText}>@{item.username}</Text>
-                                    </TouchableOpacity>
-                                )}
-                            />
+                    {showUserList && (
+                        <View style={{ zIndex: 50 }}>
+                            {loadingUsers && (
+                                <ActivityIndicator size="small" color={Colors.bloodRed} style={{ marginVertical: 8 }} />
+                            )}
+
+                            {users.length > 0 && (
+                                <View style={styles.searchResults}>
+                                    <FlatList
+                                        data={users}
+                                        keyExtractor={(item) => item.user_id}
+                                        keyboardShouldPersistTaps="handled"
+                                        renderItem={({ item }) => (
+                                            <TouchableOpacity
+                                                style={[
+                                                    styles.searchResultItem,
+                                                    selectedUser?.user_id === item.user_id && styles.searchResultSelected,
+                                                ]}
+                                                onPress={() => {
+                                                    setSelectedUser(item);
+                                                    setShowUserList(false);
+                                                }}
+                                            >
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                    <Text style={styles.searchResultText}>@{item.username}</Text>
+                                                    {selectedUser?.user_id === item.user_id && (
+                                                        <Ionicons name="checkmark-circle" size={20} color={Colors.bloodRed} />
+                                                    )}
+                                                </View>
+                                            </TouchableOpacity>
+                                        )}
+                                        ListEmptyComponent={() => (
+                                            <Text style={{ color: Colors.metalSilver, padding: 12, textAlign: 'center' }}>
+                                                No se encontraron usuarios
+                                            </Text>
+                                        )}
+                                    />
+                                </View>
+                            )}
+
+                            {!loadingUsers && users.length === 0 && (
+                                <View style={styles.emptyUsersContainer}>
+                                    <Text style={styles.emptyUsersText}>
+                                        No hay otros usuarios disponibles
+                                    </Text>
+                                </View>
+                            )}
                         </View>
                     )}
 
@@ -556,23 +645,25 @@ export default function MovieDetailScreen() {
                     </Text>
 
                     {/* Send button */}
-                    <TouchableOpacity
-                        style={[
-                            styles.sendButton,
-                            (!selectedUser || sendingRecommendation) && styles.disabledButton,
-                        ]}
-                        onPress={handleSendRecommendation}
-                        disabled={!selectedUser || sendingRecommendation}
-                    >
-                        {sendingRecommendation ? (
-                            <ActivityIndicator color="#0a0a0a" />
-                        ) : (
-                            <Text style={styles.sendButtonText}>
-                                Enviar Recomendación
-                            </Text>
-                        )}
-                    </TouchableOpacity>
-                </View>
+                    <View style={{ paddingTop: 16 }}>
+                        <TouchableOpacity
+                            style={[
+                                styles.sendButton,
+                                (!selectedUser || sendingRecommendation) && styles.disabledButton,
+                            ]}
+                            onPress={handleSendRecommendation}
+                            disabled={!selectedUser || sendingRecommendation}
+                        >
+                            {sendingRecommendation ? (
+                                <ActivityIndicator color="#0a0a0a" />
+                            ) : (
+                                <Text style={styles.sendButtonText}>
+                                    Enviar Recomendación
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </KeyboardAvoidingView>
             </Modal>
         </SafeAreaView>
     );
@@ -783,11 +874,41 @@ const styles = StyleSheet.create({
     multilineInput: {
         marginBottom: 16,
     },
+    dropdownButton: {
+        backgroundColor: Colors.metalGray,
+        borderWidth: 1,
+        borderColor: Colors.metalSilver,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 4,
+        marginBottom: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    dropdownButtonText: {
+        color: "#f4f4f5",
+        flex: 1,
+    },
+    emptyUsersContainer: {
+        backgroundColor: Colors.metalGray,
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 16,
+        alignItems: 'center',
+    },
+    emptyUsersText: {
+        color: Colors.metalSilver,
+        textAlign: 'center',
+    },
     searchResults: {
         backgroundColor: Colors.metalGray,
         borderRadius: 8,
         marginBottom: 16,
-        maxHeight: 160,
+        maxHeight: 180,
+        borderWidth: 1,
+        borderColor: Colors.bloodRed,
+        overflow: 'hidden',
     },
     searchResultItem: {
         padding: 12,
@@ -796,6 +917,10 @@ const styles = StyleSheet.create({
     },
     searchResultText: {
         color: "#f4f4f5", // zinc-100
+    },
+    searchResultSelected: {
+        backgroundColor: "rgba(220, 38, 38, 0.2)",
+        borderColor: Colors.bloodRed,
     },
     selectedUserContainer: {
         backgroundColor: Colors.metalGray,
@@ -811,6 +936,13 @@ const styles = StyleSheet.create({
     },
     removeUserText: {
         color: Colors.bloodRed,
+    },
+    selectionHint: {
+        color: Colors.bloodRed,
+        fontSize: 12,
+        marginBottom: 8,
+        textAlign: 'center',
+        fontStyle: 'italic',
     },
     charCount: {
         color: Colors.metalSilver,

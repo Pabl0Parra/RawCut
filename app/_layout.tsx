@@ -1,4 +1,5 @@
 import { Slot, Stack, SplashScreen, useRouter, useSegments } from "expo-router";
+import * as Linking from "expo-linking";
 import { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import {
@@ -62,7 +63,35 @@ export default function RootLayout() {
             setIsReady(true);
         });
 
-        return () => subscription.unsubscribe();
+        // Deep linking handler
+        const handleDeepLink = async (url: string | null) => {
+            if (!url) return;
+            const { queryParams } = Linking.parse(url);
+
+            if (queryParams?.access_token && queryParams?.refresh_token) {
+                const { data, error } = await supabase.auth.setSession({
+                    access_token: queryParams.access_token as string,
+                    refresh_token: queryParams.refresh_token as string,
+                });
+
+                if (data.session) {
+                    setSession(data.session);
+                }
+            }
+        };
+
+        // Listen for deep links
+        const deepLinkSubscription = Linking.addEventListener("url", (event) => {
+            handleDeepLink(event.url);
+        });
+
+        // Initial link check
+        Linking.getInitialURL().then(handleDeepLink);
+
+        return () => {
+            subscription.unsubscribe();
+            deepLinkSubscription.remove();
+        };
     }, []);
 
     // Handle Native Splash hiding

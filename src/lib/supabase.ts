@@ -10,7 +10,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         storage: AsyncStorage,
         autoRefreshToken: true,
         persistSession: true,
-        detectSessionInUrl: false,
+        detectSessionInUrl: true,
     },
 });
 
@@ -39,6 +39,7 @@ export interface Recommendation {
     tmdb_id: number;
     media_type: "movie" | "tv";
     message: string | null;
+    is_read: boolean;
     created_at: string;
 }
 
@@ -47,6 +48,7 @@ export interface RecommendationComment {
     recommendation_id: string;
     user_id: string;
     text: string;
+    is_read: boolean;
     created_at: string;
 }
 
