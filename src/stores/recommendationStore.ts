@@ -28,6 +28,69 @@ interface RecommendationState {
     clearRecommendations: () => void;
 }
 
+// Helpers
+const processRecommendations = (data: any[]): EnrichedRecommendation[] => {
+    return data.map((rec) => ({
+        ...rec,
+        comments: rec.comments || [],
+        rating: Array.isArray(rec.rating) ? rec.rating[0] : rec.rating,
+    }));
+};
+
+const addCommentToRecs = (
+    recs: EnrichedRecommendation[],
+    recommendationId: string,
+    newComment: RecommendationComment
+): EnrichedRecommendation[] => {
+    return recs.map((rec) =>
+        rec.id === recommendationId
+            ? { ...rec, comments: [...rec.comments, newComment] }
+            : rec
+    );
+};
+
+const updateRecRating = (
+    recs: EnrichedRecommendation[],
+    recommendationId: string,
+    rating: Rating
+): EnrichedRecommendation[] => {
+    return recs.map((rec) =>
+        rec.id === recommendationId
+            ? { ...rec, rating, is_read: true }
+            : rec
+    );
+};
+
+const markRecCommentsRead = (
+    recs: EnrichedRecommendation[],
+    recommendationId: string,
+    userId: string
+): EnrichedRecommendation[] => {
+    return recs.map((rec) =>
+        rec.id === recommendationId
+            ? {
+                ...rec,
+                comments: rec.comments.map((c) =>
+                    c.user_id !== userId ? { ...c, is_read: true } : c
+                ),
+            }
+            : rec
+    );
+};
+
+const calculateUnreadCount = (
+    sent: EnrichedRecommendation[],
+    received: EnrichedRecommendation[],
+    userId: string
+): number => {
+    const receivedUnreadRecs = received.filter(r => !r.is_read).length;
+    let unreadCommentsCount = 0;
+    [...sent, ...received].forEach(rec => {
+        unreadCommentsCount += rec.comments.filter(c => c.user_id !== userId && !c.is_read).length;
+    });
+    return receivedUnreadRecs + unreadCommentsCount;
+};
+
 export const useRecommendationStore = create<RecommendationState>((set, get) => ({
     sent: [],
     received: [],
@@ -69,31 +132,14 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
             if (sentError) throw sentError;
             if (receivedError) throw receivedError;
 
-            const processRecommendations = (data: any[]): EnrichedRecommendation[] => {
-                return data.map((rec) => ({
-                    ...rec,
-                    comments: rec.comments || [],
-                    rating: Array.isArray(rec.rating) ? rec.rating[0] : rec.rating,
-                }));
-            };
-
-            const receivedUnreadRecs = (receivedData || []).filter((r: any) => !r.is_read).length;
-
-            const allRecs = [...(sentData || []), ...(receivedData || [])];
-            let unreadCommentsCount = 0;
-
-            allRecs.forEach(rec => {
-                const unreadComments = (rec.comments || []).filter((c: any) =>
-                    c.user_id !== user.id && !c.is_read
-                );
-                unreadCommentsCount += unreadComments.length;
-            });
+            const sent = processRecommendations(sentData || []);
+            const received = processRecommendations(receivedData || []);
 
             set({
-                sent: processRecommendations(sentData || []),
-                received: processRecommendations(receivedData || []),
+                sent,
+                received,
                 isLoading: false,
-                unreadCount: receivedUnreadRecs + unreadCommentsCount,
+                unreadCount: calculateUnreadCount(sent, received, user.id),
             });
         } catch (err) {
             console.error("Error fetching recommendations:", err);
@@ -118,20 +164,10 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
 
             if (error) throw error;
 
-            // Update local state
-            set((state) => {
-                const updateComments = (recs: EnrichedRecommendation[]) =>
-                    recs.map((rec) =>
-                        rec.id === recommendationId
-                            ? { ...rec, comments: [...rec.comments, data] }
-                            : rec
-                    );
-
-                return {
-                    sent: updateComments(state.sent),
-                    received: updateComments(state.received),
-                };
-            });
+            set((state) => ({
+                sent: addCommentToRecs(state.sent, recommendationId, data),
+                received: addCommentToRecs(state.received, recommendationId, data),
+            }));
 
             return true;
         } catch (err) {
@@ -162,19 +198,13 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 .update({ is_read: true })
                 .eq("id", recommendationId);
 
-            // Update local state
             set((state) => {
-                const updateRating = (recs: EnrichedRecommendation[]) =>
-                    recs.map((rec) =>
-                        rec.id === recommendationId ? { ...rec, rating: data, is_read: true } : rec
-                    );
-
-                const wasUnread = state.received.find(r => r.id === recommendationId && !r.is_read);
-
+                const newSent = updateRecRating(state.sent, recommendationId, data);
+                const newReceived = updateRecRating(state.received, recommendationId, data);
                 return {
-                    sent: updateRating(state.sent),
-                    received: updateRating(state.received),
-                    unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount,
+                    sent: newSent,
+                    received: newReceived,
+                    unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
                 };
             });
 
@@ -222,31 +252,13 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
             if (error) throw error;
 
             set((state) => {
-                const updateComments = (recs: EnrichedRecommendation[]) =>
-                    recs.map((rec) =>
-                        rec.id === recommendationId
-                            ? {
-                                ...rec,
-                                comments: rec.comments.map((c) =>
-                                    c.user_id !== user.id ? { ...c, is_read: true } : c
-                                ),
-                            }
-                            : rec
-                    );
-
-                const newSent = updateComments(state.sent);
-                const newReceived = updateComments(state.received);
-
-                const receivedUnreadRecs = newReceived.filter(r => !r.is_read).length;
-                let unreadCommentsCount = 0;
-                [...newSent, ...newReceived].forEach(rec => {
-                    unreadCommentsCount += rec.comments.filter(c => c.user_id !== user.id && !c.is_read).length;
-                });
+                const newSent = markRecCommentsRead(state.sent, recommendationId, user.id);
+                const newReceived = markRecCommentsRead(state.received, recommendationId, user.id);
 
                 return {
                     sent: newSent,
                     received: newReceived,
-                    unreadCount: receivedUnreadRecs + unreadCommentsCount,
+                    unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
                 };
             });
         } catch (err) {
@@ -270,19 +282,10 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 },
                 (payload) => {
                     const newComment = payload.new as RecommendationComment;
-                    set((state) => {
-                        const updateComments = (recs: EnrichedRecommendation[]) =>
-                            recs.map((rec) =>
-                                rec.id === newComment.recommendation_id
-                                    ? { ...rec, comments: [...rec.comments, newComment] }
-                                    : rec
-                            );
-
-                        return {
-                            sent: updateComments(state.sent),
-                            received: updateComments(state.received),
-                        };
-                    });
+                    set((state) => ({
+                        sent: addCommentToRecs(state.sent, newComment.recommendation_id, newComment),
+                        received: addCommentToRecs(state.received, newComment.recommendation_id, newComment),
+                    }));
                 }
             )
             .subscribe();
