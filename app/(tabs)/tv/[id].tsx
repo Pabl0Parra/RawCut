@@ -30,11 +30,15 @@ import { Colors } from "../../../src/constants/Colors";
 
 // Components
 import TrailerModal from "../../../src/components/TrailerModal";
-import ActionButton from "../../../src/components/ActionButton";
 import ContentRecommendModal from "../../../src/components/ContentRecommendModal";
 import SeasonCard from "../../../src/components/SeasonCard";
 import SeasonModal from "../../../src/components/SeasonModal";
 import EpisodeModal from "../../../src/components/EpisodeModal";
+import { ContentBackdrop } from "../../../src/components/ContentBackdrop";
+import { ContentPoster } from "../../../src/components/ContentPoster";
+import { GenreList } from "../../../src/components/GenreList";
+import { ContentActionBar } from "../../../src/components/ContentActionBar";
+import { useContentActions } from "../../../src/hooks/useContentActions";
 
 // Types & Utils
 import type {
@@ -93,20 +97,20 @@ export default function TVDetailScreen(): React.JSX.Element {
 
     const { user } = useAuthStore();
     const {
-        isFavorite,
-        isInWatchlist,
-        isWatched,
-        addToFavorites,
-        removeFromFavorites,
-        addToWatchlist,
-        removeFromWatchlist,
         fetchTVProgress,
         isEpisodeWatched,
         isSeasonWatched,
         getNextEpisodeToWatch,
         toggleEpisodeWatched,
-        toggleWatched,
     } = useContentStore();
+    const {
+        isFavorite,
+        isInWatchlist,
+        isWatched,
+        handleToggleFavorite,
+        handleToggleWatchlist,
+        handleToggleWatched,
+    } = useContentActions();
 
     // ========================================================================
     // State Helpers
@@ -151,30 +155,7 @@ export default function TVDetailScreen(): React.JSX.Element {
     // Action Handlers
     // ========================================================================
 
-    const handleToggleFavorite = async (): Promise<void> => {
-        if (!tvShow || !user) return;
-
-        if (isFavorite(tvShow.id, TV_MEDIA_TYPE)) {
-            await removeFromFavorites(tvShow.id, TV_MEDIA_TYPE);
-        } else {
-            await addToFavorites(tvShow.id, TV_MEDIA_TYPE);
-        }
-    };
-
-    const handleToggleWatchlist = async (): Promise<void> => {
-        if (!tvShow || !user) return;
-
-        if (isInWatchlist(tvShow.id, TV_MEDIA_TYPE)) {
-            await removeFromWatchlist(tvShow.id, TV_MEDIA_TYPE);
-        } else {
-            await addToWatchlist(tvShow.id, TV_MEDIA_TYPE);
-        }
-    };
-
-    const handleToggleWatched = async (): Promise<void> => {
-        if (!tvShow || !user) return;
-        await toggleWatched(tvShow.id, TV_MEDIA_TYPE);
-    };
+    // Action handlers now provided by useContentActions hook
 
     const handleWatchTrailer = (): void => {
         if (trailerKey) {

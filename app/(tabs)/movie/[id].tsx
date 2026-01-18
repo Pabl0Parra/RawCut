@@ -18,12 +18,15 @@ import { Image } from "expo-image";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { getImageUrl, type Movie, type CastMember } from "../../../src/lib/tmdb";
-import { useContentStore } from "../../../src/stores/contentStore";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { Colors } from "../../../src/constants/Colors";
 import TrailerModal from "../../../src/components/TrailerModal";
-import ActionButton from "../../../src/components/ActionButton";
 import RecommendModal from "../../../src/components/RecommendModal";
+import { ContentBackdrop } from "../../../src/components/ContentBackdrop";
+import { ContentPoster } from "../../../src/components/ContentPoster";
+import { GenreList } from "../../../src/components/GenreList";
+import { ContentActionBar } from "../../../src/components/ContentActionBar";
+import { useContentActions } from "../../../src/hooks/useContentActions";
 
 import type { MovieWithDetails } from "../../../src/types/movieDetail.types";
 import {
@@ -87,12 +90,10 @@ export default function MovieDetailScreen(): React.JSX.Element {
         isFavorite,
         isInWatchlist,
         isWatched,
-        addToFavorites,
-        removeFromFavorites,
-        addToWatchlist,
-        removeFromWatchlist,
-        toggleWatched,
-    } = useContentStore();
+        handleToggleFavorite,
+        handleToggleWatchlist,
+        handleToggleWatched,
+    } = useContentActions();
 
     // ========================================================================
     // State Helpers
@@ -134,30 +135,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
     // Action Handlers
     // ========================================================================
 
-    const handleToggleFavorite = async (): Promise<void> => {
-        if (!movie || !user) return;
-
-        if (isFavorite(movie.id, "movie")) {
-            await removeFromFavorites(movie.id, "movie");
-        } else {
-            await addToFavorites(movie.id, "movie");
-        }
-    };
-
-    const handleToggleWatchlist = async (): Promise<void> => {
-        if (!movie || !user) return;
-
-        if (isInWatchlist(movie.id, "movie")) {
-            await removeFromWatchlist(movie.id, "movie");
-        } else {
-            await addToWatchlist(movie.id, "movie");
-        }
-    };
-
-    const handleToggleWatched = async (): Promise<void> => {
-        if (!movie || !user) return;
-        await toggleWatched(movie.id, "movie");
-    };
+    // Action handlers now provided by useContentActions hook
 
     const handleWatchTrailer = (): void => {
         if (trailerKey) {
@@ -197,115 +175,13 @@ export default function MovieDetailScreen(): React.JSX.Element {
         </SafeAreaView>
     );
 
-    const renderBackdrop = (): React.JSX.Element => {
-        const backdropUrl = getImageUrl(movie?.backdrop_path ?? null, "original");
-        const backdropHeight = SCREEN_WIDTH * BACKDROP_ASPECT_RATIO;
+    // Backdrop, poster, genres, and action buttons now use shared components
 
-        return (
-            <View style={styles.backdropContainer}>
-                {backdropUrl ? (
-                    <Image
-                        source={{ uri: backdropUrl }}
-                        style={{ width: SCREEN_WIDTH, height: backdropHeight }}
-                        contentFit="cover"
-                    />
-                ) : (
-                    <View
-                        style={[
-                            styles.backdropPlaceholder,
-                            { width: SCREEN_WIDTH, height: backdropHeight },
-                        ]}
-                    />
-                )}
 
-                {trailerKey && (
-                    <TouchableOpacity
-                        style={styles.playButtonOverlay}
-                        onPress={handleWatchTrailer}
-                    >
-                        <Ionicons
-                            name="play-circle"
-                            size={80}
-                            color="rgba(255,255,255,0.8)"
-                        />
-                        <Text style={styles.playTrailerText}>Ver Trailer</Text>
-                    </TouchableOpacity>
-                )}
-            </View>
-        );
-    };
 
-    const renderPoster = (): React.JSX.Element => {
-        const posterUrl = getImageUrl(movie?.poster_path ?? null, "w300");
 
-        if (posterUrl) {
-            return (
-                <Image
-                    source={{ uri: posterUrl }}
-                    style={styles.poster}
-                    contentFit="cover"
-                />
-            );
-        }
 
-        return (
-            <View style={styles.posterPlaceholder}>
-                <Text style={styles.posterPlaceholderIcon}>🎬</Text>
-            </View>
-        );
-    };
 
-    const renderGenres = (): React.JSX.Element | null => {
-        if (!movie?.genres || movie.genres.length === 0) return null;
-
-        return (
-            <View style={styles.genresContainer}>
-                {movie.genres.map((genre) => (
-                    <View key={genre.id} style={styles.genreBadge}>
-                        <Text style={styles.genreText}>{genre.name}</Text>
-                    </View>
-                ))}
-            </View>
-        );
-    };
-
-    const renderActionButtons = (): React.JSX.Element | null => {
-        if (!user || !movie) return null;
-
-        const movieId = movie.id;
-
-        return (
-            <View style={styles.actionButtonsRow}>
-                <ActionButton
-                    isActive={isFavorite(movieId, "movie")}
-                    activeIcon="skull"
-                    inactiveIcon="skull-outline"
-                    activeLabel="En Favoritos"
-                    inactiveLabel="Añadir"
-                    onPress={handleToggleFavorite}
-                    iconFamily="Ionicons"
-                />
-                <ActionButton
-                    isActive={isInWatchlist(movieId, "movie")}
-                    activeIcon="sword-cross"
-                    inactiveIcon="sword"
-                    activeLabel="En Lista"
-                    inactiveLabel="Watchlist"
-                    onPress={handleToggleWatchlist}
-                    iconFamily="MaterialCommunityIcons"
-                />
-                <ActionButton
-                    isActive={isWatched(movieId, "movie")}
-                    activeIcon="eye"
-                    inactiveIcon="eye-outline"
-                    activeLabel="Ya Visto"
-                    inactiveLabel="Marcar Visto"
-                    onPress={handleToggleWatched}
-                    iconFamily="Ionicons"
-                />
-            </View>
-        );
-    };
 
     const renderRecommendButton = (): React.JSX.Element | null => {
         if (!user) return null;
@@ -474,13 +350,20 @@ export default function MovieDetailScreen(): React.JSX.Element {
                 </TouchableOpacity>
 
                 {/* Backdrop */}
-                {renderBackdrop()}
+                <ContentBackdrop
+                    backdropUrl={getImageUrl(movie.backdrop_path ?? null, "original")}
+                    trailerKey={trailerKey}
+                    onPlayTrailer={handleWatchTrailer}
+                />
 
                 {/* Content */}
                 <View style={styles.contentContainer}>
                     {/* Header Row */}
                     <View style={styles.headerRow}>
-                        {renderPoster()}
+                        <ContentPoster
+                            posterUrl={getImageUrl(movie.poster_path ?? null, "w300")}
+                            placeholderIcon="🎬"
+                        />
                         <View style={styles.infoContainer}>
                             <Text style={styles.title}>{movie.title}</Text>
                             <Text style={styles.yearText}>
@@ -493,10 +376,20 @@ export default function MovieDetailScreen(): React.JSX.Element {
                     </View>
 
                     {/* Genres */}
-                    {renderGenres()}
+                    <GenreList genres={movie.genres || []} />
 
                     {/* Action Buttons */}
-                    {renderActionButtons()}
+                    <ContentActionBar
+                        contentId={movie.id}
+                        mediaType="movie"
+                        isFavorite={isFavorite(movie.id, "movie")}
+                        isInWatchlist={isInWatchlist(movie.id, "movie")}
+                        isWatched={isWatched(movie.id, "movie")}
+                        onToggleFavorite={() => handleToggleFavorite(movie.id, "movie")}
+                        onToggleWatchlist={() => handleToggleWatchlist(movie.id, "movie")}
+                        onToggleWatched={() => handleToggleWatched(movie.id, "movie")}
+                        currentUserId={user?.id}
+                    />
 
                     {/* Recommend Button */}
                     {renderRecommendButton()}
