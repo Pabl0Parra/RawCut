@@ -352,8 +352,9 @@ export default function TVDetailScreen() {
                                                 ? styles.activeButtonText
                                                 : styles.inactiveButtonText
                                         }
+                                        numberOfLines={1}
                                     >
-                                        {isFavorite(tvShow.id, "tv") ? "En Favoritos" : "Añadir a Favoritos"}
+                                        {isFavorite(tvShow.id, "tv") ? "En Favoritos" : "Añadir"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -367,7 +368,7 @@ export default function TVDetailScreen() {
                                 ]}
                                 onPress={handleToggleWatchlist}
                             >
-                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', gap: 6 }}>
                                     <MaterialCommunityIcons
                                         name={isInWatchlist(tvShow.id, "tv") ? "sword-cross" : "sword"}
                                         size={20}
@@ -379,6 +380,7 @@ export default function TVDetailScreen() {
                                                 ? styles.activeButtonText
                                                 : styles.inactiveButtonText
                                         }
+                                        numberOfLines={1}
                                     >
                                         {isInWatchlist(tvShow.id, "tv")
                                             ? "En Lista"
@@ -396,7 +398,7 @@ export default function TVDetailScreen() {
                                 ]}
                                 onPress={() => toggleWatched(tvShow.id, "tv")}
                             >
-                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', gap: 6 }}>
                                     <Ionicons
                                         name={isWatched(tvShow.id, "tv") ? "eye" : "eye-outline"}
                                         size={20}
@@ -408,6 +410,7 @@ export default function TVDetailScreen() {
                                                 ? styles.activeButtonText
                                                 : styles.inactiveButtonText
                                         }
+                                        numberOfLines={1}
                                     >
                                         {isWatched(tvShow.id, "tv") ? "Visto" : "Visto"}
                                     </Text>

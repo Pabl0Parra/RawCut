@@ -111,25 +111,44 @@ export default function HomeScreen() {
     const loadContinueWatching = async () => {
         setLoadingContinue(true);
         try {
-            // Get unique show IDs from progress
-            const showIds = [...new Set(tvProgress.map(p => p.tmdb_id))];
+            // Filter out movies (0,0) and fully watched shows (-1,-1)
+            // Only keep entries that represent actual episode progress (season > 0)
+            const actualProgress = tvProgress.filter(p => p.season_number > 0);
+
+            // Get unique show IDs from actual progress
+            const showIds = [...new Set(actualProgress.map(p => p.tmdb_id))];
+
+            if (showIds.length === 0) {
+                setContinueWatching([]);
+                setLoadingContinue(false);
+                return;
+            }
 
             const showsWithDetails = await Promise.all(
                 showIds.slice(0, 10).map(async (id) => {
-                    const show = await getTVShowDetails(id);
-                    const watchedCount = tvProgress.filter(p => p.tmdb_id === id).length;
-                    return {
-                        show,
-                        progress: {
-                            watched: watchedCount,
-                            total: show.number_of_episodes || 0
-                        }
-                    };
+                    try {
+                        const show = await getTVShowDetails(id);
+                        const watchedCount = tvProgress.filter(p => p.tmdb_id === id && p.season_number > 0).length;
+
+                        // Check if show is already fully watched (optional logic, but good for cleanliness)
+                        if (isWatched(id, "tv")) return null;
+
+                        return {
+                            show,
+                            progress: {
+                                watched: watchedCount,
+                                total: show.number_of_episodes || 0
+                            }
+                        };
+                    } catch (error) {
+                        console.error(`Error fetching details for show ${id}:`, error);
+                        return null;
+                    }
                 })
             );
 
-            // Filter out finished shows if we wanted, but for now just show them
-            setContinueWatching(showsWithDetails);
+            // Filter out nulls (failed fetches or already watched shows)
+            setContinueWatching(showsWithDetails.filter(s => s !== null) as any);
         } catch (err) {
             console.error("Error loading continue watching:", err);
         } finally {
@@ -151,7 +170,16 @@ export default function HomeScreen() {
     const loadGenres = async () => {
         try {
             const data = activeTab === "movies" ? await getMovieGenres() : await getTVGenres();
-            setGenres(data.genres);
+
+            // Sort genres alphabetically and clarify "Terror" as "Horror"
+            const processedGenres = data.genres
+                .map(g => ({
+                    ...g,
+                    name: g.name === "Terror" ? "Terror (Horror)" : g.name
+                }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            setGenres(processedGenres);
         } catch (err) {
             console.error("Error loading genres:", err);
         }
@@ -168,7 +196,10 @@ export default function HomeScreen() {
     };
 
     const applyFilters = () => {
-        setFiltersActive(true);
+        // Only activate filters if something is actually selected
+        const hasActiveFilters = selectedGenre !== null || selectedYear.trim() !== "" || sortBy !== "popularity.desc";
+        setFiltersActive(hasActiveFilters);
+
         setShowFilterModal(false);
         setPage(1);
         setHasMore(true);

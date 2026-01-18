@@ -285,7 +285,7 @@ export default function MovieDetailScreen() {
                                 ]}
                                 onPress={handleToggleFavorite}
                             >
-                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', gap: 6 }}>
                                     <Ionicons
                                         name={isFavorite(movie.id, "movie") ? "skull" : "skull-outline"}
                                         size={20}
@@ -297,8 +297,9 @@ export default function MovieDetailScreen() {
                                                 ? styles.activeButtonText
                                                 : styles.inactiveButtonText
                                         }
+                                        numberOfLines={1}
                                     >
-                                        {isFavorite(movie.id, "movie") ? "En Favoritos" : "Añadir a Favoritos"}
+                                        {isFavorite(movie.id, "movie") ? "En Favoritos" : "Añadir"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -312,7 +313,7 @@ export default function MovieDetailScreen() {
                                 ]}
                                 onPress={handleToggleWatchlist}
                             >
-                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', gap: 6 }}>
                                     <MaterialCommunityIcons
                                         name={isInWatchlist(movie.id, "movie") ? "sword-cross" : "sword"}
                                         size={20}
@@ -324,6 +325,7 @@ export default function MovieDetailScreen() {
                                                 ? styles.activeButtonText
                                                 : styles.inactiveButtonText
                                         }
+                                        numberOfLines={1}
                                     >
                                         {isInWatchlist(movie.id, "movie")
                                             ? "En Lista"
@@ -341,7 +343,7 @@ export default function MovieDetailScreen() {
                                 ]}
                                 onPress={() => toggleWatched(movie.id, "movie")}
                             >
-                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'nowrap', alignItems: 'center', gap: 6 }}>
                                     <Ionicons
                                         name={isWatched(movie.id, "movie") ? "eye" : "eye-outline"}
                                         size={20}
@@ -353,6 +355,7 @@ export default function MovieDetailScreen() {
                                                 ? styles.activeButtonText
                                                 : styles.inactiveButtonText
                                         }
+                                        numberOfLines={1}
                                     >
                                         {isWatched(movie.id, "movie") ? "Visto" : "Visto"}
                                     </Text>
