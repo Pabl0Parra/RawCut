@@ -20,7 +20,6 @@ import RecommendationCard from "../../src/components/RecommendationCard";
 
 import type {
     RecommendationTab,
-    TmdbDataMap,
     RecommendationWithRelations,
     TmdbContentData,
     RecommendationsScreenState,
