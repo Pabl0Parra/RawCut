@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions, Text, Platform } from 'react-native';
+import { View, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions, Text } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';

@@ -16,7 +16,7 @@ import {
     type ImageStyle,
 } from "react-native";
 import { Image } from "expo-image";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 import { Colors } from "../constants/Colors";
 import type { Profile } from "../lib/supabase";
@@ -142,7 +142,7 @@ export const RecommendModal: React.FC<RecommendModalProps> = ({
         }
     };
 
-    const renderUserItem = ({ item }: { item: Profile }): JSX.Element => {
+    const renderUserItem = ({ item }: { item: Profile }): React.JSX.Element => {
         const isSelected = selectedUser?.user_id === item.user_id;
 
         return (
@@ -174,11 +174,11 @@ export const RecommendModal: React.FC<RecommendModalProps> = ({
         );
     };
 
-    const renderEmptyUserList = (): JSX.Element => (
+    const renderEmptyUserList = (): React.JSX.Element => (
         <Text style={styles.emptyListText}>No se encontraron usuarios</Text>
     );
 
-    const renderUserList = (): JSX.Element | null => {
+    const renderUserList = (): React.JSX.Element | null => {
         if (!showUserList) return null;
 
         if (isLoadingUsers) {

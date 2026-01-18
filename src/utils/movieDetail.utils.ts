@@ -2,17 +2,14 @@ import {
     getMovieDetails,
     getRelatedMovies,
     getMovieVideos,
-    type Movie,
     type Video,
     type CrewMember,
 } from "../lib/tmdb";
 import { supabase, type Profile } from "../lib/supabase";
 import type {
-    MovieWithDetails,
     MovieLoadResult,
     SendRecommendationParams,
     SendRecommendationResult,
-    MediaType,
 } from "../types/movieDetail.types";
 import {
     DIRECTOR_JOB,

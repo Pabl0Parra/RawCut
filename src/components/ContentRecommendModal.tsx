@@ -16,7 +16,7 @@ import {
     type ImageStyle,
 } from "react-native";
 import { Image } from "expo-image";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 import { Colors } from "../constants/Colors";
 import type { Profile } from "../lib/supabase";
