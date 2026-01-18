@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
-import { Tabs, router } from "expo-router";
-import { View, Text, Platform, TouchableOpacity, Modal, StyleSheet, Pressable, Alert } from "react-native";
+import { useEffect } from "react";
+import { Tabs } from "expo-router";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
@@ -19,9 +18,8 @@ import {
 
 export default function TabLayout() {
     const insets = useSafeAreaInsets();
-    const { user, profile, signOut } = useAuthStore();
+    const { user } = useAuthStore();
     const { unreadCount, fetchRecommendations, subscribeToRealtime } = useRecommendationStore();
-    const [menuVisible, setMenuVisible] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -31,201 +29,90 @@ export default function TabLayout() {
         }
     }, [user]);
 
-    const handleSignOut = () => {
-        setMenuVisible(false);
-        Alert.alert(
-            "Cerrar Sesión",
-            "¿Estás seguro de que quieres cerrar sesión?",
-            [
-                { text: "Cancelar", style: "cancel" },
-                { text: "Cerrar Sesión", style: "destructive", onPress: signOut }
-            ]
-        );
-    };
-
-    const goToProfile = () => {
-        setMenuVisible(false);
-        router.push("/profile");
-    };
-
     return (
-        <>
-            <Tabs
-                screenOptions={{
-                    tabBarStyle: {
-                        backgroundColor: Colors.metalGray,
-                        borderTopColor: Colors.metalSilver,
-                        borderTopWidth: 0.5,
-                        height: 60 + insets.bottom,
-                        paddingBottom: insets.bottom,
-                        paddingTop: 8,
-                    },
-                    tabBarActiveTintColor: Colors.bloodRed,
-                    tabBarInactiveTintColor: Colors.metalSilver,
-                    tabBarLabelStyle: {
-                        fontSize: 10,
-                        fontFamily: "Inter_500Medium",
-                        marginBottom: 4,
-                    },
-                    headerStyle: {
-                        backgroundColor: Colors.metalBlack,
-                    },
-                    headerTintColor: Colors.white,
-                    headerTitleStyle: {
-                        fontFamily: "BebasNeue_400Regular",
-                        fontSize: 28,
-                    },
-                    headerTitle: "CORTOCRUDO",
-                    headerTitleAlign: 'center',
-                    headerLeft: HeaderLeft,
-                    headerRight: () => <HeaderRight onPress={() => setMenuVisible(true)} />,
+        <Tabs
+            screenOptions={{
+                tabBarStyle: {
+                    backgroundColor: Colors.metalGray,
+                    borderTopColor: Colors.metalSilver,
+                    borderTopWidth: 0.5,
+                    height: 60 + insets.bottom,
+                    paddingBottom: insets.bottom,
+                    paddingTop: 8,
+                },
+                tabBarActiveTintColor: Colors.bloodRed,
+                tabBarInactiveTintColor: Colors.metalSilver,
+                tabBarLabelStyle: {
+                    fontSize: 10,
+                    fontFamily: "Inter_500Medium",
+                    marginBottom: 4,
+                },
+                headerStyle: {
+                    backgroundColor: Colors.metalBlack,
+                },
+                headerTintColor: Colors.white,
+                headerTitleStyle: {
+                    fontFamily: "BebasNeue_400Regular",
+                    fontSize: 28,
+                },
+                headerTitle: "CORTOCRUDO",
+                headerTitleAlign: 'center',
+                headerLeft: HeaderLeft,
+                headerRight: HeaderRight,
+            }}
+            // @ts-ignore
+            sceneContainerStyle={{ backgroundColor: 'transparent' }}
+        >
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: "Inicio",
+                    tabBarIcon: HomeIcon,
                 }}
-                // @ts-ignore
-                sceneContainerStyle={{ backgroundColor: 'transparent' }}
-            >
-                <Tabs.Screen
-                    name="index"
-                    options={{
-                        title: "Inicio",
-                        tabBarIcon: HomeIcon,
-                    }}
-                />
-                <Tabs.Screen
-                    name="favorites"
-                    options={{
-                        title: "Favoritos",
-                        tabBarIcon: FavoritesIcon,
-                    }}
-                />
-                <Tabs.Screen
-                    name="watchlist"
-                    options={{
-                        title: "Watchlist",
-                        tabBarIcon: WatchlistIcon,
-                    }}
-                />
-                <Tabs.Screen
-                    name="recommendations"
-                    options={{
-                        title: "Sugeridas",
-                        tabBarIcon: RecommendationsIcon,
-                        tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
-                    }}
-                />
-                <Tabs.Screen
-                    name="profile"
-                    options={{
-                        title: "Perfil",
-                        tabBarIcon: ProfileIcon,
-                    }}
-                />
-                <Tabs.Screen
-                    name="movie/[id]"
-                    options={{
-                        href: null,
-                        headerShown: false,
-                    }}
-                />
-                <Tabs.Screen
-                    name="tv/[id]"
-                    options={{
-                        href: null,
-                        headerShown: false,
-                    }}
-                />
-            </Tabs>
-
-            <Modal
-                visible={menuVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setMenuVisible(false)}
-            >
-                <Pressable
-                    style={styles.modalOverlay}
-                    onPress={() => setMenuVisible(false)}
-                >
-                    <View
-                        style={[
-                            styles.menuContent,
-                            { top: Platform.OS === "ios" ? insets.top + 50 : 50 }
-                        ]}
-                    >
-                        <View style={styles.userInfo}>
-                            <Text style={styles.usernameText}>@{profile?.username || 'usuario'}</Text>
-                            <Text style={styles.emailText}>{user?.email}</Text>
-                        </View>
-
-                        <TouchableOpacity style={styles.menuItem} onPress={goToProfile}>
-                            <Ionicons name="person-outline" size={20} color={Colors.white} />
-                            <Text style={styles.menuItemText}>Mi Perfil</Text>
-                        </TouchableOpacity>
-
-                        <View style={styles.separator} />
-
-                        <TouchableOpacity style={styles.menuItem} onPress={handleSignOut}>
-                            <Ionicons name="log-out-outline" size={20} color={Colors.bloodRed} />
-                            <Text style={[styles.menuItemText, { color: Colors.bloodRed }]}>Cerrar Sesión</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Pressable>
-            </Modal>
-        </>
+            />
+            <Tabs.Screen
+                name="favorites"
+                options={{
+                    title: "Favoritos",
+                    tabBarIcon: FavoritesIcon,
+                }}
+            />
+            <Tabs.Screen
+                name="watchlist"
+                options={{
+                    title: "Watchlist",
+                    tabBarIcon: WatchlistIcon,
+                }}
+            />
+            <Tabs.Screen
+                name="recommendations"
+                options={{
+                    title: "Sugeridas",
+                    tabBarIcon: RecommendationsIcon,
+                    tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: "Perfil",
+                    tabBarIcon: ProfileIcon,
+                }}
+            />
+            <Tabs.Screen
+                name="movie/[id]"
+                options={{
+                    href: null,
+                    headerShown: false,
+                }}
+            />
+            <Tabs.Screen
+                name="tv/[id]"
+                options={{
+                    href: null,
+                    headerShown: false,
+                }}
+            />
+        </Tabs>
     );
 }
-
-const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
-    menuContent: {
-        position: "absolute",
-        right: 16,
-        backgroundColor: Colors.metalGray,
-        borderRadius: 12,
-        padding: 8,
-        minWidth: 200,
-        borderWidth: 1,
-        borderColor: Colors.metalSilver,
-        // Shadow for iOS
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        // Elevation for Android
-        elevation: 10,
-    },
-    userInfo: {
-        padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: "rgba(255, 255, 255, 0.1)",
-        marginBottom: 4,
-    },
-    usernameText: {
-        color: Colors.white,
-        fontWeight: "bold",
-        fontSize: 14,
-    },
-    emailText: {
-        color: Colors.metalSilver,
-        fontSize: 12,
-        marginTop: 2,
-    },
-    menuItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 12,
-        gap: 12,
-        borderRadius: 8,
-    },
-    menuItemText: {
-        color: Colors.white,
-        fontSize: 16,
-    },
-    separator: {
-        height: 1,
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        marginVertical: 4,
-    },
-});
