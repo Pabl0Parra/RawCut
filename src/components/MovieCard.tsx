@@ -209,7 +209,7 @@ export default function MovieCard({
                     {title}
                 </Text>
                 <View style={styles.metaRow}>
-                    {year && <Text style={styles.year}>{year}</Text>}
+                    {!!year && <Text style={styles.year}>{year}</Text>}
                     <Text style={styles.rating}>⭐ {rating}</Text>
                 </View>
             </View>
