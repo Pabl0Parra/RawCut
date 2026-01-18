@@ -79,6 +79,7 @@ export default function FavoritesScreen() {
                             };
                         }
                     } catch (err) {
+                        console.error('Error fetching details for favorite:', err);
                         return {
                             id: fav.id,
                             tmdb_id: fav.tmdb_id,
@@ -186,14 +187,17 @@ export default function FavoritesScreen() {
         );
     }
 
-    return (
-        <View style={[styles.safeArea, { paddingTop: 16 }]}>
-
-            {loading && enrichedFavorites.length === 0 ? (
+    const renderContent = () => {
+        if (loading && enrichedFavorites.length === 0) {
+            return (
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color="#dc2626" />
                 </View>
-            ) : enrichedFavorites.length === 0 ? (
+            );
+        }
+
+        if (enrichedFavorites.length === 0) {
+            return (
                 <View style={styles.emptyStateContainer}>
                     <Text style={styles.emptyIcon}>💔</Text>
                     <Text style={styles.emptyTitle}>
@@ -203,15 +207,23 @@ export default function FavoritesScreen() {
                         Explora películas y series para añadir a tus favoritos
                     </Text>
                 </View>
-            ) : (
-                <FlatList
-                    data={enrichedFavorites}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContent}
-                    showsVerticalScrollIndicator={false}
-                />
-            )}
+            );
+        }
+
+        return (
+            <FlatList
+                data={enrichedFavorites}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+            />
+        );
+    };
+
+    return (
+        <View style={[styles.safeArea, { paddingTop: 16 }]}>
+            {renderContent()}
         </View>
     );
 }
