@@ -7,22 +7,15 @@ import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 
-const HeaderLeft = () => (
-    <Image
-        source={require('../../assets/icons/metal-hand.png')}
-        style={{ width: 40, height: 40, marginLeft: 16, tintColor: "#fff" }}
-        resizeMode="contain"
-    />
-);
-
-const HeaderRight = ({ onPress }: { onPress: () => void }) => (
-    <TouchableOpacity
-        onPress={onPress}
-        style={{ marginRight: 16 }}
-    >
-        <Ionicons name="person-circle-outline" size={32} color={Colors.white} />
-    </TouchableOpacity>
-);
+import { HeaderLeft } from "../../src/components/navigation/HeaderLeft";
+import { HeaderRight } from "../../src/components/navigation/HeaderRight";
+import {
+    HomeIcon,
+    FavoritesIcon,
+    WatchlistIcon,
+    RecommendationsIcon,
+    ProfileIcon
+} from "../../src/components/navigation/TabBarIcons";
 
 export default function TabLayout() {
     const insets = useSafeAreaInsets();
@@ -84,7 +77,7 @@ export default function TabLayout() {
                     },
                     headerTitle: "CORTOCRUDO",
                     headerTitleAlign: 'center',
-                    headerLeft: () => <HeaderLeft />,
+                    headerLeft: HeaderLeft,
                     headerRight: () => <HeaderRight onPress={() => setMenuVisible(true)} />,
                 }}
                 // @ts-ignore
@@ -94,36 +87,28 @@ export default function TabLayout() {
                     name="index"
                     options={{
                         title: "Inicio",
-                        tabBarIcon: ({ color }) => (
-                            <MaterialIcons name="castle" size={24} color={color} />
-                        ),
+                        tabBarIcon: HomeIcon,
                     }}
                 />
                 <Tabs.Screen
                     name="favorites"
                     options={{
                         title: "Favoritos",
-                        tabBarIcon: ({ color }) => (
-                            <Ionicons name="skull-outline" size={24} color={color} />
-                        ),
+                        tabBarIcon: FavoritesIcon,
                     }}
                 />
                 <Tabs.Screen
                     name="watchlist"
                     options={{
                         title: "Watchlist",
-                        tabBarIcon: ({ color }) => (
-                            <MaterialCommunityIcons name="sword" size={24} color={color} />
-                        ),
+                        tabBarIcon: WatchlistIcon,
                     }}
                 />
                 <Tabs.Screen
                     name="recommendations"
                     options={{
                         title: "Sugeridas",
-                        tabBarIcon: ({ color }) => (
-                            <MaterialCommunityIcons name="email-outline" size={24} color={color} />
-                        ),
+                        tabBarIcon: RecommendationsIcon,
                         tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
                     }}
                 />
@@ -131,9 +116,7 @@ export default function TabLayout() {
                     name="profile"
                     options={{
                         title: "Perfil",
-                        tabBarIcon: ({ color }) => (
-                            <MaterialCommunityIcons name="shield-sword-outline" size={24} color={color} />
-                        ),
+                        tabBarIcon: ProfileIcon,
                     }}
                 />
                 <Tabs.Screen
