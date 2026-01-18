@@ -98,7 +98,7 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name="favorites"
                     options={{
-                        title: "Cementerio",
+                        title: "Favoritos",
                         tabBarIcon: ({ color }) => (
                             <Ionicons name="skull-outline" size={24} color={color} />
                         ),

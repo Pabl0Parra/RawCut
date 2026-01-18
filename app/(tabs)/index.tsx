@@ -66,10 +66,12 @@ export default function HomeScreen() {
         fetchUserContent,
         isFavorite,
         isInWatchlist,
+        isWatched,
         addToFavorites,
         removeFromFavorites,
         addToWatchlist,
         removeFromWatchlist,
+        toggleWatched,
         tvProgress,
         fetchTVProgress,
     } = useContentStore();
@@ -296,6 +298,10 @@ export default function HomeScreen() {
 
     const data = activeTab === "movies" ? movies : tvShows;
 
+    const handleToggleWatched = async (tmdbId: number, mediaType: "movie" | "tv") => {
+        await toggleWatched(tmdbId, mediaType);
+    };
+
     const renderItem = ({ item }: { item: Movie | TVShow }) => (
         <MovieCard
             item={item}
@@ -305,11 +311,15 @@ export default function HomeScreen() {
                 item.id,
                 activeTab === "movies" ? "movie" : "tv"
             )}
+            isWatched={isWatched(item.id, activeTab === "movies" ? "movie" : "tv")}
             onToggleFavorite={() =>
                 handleToggleFavorite(item.id, activeTab === "movies" ? "movie" : "tv")
             }
             onToggleWatchlist={() =>
                 handleToggleWatchlist(item.id, activeTab === "movies" ? "movie" : "tv")
+            }
+            onToggleWatched={() =>
+                handleToggleWatched(item.id, activeTab === "movies" ? "movie" : "tv")
             }
         />
     );
@@ -338,7 +348,7 @@ export default function HomeScreen() {
                     data={continueWatching}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item) => item.show.id.toString()}
+                    keyExtractor={(item, index) => `${item.show.id}-${index}`}
                     contentContainerStyle={styles.continueList}
                     renderItem={({ item }) => (
                         <TouchableOpacity
@@ -520,7 +530,7 @@ export default function HomeScreen() {
                 <FlatList
                     data={data}
                     renderItem={renderItem}
-                    keyExtractor={(item) => item.id.toString()}
+                    keyExtractor={(item, index) => `${item.id}-${index}`}
                     numColumns={3}
                     columnWrapperStyle={styles.columnWrapper}
                     contentContainerStyle={styles.listContent}

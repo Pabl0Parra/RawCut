@@ -198,7 +198,7 @@ export default function WatchlistScreen() {
                 <FlatList
                     data={enrichedWatchlist}
                     renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item, index) => `${item.id}-${index}`}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
                 />

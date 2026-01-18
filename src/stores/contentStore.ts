@@ -26,8 +26,10 @@ interface ContentState {
     addToWatchlist: (tmdbId: number, mediaType: "movie" | "tv") => Promise<boolean>;
     removeFromWatchlist: (tmdbId: number, mediaType: "movie" | "tv") => Promise<boolean>;
     toggleEpisodeWatched: (tmdbId: number, seasonNumber: number, episodeNumber: number) => Promise<boolean>;
+    toggleWatched: (tmdbId: number, mediaType: "movie" | "tv") => Promise<boolean>;
     isFavorite: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
     isInWatchlist: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
+    isWatched: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
     isEpisodeWatched: (tmdbId: number, seasonNumber: number, episodeNumber: number) => boolean;
     isSeasonWatched: (tmdbId: number, seasonNumber: number, totalEpisodes: number) => boolean;
     getNextEpisodeToWatch: (tmdbId: number, seasons: { season_number: number; episode_count: number }[]) => { season: number; episode: number } | null;
@@ -238,6 +240,61 @@ export const useContentStore = create<ContentState>((set, get) => ({
         }
     },
 
+    toggleWatched: async (tmdbId: number, mediaType: "movie" | "tv") => {
+        const user = useAuthStore.getState().user;
+        if (!user) return false;
+
+        const season = mediaType === "movie" ? 0 : -1;
+        const episode = mediaType === "movie" ? 0 : -1;
+        const isWatched = get().isWatched(tmdbId, mediaType);
+
+        try {
+            if (isWatched) {
+                const { error } = await supabase
+                    .from("tv_progress")
+                    .delete()
+                    .eq("user_id", user.id)
+                    .eq("tmdb_id", tmdbId)
+                    .eq("season_number", season)
+                    .eq("episode_number", episode);
+
+                if (error) throw error;
+
+                set((state) => ({
+                    tvProgress: state.tvProgress.filter(
+                        (item) =>
+                            !(
+                                item.tmdb_id === tmdbId &&
+                                item.season_number === season &&
+                                item.episode_number === episode
+                            )
+                    ),
+                }));
+            } else {
+                const { data, error } = await supabase
+                    .from("tv_progress")
+                    .insert({
+                        user_id: user.id,
+                        tmdb_id: tmdbId,
+                        season_number: season,
+                        episode_number: episode,
+                    })
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                set((state) => ({
+                    tvProgress: [...state.tvProgress, data],
+                }));
+            }
+            return true;
+        } catch (err) {
+            console.error("Error toggling watched status:", err);
+            return false;
+        }
+    },
+
     isFavorite: (tmdbId: number, mediaType: "movie" | "tv") => {
         return get().favorites.some(
             (item) => item.tmdb_id === tmdbId && item.media_type === mediaType
@@ -247,6 +304,17 @@ export const useContentStore = create<ContentState>((set, get) => ({
     isInWatchlist: (tmdbId: number, mediaType: "movie" | "tv") => {
         return get().watchlist.some(
             (item) => item.tmdb_id === tmdbId && item.media_type === mediaType
+        );
+    },
+
+    isWatched: (tmdbId: number, mediaType: "movie" | "tv") => {
+        const season = mediaType === "movie" ? 0 : -1;
+        const episode = mediaType === "movie" ? 0 : -1;
+        return get().tvProgress.some(
+            (item) =>
+                item.tmdb_id === tmdbId &&
+                item.season_number === season &&
+                item.episode_number === episode
         );
     },
 

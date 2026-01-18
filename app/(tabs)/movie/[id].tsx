@@ -47,10 +47,12 @@ export default function MovieDetailScreen() {
     const {
         isFavorite,
         isInWatchlist,
+        isWatched,
         addToFavorites,
         removeFromFavorites,
         addToWatchlist,
         removeFromWatchlist,
+        toggleWatched,
     } = useContentStore();
 
     useEffect(() => {
@@ -296,7 +298,7 @@ export default function MovieDetailScreen() {
                                                 : styles.inactiveButtonText
                                         }
                                     >
-                                        {isFavorite(movie.id, "movie") ? "Favorito" : "Añadir a cementerio"}
+                                        {isFavorite(movie.id, "movie") ? "En Favoritos" : "Añadir a Favoritos"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -326,6 +328,33 @@ export default function MovieDetailScreen() {
                                         {isInWatchlist(movie.id, "movie")
                                             ? "En Lista"
                                             : "Watchlist"}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.actionButton,
+                                    isWatched(movie.id, "movie")
+                                        ? styles.activeButton
+                                        : styles.inactiveButton,
+                                ]}
+                                onPress={() => toggleWatched(movie.id, "movie")}
+                            >
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                    <Ionicons
+                                        name={isWatched(movie.id, "movie") ? "eye" : "eye-outline"}
+                                        size={20}
+                                        color={isWatched(movie.id, "movie") ? Colors.white : "#f4f4f5"}
+                                    />
+                                    <Text
+                                        style={
+                                            isWatched(movie.id, "movie")
+                                                ? styles.activeButtonText
+                                                : styles.inactiveButtonText
+                                        }
+                                    >
+                                        {isWatched(movie.id, "movie") ? "Visto" : "Visto"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -434,7 +463,7 @@ export default function MovieDetailScreen() {
                             </Text>
                             <FlatList
                                 data={movie.credits.cast}
-                                keyExtractor={(item) => item.id.toString()}
+                                keyExtractor={(item, index) => `${item.id}-${index}`}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.castList}
@@ -473,7 +502,7 @@ export default function MovieDetailScreen() {
                             </Text>
                             <FlatList
                                 data={relatedMovies}
-                                keyExtractor={(item) => item.id.toString()}
+                                keyExtractor={(item, index) => `${item.id}-${index}`}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.castList}
@@ -576,7 +605,7 @@ export default function MovieDetailScreen() {
                                 <View style={styles.searchResults}>
                                     <FlatList
                                         data={users}
-                                        keyExtractor={(item) => item.user_id}
+                                        keyExtractor={(item, index) => `${item.user_id}-${index}`}
                                         keyboardShouldPersistTaps="handled"
                                         renderItem={({ item }) => (
                                             <TouchableOpacity

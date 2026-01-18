@@ -64,8 +64,10 @@ export default function TVDetailScreen() {
         fetchTVProgress,
         isEpisodeWatched,
         isSeasonWatched,
+        isWatched,
         getNextEpisodeToWatch,
         toggleEpisodeWatched,
+        toggleWatched,
     } = useContentStore();
 
     useEffect(() => {
@@ -351,7 +353,7 @@ export default function TVDetailScreen() {
                                                 : styles.inactiveButtonText
                                         }
                                     >
-                                        {isFavorite(tvShow.id, "tv") ? "Favorito" : "Añadir"}
+                                        {isFavorite(tvShow.id, "tv") ? "En Favoritos" : "Añadir a Favoritos"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -381,6 +383,33 @@ export default function TVDetailScreen() {
                                         {isInWatchlist(tvShow.id, "tv")
                                             ? "En Lista"
                                             : "Watchlist"}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.actionButton,
+                                    isWatched(tvShow.id, "tv")
+                                        ? styles.activeButton
+                                        : styles.inactiveButton,
+                                ]}
+                                onPress={() => toggleWatched(tvShow.id, "tv")}
+                            >
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                    <Ionicons
+                                        name={isWatched(tvShow.id, "tv") ? "eye" : "eye-outline"}
+                                        size={20}
+                                        color={isWatched(tvShow.id, "tv") ? Colors.white : "#f4f4f5"}
+                                    />
+                                    <Text
+                                        style={
+                                            isWatched(tvShow.id, "tv")
+                                                ? styles.activeButtonText
+                                                : styles.inactiveButtonText
+                                        }
+                                    >
+                                        {isWatched(tvShow.id, "tv") ? "Visto" : "Visto"}
                                     </Text>
                                 </View>
                             </TouchableOpacity>
@@ -478,7 +507,7 @@ export default function TVDetailScreen() {
                             </Text>
                             <FlatList
                                 data={tvShow.seasons}
-                                keyExtractor={(item) => item.id.toString()}
+                                keyExtractor={(item, index) => `${item.id}-${index}`}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.seasonList}
@@ -533,7 +562,7 @@ export default function TVDetailScreen() {
                             </Text>
                             <FlatList
                                 data={tvShow.credits.cast}
-                                keyExtractor={(item) => item.id.toString()}
+                                keyExtractor={(item, index) => `${item.id}-${index}`}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.castList}
@@ -572,7 +601,7 @@ export default function TVDetailScreen() {
                             </Text>
                             <FlatList
                                 data={relatedTVShows}
-                                keyExtractor={(item) => item.id.toString()}
+                                keyExtractor={(item, index) => `${item.id}-${index}`}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.castList}
