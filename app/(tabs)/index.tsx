@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, JSX } from "react";
 import {
     View,
     Text,
@@ -10,56 +10,238 @@ import {
     StyleSheet,
     Modal,
     ScrollView,
-    ViewStyle,
-    TextStyle,
-    ImageStyle,
+    type ViewStyle,
+    type TextStyle,
+    type ImageStyle,
 } from "react-native";
-import { MaterialCommunityIcons, Feather, Entypo, Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, router } from "expo-router";
-import MovieCard from "../../src/components/MovieCard";
-import { Image } from "expo-image";
 import {
-    getPopularMovies,
-    getPopularTVShows,
+    MaterialCommunityIcons,
+    Feather,
+    Entypo,
+    Ionicons,
+} from "@expo/vector-icons";
+import { useFocusEffect, router } from "expo-router";
+import { Image } from "expo-image";
+
+import MovieCard from "../../src/components/MovieCard";
+import {
     searchMovies,
     searchTVShows,
     getMovieGenres,
     getTVGenres,
-    discoverMovies,
-    discoverTVShows,
-    getTVShowDetails,
     getImageUrl,
-    Movie,
-    TVShow,
-    Genre,
+    type Movie,
+    type TVShow,
+    type Genre,
 } from "../../src/lib/tmdb";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { Colors } from "../../src/constants/Colors";
 
-export default function HomeScreen() {
-    const [activeTab, setActiveTab] = useState<"movies" | "tv">("movies");
+import type {
+    ContentTab,
+    MediaType,
+    ContinueWatchingItem,
+    SortOption,
+} from "../../src/types/homeScreen.types";
+import {
+    SORT_OPTIONS,
+    DEFAULT_SORT_VALUE,
+} from "../../src/types/homeScreen.types";
+import {
+    buildDiscoverParams,
+    hasActiveFilters,
+    fetchMovieContent,
+    fetchTVContent,
+    calculatePaginationState,
+    mergeContentResults,
+    shouldSkipContentLoad,
+    processContinueWatchingShow,
+    filterActualEpisodeProgress,
+    extractUniqueShowIds,
+    countWatchedEpisodes,
+    processGenreName,
+    sortGenresAlphabetically,
+    isNotNull,
+} from "../../src/utils/contentLoader.utils";
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+const MAX_CONTINUE_WATCHING_ITEMS = 10;
+
+// ============================================================================
+// Custom Hooks
+// ============================================================================
+
+interface UseContentLoadingParams {
+    activeTab: ContentTab;
+    page: number;
+    hasMore: boolean;
+    loading: boolean;
+    filtersActive: boolean;
+    searchQuery: string;
+    sortBy: string;
+    selectedGenre: number | null;
+    selectedYear: string;
+}
+
+interface UseContentLoadingReturn {
+    loadContent: (reset?: boolean) => Promise<void>;
+    movies: Movie[];
+    tvShows: TVShow[];
+    setMovies: React.Dispatch<React.SetStateAction<Movie[]>>;
+    setTVShows: React.Dispatch<React.SetStateAction<TVShow[]>>;
+    setPage: React.Dispatch<React.SetStateAction<number>>;
+    setHasMore: React.Dispatch<React.SetStateAction<boolean>>;
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const useContentLoading = (
+    params: UseContentLoadingParams
+): UseContentLoadingReturn => {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [tvShows, setTVShows] = useState<TVShow[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
+    const [localLoading, setLoading] = useState(true);
+    const [localPage, setPage] = useState(1);
+    const [localHasMore, setHasMore] = useState(true);
+
+    const {
+        activeTab,
+        filtersActive,
+        searchQuery,
+        sortBy,
+        selectedGenre,
+        selectedYear,
+    } = params;
+
+    const loadContent = useCallback(
+        async (reset: boolean = false): Promise<void> => {
+            const currentPage = reset ? 1 : localPage;
+            const shouldUseDiscoverApi = filtersActive && !searchQuery;
+
+            if (shouldSkipContentLoad(reset, localHasMore, localLoading)) {
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const discoverParams = buildDiscoverParams({
+                    currentPage,
+                    sortBy,
+                    selectedGenre,
+                    selectedYear,
+                    activeTab,
+                });
+
+                if (activeTab === "movies") {
+                    const { results, totalPages } = await fetchMovieContent(
+                        currentPage,
+                        shouldUseDiscoverApi,
+                        discoverParams
+                    );
+
+                    setMovies((prev) => mergeContentResults(prev, results, reset));
+                    const pagination = calculatePaginationState(currentPage, totalPages, reset);
+                    setHasMore(pagination.hasMore);
+                    setPage(pagination.nextPage);
+                } else {
+                    const { results, totalPages } = await fetchTVContent(
+                        currentPage,
+                        shouldUseDiscoverApi,
+                        discoverParams
+                    );
+
+                    setTVShows((prev) => mergeContentResults(prev, results, reset));
+                    const pagination = calculatePaginationState(currentPage, totalPages, reset);
+                    setHasMore(pagination.hasMore);
+                    setPage(pagination.nextPage);
+                }
+            } catch (err) {
+                console.error("Error loading content:", err);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [
+            activeTab,
+            filtersActive,
+            searchQuery,
+            sortBy,
+            selectedGenre,
+            selectedYear,
+            localPage,
+            localHasMore,
+            localLoading,
+        ]
+    );
+
+    return {
+        loadContent,
+        movies,
+        tvShows,
+        setMovies,
+        setTVShows,
+        setPage,
+        setHasMore,
+        setLoading,
+    };
+};
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export default function HomeScreen(): JSX.Element {
+    // Tab State
+    const [activeTab, setActiveTab] = useState<ContentTab>("movies");
+
+    // Search State
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
+
+    // UI State
+    const [refreshing, setRefreshing] = useState(false);
     const [showProfileBanner, setShowProfileBanner] = useState(false);
-    const [continueWatching, setContinueWatching] = useState<{ show: TVShow, progress: { watched: number, total: number } }[]>([]);
-    const [loadingContinue, setLoadingContinue] = useState(false);
     const [showContinueSection, setShowContinueSection] = useState(true);
 
     // Filter State
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [genres, setGenres] = useState<Genre[]>([]);
     const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
-    const [selectedYear, setSelectedYear] = useState<string>("");
-    const [sortBy, setSortBy] = useState<string>("popularity.desc");
+    const [selectedYear, setSelectedYear] = useState("");
+    const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_VALUE);
     const [filtersActive, setFiltersActive] = useState(false);
 
+    // Continue Watching State
+    const [continueWatching, setContinueWatching] = useState<ContinueWatchingItem[]>([]);
+    const [loadingContinue, setLoadingContinue] = useState(false);
+
+    // Content Loading Hook
+    const {
+        loadContent,
+        movies,
+        tvShows,
+        setMovies,
+        setTVShows,
+        setPage,
+        setHasMore,
+        setLoading,
+    } = useContentLoading({
+        activeTab,
+        page: 1,
+        hasMore: true,
+        loading: true,
+        filtersActive,
+        searchQuery,
+        sortBy,
+        selectedGenre,
+        selectedYear,
+    });
+
+    // Store Hooks
     const { user } = useAuthStore();
     const {
         fetchUserContent,
@@ -75,7 +257,18 @@ export default function HomeScreen() {
         fetchTVProgress,
     } = useContentStore();
 
-    // Fetch content on mount
+    // ========================================================================
+    // Derived State
+    // ========================================================================
+
+    const data = activeTab === "movies" ? movies : tvShows;
+    const loading = data.length === 0;
+
+    // ========================================================================
+    // Effects
+    // ========================================================================
+
+    // Initial content load
     useEffect(() => {
         loadContent();
         loadGenres();
@@ -84,99 +277,56 @@ export default function HomeScreen() {
     // Fetch user content when screen focuses
     useFocusEffect(
         useCallback(() => {
-            if (user) {
-                fetchUserContent();
-                fetchTVProgress();
-                // Check if user has generic username
-                const { profile } = useAuthStore.getState();
-                if (profile?.username?.startsWith("user_")) {
-                    setShowProfileBanner(true);
-                } else {
-                    setShowProfileBanner(false);
-                }
-            }
-        }, [user])
+            if (!user) return;
+
+            fetchUserContent();
+            fetchTVProgress();
+
+            const { profile } = useAuthStore.getState();
+            const hasGenericUsername = profile?.username?.startsWith("user_") ?? false;
+            setShowProfileBanner(hasGenericUsername);
+        }, [user, fetchUserContent, fetchTVProgress])
     );
 
-    // Filter shows for "Continue Watching"
+    // Update continue watching when TV progress changes
     useEffect(() => {
-        if (activeTab === "tv" && user && tvProgress.length > 0) {
+        const shouldLoadContinueWatching =
+            activeTab === "tv" && user && tvProgress.length > 0;
+
+        if (shouldLoadContinueWatching) {
             loadContinueWatching();
         } else {
             setContinueWatching([]);
         }
     }, [activeTab, tvProgress.length, user]);
 
-    const loadContinueWatching = async () => {
-        setLoadingContinue(true);
-        try {
-            // Filter out movies (0,0) and fully watched shows (-1,-1)
-            // Only keep entries that represent actual episode progress (season > 0)
-            const actualProgress = tvProgress.filter(p => p.season_number > 0);
-
-            // Get unique show IDs from actual progress
-            const showIds = [...new Set(actualProgress.map(p => p.tmdb_id))];
-
-            if (showIds.length === 0) {
-                setContinueWatching([]);
-                setLoadingContinue(false);
-                return;
-            }
-
-            const showsWithDetails = await Promise.all(
-                showIds.slice(0, 10).map(async (id) => {
-                    try {
-                        const show = await getTVShowDetails(id);
-                        const watchedCount = tvProgress.filter(p => p.tmdb_id === id && p.season_number > 0).length;
-
-                        // Check if show is already fully watched (optional logic, but good for cleanliness)
-                        if (isWatched(id, "tv")) return null;
-
-                        return {
-                            show,
-                            progress: {
-                                watched: watchedCount,
-                                total: show.number_of_episodes || 0
-                            }
-                        };
-                    } catch (error) {
-                        console.error(`Error fetching details for show ${id}:`, error);
-                        return null;
-                    }
-                })
-            );
-
-            // Filter out nulls (failed fetches or already watched shows)
-            setContinueWatching(showsWithDetails.filter(s => s !== null) as any);
-        } catch (err) {
-            console.error("Error loading continue watching:", err);
-        } finally {
-            setLoadingContinue(false);
-        }
-    };
-
-    // Load content and genres when tab changes
+    // Handle tab changes
     useEffect(() => {
         setPage(1);
         setHasMore(true);
         setSearchQuery("");
-        // Reset filters when changing tabs to avoid confusion
         resetFilters(false);
         loadContent(true);
         loadGenres();
     }, [activeTab]);
 
-    const loadGenres = async () => {
-        try {
-            const data = activeTab === "movies" ? await getMovieGenres() : await getTVGenres();
+    // ========================================================================
+    // Handlers
+    // ========================================================================
 
-            // Sort genres alphabetically and clarify "Terror" as "Horror"
-            const processedGenres = data.genres
-                .map(g => ({
-                    ...g,
-                    name: g.name === "Terror" ? "Terror (Horror)" : g.name
+    const loadGenres = async (): Promise<void> => {
+        try {
+            const data =
+                activeTab === "movies"
+                    ? await getMovieGenres()
+                    : await getTVGenres();
+
+            const processedGenres = sortGenresAlphabetically(
+                data.genres.map((genre) => ({
+                    ...genre,
+                    name: processGenreName(genre.name),
                 }))
-                .sort((a, b) => a.name.localeCompare(b.name));
+            );
 
             setGenres(processedGenres);
         } catch (err) {
@@ -184,98 +334,74 @@ export default function HomeScreen() {
         }
     };
 
-    const resetFilters = (reload: boolean = true) => {
+    const loadContinueWatching = async (): Promise<void> => {
+        setLoadingContinue(true);
+
+        try {
+            const actualProgress = filterActualEpisodeProgress(tvProgress);
+            const showIds = extractUniqueShowIds(actualProgress);
+
+            if (showIds.length === 0) {
+                setContinueWatching([]);
+                return;
+            }
+
+            const showPromises = showIds
+                .slice(0, MAX_CONTINUE_WATCHING_ITEMS)
+                .map((showId) =>
+                    processContinueWatchingShow(
+                        showId,
+                        countWatchedEpisodes(tvProgress, showId),
+                        isWatched(showId, "tv")
+                    )
+                );
+
+            const results = await Promise.all(showPromises);
+            setContinueWatching(results.filter(isNotNull));
+        } catch (err) {
+            console.error("Error loading continue watching:", err);
+        } finally {
+            setLoadingContinue(false);
+        }
+    };
+
+    const resetFilters = (reload: boolean = true): void => {
         setSelectedGenre(null);
         setSelectedYear("");
-        setSortBy("popularity.desc");
+        setSortBy(DEFAULT_SORT_VALUE);
         setFiltersActive(false);
+
         if (reload) {
             loadContent(true);
         }
     };
 
-    const applyFilters = () => {
-        // Only activate filters if something is actually selected
-        const hasActiveFilters = selectedGenre !== null || selectedYear.trim() !== "" || sortBy !== "popularity.desc";
-        setFiltersActive(hasActiveFilters);
+    const applyFilters = (): void => {
+        const activeFiltersExist = hasActiveFilters(
+            selectedGenre,
+            selectedYear,
+            sortBy,
+            DEFAULT_SORT_VALUE
+        );
 
+        setFiltersActive(activeFiltersExist);
         setShowFilterModal(false);
         setPage(1);
         setHasMore(true);
-        // Delay slightly to allow modal to close smoothly
+
+        // Delay to allow modal close animation
         setTimeout(() => loadContent(true), 100);
     };
 
-    const loadContent = async (reset: boolean = false) => {
-        if (!reset && (!hasMore || loading)) return;
-
-        setLoading(true);
-        try {
-            let results: any[] = [];
-            let totalPages = 1;
-            const currentPage = reset ? 1 : page;
-
-            if (filtersActive && !searchQuery) {
-                // Use Discover API
-                const params = {
-                    page: currentPage,
-                    sort_by: sortBy,
-                    with_genres: selectedGenre ? selectedGenre.toString() : undefined,
-                    primary_release_year: activeTab === "movies" ? selectedYear : undefined,
-                    first_air_date_year: activeTab === "tv" ? selectedYear : undefined,
-                };
-
-                if (activeTab === "movies") {
-                    const response = await discoverMovies(params);
-                    results = response.results;
-                    totalPages = response.total_pages;
-                } else {
-                    const response = await discoverTVShows(params);
-                    results = response.results;
-                    totalPages = response.total_pages;
-                }
-            } else if (activeTab === "movies") {
-                const response = await getPopularMovies(currentPage);
-                results = response.results;
-                totalPages = response.total_pages;
-            } else {
-                const response = await getPopularTVShows(currentPage);
-                results = response.results;
-                totalPages = response.total_pages;
-            }
-
-            if (activeTab === "movies") {
-                if (reset) {
-                    setMovies(results);
-                } else {
-                    setMovies((prev) => [...prev, ...results]);
-                }
-            } else {
-                if (reset) {
-                    setTVShows(results);
-                } else {
-                    setTVShows((prev) => [...prev, ...results]);
-                }
-            }
-
-            setHasMore(currentPage < totalPages);
-            setPage(reset ? 2 : currentPage + 1);
-
-        } catch (err) {
-            console.error("Error loading content:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleSearch = async () => {
+    const handleSearch = async (): Promise<void> => {
         if (!searchQuery.trim()) {
-            loadContent(true); // Will use filters if active
+            loadContent(true);
             return;
         }
 
         setIsSearching(true);
         setLoading(true);
+
         try {
             if (activeTab === "movies") {
                 const response = await searchMovies(searchQuery);
@@ -284,7 +410,7 @@ export default function HomeScreen() {
                 const response = await searchTVShows(searchQuery);
                 setTVShows(response.results);
             }
-            setHasMore(false); // Disable pagination for search results
+            setHasMore(false);
         } catch (err) {
             console.error("Error searching:", err);
         } finally {
@@ -293,7 +419,7 @@ export default function HomeScreen() {
         }
     };
 
-    const handleRefresh = async () => {
+    const handleRefresh = async (): Promise<void> => {
         setRefreshing(true);
         setPage(1);
         setHasMore(true);
@@ -304,9 +430,10 @@ export default function HomeScreen() {
 
     const handleToggleFavorite = async (
         tmdbId: number,
-        mediaType: "movie" | "tv"
-    ) => {
+        mediaType: MediaType
+    ): Promise<void> => {
         if (!user) return;
+
         if (isFavorite(tmdbId, mediaType)) {
             await removeFromFavorites(tmdbId, mediaType);
         } else {
@@ -316,9 +443,10 @@ export default function HomeScreen() {
 
     const handleToggleWatchlist = async (
         tmdbId: number,
-        mediaType: "movie" | "tv"
-    ) => {
+        mediaType: MediaType
+    ): Promise<void> => {
         if (!user) return;
+
         if (isInWatchlist(tmdbId, mediaType)) {
             await removeFromWatchlist(tmdbId, mediaType);
         } else {
@@ -326,36 +454,39 @@ export default function HomeScreen() {
         }
     };
 
-    const data = activeTab === "movies" ? movies : tvShows;
-
-    const handleToggleWatched = async (tmdbId: number, mediaType: "movie" | "tv") => {
+    const handleToggleWatched = async (
+        tmdbId: number,
+        mediaType: MediaType
+    ): Promise<void> => {
         await toggleWatched(tmdbId, mediaType);
     };
 
-    const renderItem = ({ item }: { item: Movie | TVShow }) => (
-        <MovieCard
-            item={item}
-            mediaType={activeTab === "movies" ? "movie" : "tv"}
-            isFavorite={isFavorite(item.id, activeTab === "movies" ? "movie" : "tv")}
-            inWatchlist={isInWatchlist(
-                item.id,
-                activeTab === "movies" ? "movie" : "tv"
-            )}
-            isWatched={isWatched(item.id, activeTab === "movies" ? "movie" : "tv")}
-            onToggleFavorite={() =>
-                handleToggleFavorite(item.id, activeTab === "movies" ? "movie" : "tv")
-            }
-            onToggleWatchlist={() =>
-                handleToggleWatchlist(item.id, activeTab === "movies" ? "movie" : "tv")
-            }
-            onToggleWatched={() =>
-                handleToggleWatched(item.id, activeTab === "movies" ? "movie" : "tv")
-            }
-        />
-    );
+    const getMediaType = (): MediaType => (activeTab === "movies" ? "movie" : "tv");
 
-    const renderFooter = () => {
+    // ========================================================================
+    // Render Functions
+    // ========================================================================
+
+    const renderItem = ({ item }: { item: Movie | TVShow }): JSX.Element => {
+        const mediaType = getMediaType();
+
+        return (
+            <MovieCard
+                item={item}
+                mediaType={mediaType}
+                isFavorite={isFavorite(item.id, mediaType)}
+                inWatchlist={isInWatchlist(item.id, mediaType)}
+                isWatched={isWatched(item.id, mediaType)}
+                onToggleFavorite={() => handleToggleFavorite(item.id, mediaType)}
+                onToggleWatchlist={() => handleToggleWatchlist(item.id, mediaType)}
+                onToggleWatched={() => handleToggleWatched(item.id, mediaType)}
+            />
+        );
+    };
+
+    const renderFooter = (): JSX.Element | null => {
         if (!loading || data.length === 0) return null;
+
         return (
             <View style={styles.footerContainer}>
                 <ActivityIndicator size="small" color="#dc2626" />
@@ -363,12 +494,63 @@ export default function HomeScreen() {
         );
     };
 
-    const renderContinueWatching = () => {
+    const renderContinueWatchingItem = ({
+        item,
+    }: {
+        item: ContinueWatchingItem;
+    }): JSX.Element => {
+        const progressPercentage =
+            (item.progress.watched / Math.max(1, item.progress.total)) * 100;
+
+        return (
+            <TouchableOpacity
+                style={styles.continueCard}
+                onPress={() => router.push(`/tv/${item.show.id}`)}
+            >
+                <Image
+                    source={{
+                        uri: getImageUrl(item.show.poster_path, "w300") ?? undefined,
+                    }}
+                    style={styles.continueImage}
+                    contentFit="cover"
+                />
+                <View style={styles.progressBarBg}>
+                    <View
+                        style={[
+                            styles.progressBarFill,
+                            { width: `${progressPercentage}%` },
+                        ]}
+                    />
+                </View>
+                <Text style={styles.continueText} numberOfLines={1}>
+                    {item.show.name}
+                </Text>
+                <Text style={styles.continueProgress}>
+                    {item.progress.watched}/{item.progress.total} eps
+                </Text>
+                {item.show.next_episode_to_air && (
+                    <View style={styles.nextEpisodeBadge}>
+                        <Text style={styles.nextEpisodeText}>
+                            S{item.show.next_episode_to_air.season_number} E
+                            {item.show.next_episode_to_air.episode_number}
+                        </Text>
+                    </View>
+                )}
+            </TouchableOpacity>
+        );
+    };
+
+    const renderContinueWatching = (): JSX.Element | null => {
         if (activeTab !== "tv" || !showContinueSection) return null;
 
         if (loadingContinue) {
             return (
-                <View style={[styles.continueSection, { height: 160, justifyContent: 'center' }]}>
+                <View
+                    style={[
+                        styles.continueSection,
+                        { height: 160, justifyContent: "center" },
+                    ]}
+                >
                     <ActivityIndicator size="small" color={Colors.bloodRed} />
                 </View>
             );
@@ -381,7 +563,11 @@ export default function HomeScreen() {
                 <View style={styles.continueHeader}>
                     <Text style={styles.continueTitle}>Continuar Viendo</Text>
                     <TouchableOpacity onPress={() => setShowContinueSection(false)}>
-                        <Ionicons name="close-circle" size={24} color={Colors.metalSilver} />
+                        <Ionicons
+                            name="close-circle"
+                            size={24}
+                            color={Colors.metalSilver}
+                        />
                     </TouchableOpacity>
                 </View>
                 <FlatList
@@ -390,45 +576,97 @@ export default function HomeScreen() {
                     showsHorizontalScrollIndicator={false}
                     keyExtractor={(item, index) => `${item.show.id}-${index}`}
                     contentContainerStyle={styles.continueList}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            style={styles.continueCard}
-                            onPress={() => router.push(`/tv/${item.show.id}`)}
-                        >
-                            <Image
-                                source={{ uri: getImageUrl(item.show.poster_path, "w300") || undefined }}
-                                style={styles.continueImage}
-                                contentFit="cover"
-                            />
-                            <View style={styles.progressBarBg}>
-                                <View
-                                    style={[
-                                        styles.progressBarFill,
-                                        { width: `${(item.progress.watched / Math.max(1, item.progress.total)) * 100}%` }
-                                    ]}
-                                />
-                            </View>
-                            <Text style={styles.continueText} numberOfLines={1}>{item.show.name}</Text>
-                            <Text style={styles.continueProgress}>
-                                {item.progress.watched}/{item.progress.total} eps
-                            </Text>
-                            {item.show.next_episode_to_air && (
-                                <View style={styles.nextEpisodeBadge}>
-                                    <Text style={styles.nextEpisodeText}>
-                                        S{item.show.next_episode_to_air.season_number} E{item.show.next_episode_to_air.episode_number}
-                                    </Text>
-                                </View>
-                            )}
-                        </TouchableOpacity>
-                    )}
+                    renderItem={renderContinueWatchingItem}
                 />
             </View>
         );
     };
 
+    const renderSortOption = (option: SortOption): JSX.Element => (
+        <TouchableOpacity
+            key={option.value}
+            style={[
+                styles.optionChip,
+                sortBy === option.value && styles.activeOptionChip,
+            ]}
+            onPress={() => setSortBy(option.value)}
+        >
+            <Text
+                style={[
+                    styles.optionText,
+                    sortBy === option.value && styles.activeOptionText,
+                ]}
+            >
+                {option.label}
+            </Text>
+        </TouchableOpacity>
+    );
+
+    const renderGenreChip = (genre: Genre): JSX.Element => (
+        <TouchableOpacity
+            key={genre.id}
+            style={[
+                styles.genreChip,
+                selectedGenre === genre.id && styles.activeGenreChip,
+            ]}
+            onPress={() =>
+                setSelectedGenre(selectedGenre === genre.id ? null : genre.id)
+            }
+        >
+            <Text
+                style={[
+                    styles.genreChipText,
+                    selectedGenre === genre.id && styles.activeGenreText,
+                ]}
+            >
+                {genre.name}
+            </Text>
+        </TouchableOpacity>
+    );
+
+    const renderEmptyState = (): JSX.Element => (
+        <View style={styles.centerContainer}>
+            <Text style={styles.emptyIcon}>🎬</Text>
+            <Text style={styles.emptyText}>No se encontraron resultados</Text>
+        </View>
+    );
+
+    const renderLoadingState = (): JSX.Element => (
+        <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color="#dc2626" />
+            <Text style={styles.loadingText}>Cargando contenido...</Text>
+        </View>
+    );
+
+    const renderContentList = (): JSX.Element => (
+        <FlatList
+            data={data}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
+            numColumns={3}
+            columnWrapperStyle={styles.columnWrapper}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            onEndReached={() => !isSearching && loadContent()}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={renderFooter}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={handleRefresh}
+                    tintColor="#dc2626"
+                    colors={["#dc2626"]}
+                />
+            }
+        />
+    );
+
+    // ========================================================================
+    // Main Render
+    // ========================================================================
+
     return (
         <View style={[styles.safeArea, { paddingTop: 28 }]}>
-
             {/* Pill Tab System */}
             <View style={styles.tabsContainer}>
                 <View style={styles.tabsWrapper}>
@@ -439,11 +677,13 @@ export default function HomeScreen() {
                         ]}
                         onPress={() => setActiveTab("movies")}
                     >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <View style={styles.tabContent}>
                             <MaterialCommunityIcons
                                 name="movie-open-play-outline"
                                 size={24}
-                                color={activeTab === "movies" ? Colors.white : Colors.metalSilver}
+                                color={
+                                    activeTab === "movies" ? Colors.white : Colors.metalSilver
+                                }
                             />
                             <Text
                                 style={[
@@ -465,7 +705,7 @@ export default function HomeScreen() {
                         ]}
                         onPress={() => setActiveTab("tv")}
                     >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <View style={styles.tabContent}>
                             <Feather
                                 name="tv"
                                 size={24}
@@ -490,19 +730,29 @@ export default function HomeScreen() {
             {showProfileBanner && (
                 <TouchableOpacity
                     style={styles.profileBanner}
-                    onPress={() => router.push("/profile" as any)}
+                    onPress={() => router.push("/profile" as Parameters<typeof router.push>[0])}
                 >
                     <View style={styles.profileBannerContent}>
                         <Ionicons name="sparkles" size={20} color={Colors.white} />
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.profileBannerTitle}>¡Dale estilo a tu cuenta!</Text>
-                            <Text style={styles.profileBannerSubtitle}>Cambia tu nombre de usuario genérico en tu perfil.</Text>
+                        <View style={styles.profileBannerTextContainer}>
+                            <Text style={styles.profileBannerTitle}>
+                                ¡Dale estilo a tu cuenta!
+                            </Text>
+                            <Text style={styles.profileBannerSubtitle}>
+                                Cambia tu nombre de usuario genérico en tu perfil.
+                            </Text>
                         </View>
-                        <TouchableOpacity onPress={(e) => {
-                            e.stopPropagation();
-                            setShowProfileBanner(false);
-                        }}>
-                            <Ionicons name="close" size={24} color="rgba(255,255,255,0.6)" />
+                        <TouchableOpacity
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                setShowProfileBanner(false);
+                            }}
+                        >
+                            <Ionicons
+                                name="close"
+                                size={24}
+                                color="rgba(255,255,255,0.6)"
+                            />
                         </TouchableOpacity>
                     </View>
                 </TouchableOpacity>
@@ -530,7 +780,10 @@ export default function HomeScreen() {
                     </View>
 
                     <TouchableOpacity
-                        style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
+                        style={[
+                            styles.filterButtonCompact,
+                            filtersActive && styles.activeFilterButton,
+                        ]}
                         onPress={() => setShowFilterModal(true)}
                     >
                         <Ionicons
@@ -546,50 +799,21 @@ export default function HomeScreen() {
                         style={styles.clearFiltersContainer}
                         onPress={() => resetFilters(true)}
                     >
-                        <Text style={styles.clearFiltersText}>Limpiar filtros activos</Text>
+                        <Text style={styles.clearFiltersText}>
+                            Limpiar filtros activos
+                        </Text>
                     </TouchableOpacity>
                 )}
             </View>
 
-
-
             {/* Content List */}
-            {loading && data.length === 0 ? (
-                <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color="#dc2626" />
-                    <Text style={styles.loadingText}>Cargando contenido...</Text>
-                </View>
-            ) : data.length === 0 ? (
-                <View style={styles.centerContainer}>
-                    <Text style={styles.emptyIcon}>🎬</Text>
-                    <Text style={styles.emptyText}>
-                        No se encontraron resultados
-                    </Text>
-                </View>
-            ) : (
-                <FlatList
-                    data={data}
-                    renderItem={renderItem}
-                    keyExtractor={(item, index) => `${item.id}-${index}`}
-                    numColumns={3}
-                    columnWrapperStyle={styles.columnWrapper}
-                    contentContainerStyle={styles.listContent}
-                    showsVerticalScrollIndicator={false}
-                    onEndReached={() => !isSearching && loadContent()}
-                    onEndReachedThreshold={0.5}
-                    ListFooterComponent={renderFooter}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={handleRefresh}
-                            tintColor="#dc2626"
-                            colors={["#dc2626"]}
-                        />
-                    }
-                />
-            )}
+            {loading && data.length === 0
+                ? renderLoadingState()
+                : data.length === 0
+                    ? renderEmptyState()
+                    : renderContentList()}
 
-            {activeTab === 'tv' && renderContinueWatching()}
+            {activeTab === "tv" && renderContinueWatching()}
 
             {/* Filter Modal */}
             <Modal
@@ -610,21 +834,7 @@ export default function HomeScreen() {
                         {/* Sort By */}
                         <Text style={styles.sectionHeader}>Ordenar Por</Text>
                         <View style={styles.optionsRow}>
-                            {[
-                                { label: "Popularidad", value: "popularity.desc" },
-                                { label: "Mejor Valorados", value: "vote_average.desc" },
-                                { label: "Más Recientes", value: "primary_release_date.desc" }
-                            ].map((opt) => (
-                                <TouchableOpacity
-                                    key={opt.value}
-                                    style={[styles.optionChip, sortBy === opt.value && styles.activeOptionChip]}
-                                    onPress={() => setSortBy(opt.value)}
-                                >
-                                    <Text style={[styles.optionText, sortBy === opt.value && styles.activeOptionText]}>
-                                        {opt.label}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                            {SORT_OPTIONS.map(renderSortOption)}
                         </View>
 
                         {/* Year */}
@@ -642,22 +852,15 @@ export default function HomeScreen() {
                         {/* Genres */}
                         <Text style={styles.sectionHeader}>Género</Text>
                         <View style={styles.genresRow}>
-                            {genres.map((genre) => (
-                                <TouchableOpacity
-                                    key={genre.id}
-                                    style={[styles.genreChip, selectedGenre === genre.id && styles.activeGenreChip]}
-                                    onPress={() => setSelectedGenre(selectedGenre === genre.id ? null : genre.id)}
-                                >
-                                    <Text style={[styles.genreChipText, selectedGenre === genre.id && styles.activeGenreText]}>
-                                        {genre.name}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                            {genres.map(renderGenreChip)}
                         </View>
                     </ScrollView>
 
                     <View style={styles.modalFooter}>
-                        <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
+                        <TouchableOpacity
+                            style={styles.applyButton}
+                            onPress={applyFilters}
+                        >
                             <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
                         </TouchableOpacity>
                     </View>
@@ -667,21 +870,34 @@ export default function HomeScreen() {
     );
 }
 
+// ============================================================================
+// Styles
+// ============================================================================
+
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
+    } as ViewStyle,
+    tabContent: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+    } as ViewStyle,
+    profileBannerTextContainer: {
+        flex: 1,
     } as ViewStyle,
     filterHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
         paddingHorizontal: 16,
         paddingBottom: 8,
     } as ViewStyle,
     filterButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         backgroundColor: Colors.metalGray,
         paddingVertical: 6,
         paddingHorizontal: 16,
@@ -695,22 +911,22 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     filterButtonText: {
         color: Colors.metalSilver,
-        fontWeight: 'bold',
+        fontWeight: "bold",
     } as TextStyle,
     activeFilterButtonText: {
         color: Colors.white,
     } as TextStyle,
     clearFiltersText: {
         color: Colors.metalSilver,
-        textDecorationLine: 'underline',
+        textDecorationLine: "underline",
     } as TextStyle,
     controlsContainer: {
         paddingHorizontal: 16,
         paddingBottom: 12,
     } as ViewStyle,
     searchAndFilterRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         gap: 8,
     } as ViewStyle,
     filterButtonCompact: {
@@ -719,12 +935,12 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: Colors.metalSilver,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
     } as ViewStyle,
     clearFiltersContainer: {
         marginTop: 4,
-        alignSelf: 'flex-end',
+        alignSelf: "flex-end",
     } as ViewStyle,
     searchWrapper: {
         flex: 1,
@@ -737,7 +953,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     searchInput: {
         flex: 1,
-        color: "#f4f4f5", // zinc-100
+        color: "#f4f4f5",
         paddingHorizontal: 16,
         paddingVertical: 12,
     } as TextStyle,
@@ -756,8 +972,7 @@ const styles = StyleSheet.create({
     tabsWrapper: {
         flexDirection: "row",
         backgroundColor: Colors.metalGray,
-
-        borderRadius: 9999, // full rounded
+        borderRadius: 9999,
     } as ViewStyle,
     tab: {
         flex: 1,
@@ -808,7 +1023,6 @@ const styles = StyleSheet.create({
     footerContainer: {
         paddingVertical: 16,
     } as ViewStyle,
-    // Modal Styles
     modalContainer: {
         flex: 1,
         backgroundColor: Colors.metalBlack,
@@ -842,8 +1056,8 @@ const styles = StyleSheet.create({
         marginTop: 16,
     } as TextStyle,
     optionsRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
+        flexDirection: "row",
+        flexWrap: "wrap",
         gap: 8,
     } as ViewStyle,
     optionChip: {
@@ -859,7 +1073,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.bloodRed,
     } as ViewStyle,
     optionText: {
-        color: '#f4f4f5',
+        color: "#f4f4f5",
     } as TextStyle,
     activeOptionText: {
         color: Colors.white,
@@ -871,12 +1085,12 @@ const styles = StyleSheet.create({
         borderColor: Colors.metalSilver,
         borderRadius: 8,
         padding: 12,
-        color: '#f4f4f5',
+        color: "#f4f4f5",
         fontSize: 16,
     } as TextStyle,
     genresRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
+        flexDirection: "row",
+        flexWrap: "wrap",
         gap: 8,
     } as ViewStyle,
     genreChip: {
@@ -892,12 +1106,12 @@ const styles = StyleSheet.create({
         borderColor: Colors.bloodRed,
     } as ViewStyle,
     genreChipText: {
-        color: '#f4f4f5',
+        color: "#f4f4f5",
         fontSize: 12,
     } as TextStyle,
     activeGenreText: {
         color: Colors.white,
-        fontWeight: 'bold',
+        fontWeight: "bold",
     } as TextStyle,
     modalFooter: {
         paddingTop: 16,
@@ -906,13 +1120,13 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.bloodRed,
         paddingVertical: 16,
         borderRadius: 8,
-        alignItems: 'center',
+        alignItems: "center",
     } as ViewStyle,
     applyButtonText: {
         color: Colors.white,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         fontSize: 16,
-        textTransform: 'uppercase',
+        textTransform: "uppercase",
     } as TextStyle,
     profileBanner: {
         marginHorizontal: 16,
@@ -949,9 +1163,9 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     } as ViewStyle,
     continueHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
         paddingHorizontal: 16,
         marginBottom: 8,
     } as ViewStyle,
@@ -979,16 +1193,16 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255,255,255,0.2)",
         borderRadius: 1.5,
         marginTop: 6,
-        overflow: 'hidden',
+        overflow: "hidden",
     } as ViewStyle,
     progressBarFill: {
-        height: '100%',
+        height: "100%",
         backgroundColor: Colors.bloodRed,
     } as ViewStyle,
     continueText: {
         color: Colors.white,
         fontSize: 10,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         marginTop: 4,
     } as TextStyle,
     continueProgress: {
@@ -1008,6 +1222,6 @@ const styles = StyleSheet.create({
         color: "#ffffffff",
         fontSize: 11,
         fontWeight: "bold",
-        textAlign: 'center',
+        textAlign: "center",
     } as TextStyle,
 });
