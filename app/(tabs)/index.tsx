@@ -64,6 +64,8 @@ import {
     sortGenresAlphabetically,
     isNotNull,
 } from "../../src/utils/contentLoader.utils";
+import { ContinueWatchingCard } from "../../src/components/ContinueWatchingCard";
+import { seasonsToProgressInfo } from "../../src/utils/tvDetail.utils";
 
 // ============================================================================
 // Constants
@@ -255,6 +257,7 @@ export default function HomeScreen(): JSX.Element {
         toggleWatched,
         tvProgress,
         fetchTVProgress,
+        getNextEpisodeToWatch,
     } = useContentStore();
 
     // ========================================================================
@@ -499,44 +502,17 @@ export default function HomeScreen(): JSX.Element {
     }: {
         item: ContinueWatchingItem;
     }): JSX.Element => {
-        const progressPercentage =
-            (item.progress.watched / Math.max(1, item.progress.total)) * 100;
+        const nextEpisode = getNextEpisodeToWatch(
+            item.show.id,
+            seasonsToProgressInfo(item.show.seasons)
+        );
 
         return (
-            <TouchableOpacity
-                style={styles.continueCard}
-                onPress={() => router.push(`/tv/${item.show.id}`)}
-            >
-                <Image
-                    source={{
-                        uri: getImageUrl(item.show.poster_path, "w300") ?? undefined,
-                    }}
-                    style={styles.continueImage}
-                    contentFit="cover"
-                />
-                <View style={styles.progressBarBg}>
-                    <View
-                        style={[
-                            styles.progressBarFill,
-                            { width: `${progressPercentage}%` },
-                        ]}
-                    />
-                </View>
-                <Text style={styles.continueText} numberOfLines={1}>
-                    {item.show.name}
-                </Text>
-                <Text style={styles.continueProgress}>
-                    {item.progress.watched}/{item.progress.total} eps
-                </Text>
-                {item.show.next_episode_to_air && (
-                    <View style={styles.nextEpisodeBadge}>
-                        <Text style={styles.nextEpisodeText}>
-                            S{item.show.next_episode_to_air.season_number} E
-                            {item.show.next_episode_to_air.episode_number}
-                        </Text>
-                    </View>
-                )}
-            </TouchableOpacity>
+            <ContinueWatchingCard
+                item={item}
+                onPress={(showId) => router.push(`/tv/${showId}`)}
+                nextEpisode={nextEpisode}
+            />
         );
     };
 
@@ -1176,12 +1152,12 @@ const styles = StyleSheet.create({
         fontSize: 12,
     } as TextStyle,
     continueSection: {
-        paddingVertical: 12,
-        backgroundColor: "rgba(0,0,0,0.4)",
+        paddingVertical: 20,
+        backgroundColor: "rgba(10, 10, 10, 0.8)",
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: "rgba(255,255,255,0.1)",
-        marginBottom: 4,
+        borderColor: "rgba(255,255,255,0.05)",
+        marginVertical: 8,
     } as ViewStyle,
     continueHeader: {
         flexDirection: "row",
@@ -1192,57 +1168,16 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     continueTitle: {
         color: Colors.white,
-        fontSize: 14,
+        fontSize: 18,
         fontFamily: "BebasNeue_400Regular",
-        letterSpacing: 1,
+        letterSpacing: 1.5,
     } as TextStyle,
     continueList: {
         paddingHorizontal: 16,
-        gap: 12,
+        paddingTop: 12,
+        gap: 16,
     } as ViewStyle,
     continueCard: {
-        width: 80,
+        width: 280,
     } as ViewStyle,
-    continueImage: {
-        width: 60,
-        height: 80,
-        borderRadius: 4,
-        backgroundColor: Colors.metalGray,
-    } as ImageStyle,
-    progressBarBg: {
-        height: 3,
-        backgroundColor: "rgba(255,255,255,0.2)",
-        borderRadius: 1.5,
-        marginTop: 6,
-        overflow: "hidden",
-    } as ViewStyle,
-    progressBarFill: {
-        height: "100%",
-        backgroundColor: Colors.bloodRed,
-    } as ViewStyle,
-    continueText: {
-        color: Colors.white,
-        fontSize: 10,
-        fontWeight: "bold",
-        marginTop: 4,
-    } as TextStyle,
-    continueProgress: {
-        color: Colors.metalSilver,
-        fontSize: 9,
-        marginTop: 1,
-    } as TextStyle,
-    nextEpisodeBadge: {
-        backgroundColor: "rgba(234, 179, 8, 0.2)",
-        padding: 2,
-        borderRadius: 2,
-        marginTop: 4,
-        borderWidth: 0.5,
-        borderColor: "rgba(234, 179, 8, 0.5)",
-    } as ViewStyle,
-    nextEpisodeText: {
-        color: "#ffffffff",
-        fontSize: 11,
-        fontWeight: "bold",
-        textAlign: "center",
-    } as TextStyle,
 });
