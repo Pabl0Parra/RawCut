@@ -6,21 +6,21 @@ interface TabBarIconProps {
 }
 
 export const HomeIcon = ({ color }: TabBarIconProps) => (
-    <MaterialIcons name="castle" size={24} color={color} />
+    <MaterialIcons name="castle" size={20} color={color} />
 );
 
 export const FavoritesIcon = ({ color }: TabBarIconProps) => (
-    <Ionicons name="skull-outline" size={24} color={color} />
+    <Ionicons name="skull-outline" size={20} color={color} />
 );
 
 export const WatchlistIcon = ({ color }: TabBarIconProps) => (
-    <MaterialCommunityIcons name="sword" size={24} color={color} />
+    <MaterialCommunityIcons name="sword" size={20} color={color} />
 );
 
 export const RecommendationsIcon = ({ color }: TabBarIconProps) => (
-    <MaterialCommunityIcons name="email-outline" size={24} color={color} />
+    <MaterialCommunityIcons name="email-outline" size={20} color={color} />
 );
 
 export const ProfileIcon = ({ color }: TabBarIconProps) => (
-    <MaterialCommunityIcons name="shield-sword-outline" size={24} color={color} />
+    <MaterialCommunityIcons name="shield-sword-outline" size={20} color={color} />
 );

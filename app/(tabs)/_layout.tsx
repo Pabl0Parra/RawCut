@@ -35,16 +35,15 @@ export default function TabLayout() {
                     backgroundColor: Colors.metalGray,
                     borderTopColor: Colors.metalSilver,
                     borderTopWidth: 0.5,
-                    height: 50 + insets.bottom,
+                    height: 52 + insets.bottom,
                     paddingBottom: insets.bottom,
-                    paddingTop: 4,
+
                 },
                 tabBarActiveTintColor: Colors.bloodRed,
                 tabBarInactiveTintColor: Colors.metalSilver,
                 tabBarLabelStyle: {
                     fontSize: 10,
                     fontFamily: "Inter_500Medium",
-                    marginBottom: 4,
                 },
                 headerStyle: {
                     backgroundColor: Colors.metalBlack,
@@ -100,6 +99,7 @@ export default function TabLayout() {
                     title: "Perfil",
                     headerTitle: "CORTOCRUDO - PERFIL",
                     tabBarIcon: ProfileIcon,
+                    href: null,
                 }}
             />
             <Tabs.Screen
