@@ -219,8 +219,10 @@ export default function MovieCard({
 
 const styles = StyleSheet.create({
     container: {
-        width: "31%",
+        width: "29%",
         marginBottom: 16,
+        gap: 4,
+        marginHorizontal: 4,
     } as ViewStyle,
     posterContainer: {
         position: "relative",

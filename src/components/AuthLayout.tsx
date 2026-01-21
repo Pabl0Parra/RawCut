@@ -14,7 +14,7 @@ import {
     type ImageStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
+import { Link, type LinkProps } from "expo-router";
 import { Colors } from "../constants/Colors";
 
 /**
@@ -30,7 +30,7 @@ export interface AuthLayoutProps {
     submitButtonText: string;
     linkText: string;
     linkLabel: string;
-    linkHref: string;
+    linkHref: LinkProps["href"];
     showLogo?: boolean;
 }
 
@@ -62,7 +62,7 @@ export function AuthLayout({
                         CortoCrudo
                     </Text>
                     <Image
-                        source={require("../../assets/corto-crudo-logo.png")}
+                        source={require("../../assets/2.png")}
                         style={styles.logoImage}
                         resizeMode="contain"
                     />
@@ -127,7 +127,7 @@ export function AuthLayout({
                         {/* Link to other auth screen */}
                         <View style={styles.linkContainer}>
                             <Text style={styles.linkText}>{linkText} </Text>
-                            <Link href={linkHref} asChild>
+                            <Link href={linkHref as any} asChild>
                                 <TouchableOpacity>
                                     <Text style={styles.link}>{linkLabel}</Text>
                                 </TouchableOpacity>

@@ -35,9 +35,9 @@ export default function TabLayout() {
                     backgroundColor: Colors.metalGray,
                     borderTopColor: Colors.metalSilver,
                     borderTopWidth: 0.5,
-                    height: 60 + insets.bottom,
+                    height: 50 + insets.bottom,
                     paddingBottom: insets.bottom,
-                    paddingTop: 8,
+                    paddingTop: 4,
                 },
                 tabBarActiveTintColor: Colors.bloodRed,
                 tabBarInactiveTintColor: Colors.metalSilver,
@@ -73,6 +73,7 @@ export default function TabLayout() {
                 name="favorites"
                 options={{
                     title: "Favoritos",
+                    headerTitle: "CORTOCRUDO - FAVORITOS",
                     tabBarIcon: FavoritesIcon,
                 }}
             />
@@ -80,6 +81,7 @@ export default function TabLayout() {
                 name="watchlist"
                 options={{
                     title: "Watchlist",
+                    headerTitle: "CORTOCRUDO - WATCHLIST",
                     tabBarIcon: WatchlistIcon,
                 }}
             />
@@ -87,6 +89,7 @@ export default function TabLayout() {
                 name="recommendations"
                 options={{
                     title: "Sugeridas",
+                    headerTitle: "CORTOCRUDO - SUGERIDAS",
                     tabBarIcon: RecommendationsIcon,
                     tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
                 }}
@@ -95,6 +98,7 @@ export default function TabLayout() {
                 name="profile"
                 options={{
                     title: "Perfil",
+                    headerTitle: "CORTOCRUDO - PERFIL",
                     tabBarIcon: ProfileIcon,
                 }}
             />

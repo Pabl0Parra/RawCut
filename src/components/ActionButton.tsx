@@ -31,12 +31,12 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     const label = isActive ? activeLabel : inactiveLabel;
     const iconColor = isActive ? Colors.white : "#f4f4f5";
 
-    const renderIcon = (): JSX.Element => {
+    const renderIcon = (): React.JSX.Element => {
         if (iconFamily === "MaterialCommunityIcons") {
             return (
                 <MaterialCommunityIcons
                     name={iconName as MaterialCommunityIconsName}
-                    size={20}
+                    size={18}
                     color={iconColor}
                 />
             );
@@ -45,7 +45,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         return (
             <Ionicons
                 name={iconName as IoniconsName}
-                size={20}
+                size={18}
                 color={iconColor}
             />
         );
@@ -75,9 +75,10 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 const styles = StyleSheet.create({
     actionButton: {
         flex: 1,
-        paddingVertical: 12,
+        paddingVertical: 8,
         borderRadius: 4,
         alignItems: "center",
+        marginHorizontal: 4,
     } as ViewStyle,
     activeButton: {
         backgroundColor: Colors.vibrantRed,
@@ -91,14 +92,16 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         flexWrap: "nowrap",
         alignItems: "center",
-        gap: 6,
+        gap: 4,
     } as ViewStyle,
     activeButtonText: {
         color: Colors.white,
         fontWeight: "bold",
+        fontSize: 12,
     } as TextStyle,
     inactiveButtonText: {
         color: "#f4f4f5",
+        fontSize: 12,
     } as TextStyle,
 });
 

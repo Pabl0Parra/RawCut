@@ -147,7 +147,7 @@ export const detailScreenStyles = StyleSheet.create({
     } as TextStyle,
     recommendButton: {
         backgroundColor: Colors.bloodRed,
-        paddingVertical: 12,
+        paddingVertical: 8,
         paddingHorizontal: 24,
         borderRadius: 8,
         marginVertical: 16,
@@ -160,7 +160,7 @@ export const detailScreenStyles = StyleSheet.create({
     } as ViewStyle,
     recommendButtonText: {
         color: Colors.white,
-        fontSize: 16,
+        fontSize: 12,
         fontWeight: "bold",
         textTransform: "uppercase",
     } as TextStyle,
