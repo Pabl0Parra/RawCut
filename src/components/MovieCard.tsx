@@ -137,7 +137,8 @@ export default function MovieCard({
 
         return (
             <View style={styles.watchedOverlay}>
-                <Ionicons name="checkmark-circle" size={24} color={Colors.white} />
+                <Ionicons name="checkmark-circle" size={28} color={Colors.white} />
+                <Text style={styles.watchedText}>VISTO</Text>
             </View>
         );
     };
@@ -246,12 +247,22 @@ const styles = StyleSheet.create({
     } as TextStyle,
     watchedOverlay: {
         position: "absolute",
-        top: 4,
-        left: 4,
-        backgroundColor: "rgba(220, 38, 38, 0.8)",
-        borderRadius: 12,
-        padding: 2,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(220, 38, 38, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
     } as ViewStyle,
+    watchedText: {
+        color: Colors.white,
+        fontSize: 12,
+        fontWeight: "bold",
+        marginTop: 4,
+        fontFamily: "BebasNeue_400Regular",
+        letterSpacing: 1,
+    } as TextStyle,
     quickActions: {
         position: "absolute",
         bottom: 0,
