@@ -193,6 +193,27 @@ export default function MovieCard({
         );
     };
 
+    const isNewRelease = (dateString?: string): boolean => {
+        if (!dateString) return false;
+        const releaseDate = new Date(dateString);
+        const today = new Date();
+        const diffTime = Math.abs(today.getTime() - releaseDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= 7;
+    };
+
+    const showNewBadge = !isMovie(item) && isNewRelease(item.first_air_date);
+
+    const renderNewBadge = (): JSX.Element | null => {
+        if (!showNewBadge) return null;
+
+        return (
+            <View style={styles.newBadge}>
+                <Text style={styles.newBadgeText}>NUEVO</Text>
+            </View>
+        );
+    };
+
     return (
         <TouchableOpacity
             style={styles.container}
@@ -202,6 +223,7 @@ export default function MovieCard({
             <View style={styles.posterContainer}>
                 {renderPoster()}
                 {renderWatchedOverlay()}
+                {renderNewBadge()}
                 {renderQuickActions()}
             </View>
 
@@ -262,6 +284,22 @@ const styles = StyleSheet.create({
         marginTop: 4,
         fontFamily: "BebasNeue_400Regular",
         letterSpacing: 1,
+    } as TextStyle,
+    newBadge: {
+        position: "absolute",
+        top: 8,
+        right: 8,
+        backgroundColor: Colors.bloodRed,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+        zIndex: 10,
+    } as ViewStyle,
+    newBadgeText: {
+        color: Colors.white,
+        fontSize: 10,
+        fontWeight: "bold",
+        letterSpacing: 0.5,
     } as TextStyle,
     quickActions: {
         position: "absolute",
