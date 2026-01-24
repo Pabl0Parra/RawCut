@@ -7,7 +7,6 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Alert,
-    Linking,
     Platform,
     type ViewStyle,
     type TextStyle,
