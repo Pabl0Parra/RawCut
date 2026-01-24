@@ -17,6 +17,9 @@ import VideoSplash from "../src/components/VideoSplash"; // Import VideoSplash
 import SmokeBackground from "../src/components/SmokeBackground";
 import { ThemeProvider, DarkTheme } from "@react-navigation/native";
 
+import { HeaderLeft } from "../src/components/navigation/HeaderLeft";
+import { HeaderRight } from "../src/components/navigation/HeaderRight";
+
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
@@ -155,6 +158,24 @@ export default function RootLayout() {
                             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                             <Stack.Screen name="login" options={{ headerShown: false }} />
                             <Stack.Screen name="register" options={{ headerShown: false }} />
+                            <Stack.Screen
+                                name="person/[id]"
+                                options={{
+                                    headerShown: true,
+                                    headerStyle: {
+                                        backgroundColor: Colors.metalBlack,
+                                    },
+                                    headerTintColor: Colors.white,
+                                    headerTitleStyle: {
+                                        fontFamily: "BebasNeue_400Regular",
+                                        fontSize: 28,
+                                    },
+                                    headerTitle: "CORTOCRUDO",
+                                    headerTitleAlign: 'center',
+                                    headerLeft: () => <HeaderLeft />,
+                                    headerRight: () => <HeaderRight />,
+                                }}
+                            />
                         </Stack>
                     </>
                 )}

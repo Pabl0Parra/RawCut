@@ -73,6 +73,52 @@ const formatRating = (rating: number): string => {
 };
 
 /**
+ * Props for ActionButton component
+ */
+interface ActionButtonProps {
+    isActive: boolean;
+    activeIcon: keyof typeof Ionicons.glyphMap;
+    inactiveIcon: keyof typeof Ionicons.glyphMap;
+    activeLabel: string;
+    inactiveLabel: string;
+    onPress?: () => void;
+    iconFamily?: "Ionicons"; // Extend if other icon families are used
+}
+
+/**
+ * Reusable action button for quick actions
+ */
+export const ActionButton: React.FC<ActionButtonProps> = ({
+    isActive,
+    activeIcon,
+    inactiveIcon,
+    activeLabel,
+    inactiveLabel,
+    onPress,
+    iconFamily = "Ionicons",
+}) => {
+    console.log(`ActionButton: Press handler for ${activeLabel} is defined: ${!!onPress}`);
+    const iconName = isActive ? activeIcon : inactiveIcon;
+    const color = isActive ? Colors.bloodRed : Colors.metalSilver;
+
+    if (!onPress) {
+        return null; // Don't render if no action is provided
+    }
+
+    return (
+        <TouchableOpacity
+            style={styles.quickActionButton}
+            onPress={onPress}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+            {iconFamily === "Ionicons" && (
+                <Ionicons name={iconName} size={16} color={color} />
+            )}
+        </TouchableOpacity>
+    );
+};
+
+/**
  * Card component for displaying movie/TV show in a grid
  */
 export default function MovieCard({
@@ -85,6 +131,7 @@ export default function MovieCard({
     onToggleWatchlist,
     onToggleWatched,
 }: Readonly<MovieCardProps>): JSX.Element {
+    console.log(`MovieCard: Rendering card for ${getTitle(item)} (ID: ${item.id})`);
     const posterUrl = getImageUrl(item.poster_path, "w300");
     const title = getTitle(item);
     const year = extractYear(getReleaseDate(item));
@@ -97,18 +144,18 @@ export default function MovieCard({
         router.push(path as Parameters<typeof router.push>[0]);
     };
 
-    const handleToggleFavorite = (e: { stopPropagation: () => void }): void => {
-        e.stopPropagation();
+    const handleToggleFavorite = (): void => {
+        console.log("MovieCard: onToggleFavorite triggered");
         onToggleFavorite?.();
     };
 
-    const handleToggleWatchlist = (e: { stopPropagation: () => void }): void => {
-        e.stopPropagation();
+    const handleToggleWatchlist = (): void => {
+        console.log("MovieCard: onToggleWatchlist triggered");
         onToggleWatchlist?.();
     };
 
-    const handleToggleWatched = (e: { stopPropagation: () => void }): void => {
-        e.stopPropagation();
+    const handleToggleWatched = (): void => {
+        console.log("MovieCard: onToggleWatched triggered");
         onToggleWatched?.();
     };
 
@@ -215,19 +262,26 @@ export default function MovieCard({
     };
 
     return (
-        <TouchableOpacity
-            style={styles.container}
-            onPress={handlePress}
-            activeOpacity={0.8}
-        >
+        <View style={styles.container}>
             <View style={styles.posterContainer}>
-                {renderPoster()}
+                <TouchableOpacity
+                    onPress={handlePress}
+                    activeOpacity={0.8}
+                    style={StyleSheet.absoluteFill}
+                >
+                    {renderPoster()}
+                </TouchableOpacity>
+
                 {renderWatchedOverlay()}
                 {renderNewBadge()}
                 {renderQuickActions()}
             </View>
 
-            <View style={styles.infoContainer}>
+            <TouchableOpacity
+                style={styles.infoContainer}
+                onPress={handlePress}
+                activeOpacity={0.7}
+            >
                 <Text style={styles.title} numberOfLines={2}>
                     {title}
                 </Text>
@@ -235,8 +289,8 @@ export default function MovieCard({
                     {!!year && <Text style={styles.year}>{year}</Text>}
                     <Text style={styles.rating}>⭐ {rating}</Text>
                 </View>
-            </View>
-        </TouchableOpacity>
+            </TouchableOpacity>
+        </View>
     );
 }
 
@@ -310,6 +364,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-around",
         backgroundColor: "rgba(10, 10, 10, 0.8)",
         paddingVertical: 6,
+        zIndex: 20,
     } as ViewStyle,
     quickActionButton: {
         padding: 4,

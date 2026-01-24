@@ -54,7 +54,8 @@ export const useContentStore = create<ContentState>((set, get) => ({
             const { data, error } = await supabase
                 .from("user_content")
                 .select("*")
-                .eq("user_id", user.id);
+                .eq("user_id", user.id)
+                .order("created_at", { ascending: false });
 
             if (error) throw error;
 
@@ -88,9 +89,19 @@ export const useContentStore = create<ContentState>((set, get) => ({
 
     addToFavorites: async (tmdbId: number, mediaType: "movie" | "tv") => {
         const user = useAuthStore.getState().user;
-        if (!user) return false;
+        if (!user) {
+            console.error("addToFavorites: No user session found");
+            return false;
+        }
 
+        console.log(`addToFavorites: Attempting to add ${mediaType} ${tmdbId}`);
         try {
+            // Check if already in favorites to avoid duplicates if state is out of sync
+            if (get().isFavorite(tmdbId, mediaType)) {
+                console.log("addToFavorites: Already in favorites, skipping insert");
+                return true;
+            }
+
             const { data, error } = await supabase.from("user_content").insert({
                 user_id: user.id,
                 tmdb_id: tmdbId,
@@ -98,10 +109,18 @@ export const useContentStore = create<ContentState>((set, get) => ({
                 list_type: "favorite",
             }).select().single();
 
-            if (error) throw error;
+            if (error) {
+                // Ignore "already exists" errors (duplicate key value violates unique constraint)
+                if (error.code === '23505') {
+                    console.log("addToFavorites: Item already exists in DB");
+                    return true;
+                }
+                throw error;
+            }
 
+            console.log("addToFavorites: Success", data);
             set((state) => ({
-                favorites: [...state.favorites, data],
+                favorites: [data, ...state.favorites],
             }));
             return true;
         } catch (err) {
@@ -114,6 +133,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!user) return false;
 
+        console.log(`removeFromFavorites: Removing ${mediaType} ${tmdbId}`);
         try {
             const { error } = await supabase
                 .from("user_content")
@@ -125,6 +145,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
 
             if (error) throw error;
 
+            console.log("removeFromFavorites: Success");
             set((state) => ({
                 favorites: state.favorites.filter(
                     (item) => !(item.tmdb_id === tmdbId && item.media_type === mediaType)
@@ -139,9 +160,19 @@ export const useContentStore = create<ContentState>((set, get) => ({
 
     addToWatchlist: async (tmdbId: number, mediaType: "movie" | "tv") => {
         const user = useAuthStore.getState().user;
-        if (!user) return false;
+        if (!user) {
+            console.error("addToWatchlist: No user session found");
+            return false;
+        }
 
+        console.log(`addToWatchlist: Attempting to add ${mediaType} ${tmdbId}`);
         try {
+            // Check if already in watchlist to avoid duplicates if state is out of sync
+            if (get().isInWatchlist(tmdbId, mediaType)) {
+                console.log("addToWatchlist: Already in watchlist, skipping insert");
+                return true;
+            }
+
             const { data, error } = await supabase.from("user_content").insert({
                 user_id: user.id,
                 tmdb_id: tmdbId,
@@ -149,10 +180,18 @@ export const useContentStore = create<ContentState>((set, get) => ({
                 list_type: "watchlist",
             }).select().single();
 
-            if (error) throw error;
+            if (error) {
+                // Ignore "already exists" errors
+                if (error.code === '23505') {
+                    console.log("addToWatchlist: Item already exists in DB");
+                    return true;
+                }
+                throw error;
+            }
 
+            console.log("addToWatchlist: Success", data);
             set((state) => ({
-                watchlist: [...state.watchlist, data],
+                watchlist: [data, ...state.watchlist],
             }));
             return true;
         } catch (err) {
@@ -297,23 +336,26 @@ export const useContentStore = create<ContentState>((set, get) => ({
     },
 
     isFavorite: (tmdbId: number, mediaType: "movie" | "tv") => {
+        const id = Number(tmdbId);
         return get().favorites.some(
-            (item) => item.tmdb_id === tmdbId && item.media_type === mediaType
+            (item) => Number(item.tmdb_id) === id && item.media_type === mediaType
         );
     },
 
     isInWatchlist: (tmdbId: number, mediaType: "movie" | "tv") => {
+        const id = Number(tmdbId);
         return get().watchlist.some(
-            (item) => item.tmdb_id === tmdbId && item.media_type === mediaType
+            (item) => Number(item.tmdb_id) === id && item.media_type === mediaType
         );
     },
 
     isWatched: (tmdbId: number, mediaType: "movie" | "tv") => {
+        const id = Number(tmdbId);
         const season = mediaType === "movie" ? 0 : -1;
         const episode = mediaType === "movie" ? 0 : -1;
         return get().tvProgress.some(
             (item) =>
-                item.tmdb_id === tmdbId &&
+                Number(item.tmdb_id) === id &&
                 item.season_number === season &&
                 item.episode_number === episode
         );

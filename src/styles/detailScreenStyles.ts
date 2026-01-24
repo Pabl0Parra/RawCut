@@ -68,7 +68,7 @@ export const detailScreenStyles = StyleSheet.create({
     } as ViewStyle,
     descriptionTitle: {
         color: "#f4f4f5",
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: "bold",
         marginBottom: 8,
     } as TextStyle,

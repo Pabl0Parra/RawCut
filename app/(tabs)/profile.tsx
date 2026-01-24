@@ -1,41 +1,390 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    ActivityIndicator,
+    Alert,
+    ScrollView,
+    Image,
+    Animated,
+    Linking,
+    Platform,
+    type ViewStyle,
+    type TextStyle,
+    type ImageStyle,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useAuthStore } from "../../src/stores/authStore";
-import { Colors } from "../../src/constants/Colors";
+import { useAvatarUpload, type ImageSource } from "../../src/hooks/useAvatarUpload";
+import { Colors, Fonts } from "../../src/constants/Colors";
 
-export default function ProfileScreen() {
-    const { profile, user, updateUsername, signOut, isLoading, error, clearError } = useAuthStore();
-    const [newUsername, setNewUsername] = useState(profile?.username || "");
-    const [isEditing, setIsEditing] = useState(false);
+/** App version - should be synced with app.json */
+const APP_VERSION = "1.0.0";
 
-    const isGenericUsername = profile?.username?.startsWith("user_");
+/** External links */
+const LINKS = {
+    help: "https://cortoCrudo.app/help",
+    privacy: "https://cortoCrudo.app/privacy",
+    terms: "https://cortoCrudo.app/terms",
+} as const;
 
-    useEffect(() => {
-        if (profile?.username) {
-            setNewUsername(profile.username);
-        }
-    }, [profile]);
+/** Format date to localized string */
+function formatMemberSince(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+}
 
-    const handleUpdateUsername = async () => {
-        if (!newUsername.trim()) {
-            Alert.alert("Error", "El nombre de usuario no puede estar vacío");
-            return;
-        }
+/** Get initials from username or email */
+function getInitials(username: string | undefined, email: string | undefined): string {
+    if (username && !username.startsWith("user_")) {
+        return username.slice(0, 2).toUpperCase();
+    }
+    if (email) {
+        return email.slice(0, 2).toUpperCase();
+    }
+    return "??";
+}
 
-        if (newUsername.trim() === profile?.username) {
-            setIsEditing(false);
-            return;
-        }
+// ============================================================================
+// Sub-Components
+// ============================================================================
 
-        const success = await updateUsername(newUsername.trim());
-        if (success) {
-            Alert.alert("Éxito", "Nombre de usuario actualizado correctamente");
-            setIsEditing(false);
+/** Avatar component with upload capability */
+interface AvatarSectionProps {
+    avatarUrl: string | null;
+    username: string | undefined;
+    email: string | undefined;
+    isUploading: boolean;
+    uploadProgress: number;
+    onPress: () => void;
+}
+
+function AvatarSection({
+    avatarUrl,
+    username,
+    email,
+    isUploading,
+    uploadProgress,
+    onPress,
+}: AvatarSectionProps): React.JSX.Element {
+    const initials = getInitials(username, email);
+
+    return (
+        <TouchableOpacity
+            style={styles.avatarContainer}
+            onPress={onPress}
+            disabled={isUploading}
+            activeOpacity={0.8}
+            accessibilityLabel="Cambiar foto de perfil"
+            accessibilityRole="button"
+        >
+            <View style={styles.avatarWrapper}>
+                {avatarUrl ? (
+                    <Image
+                        source={{ uri: avatarUrl }}
+                        style={styles.avatarImage}
+                        resizeMode="cover"
+                    />
+                ) : (
+                    <View style={styles.avatarPlaceholder}>
+                        <Text style={styles.avatarInitials}>{initials}</Text>
+                    </View>
+                )}
+
+                {/* Upload overlay */}
+                {isUploading && (
+                    <View style={styles.avatarOverlay}>
+                        <ActivityIndicator size="large" color={Colors.white} />
+                        <Text style={styles.uploadProgressText}>
+                            {Math.round(uploadProgress * 100)}%
+                        </Text>
+                    </View>
+                )}
+
+                {/* Camera badge */}
+                {!isUploading && (
+                    <View style={styles.cameraBadge}>
+                        <Ionicons name="camera" size={16} color={Colors.white} />
+                    </View>
+                )}
+            </View>
+        </TouchableOpacity>
+    );
+}
+
+/** Section header component */
+interface SectionHeaderProps {
+    title: string;
+}
+
+function SectionHeader({ title }: SectionHeaderProps): React.JSX.Element {
+    return <Text style={styles.sectionTitle}>{title}</Text>;
+}
+
+/** Profile info row component */
+interface InfoRowProps {
+    icon: keyof typeof Ionicons.glyphMap;
+    label: string;
+    value: string;
+    onEdit?: () => void;
+    isEditable?: boolean;
+}
+
+function InfoRow({
+    icon,
+    label,
+    value,
+    onEdit,
+    isEditable = false,
+}: InfoRowProps): React.JSX.Element {
+    return (
+        <View style={styles.infoRow}>
+            <View style={styles.infoRowLeft}>
+                <Ionicons name={icon} size={20} color={Colors.metalSilver} />
+                <View style={styles.infoRowText}>
+                    <Text style={styles.infoLabel}>{label}</Text>
+                    <Text style={styles.infoValue}>{value}</Text>
+                </View>
+            </View>
+            {isEditable && onEdit && (
+                <TouchableOpacity
+                    onPress={onEdit}
+                    style={styles.editButton}
+                    accessibilityLabel={`Editar ${label}`}
+                    accessibilityRole="button"
+                >
+                    <Ionicons name="create-outline" size={20} color={Colors.bloodRed} />
+                </TouchableOpacity>
+            )}
+        </View>
+    );
+}
+
+/** Settings row with toggle or navigation */
+interface SettingsRowProps {
+    icon: keyof typeof Ionicons.glyphMap;
+    label: string;
+    onPress: () => void;
+    rightElement?: React.ReactNode;
+    destructive?: boolean;
+}
+
+function SettingsRow({
+    icon,
+    label,
+    onPress,
+    rightElement,
+    destructive = false,
+}: SettingsRowProps): React.JSX.Element {
+    return (
+        <TouchableOpacity
+            style={styles.settingsRow}
+            onPress={onPress}
+            activeOpacity={0.7}
+            accessibilityLabel={label}
+            accessibilityRole="button"
+        >
+            <View style={styles.settingsRowLeft}>
+                <Ionicons
+                    name={icon}
+                    size={22}
+                    color={destructive ? Colors.bloodRed : Colors.metalSilver}
+                />
+                <Text
+                    style={[
+                        styles.settingsLabel,
+                        destructive && styles.settingsLabelDestructive,
+                    ]}
+                >
+                    {label}
+                </Text>
+            </View>
+            {rightElement ?? (
+                <Ionicons name="chevron-forward" size={20} color={Colors.metalSilver} />
+            )}
+        </TouchableOpacity>
+    );
+}
+
+/** Username edit modal/inline component */
+interface UsernameEditorProps {
+    currentUsername: string;
+    isLoading: boolean;
+    error: string | null;
+    onSave: (newUsername: string) => Promise<void>;
+    onCancel: () => void;
+}
+
+function UsernameEditor({
+    currentUsername,
+    isLoading,
+    error,
+    onSave,
+    onCancel,
+}: UsernameEditorProps): React.JSX.Element {
+    const [value, setValue] = useState(currentUsername);
+
+    const handleSave = async () => {
+        if (value.trim() && value.trim() !== currentUsername) {
+            await onSave(value.trim());
+        } else {
+            onCancel();
         }
     };
 
-    const handleSignOut = () => {
+    return (
+        <View style={styles.editorContainer}>
+            <View style={styles.editorInputRow}>
+                <TextInput
+                    style={styles.editorInput}
+                    value={value}
+                    onChangeText={setValue}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    maxLength={20}
+                    placeholder="Nombre de usuario"
+                    placeholderTextColor={Colors.placeholderGray}
+                    autoFocus
+                    selectTextOnFocus
+                />
+                <View style={styles.editorButtons}>
+                    <TouchableOpacity
+                        style={styles.editorButtonSave}
+                        onPress={handleSave}
+                        disabled={isLoading}
+                        accessibilityLabel="Guardar"
+                    >
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color={Colors.white} />
+                        ) : (
+                            <Ionicons name="checkmark" size={22} color={Colors.white} />
+                        )}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.editorButtonCancel}
+                        onPress={onCancel}
+                        disabled={isLoading}
+                        accessibilityLabel="Cancelar"
+                    >
+                        <Ionicons name="close" size={22} color={Colors.white} />
+                    </TouchableOpacity>
+                </View>
+            </View>
+            {error && <Text style={styles.editorError}>{error}</Text>}
+        </View>
+    );
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export default function ProfileScreen(): React.JSX.Element {
+    const {
+        profile,
+        user,
+        updateUsername,
+        signOut,
+        fetchProfile,
+        isLoading,
+        error,
+        clearError,
+    } = useAuthStore();
+
+    const {
+        isUploading,
+        uploadProgress,
+        error: avatarError,
+        pickAndUploadAvatar,
+        deleteAvatar,
+        clearError: clearAvatarError,
+    } = useAvatarUpload();
+
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+
+    const isGenericUsername = profile?.username?.startsWith("user_");
+
+    // Clear errors when leaving edit mode
+    useEffect(() => {
+        if (!isEditingUsername) {
+            clearError();
+        }
+    }, [isEditingUsername, clearError]);
+
+    /** Handle avatar press - show picker options */
+    const handleAvatarPress = useCallback(() => {
+        const options: Array<{
+            text: string;
+            onPress?: () => void;
+            style?: "cancel" | "destructive";
+        }> = [
+                {
+                    text: "Tomar foto",
+                    onPress: async () => {
+                        if (user?.id) {
+                            const url = await pickAndUploadAvatar(user.id, "camera");
+                            if (url) {
+                                await fetchProfile();
+                            }
+                        }
+                    },
+                },
+                {
+                    text: "Elegir de galería",
+                    onPress: async () => {
+                        if (user?.id) {
+                            const url = await pickAndUploadAvatar(user.id, "gallery");
+                            if (url) {
+                                await fetchProfile();
+                            }
+                        }
+                    },
+                },
+            ];
+
+        // Add remove option if avatar exists
+        if (profile?.avatar_url) {
+            options.push({
+                text: "Eliminar foto",
+                style: "destructive",
+                onPress: async () => {
+                    if (user?.id) {
+                        const success = await deleteAvatar(user.id, profile.avatar_url);
+                        if (success) {
+                            await fetchProfile();
+                        }
+                    }
+                },
+            });
+        }
+
+        options.push({ text: "Cancelar", style: "cancel" });
+
+        Alert.alert("Foto de perfil", "Elige una opción", options);
+    }, [user?.id, profile?.avatar_url, pickAndUploadAvatar, deleteAvatar, fetchProfile]);
+
+    /** Handle username update */
+    const handleUpdateUsername = useCallback(
+        async (newUsername: string) => {
+            const success = await updateUsername(newUsername);
+            if (success) {
+                setIsEditingUsername(false);
+                Alert.alert("Éxito", "Nombre de usuario actualizado");
+            }
+        },
+        [updateUsername]
+    );
+
+    /** Handle sign out */
+    const handleSignOut = useCallback(() => {
         Alert.alert(
             "Cerrar sesión",
             "¿Estás seguro de que quieres cerrar sesión?",
@@ -44,273 +393,492 @@ export default function ProfileScreen() {
                 { text: "Cerrar sesión", style: "destructive", onPress: signOut },
             ]
         );
-    };
+    }, [signOut]);
+
+    /** Handle delete account */
+    const handleDeleteAccount = useCallback(() => {
+        Alert.alert(
+            "Eliminar cuenta",
+            "Esta acción es irreversible. Se eliminarán todos tus datos, listas y recomendaciones. ¿Estás seguro?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Eliminar cuenta",
+                    style: "destructive",
+                    onPress: () => {
+                        // TODO: Implement account deletion
+                        Alert.alert(
+                            "Próximamente",
+                            "Esta función estará disponible pronto. Contacta soporte para eliminar tu cuenta."
+                        );
+                    },
+                },
+            ]
+        );
+    }, []);
+
+    /** Open external link */
+    const openLink = useCallback((url: string) => {
+        Linking.openURL(url).catch(() => {
+            Alert.alert("Error", "No se pudo abrir el enlace");
+        });
+    }, []);
+
+    /** Show settings coming soon */
+    const showComingSoon = useCallback((feature: string) => {
+        Alert.alert("Próximamente", `${feature} estará disponible pronto.`);
+    }, []);
+
+    // Show avatar error if present
+    useEffect(() => {
+        if (avatarError) {
+            Alert.alert("Error", avatarError);
+            clearAvatarError();
+        }
+    }, [avatarError, clearAvatarError]);
 
     return (
-        <View style={styles.safeArea}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={{ flex: 1 }}
+        <View style={styles.container}>
+            <KeyboardAwareScrollView
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                extraScrollHeight={Platform.select({ ios: 20, android: 40 })}
             >
-                <ScrollView contentContainerStyle={styles.container}>
-                    <View style={styles.header}>
-                        <View style={styles.avatarContainer}>
-                            <Ionicons name="person-circle" size={100} color={Colors.metalSilver} />
-                        </View>
-                        <Text style={styles.emailText}>{user?.email}</Text>
-                        <View style={styles.pointsBadge}>
-                            <Ionicons name="flash" size={16} color="#fbbf24" />
-                            <Text style={styles.pointsText}>{profile?.points || 0} puntos</Text>
-                        </View>
-                    </View>
+                {/* Header with Avatar */}
+                <View style={styles.header}>
+                    <AvatarSection
+                        avatarUrl={profile?.avatar_url ?? null}
+                        username={profile?.username}
+                        email={user?.email}
+                        isUploading={isUploading}
+                        uploadProgress={uploadProgress}
+                        onPress={handleAvatarPress}
+                    />
+                    <Text style={styles.displayName}>
+                        @{profile?.username ?? "usuario"}
+                    </Text>
+                    <Text style={styles.emailText}>{user?.email}</Text>
+                </View>
 
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Información del Perfil</Text>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nombre de Usuario</Text>
-                            <View style={styles.usernameContainer}>
-                                {isEditing ? (
-                                    <View style={styles.editContainer}>
-                                        <TextInput
-                                            style={styles.input}
-                                            value={newUsername}
-                                            onChangeText={setNewUsername}
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                            maxLength={20}
-                                            placeholder="Nombre de usuario"
-                                            placeholderTextColor="#71717a"
-                                        />
-                                        <View style={styles.editButtons}>
-                                            <TouchableOpacity
-                                                style={styles.saveButton}
-                                                onPress={handleUpdateUsername}
-                                                disabled={isLoading}
-                                            >
-                                                {isLoading ? (
-                                                    <ActivityIndicator size="small" color="white" />
-                                                ) : (
-                                                    <Ionicons name="checkmark" size={24} color="white" />
-                                                )}
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                style={styles.cancelButton}
-                                                onPress={() => {
-                                                    setNewUsername(profile?.username || "");
-                                                    setIsEditing(false);
-                                                    clearError();
-                                                }}
-                                            >
-                                                <Ionicons name="close" size={24} color="white" />
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                ) : (
-                                    <View style={styles.displayContainer}>
-                                        <Text style={styles.usernameText}>@{profile?.username}</Text>
-                                        <TouchableOpacity
-                                            style={styles.editIconButton}
-                                            onPress={() => setIsEditing(true)}
-                                        >
-                                            <Ionicons name="create-outline" size={20} color={Colors.bloodRed} />
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
-                            </View>
-                            {isGenericUsername && !isEditing && (
-                                <View style={styles.genericPrompt}>
-                                    <Ionicons name="information-circle-outline" size={16} color={Colors.bloodRed} />
-                                    <Text style={styles.genericPromptText}>
-                                        Aún tienes un nombre genérico. ¡Reclama tu identidad!
-                                    </Text>
-                                </View>
-                            )}
-
-                            {error && isEditing && (
-                                <Text style={styles.errorText}>{error}</Text>
-                            )}
-                        </View>
-                    </View>
-
-                    <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-                        <Ionicons name="log-out-outline" size={20} color="white" />
-                        <Text style={styles.signOutText}>Cerrar Sesión</Text>
+                {/* Generic username prompt */}
+                {isGenericUsername && !isEditingUsername && (
+                    <TouchableOpacity
+                        style={styles.genericPrompt}
+                        onPress={() => setIsEditingUsername(true)}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons
+                            name="information-circle"
+                            size={20}
+                            color={Colors.bloodRed}
+                        />
+                        <Text style={styles.genericPromptText}>
+                            Aún tienes un nombre genérico. ¡Personaliza tu perfil!
+                        </Text>
+                        <Ionicons name="chevron-forward" size={18} color={Colors.bloodRed} />
                     </TouchableOpacity>
+                )}
 
-                    <Text style={styles.versionText}>CortoCrudo v1.0.0</Text>
-                    <Text style={styles.authorText}>Author: Pabl0Parra</Text>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                {/* Profile Information Section */}
+                <View style={styles.section}>
+                    <SectionHeader title="Información del perfil" />
+
+                    {isEditingUsername ? (
+                        <UsernameEditor
+                            currentUsername={profile?.username ?? ""}
+                            isLoading={isLoading}
+                            error={error}
+                            onSave={handleUpdateUsername}
+                            onCancel={() => {
+                                setIsEditingUsername(false);
+                                clearError();
+                            }}
+                        />
+                    ) : (
+                        <InfoRow
+                            icon="person-outline"
+                            label="Nombre de usuario"
+                            value={`@${profile?.username ?? "usuario"}`}
+                            isEditable
+                            onEdit={() => setIsEditingUsername(true)}
+                        />
+                    )}
+
+                    <InfoRow
+                        icon="mail-outline"
+                        label="Correo electrónico"
+                        value={user?.email ?? "—"}
+                    />
+
+                    <InfoRow
+                        icon="calendar-outline"
+                        label="Miembro desde"
+                        value={
+                            profile?.created_at
+                                ? formatMemberSince(profile.created_at)
+                                : "—"
+                        }
+                    />
+                </View>
+
+                {/* Settings Section */}
+                <View style={styles.section}>
+                    <SectionHeader title="Configuración" />
+
+                    <SettingsRow
+                        icon="notifications-outline"
+                        label="Notificaciones"
+                        onPress={() => showComingSoon("Notificaciones")}
+                    />
+
+                    <SettingsRow
+                        icon="moon-outline"
+                        label="Tema"
+                        onPress={() => showComingSoon("Selección de tema")}
+                    />
+
+                    <SettingsRow
+                        icon="language-outline"
+                        label="Idioma"
+                        onPress={() => showComingSoon("Selección de idioma")}
+                    />
+                </View>
+
+                {/* About Section */}
+                <View style={styles.section}>
+                    <SectionHeader title="Acerca de" />
+
+                    <SettingsRow
+                        icon="help-circle-outline"
+                        label="Centro de ayuda"
+                        onPress={() => openLink(LINKS.help)}
+                    />
+
+                    <SettingsRow
+                        icon="shield-checkmark-outline"
+                        label="Política de privacidad"
+                        onPress={() => openLink(LINKS.privacy)}
+                    />
+
+                    <SettingsRow
+                        icon="document-text-outline"
+                        label="Términos de servicio"
+                        onPress={() => openLink(LINKS.terms)}
+                    />
+
+                    <View style={styles.versionRow}>
+                        <Ionicons
+                            name="information-circle-outline"
+                            size={22}
+                            color={Colors.metalSilver}
+                        />
+                        <Text style={styles.settingsLabel}>Versión</Text>
+                        <Text style={styles.versionText}>{APP_VERSION}</Text>
+                    </View>
+                </View>
+
+                {/* Account Section */}
+                <View style={styles.section}>
+                    <SectionHeader title="Cuenta" />
+
+                    <SettingsRow
+                        icon="trash-outline"
+                        label="Eliminar cuenta"
+                        onPress={handleDeleteAccount}
+                        destructive
+                    />
+                </View>
+
+                {/* Sign Out Button */}
+                <TouchableOpacity
+                    style={styles.signOutButton}
+                    onPress={handleSignOut}
+                    activeOpacity={0.8}
+                >
+                    <Ionicons name="log-out-outline" size={22} color={Colors.white} />
+                    <Text style={styles.signOutText}>Cerrar Sesión</Text>
+                </TouchableOpacity>
+
+                {/* Footer */}
+                <View style={styles.footer}>
+                    <Text style={styles.footerText}>CortoCrudo v{APP_VERSION}</Text>
+                    <Text style={styles.footerAuthor}>Made with ❤️ by Pabl0Parra</Text>
+                </View>
+            </KeyboardAwareScrollView>
         </View>
     );
 }
 
+// ============================================================================
+// Styles
+// ============================================================================
+
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: "#0a0a0a",
-    },
     container: {
-        padding: 20,
-        alignItems: "center",
-    },
+        flex: 1,
+        backgroundColor: Colors.metalBlack,
+    } as ViewStyle,
+    scrollView: {
+        flex: 1,
+    } as ViewStyle,
+    scrollContent: {
+        paddingHorizontal: 20,
+        paddingTop: 24,
+        paddingBottom: 40,
+    } as ViewStyle,
+
+    // Header
     header: {
         alignItems: "center",
         marginBottom: 24,
-        marginTop: 8,
-    },
+    } as ViewStyle,
     avatarContainer: {
         marginBottom: 16,
-    },
-    emailText: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        marginBottom: 12,
-    },
-    pointsBadge: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "rgba(251, 191, 36, 0.1)",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: "rgba(251, 191, 36, 0.3)",
-    },
-    pointsText: {
-        color: "#fbbf24",
-        fontWeight: "bold",
-        marginLeft: 6,
-        fontSize: 14,
-    },
-    section: {
+    } as ViewStyle,
+    avatarWrapper: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        overflow: "hidden",
+        position: "relative",
+    } as ViewStyle,
+    avatarImage: {
         width: "100%",
+        height: "100%",
+    } as ImageStyle,
+    avatarPlaceholder: {
+        width: "100%",
+        height: "100%",
         backgroundColor: Colors.metalGray,
-        borderRadius: 12,
-        padding: 20,
-        marginBottom: 40,
-        borderWidth: 1,
+        borderWidth: 2,
         borderColor: Colors.metalSilver,
-    },
-    sectionTitle: {
-        color: "#f4f4f5",
-        fontSize: 18,
+        borderRadius: 60,
+        alignItems: "center",
+        justifyContent: "center",
+    } as ViewStyle,
+    avatarInitials: {
+        fontSize: 40,
         fontWeight: "bold",
-        marginBottom: 20,
-    },
-    inputGroup: {
-        width: "100%",
-    },
-    label: {
         color: Colors.metalSilver,
-        fontSize: 12,
-        marginBottom: 8,
-        textTransform: "uppercase",
-        letterSpacing: 1,
-    },
-    usernameContainer: {
-        minHeight: 50,
-        justifyContent: "center",
-    },
-    displayContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-    },
-    usernameText: {
-        color: "white",
-        fontSize: 20,
-        fontWeight: "600",
-    },
-    editIconButton: {
-        padding: 8,
-    },
-    editContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    input: {
-        flex: 1,
-        backgroundColor: "#18181b",
-        borderWidth: 1,
-        borderColor: Colors.bloodRed,
-        borderRadius: 8,
-        color: "white",
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        fontSize: 16,
-    },
-    editButtons: {
-        flexDirection: "row",
-        marginLeft: 12,
-        gap: 8,
-    },
-    saveButton: {
-        backgroundColor: "#22c55e",
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+    } as TextStyle,
+    avatarOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
         alignItems: "center",
         justifyContent: "center",
-    },
-    cancelButton: {
-        backgroundColor: Colors.bloodRed,
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    errorText: {
-        color: Colors.bloodRed,
-        fontSize: 12,
+    } as ViewStyle,
+    uploadProgressText: {
+        color: Colors.white,
+        fontSize: 14,
         marginTop: 8,
-    },
-    signOutButton: {
-        flexDirection: "row",
+        fontWeight: "600",
+    } as TextStyle,
+    cameraBadge: {
+        position: "absolute",
+        bottom: 4,
+        right: 4,
+        backgroundColor: Colors.bloodRed,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "rgba(220, 38, 38, 0.1)",
-        borderWidth: 1,
-        borderColor: Colors.bloodRed,
-        paddingVertical: 14,
-        paddingHorizontal: 24,
-        borderRadius: 8,
-        width: "100%",
-    },
-    signOutText: {
-        color: "white",
+        borderWidth: 2,
+        borderColor: Colors.metalBlack,
+    } as ViewStyle,
+    displayName: {
+        fontSize: 24,
         fontWeight: "bold",
-        marginLeft: 10,
-        fontSize: 16,
-    },
-    versionText: {
-        color: "#444",
-        fontFamily: "BebasNeue_400Regular",
-        fontSize: 16,
-        marginTop: 40,
-        marginBottom: 20,
-    },
+        color: Colors.white,
+        marginBottom: 4,
+    } as TextStyle,
+    emailText: {
+        fontSize: 14,
+        color: Colors.metalSilver,
+    } as TextStyle,
+
+    // Generic username prompt
     genericPrompt: {
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: "rgba(220, 38, 38, 0.1)",
-        padding: 8,
-        borderRadius: 4,
-        marginTop: 12,
-        gap: 6,
-    },
+        borderWidth: 1,
+        borderColor: "rgba(220, 38, 38, 0.3)",
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 24,
+        gap: 10,
+    } as ViewStyle,
     genericPromptText: {
+        flex: 1,
         color: Colors.bloodRed,
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: "500",
-    },
-    authorText: {
-        color: "#444",
-        fontFamily: "BebasNeue_400Regular",
+    } as TextStyle,
+
+    // Sections
+    section: {
+        backgroundColor: Colors.metalGray,
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 16,
+    } as ViewStyle,
+    sectionTitle: {
+        fontSize: 13,
+        fontWeight: "600",
+        color: Colors.metalSilver,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        marginBottom: 16,
+    } as TextStyle,
+
+    // Info rows
+    infoRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(113, 113, 122, 0.2)",
+    } as ViewStyle,
+    infoRowLeft: {
+        flexDirection: "row",
+        alignItems: "center",
+        flex: 1,
+    } as ViewStyle,
+    infoRowText: {
+        marginLeft: 14,
+        flex: 1,
+    } as ViewStyle,
+    infoLabel: {
+        fontSize: 12,
+        color: Colors.metalSilver,
+        marginBottom: 2,
+    } as TextStyle,
+    infoValue: {
         fontSize: 16,
-        marginTop: 40,
-        marginBottom: 20,
-    },
+        color: Colors.white,
+        fontWeight: "500",
+    } as TextStyle,
+    editButton: {
+        padding: 8,
+    } as ViewStyle,
+
+    // Settings rows
+    settingsRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(113, 113, 122, 0.2)",
+    } as ViewStyle,
+    settingsRowLeft: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 14,
+    } as ViewStyle,
+    settingsLabel: {
+        fontSize: 16,
+        color: Colors.white,
+    } as TextStyle,
+    settingsLabelDestructive: {
+        color: Colors.bloodRed,
+    } as TextStyle,
+    versionRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 14,
+        gap: 14,
+    } as ViewStyle,
+    versionText: {
+        fontSize: 16,
+        color: Colors.metalSilver,
+        marginLeft: "auto",
+    } as TextStyle,
+
+    // Username editor
+    editorContainer: {
+        paddingVertical: 8,
+    } as ViewStyle,
+    editorInputRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    } as ViewStyle,
+    editorInput: {
+        flex: 1,
+        backgroundColor: Colors.metalBlack,
+        borderWidth: 1,
+        borderColor: Colors.bloodRed,
+        borderRadius: 10,
+        color: Colors.white,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        fontSize: 16,
+    } as TextStyle,
+    editorButtons: {
+        flexDirection: "row",
+        gap: 8,
+    } as ViewStyle,
+    editorButtonSave: {
+        backgroundColor: "#22c55e",
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        alignItems: "center",
+        justifyContent: "center",
+    } as ViewStyle,
+    editorButtonCancel: {
+        backgroundColor: Colors.bloodRed,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        alignItems: "center",
+        justifyContent: "center",
+    } as ViewStyle,
+    editorError: {
+        color: Colors.bloodRed,
+        fontSize: 13,
+        marginTop: 10,
+    } as TextStyle,
+
+    // Sign out button
+    signOutButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "transparent",
+        borderWidth: 1.5,
+        borderColor: Colors.bloodRed,
+        paddingVertical: 16,
+        borderRadius: 12,
+        gap: 10,
+        marginTop: 8,
+    } as ViewStyle,
+    signOutText: {
+        color: Colors.white,
+        fontWeight: "bold",
+        fontSize: 16,
+    } as TextStyle,
+
+    // Footer
+    footer: {
+        alignItems: "center",
+        marginTop: 32,
+        paddingBottom: 20,
+    } as ViewStyle,
+    footerText: {
+        color: Colors.metalSilver,
+        fontSize: 14,
+        opacity: 0.6,
+    } as TextStyle,
+    footerAuthor: {
+        color: Colors.metalSilver,
+        fontSize: 12,
+        marginTop: 4,
+        opacity: 0.4,
+    } as TextStyle,
 });

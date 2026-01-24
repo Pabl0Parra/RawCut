@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
+import { useContentStore } from "../../src/stores/contentStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 
 import { HeaderLeft } from "../../src/components/navigation/HeaderLeft";
@@ -19,10 +20,13 @@ export default function TabLayout() {
     const insets = useSafeAreaInsets();
     const { user } = useAuthStore();
     const { unreadCount, fetchRecommendations, subscribeToRealtime } = useRecommendationStore();
+    const { fetchUserContent, fetchTVProgress } = useContentStore();
 
     useEffect(() => {
         if (user) {
             fetchRecommendations();
+            fetchUserContent();
+            fetchTVProgress();
             const unsubscribe = subscribeToRealtime();
             return unsubscribe;
         }
@@ -106,14 +110,12 @@ export default function TabLayout() {
                 name="movie/[id]"
                 options={{
                     href: null,
-                    headerShown: false,
                 }}
             />
             <Tabs.Screen
                 name="tv/[id]"
                 options={{
                     href: null,
-                    headerShown: false,
                 }}
             />
         </Tabs>

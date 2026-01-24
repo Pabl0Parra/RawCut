@@ -52,8 +52,6 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
                 player={player}
                 contentFit="cover"
                 nativeControls={false}
-                allowsFullscreen={false}
-                allowsPictureInPicture={false}
             />
         </Animated.View>
     );
