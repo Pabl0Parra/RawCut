@@ -451,13 +451,6 @@ export default function ProfileScreen(): React.JSX.Element {
         );
     }, [user?.id, profile?.avatar_url, deleteAccount, deleteAvatar, clearContent, clearRecommendations]);
 
-    /** Open external link */
-    const openLink = useCallback((url: string) => {
-        Linking.openURL(url).catch(() => {
-            Alert.alert("Error", "No se pudo abrir el enlace");
-        });
-    }, []);
-
     /** Show settings coming soon */
     const showComingSoon = useCallback((feature: string) => {
         Alert.alert("Próximamente", `${feature} estará disponible pronto.`);
