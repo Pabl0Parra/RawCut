@@ -219,7 +219,7 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
                     authError
                 });
 
-                if (!currentUser || currentUser.id !== userId) {
+                if (currentUser?.id !== userId) {
                     console.error("Auth mismatch: Cannot update profile for different user");
                     // We proceed anyway to see what DB says, but this is a red flag
                 }
