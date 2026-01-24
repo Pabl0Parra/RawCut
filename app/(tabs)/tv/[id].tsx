@@ -336,7 +336,7 @@ export default function TVDetailScreen(): React.JSX.Element {
     const posterUrl = getPosterUrl(tvShow.poster_path, "w300");
 
     return (
-        <SafeAreaView style={detailScreenStyles.safeArea} edges={["top"]}>
+        <SafeAreaView style={detailScreenStyles.safeArea} edges={["left", "right", "bottom"]}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Back Button */}
                 <TouchableOpacity

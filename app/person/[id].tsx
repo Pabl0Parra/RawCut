@@ -90,7 +90,7 @@ export default function PersonDetailScreen(): JSX.Element {
     const profileUrl = getImageUrl(person.profile_path, "original");
 
     return (
-        <SafeAreaView style={detailScreenStyles.safeArea} edges={["top"]}>
+        <SafeAreaView style={detailScreenStyles.safeArea} edges={["left", "right", "bottom"]}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <TouchableOpacity
                     style={detailScreenStyles.backButton}
@@ -147,7 +147,6 @@ export default function PersonDetailScreen(): JSX.Element {
 const styles = StyleSheet.create({
     header: {
         alignItems: 'center',
-        paddingTop: 60,
         paddingBottom: 20,
     } as ViewStyle,
     profileImage: {

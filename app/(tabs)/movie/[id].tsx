@@ -216,7 +216,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
     const posterUrl = getImageUrl(movie.poster_path, "w300");
 
     return (
-        <SafeAreaView style={detailScreenStyles.safeArea} edges={["top"]}>
+        <SafeAreaView style={detailScreenStyles.safeArea} edges={["left", "right", "bottom"]}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Back Button */}
                 <TouchableOpacity
