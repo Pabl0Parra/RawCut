@@ -557,19 +557,19 @@ export default function ProfileScreen(): React.JSX.Element {
                     <SettingsRow
                         icon="help-circle-outline"
                         label="Centro de ayuda"
-                        onPress={() => openLink(LINKS.help)}
+                        onPress={() => showComingSoon("Centro de ayuda")}
                     />
 
                     <SettingsRow
                         icon="shield-checkmark-outline"
                         label="Política de privacidad"
-                        onPress={() => openLink(LINKS.privacy)}
+                        onPress={() => showComingSoon("Política de privacidad")}
                     />
 
                     <SettingsRow
                         icon="document-text-outline"
                         label="Términos de servicio"
-                        onPress={() => openLink(LINKS.terms)}
+                        onPress={() => showComingSoon("Términos de servicio")}
                     />
 
                     <View style={styles.versionRow}>
