@@ -332,24 +332,28 @@ export default function ProfileScreen(): React.JSX.Element {
         }> = [
                 {
                     text: "Tomar foto",
-                    onPress: async () => {
-                        if (user?.id) {
-                            const url = await pickAndUploadAvatar(user.id, "camera");
-                            if (url) {
-                                await fetchProfile();
+                    onPress: () => {
+                        (async () => {
+                            if (user?.id) {
+                                const url = await pickAndUploadAvatar(user.id, "camera");
+                                if (url) {
+                                    await fetchProfile();
+                                }
                             }
-                        }
+                        })();
                     },
                 },
                 {
                     text: "Elegir de galería",
-                    onPress: async () => {
-                        if (user?.id) {
-                            const url = await pickAndUploadAvatar(user.id, "gallery");
-                            if (url) {
-                                await fetchProfile();
+                    onPress: () => {
+                        (async () => {
+                            if (user?.id) {
+                                const url = await pickAndUploadAvatar(user.id, "gallery");
+                                if (url) {
+                                    await fetchProfile();
+                                }
                             }
-                        }
+                        })();
                     },
                 },
             ];
@@ -359,13 +363,15 @@ export default function ProfileScreen(): React.JSX.Element {
             options.push({
                 text: "Eliminar foto",
                 style: "destructive",
-                onPress: async () => {
-                    if (user?.id) {
-                        const success = await deleteAvatar(user.id, profile.avatar_url);
-                        if (success) {
-                            await fetchProfile();
+                onPress: () => {
+                    (async () => {
+                        if (user?.id) {
+                            const success = await deleteAvatar(user.id, profile.avatar_url);
+                            if (success) {
+                                await fetchProfile();
+                            }
                         }
-                    }
+                    })();
                 },
             });
         }
