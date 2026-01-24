@@ -12,8 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
-import { Image } from "expo-image";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { getImageUrl, type Movie } from "../../../src/lib/tmdb";
 import { useAuthStore } from "../../../src/stores/authStore";
@@ -34,7 +33,6 @@ import {
     loadMovieData,
     getDirectors,
     getProducers,
-    formatCrewNames,
     formatMovieMetadata,
     formatRating,
     parseMovieId,

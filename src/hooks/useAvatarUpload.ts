@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { readAsStringAsync } from "expo-file-system/legacy";
 import { decode } from "base64-arraybuffer";
-import { supabase, Profile } from "../lib/supabase";
+import { supabase } from "../lib/supabase";
 import { useAuthStore } from "../stores/authStore";
 
 /** Supabase storage bucket name for avatars */

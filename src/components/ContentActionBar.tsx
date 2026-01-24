@@ -1,14 +1,9 @@
 import React from "react";
 import {
     View,
-    Text,
-    TouchableOpacity,
     StyleSheet,
     type ViewStyle,
-    type TextStyle,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "../constants/Colors";
 import type { MediaType } from "../types/movieDetail.types";
 import { ActionButton } from "./ActionButton";
 

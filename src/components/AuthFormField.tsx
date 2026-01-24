@@ -8,8 +8,6 @@ import {
     type ViewStyle,
     type TextStyle,
     type TextInputProps,
-    type NativeSyntheticEvent,
-    type TextInputFocusEventData,
 } from "react-native";
 import {
     Controller,

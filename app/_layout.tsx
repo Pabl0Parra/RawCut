@@ -13,7 +13,7 @@ import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
 import { supabase } from "../src/lib/supabase";
 import { useAuthStore } from "../src/stores/authStore";
 import { Colors } from "../src/constants/Colors";
-import VideoSplash from "../src/components/VideoSplash"; // Import VideoSplash
+import VideoSplash from "../src/components/VideoSplash";
 import SmokeBackground from "../src/components/SmokeBackground";
 import { ThemeProvider, DarkTheme } from "@react-navigation/native";
 
