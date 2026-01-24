@@ -21,7 +21,6 @@ import { Colors } from "../../../src/constants/Colors";
 import TrailerModal from "../../../src/components/TrailerModal";
 import RecommendModal from "../../../src/components/RecommendModal";
 import { ContentBackdrop } from "../../../src/components/ContentBackdrop";
-import SmokeBackground from "../../../src/components/SmokeBackground";
 import { ContentPoster } from "../../../src/components/ContentPoster";
 import { GenreList } from "../../../src/components/GenreList";
 import { ContentActionBar } from "../../../src/components/ContentActionBar";
@@ -218,7 +217,6 @@ export default function MovieDetailScreen(): React.JSX.Element {
 
     return (
         <SafeAreaView style={detailScreenStyles.safeArea} edges={["top"]}>
-            <SmokeBackground />
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Back Button */}
                 <TouchableOpacity

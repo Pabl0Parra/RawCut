@@ -9,7 +9,7 @@ export const detailScreenStyles = StyleSheet.create({
     // Container styles
     safeArea: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
+        backgroundColor: "transparent",
     } as ViewStyle,
     centerContainer: {
         flex: 1,

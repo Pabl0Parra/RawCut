@@ -24,7 +24,6 @@ import { useFocusEffect, router } from "expo-router";
 import { Image } from "expo-image";
 
 import MovieCard from "../../src/components/MovieCard";
-import SmokeBackground from "../../src/components/SmokeBackground";
 import {
     searchMovies,
     searchTVShows,
@@ -816,8 +815,7 @@ export default function HomeScreen(): JSX.Element {
                 presentationStyle="pageSheet"
                 onRequestClose={() => setShowFilterModal(false)}
             >
-                <View style={styles.modalContainer}>
-                    <SmokeBackground />
+                <View style={[styles.modalContainer, { backgroundColor: 'rgba(10, 10, 10, 0.7)' }]}>
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Filtrar</Text>
                         <TouchableOpacity onPress={() => setShowFilterModal(false)}>
@@ -1024,7 +1022,6 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     modalContainer: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
         padding: 16,
     } as ViewStyle,
     modalHeader: {

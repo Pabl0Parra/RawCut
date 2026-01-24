@@ -306,7 +306,7 @@ export function AuthLayout({
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
+        backgroundColor: "transparent",
     } as ViewStyle,
     container: {
         flex: 1,

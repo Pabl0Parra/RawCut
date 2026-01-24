@@ -34,7 +34,6 @@ import SeasonCard from "../../../src/components/SeasonCard";
 import SeasonModal from "../../../src/components/SeasonModal";
 import EpisodeModal from "../../../src/components/EpisodeModal";
 import { ContentBackdrop } from "../../../src/components/ContentBackdrop";
-import SmokeBackground from "../../../src/components/SmokeBackground";
 import { ContentPoster } from "../../../src/components/ContentPoster";
 import { GenreList } from "../../../src/components/GenreList";
 import { ContentActionBar } from "../../../src/components/ContentActionBar";
@@ -338,7 +337,6 @@ export default function TVDetailScreen(): React.JSX.Element {
 
     return (
         <SafeAreaView style={detailScreenStyles.safeArea} edges={["top"]}>
-            <SmokeBackground />
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Back Button */}
                 <TouchableOpacity

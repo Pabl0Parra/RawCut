@@ -622,7 +622,7 @@ export default function ProfileScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
+        backgroundColor: "transparent",
     } as ViewStyle,
     scrollView: {
         flex: 1,

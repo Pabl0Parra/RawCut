@@ -17,7 +17,6 @@ import { getImageUrl, getPersonDetails, getPersonCredits, type Person, type Movi
 import { Colors } from "../../src/constants/Colors";
 import { detailScreenStyles } from "../../src/styles/detailScreenStyles";
 import { ContentHorizontalList } from "../../src/components/ContentHorizontalList";
-import SmokeBackground from "../../src/components/SmokeBackground";
 
 export default function PersonDetailScreen(): JSX.Element {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -92,7 +91,6 @@ export default function PersonDetailScreen(): JSX.Element {
 
     return (
         <SafeAreaView style={detailScreenStyles.safeArea} edges={["top"]}>
-            <SmokeBackground />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <TouchableOpacity
                     style={detailScreenStyles.backButton}
