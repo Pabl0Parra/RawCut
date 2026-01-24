@@ -12,7 +12,6 @@ import {
     ScrollView,
     type ViewStyle,
     type TextStyle,
-    type ImageStyle,
 } from "react-native";
 import {
     MaterialCommunityIcons,
@@ -21,7 +20,6 @@ import {
     Ionicons,
 } from "@expo/vector-icons";
 import { useFocusEffect, router } from "expo-router";
-import { Image } from "expo-image";
 
 import MovieCard from "../../src/components/MovieCard";
 import {
@@ -29,7 +27,6 @@ import {
     searchTVShows,
     getMovieGenres,
     getTVGenres,
-    getImageUrl,
     type Movie,
     type TVShow,
     type Genre,

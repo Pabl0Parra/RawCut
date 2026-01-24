@@ -7,8 +7,6 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Alert,
-    ScrollView,
-    Animated,
     Linking,
     Platform,
     type ViewStyle,
@@ -19,8 +17,8 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useAuthStore } from "../../src/stores/authStore";
-import { useAvatarUpload, type ImageSource } from "../../src/hooks/useAvatarUpload";
-import { Colors, Fonts } from "../../src/constants/Colors";
+import { useAvatarUpload } from "../../src/hooks/useAvatarUpload";
+import { Colors } from "../../src/constants/Colors";
 
 /** App version - should be synced with app.json */
 const APP_VERSION = "1.0.0";

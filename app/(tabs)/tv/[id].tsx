@@ -9,19 +9,14 @@ import {
     StyleSheet,
     type ViewStyle,
     type TextStyle,
-    type ImageStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
-import { Image } from "expo-image";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import {
-    getImageUrl,
-    type TVShow,
     type Season,
     type Episode,
-    type CastMember,
 } from "../../../src/lib/tmdb";
 import { useContentStore } from "../../../src/stores/contentStore";
 import { useAuthStore } from "../../../src/stores/authStore";
@@ -58,14 +53,10 @@ import {
     extractYear,
     formatRating,
     seasonsToProgressInfo,
-    getCreators,
     getProducers,
-    formatCrewNames,
     getPosterUrl,
     getBackdropUrl,
     parseTVShowId,
-    hasCreators,
-    hasProducers,
 } from "../../../src/utils/tvDetail.utils";
 
 // ============================================================================
