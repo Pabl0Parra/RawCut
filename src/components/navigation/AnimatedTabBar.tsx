@@ -1,6 +1,7 @@
 import React, { useReducer, useCallback, useEffect } from 'react';
 import {
     View,
+    Text,
     Pressable,
     StyleSheet,
     LayoutChangeEvent,
@@ -33,6 +34,7 @@ interface TabBarComponentProps {
     onLayout: (e: LayoutChangeEvent) => void;
     onPress: () => void;
     onLongPress: () => void;
+    badge?: string | number;
 }
 
 // Reducer for layout management
@@ -60,6 +62,7 @@ function TabBarItem({
     onLayout,
     onPress,
     onLongPress,
+    badge,
 }: TabBarComponentProps) {
     // Circle scale animation (appears when active)
     const animatedCircleStyle = useAnimatedStyle(() => ({
@@ -101,6 +104,13 @@ function TabBarItem({
                         focused: active,
                     })}
                 </Animated.View>
+
+                {/* Badge - placed outside iconContainer to avoid inheriting dimmed opacity when tab is inactive */}
+                {badge !== undefined && (
+                    <View style={styles.badge}>
+                        <Text style={styles.badgeText}>{badge}</Text>
+                    </View>
+                )}
             </Animated.View>
 
             {/* Label - only visible when not active */}
@@ -227,6 +237,7 @@ export default function AnimatedTabBar({
                             onLayout={(e) => handleLayout(e, index)}
                             onPress={onPress}
                             onLongPress={onLongPress}
+                            badge={options.tabBarBadge}
                         />
                     );
                 })}
@@ -274,5 +285,26 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontFamily: 'Inter_500Medium',
         marginTop: -4,
+    },
+    badge: {
+        position: 'absolute',
+        top: 6,
+        right: 6,
+        backgroundColor: Colors.white,
+        borderRadius: 10,
+        minWidth: 16,
+        height: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+        borderWidth: 1.5,
+        borderColor: Colors.bloodRed,
+        zIndex: 20,
+    },
+    badgeText: {
+        color: Colors.bloodRed,
+        fontSize: 10,
+        fontWeight: 'bold',
+        lineHeight: 12,
     },
 });

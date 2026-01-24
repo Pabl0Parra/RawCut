@@ -80,8 +80,7 @@ export default function TabLayout() {
                     title: "Sugeridas",
                     headerTitle: "CORTOCRUDO - SUGERIDAS",
                     tabBarIcon: RecommendationsIcon,
-                    // Note: Badge is not supported in custom tab bar
-                    // You'd need to add badge support to AnimatedTabBar if needed
+                    tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
                 }}
             />
             <Tabs.Screen
