@@ -7,8 +7,8 @@ import { Colors } from "../constants/Colors";
  * Props for ContentPoster component
  */
 export interface ContentPosterProps {
-    posterUrl: string | null;
-    placeholderIcon?: string;
+    readonly posterUrl: string | null;
+    readonly placeholderIcon?: string;
 }
 
 /**
@@ -18,7 +18,7 @@ export interface ContentPosterProps {
 export function ContentPoster({
     posterUrl,
     placeholderIcon = "🎬",
-}: ContentPosterProps): React.JSX.Element {
+}: Readonly<ContentPosterProps>): React.JSX.Element {
     if (posterUrl) {
         return (
             <Image

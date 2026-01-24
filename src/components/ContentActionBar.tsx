@@ -11,15 +11,15 @@ import { ActionButton } from "./ActionButton";
  * Props for ContentActionBar component
  */
 export interface ContentActionBarProps {
-    contentId: number;
-    mediaType: MediaType;
-    isFavorite: boolean;
-    isInWatchlist: boolean;
-    isWatched: boolean;
-    onToggleFavorite: () => void;
-    onToggleWatchlist: () => void;
-    onToggleWatched: () => void;
-    currentUserId?: string;
+    readonly contentId: number;
+    readonly mediaType: MediaType;
+    readonly isFavorite: boolean;
+    readonly isInWatchlist: boolean;
+    readonly isWatched: boolean;
+    readonly onToggleFavorite: () => void;
+    readonly onToggleWatchlist: () => void;
+    readonly onToggleWatched: () => void;
+    readonly currentUserId?: string;
 }
 
 /**
@@ -34,7 +34,7 @@ export function ContentActionBar({
     onToggleWatchlist,
     onToggleWatched,
     currentUserId,
-}: ContentActionBarProps): React.JSX.Element | null {
+}: Readonly<ContentActionBarProps>): React.JSX.Element | null {
     if (!currentUserId) return null;
 
     return (

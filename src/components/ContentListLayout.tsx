@@ -15,13 +15,13 @@ import { getImageUrl } from "../lib/tmdb";
 import type { EnrichedContentItem } from "../hooks/useEnrichedContent";
 
 interface ContentListLayoutProps {
-    data: EnrichedContentItem[];
-    isLoading: boolean;
-    isAuthenticated: boolean;
-    emptyTitle: string;
-    emptySubtitle: string;
-    emptyIcon: string;
-    onRemove: (tmdbId: number, mediaType: "movie" | "tv") => void;
+    readonly data: EnrichedContentItem[];
+    readonly isLoading: boolean;
+    readonly isAuthenticated: boolean;
+    readonly emptyTitle: string;
+    readonly emptySubtitle: string;
+    readonly emptyIcon: string;
+    readonly onRemove: (tmdbId: number, mediaType: "movie" | "tv") => void;
 }
 
 export function ContentListLayout({
@@ -32,7 +32,7 @@ export function ContentListLayout({
     emptySubtitle,
     emptyIcon,
     onRemove,
-}: ContentListLayoutProps) {
+}: Readonly<ContentListLayoutProps>) {
     if (!isAuthenticated) {
         return (
             <View style={styles.emptyContainer}>

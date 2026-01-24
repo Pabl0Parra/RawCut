@@ -10,9 +10,9 @@ const BACKDROP_ASPECT_RATIO = 0.56;
  * Props for ContentBackdrop component
  */
 export interface ContentBackdropProps {
-    backdropUrl: string | null;
-    trailerKey?: string | null;
-    onPlayTrailer?: () => void;
+    readonly backdropUrl: string | null;
+    readonly trailerKey?: string | null;
+    readonly onPlayTrailer?: () => void;
 }
 
 /**
@@ -23,7 +23,7 @@ export function ContentBackdrop({
     backdropUrl,
     trailerKey,
     onPlayTrailer,
-}: ContentBackdropProps): React.JSX.Element {
+}: Readonly<ContentBackdropProps>): React.JSX.Element {
     const backdropHeight = SCREEN_WIDTH * BACKDROP_ASPECT_RATIO;
 
     return (

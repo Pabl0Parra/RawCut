@@ -18,8 +18,8 @@ import { Colors } from '../../constants/Colors';
 
 // Types
 interface TabLayout {
-    x: number;
-    index: number;
+    readonly x: number;
+    readonly index: number;
 }
 
 type LayoutAction = {
@@ -28,13 +28,13 @@ type LayoutAction = {
 };
 
 interface TabBarComponentProps {
-    active: boolean;
-    icon: (props: { color: string; focused: boolean }) => React.ReactNode;
-    label: string;
-    onLayout: (e: LayoutChangeEvent) => void;
-    onPress: () => void;
-    onLongPress: () => void;
-    badge?: string | number;
+    readonly active: boolean;
+    readonly icon: (props: { color: string; focused: boolean }) => React.ReactNode;
+    readonly label: string;
+    readonly onLayout: (e: LayoutChangeEvent) => void;
+    readonly onPress: () => void;
+    readonly onLongPress: () => void;
+    readonly badge?: string | number;
 }
 
 // Reducer for layout management
@@ -63,7 +63,7 @@ function TabBarItem({
     onPress,
     onLongPress,
     badge,
-}: TabBarComponentProps) {
+}: Readonly<TabBarComponentProps>) {
     // Circle scale animation (appears when active)
     const animatedCircleStyle = useAnimatedStyle(() => ({
         transform: [

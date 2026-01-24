@@ -6,22 +6,22 @@ import { Colors } from "../constants/Colors";
  * Genre type
  */
 export interface Genre {
-    id: number;
-    name: string;
+    readonly id: number;
+    readonly name: string;
 }
 
 /**
  * Props for GenreList component
  */
 export interface GenreListProps {
-    genres: Genre[];
+    readonly genres: Genre[];
 }
 
 /**
  * Shared genre list component for content detail screens
  * Displays genre badges in a horizontal row
  */
-export function GenreList({ genres }: GenreListProps): React.JSX.Element | null {
+export function GenreList({ genres }: Readonly<GenreListProps>): React.JSX.Element | null {
     if (!genres || genres.length === 0) return null;
 
     return (

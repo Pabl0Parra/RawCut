@@ -42,17 +42,17 @@ const SCROLL_CONFIG = {
  * Props for AuthLayout component
  */
 export interface AuthLayoutProps {
-    children: ReactNode;
-    title: string;
-    subtitle: string;
-    error?: string | null;
-    isLoading: boolean;
-    onSubmit: () => void;
-    submitButtonText: string;
-    linkText: string;
-    linkLabel: string;
-    linkHref: LinkProps["href"];
-    showLogo?: boolean;
+    readonly children: ReactNode;
+    readonly title: string;
+    readonly subtitle: string;
+    readonly error?: string | null;
+    readonly isLoading: boolean;
+    readonly onSubmit: () => void;
+    readonly submitButtonText: string;
+    readonly linkText: string;
+    readonly linkLabel: string;
+    readonly linkHref: LinkProps["href"];
+    readonly showLogo?: boolean;
 }
 
 /**
@@ -118,11 +118,11 @@ function dismissKeyboard(): void {
  * Animated Logo component for the login screen
  */
 interface AnimatedLogoProps {
-    scale: Animated.Value;
-    opacity: Animated.Value;
+    readonly scale: Animated.Value;
+    readonly opacity: Animated.Value;
 }
 
-function AnimatedLogo({ scale, opacity }: AnimatedLogoProps): React.JSX.Element {
+function AnimatedLogo({ scale, opacity }: Readonly<AnimatedLogoProps>): React.JSX.Element {
     return (
         <Animated.View
             style={[
@@ -151,11 +151,11 @@ function AnimatedLogo({ scale, opacity }: AnimatedLogoProps): React.JSX.Element 
  * Static Logo component for the register screen
  */
 interface StaticLogoProps {
-    title: string;
-    subtitle: string;
+    readonly title: string;
+    readonly subtitle: string;
 }
 
-function StaticLogo({ title, subtitle }: StaticLogoProps): React.JSX.Element {
+function StaticLogo({ title, subtitle }: Readonly<StaticLogoProps>): React.JSX.Element {
     return (
         <View style={styles.logoContainer}>
             <Text style={[styles.logoText, { fontFamily: "BebasNeue_400Regular" }]}>
@@ -170,10 +170,10 @@ function StaticLogo({ title, subtitle }: StaticLogoProps): React.JSX.Element {
  * Error message display component
  */
 interface ErrorMessageProps {
-    message: string;
+    readonly message: string;
 }
 
-function ErrorMessage({ message }: ErrorMessageProps): React.JSX.Element {
+function ErrorMessage({ message }: Readonly<ErrorMessageProps>): React.JSX.Element {
     return (
         <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{message}</Text>
@@ -185,12 +185,12 @@ function ErrorMessage({ message }: ErrorMessageProps): React.JSX.Element {
  * Submit button component
  */
 interface SubmitButtonProps {
-    onPress: () => void;
-    isLoading: boolean;
-    text: string;
+    readonly onPress: () => void;
+    readonly isLoading: boolean;
+    readonly text: string;
 }
 
-function SubmitButton({ onPress, isLoading, text }: SubmitButtonProps): React.JSX.Element {
+function SubmitButton({ onPress, isLoading, text }: Readonly<SubmitButtonProps>): React.JSX.Element {
     return (
         <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}
@@ -211,12 +211,12 @@ function SubmitButton({ onPress, isLoading, text }: SubmitButtonProps): React.JS
  * Navigation link component
  */
 interface AuthLinkProps {
-    text: string;
-    label: string;
-    href: LinkProps["href"];
+    readonly text: string;
+    readonly label: string;
+    readonly href: LinkProps["href"];
 }
 
-function AuthLink({ text, label, href }: AuthLinkProps): React.JSX.Element {
+function AuthLink({ text, label, href }: Readonly<AuthLinkProps>): React.JSX.Element {
     return (
         <View style={styles.linkContainer}>
             <Text style={styles.linkText}>{text} </Text>
@@ -252,7 +252,7 @@ export function AuthLayout({
     linkLabel,
     linkHref,
     showLogo = false,
-}: AuthLayoutProps): React.JSX.Element {
+}: Readonly<AuthLayoutProps>): React.JSX.Element {
     const { logoScale, logoOpacity } = useKeyboardAnimation();
 
     return (

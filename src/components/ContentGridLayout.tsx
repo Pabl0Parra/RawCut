@@ -16,18 +16,18 @@ import MovieCard from "./MovieCard";
 import type { EnrichedContentItem } from "../hooks/useEnrichedContent";
 
 interface ContentGridLayoutProps {
-    data: EnrichedContentItem[];
-    isLoading: boolean;
-    isAuthenticated: boolean;
-    emptyTitle: string;
-    emptySubtitle: string;
-    emptyIcon: string;
-    onToggleFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => void;
-    onToggleWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => void;
-    onToggleWatched?: (tmdbId: number, mediaType: "movie" | "tv") => void;
-    isFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
-    isInWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
-    isWatched?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
+    readonly data: EnrichedContentItem[];
+    readonly isLoading: boolean;
+    readonly isAuthenticated: boolean;
+    readonly emptyTitle: string;
+    readonly emptySubtitle: string;
+    readonly emptyIcon: string;
+    readonly onToggleFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+    readonly onToggleWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+    readonly onToggleWatched?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+    readonly isFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
+    readonly isInWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
+    readonly isWatched?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
 }
 
 /**
@@ -47,7 +47,7 @@ export function ContentGridLayout({
     isFavorite,
     isInWatchlist,
     isWatched,
-}: ContentGridLayoutProps): JSX.Element {
+}: Readonly<ContentGridLayoutProps>): JSX.Element {
     if (!isAuthenticated) {
         return (
             <View style={styles.emptyContainer}>
