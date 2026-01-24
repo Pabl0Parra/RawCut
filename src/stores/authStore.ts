@@ -204,13 +204,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             }
 
             // Update username
-            const { error } = await supabase
+            const { data: updatedRows, error } = await supabase
                 .from("profiles")
                 .update({ username: newUsername })
-                .eq("user_id", user.id);
+                .eq("user_id", user.id)
+                .select();
 
             if (error) {
                 set({ isLoading: false, error: "Error al actualizar nombre de usuario" });
+                return false;
+            }
+
+            if (!updatedRows || updatedRows.length === 0) {
+                console.error("Store: Username update affected 0 rows. Possible RLS issue.");
+                set({ isLoading: false, error: "No se pudo actualizar. Permiso denegado." });
                 return false;
             }
 
