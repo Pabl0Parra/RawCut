@@ -31,6 +31,9 @@ const TransparentTheme = {
     },
 };
 
+const renderHeaderLeft = () => <HeaderLeft />;
+const renderHeaderRight = () => <HeaderRight />;
+
 export default function RootLayout() {
     const { user, setSession, fetchProfile } = useAuthStore();
     const segments = useSegments();
@@ -174,8 +177,8 @@ export default function RootLayout() {
                                     },
                                     headerTitle: "CORTOCRUDO",
                                     headerTitleAlign: 'center',
-                                    headerLeft: () => <HeaderLeft />,
-                                    headerRight: () => <HeaderRight />,
+                                    headerLeft: renderHeaderLeft,
+                                    headerRight: renderHeaderRight,
                                 }}
                             />
                         </Stack>
