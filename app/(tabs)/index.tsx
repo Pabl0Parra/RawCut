@@ -24,6 +24,7 @@ import { useFocusEffect, router } from "expo-router";
 import { Image } from "expo-image";
 
 import MovieCard from "../../src/components/MovieCard";
+import SmokeBackground from "../../src/components/SmokeBackground";
 import {
     searchMovies,
     searchTVShows,
@@ -816,6 +817,7 @@ export default function HomeScreen(): JSX.Element {
                 onRequestClose={() => setShowFilterModal(false)}
             >
                 <View style={styles.modalContainer}>
+                    <SmokeBackground />
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Filtrar</Text>
                         <TouchableOpacity onPress={() => setShowFilterModal(false)}>

@@ -16,25 +16,34 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
     // Create player
     const player = useVideoPlayer(asset, player => {
         player.loop = false;
+        player.muted = false;
         player.play();
     });
 
     useEffect(() => {
-        const subscription = player.addListener('playToEnd', () => {
-            // Add a delay before starting the fade
-            setTimeout(() => {
+        let timer: any;
+        let initTimer: any;
+
+        // Wait a bit for video metadata to load so we can get the duration
+        initTimer = setTimeout(() => {
+            const duration = player.duration * 1000;
+            console.log('Video duration:', duration, 'ms');
+
+            timer = setTimeout(() => {
+                console.log('Timer finished - starting fade');
                 Animated.timing(fadeAnim, {
                     toValue: 0,
-                    duration: 800,
+                    duration: 1000,
                     useNativeDriver: true,
                 }).start(() => {
                     onFinish();
                 });
-            }, 1000); // Wait 1 second (1000ms) after video ends
-        });
+            }, duration || 5000); // Fallback to 5s if duration is 0
+        }, 500);
 
         return () => {
-            subscription.remove();
+            clearTimeout(initTimer);
+            clearTimeout(timer);
         };
     }, [player, fadeAnim, onFinish]);
 
@@ -45,6 +54,7 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
                 player={player}
                 contentFit="cover"
                 nativeControls={false}
+                allowsPictureInPicture={false}
             />
         </Animated.View>
     );
