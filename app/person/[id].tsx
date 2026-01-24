@@ -61,8 +61,8 @@ export default function PersonDetailScreen(): JSX.Element {
     }, []);
 
     useEffect(() => {
-        const personId = parseInt(id, 10);
-        if (!isNaN(personId)) {
+        const personId = Number.parseInt(id, 10);
+        if (!Number.isNaN(personId)) {
             loadData(personId);
         }
     }, [id, loadData]);
