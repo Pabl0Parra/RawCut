@@ -1,7 +1,7 @@
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { StyleSheet, Animated } from 'react-native';
 import { Colors } from '../constants/Colors';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 
 interface VideoSplashProps {
     onFinish: () => void;
@@ -9,41 +9,36 @@ interface VideoSplashProps {
 
 export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
     const fadeAnim = useRef(new Animated.Value(1)).current;
+    const hasSetupListener = useRef(false);
+    const onFinishRef = useRef(onFinish);
 
-    // Video asset
-    const asset = require('../../assets/video/intro.mp4');
+    // Keep ref updated
+    onFinishRef.current = onFinish;
 
-    // Create player
-    const player = useVideoPlayer(asset, player => {
-        player.loop = false;
-        player.muted = false;
+    const player = useVideoPlayer(require('../../assets/video/intro.mp4'), (p) => {
+        p.loop = false;
+        p.muted = false;
+        p.play();
     });
 
     useEffect(() => {
-        // Ensure player starts from beginning after a small delay
-        const startTimeout = setTimeout(() => {
-            player.currentTime = 0;
-            player.replay();
-        }, 100);
+        if (hasSetupListener.current) return;
+        hasSetupListener.current = true;
 
-        // Listen for when video ends
-        const playToEndSubscription = player.addListener('playToEnd', () => {
-            console.log('Video finished playing');
-
+        const subscription = player.addListener('playToEnd', () => {
             Animated.timing(fadeAnim, {
                 toValue: 0,
                 duration: 800,
                 useNativeDriver: true,
             }).start(() => {
-                onFinish();
+                onFinishRef.current();
             });
         });
 
         return () => {
-            clearTimeout(startTimeout);
-            playToEndSubscription.remove();
+            subscription.remove();
         };
-    }, [player, fadeAnim, onFinish]);
+    }, [player, fadeAnim]);
 
     return (
         <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
