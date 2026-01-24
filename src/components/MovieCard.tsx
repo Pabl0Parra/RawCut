@@ -97,7 +97,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     onPress,
     iconFamily = "Ionicons",
 }) => {
-    console.log(`ActionButton: Press handler for ${activeLabel} is defined: ${!!onPress}`);
     const iconName = isActive ? activeIcon : inactiveIcon;
     const color = isActive ? Colors.bloodRed : Colors.metalSilver;
 
@@ -131,7 +130,6 @@ export default function MovieCard({
     onToggleWatchlist,
     onToggleWatched,
 }: Readonly<MovieCardProps>): JSX.Element {
-    console.log(`MovieCard: Rendering card for ${getTitle(item)} (ID: ${item.id})`);
     const posterUrl = getImageUrl(item.poster_path, "w300");
     const title = getTitle(item);
     const year = extractYear(getReleaseDate(item));
@@ -145,17 +143,14 @@ export default function MovieCard({
     };
 
     const handleToggleFavorite = (): void => {
-        console.log("MovieCard: onToggleFavorite triggered");
         onToggleFavorite?.();
     };
 
     const handleToggleWatchlist = (): void => {
-        console.log("MovieCard: onToggleWatchlist triggered");
         onToggleWatchlist?.();
     };
 
     const handleToggleWatched = (): void => {
-        console.log("MovieCard: onToggleWatched triggered");
         onToggleWatched?.();
     };
 

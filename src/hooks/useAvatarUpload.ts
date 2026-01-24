@@ -3,6 +3,7 @@ import * as ImagePicker from "expo-image-picker";
 import { readAsStringAsync } from "expo-file-system/legacy";
 import { decode } from "base64-arraybuffer";
 import { supabase, Profile } from "../lib/supabase";
+import { useAuthStore } from "../stores/authStore";
 
 /** Supabase storage bucket name for avatars */
 const AVATAR_BUCKET = "avatars";
@@ -139,7 +140,7 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
             try {
                 // Launch picker
                 const pickerOptions: ImagePicker.ImagePickerOptions = {
-                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    mediaTypes: "images",
                     allowsEditing: true,
                     aspect: [1, 1],
                     quality: 0.8,
@@ -205,12 +206,29 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
                     .getPublicUrl(filePath);
 
                 const publicUrl = urlData.publicUrl;
+                console.log("Avatar public URL generated:", publicUrl);
+
+                // Verify auth state before update
+                const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
+
+                console.log("Debug Auth Check:", {
+                    targetUserId: userId,
+                    sessionUserId: currentUser?.id,
+                    isMatch: userId === currentUser?.id,
+                    authError
+                });
+
+                if (!currentUser || currentUser.id !== userId) {
+                    console.error("Auth mismatch: Cannot update profile for different user");
+                    // We proceed anyway to see what DB says, but this is a red flag
+                }
 
                 // Update profile with new avatar URL
-                const { error: updateError } = await supabase
+                const { data: updatedRows, error: updateError } = await supabase
                     .from("profiles")
                     .update({ avatar_url: publicUrl })
-                    .eq("user_id", userId);
+                    .eq("user_id", userId)
+                    .select();
 
                 if (updateError) {
                     console.error("Profile update error:", updateError);
@@ -220,6 +238,31 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
                         error: "Error al actualizar el perfil.",
                     });
                     return null;
+                }
+
+                const rowCount = updatedRows ? updatedRows.length : 0;
+                console.log(`Profile update finished. Rows updated: ${rowCount}`);
+
+                if (rowCount === 0) {
+                    console.error("WARNING: Profile update affected 0 rows. Possible RLS issue or user_id mismatch.");
+                    setState({
+                        isUploading: false,
+                        uploadProgress: 0,
+                        error: "No se pudo actualizar el perfil (0 cambios).",
+                    });
+                    return null;
+                }
+
+                // Success - update local state using the known publicUrl
+                // (No need to redeclare updateData)
+
+                // Update local profile state immediately
+                const currentProfile = useAuthStore.getState().profile;
+                if (currentProfile) {
+                    useAuthStore.getState().setProfile({
+                        ...currentProfile,
+                        avatar_url: publicUrl
+                    });
                 }
 
                 setState({ isUploading: false, uploadProgress: 1, error: null });
@@ -267,6 +310,15 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
                         error: "Error al eliminar el avatar.",
                     });
                     return false;
+                }
+
+                // Update local profile state immediately after deletion
+                const currentProfile = useAuthStore.getState().profile;
+                if (currentProfile) {
+                    useAuthStore.getState().setProfile({
+                        ...currentProfile,
+                        avatar_url: null
+                    });
                 }
 
                 setState({ isUploading: false, uploadProgress: 0, error: null });

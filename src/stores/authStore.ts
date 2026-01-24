@@ -16,6 +16,7 @@ interface AuthState {
     fetchProfile: () => Promise<void>;
     updateUsername: (newUsername: string) => Promise<boolean>;
     setSession: (session: Session | null) => void;
+    setProfile: (profile: Profile | null) => void;
     clearError: () => void;
 }
 
@@ -149,14 +150,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { user } = get();
         if (!user) return;
 
-        const { data } = await supabase
+        console.log("Store: Fetching profile for user:", user.id);
+        const { data, error } = await supabase
             .from("profiles")
             .select("*")
             .eq("user_id", user.id)
             .single();
 
+        if (error) {
+            console.error("Store: Error fetching profile:", error);
+        }
+
         if (data) {
+            console.log("Store: Fetched profile data. Avatar URL:", data.avatar_url);
             set({ profile: data });
+        } else {
+            console.log("Store: No profile data found");
         }
     },
 
@@ -165,6 +174,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             session,
             user: session?.user || null,
         });
+    },
+    setProfile: (profile: Profile | null) => {
+        console.log("Store: Setting profile with avatar_url:", profile?.avatar_url);
+        set({ profile });
     },
 
     updateUsername: async (newUsername: string) => {

@@ -1,10 +1,22 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, Modal, Pressable, View, Text, StyleSheet, Platform, Alert } from 'react-native';
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../../constants/Colors";
 import { useAuthStore } from "../../stores/authStore";
+
+/** Get initials from username or email */
+function getInitials(username: string | undefined, email: string | undefined): string {
+    if (username && !username.startsWith("user_")) {
+        return username.slice(0, 2).toUpperCase();
+    }
+    if (email) {
+        return email.slice(0, 2).toUpperCase();
+    }
+    return "??";
+}
 
 export const HeaderRight = () => {
     const router = useRouter();
@@ -33,9 +45,24 @@ export const HeaderRight = () => {
         <>
             <TouchableOpacity
                 onPress={() => setMenuVisible(true)}
-                style={{ marginRight: 16 }}
+                style={styles.headerButton}
             >
-                <Ionicons name="person-circle-outline" size={32} color={Colors.white} />
+                {profile?.avatar_url ? (
+                    <Image
+                        key={profile.avatar_url}
+                        source={profile.avatar_url}
+                        style={styles.avatarImage}
+                        contentFit="cover"
+                        transition={200}
+                        onError={() => console.log("Header Image Load Error")}
+                    />
+                ) : (
+                    <View style={styles.headerAvatarPlaceholder}>
+                        <Text style={styles.headerInitials}>
+                            {getInitials(profile?.username, user?.email)}
+                        </Text>
+                    </View>
+                )}
             </TouchableOpacity>
 
             <Modal
@@ -81,6 +108,34 @@ const styles = StyleSheet.create({
     modalOverlay: {
         flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    headerButton: {
+        marginRight: 16,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarImage: {
+        width: "100%",
+        height: "100%",
+    },
+    headerAvatarPlaceholder: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: Colors.metalGray,
+        borderWidth: 1,
+        borderColor: Colors.metalSilver,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    headerInitials: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: Colors.metalSilver,
     },
     menuContent: {
         position: "absolute",

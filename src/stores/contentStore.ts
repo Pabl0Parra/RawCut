@@ -94,11 +94,9 @@ export const useContentStore = create<ContentState>((set, get) => ({
             return false;
         }
 
-        console.log(`addToFavorites: Attempting to add ${mediaType} ${tmdbId}`);
         try {
             // Check if already in favorites to avoid duplicates if state is out of sync
             if (get().isFavorite(tmdbId, mediaType)) {
-                console.log("addToFavorites: Already in favorites, skipping insert");
                 return true;
             }
 
@@ -112,13 +110,11 @@ export const useContentStore = create<ContentState>((set, get) => ({
             if (error) {
                 // Ignore "already exists" errors (duplicate key value violates unique constraint)
                 if (error.code === '23505') {
-                    console.log("addToFavorites: Item already exists in DB");
                     return true;
                 }
                 throw error;
             }
 
-            console.log("addToFavorites: Success", data);
             set((state) => ({
                 favorites: [data, ...state.favorites],
             }));
@@ -133,7 +129,6 @@ export const useContentStore = create<ContentState>((set, get) => ({
         const user = useAuthStore.getState().user;
         if (!user) return false;
 
-        console.log(`removeFromFavorites: Removing ${mediaType} ${tmdbId}`);
         try {
             const { error } = await supabase
                 .from("user_content")
@@ -145,7 +140,6 @@ export const useContentStore = create<ContentState>((set, get) => ({
 
             if (error) throw error;
 
-            console.log("removeFromFavorites: Success");
             set((state) => ({
                 favorites: state.favorites.filter(
                     (item) => !(item.tmdb_id === tmdbId && item.media_type === mediaType)
@@ -165,11 +159,9 @@ export const useContentStore = create<ContentState>((set, get) => ({
             return false;
         }
 
-        console.log(`addToWatchlist: Attempting to add ${mediaType} ${tmdbId}`);
         try {
             // Check if already in watchlist to avoid duplicates if state is out of sync
             if (get().isInWatchlist(tmdbId, mediaType)) {
-                console.log("addToWatchlist: Already in watchlist, skipping insert");
                 return true;
             }
 
@@ -183,13 +175,11 @@ export const useContentStore = create<ContentState>((set, get) => ({
             if (error) {
                 // Ignore "already exists" errors
                 if (error.code === '23505') {
-                    console.log("addToWatchlist: Item already exists in DB");
                     return true;
                 }
                 throw error;
             }
 
-            console.log("addToWatchlist: Success", data);
             set((state) => ({
                 watchlist: [data, ...state.watchlist],
             }));

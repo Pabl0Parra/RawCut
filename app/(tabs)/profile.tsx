@@ -8,7 +8,6 @@ import {
     ActivityIndicator,
     Alert,
     ScrollView,
-    Image,
     Animated,
     Linking,
     Platform,
@@ -16,6 +15,7 @@ import {
     type TextStyle,
     type ImageStyle,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -75,6 +75,7 @@ function AvatarSection({
     uploadProgress,
     onPress,
 }: AvatarSectionProps): React.JSX.Element {
+    console.log("AvatarSection rendering. Profile username:", username, "Avatar URL:", avatarUrl);
     const initials = getInitials(username, email);
 
     return (
@@ -89,9 +90,12 @@ function AvatarSection({
             <View style={styles.avatarWrapper}>
                 {avatarUrl ? (
                     <Image
-                        source={{ uri: avatarUrl }}
+                        key={avatarUrl}
+                        source={avatarUrl}
                         style={styles.avatarImage}
-                        resizeMode="cover"
+                        contentFit="cover"
+                        transition={200}
+                        onError={() => console.log("Profile Image Load Error for URL:", avatarUrl)}
                     />
                 ) : (
                     <View style={styles.avatarPlaceholder}>

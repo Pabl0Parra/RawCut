@@ -50,8 +50,10 @@ export default function RootLayout() {
     useEffect(() => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
+                console.log("Auth event:", event);
                 setSession(session);
                 if (session?.user) {
+                    console.log("Auth event: Fetching profile...");
                     await fetchProfile();
                 }
             }
