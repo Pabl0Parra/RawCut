@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent",
     } as ViewStyle,
     paddedTop: {
-        paddingTop: 16,
+        paddingTop: 8,
     } as ViewStyle,
     keyboardAvoidingView: {
         flex: 1,

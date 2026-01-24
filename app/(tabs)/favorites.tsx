@@ -75,6 +75,6 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: "transparent",
-        paddingTop: 16,
+        paddingTop: 8,
     },
 });

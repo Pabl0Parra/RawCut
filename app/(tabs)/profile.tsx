@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     scrollContent: {
         paddingHorizontal: 20,
-        paddingTop: 24,
+        paddingTop: 12,
         paddingBottom: 40,
     } as ViewStyle,
 
