@@ -45,6 +45,7 @@ export default function TabLayout() {
                 },
                 headerTitle: "CORTOCRUDO",
                 headerTitleAlign: 'center',
+                headerLeft: HeaderLeft,
                 headerRight: HeaderRight,
             }}
             // @ts-ignore - sceneContainerStyle is supported by underlying navigator but not explicitly in expo-router Tabs type
