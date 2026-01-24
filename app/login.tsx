@@ -32,7 +32,7 @@ export default function LoginScreen() {
 
     return (
         <AuthLayout
-            title="CortoCrudo"
+            title="Iniciar Sesión"
             subtitle="Tu guía de cine y series"
             error={error}
             isLoading={isLoading}

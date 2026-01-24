@@ -8,6 +8,8 @@ import {
     type ViewStyle,
     type TextStyle,
     type TextInputProps,
+    type NativeSyntheticEvent,
+    type TextInputFocusEventData,
 } from "react-native";
 import {
     Controller,
@@ -88,7 +90,9 @@ export function AuthFormField<T extends FieldValues>({
     }, []);
 
     const handleFocus = useCallback(
-        (originalOnFocus?: (e: any) => void) => {
+        (
+            originalOnFocus?: (e: any) => void
+        ) => {
             return (e: any) => {
                 setIsFocused(true);
                 originalOnFocus?.(e);
@@ -195,7 +199,14 @@ export function AuthFormField<T extends FieldValues>({
     );
 }
 
+/** Placeholder gray color - add to Colors if not present */
+const PLACEHOLDER_GRAY = "#71717a";
 
+// Extend Colors type safety
+const ExtendedColors = {
+    ...Colors,
+    placeholderGray: PLACEHOLDER_GRAY,
+} as const;
 
 const styles = StyleSheet.create({
     inputGroup: {
