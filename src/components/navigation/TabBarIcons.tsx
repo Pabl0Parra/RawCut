@@ -9,7 +9,7 @@ interface TabBarIconProps {
 // Increased size to 24 for better visibility with animated background
 const ICON_SIZE = 24;
 
-export const HomeIcon = ({ color }: TabBarIconProps) => (
+export const HomeIcon = ({ color, focused }: TabBarIconProps) => (
     <MaterialIcons name="castle" size={ICON_SIZE} color={color} />
 );
 
