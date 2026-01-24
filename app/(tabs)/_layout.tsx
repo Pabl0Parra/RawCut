@@ -17,6 +17,8 @@ import {
 } from "../../src/components/navigation/TabBarIcons";
 
 const renderTabBar = (props: any) => <AnimatedTabBar {...props} />;
+const renderHeaderLeft = () => <HeaderLeft />;
+const renderHeaderRight = () => <HeaderRight />;
 
 export default function TabLayout() {
     const { user } = useAuthStore();
@@ -47,8 +49,8 @@ export default function TabLayout() {
                 },
                 headerTitle: "CORTOCRUDO",
                 headerTitleAlign: 'center',
-                headerLeft: HeaderLeft,
-                headerRight: HeaderRight,
+                headerLeft: renderHeaderLeft,
+                headerRight: renderHeaderRight,
             }}
             // @ts-ignore - sceneContainerStyle is supported by underlying navigator but not explicitly in expo-router Tabs type
             sceneContainerStyle={{ backgroundColor: 'transparent' }}
