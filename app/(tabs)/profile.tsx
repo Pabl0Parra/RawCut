@@ -59,12 +59,12 @@ function getInitials(username: string | undefined, email: string | undefined): s
 
 /** Avatar component with upload capability */
 interface AvatarSectionProps {
-    avatarUrl: string | null;
-    username: string | undefined;
-    email: string | undefined;
-    isUploading: boolean;
-    uploadProgress: number;
-    onPress: () => void;
+    readonly avatarUrl: string | null;
+    readonly username: string | undefined;
+    readonly email: string | undefined;
+    readonly isUploading: boolean;
+    readonly uploadProgress: number;
+    readonly onPress: () => void;
 }
 
 function AvatarSection({
@@ -126,7 +126,7 @@ function AvatarSection({
 
 /** Section header component */
 interface SectionHeaderProps {
-    title: string;
+    readonly title: string;
 }
 
 function SectionHeader({ title }: Readonly<SectionHeaderProps>): React.JSX.Element {
@@ -135,11 +135,11 @@ function SectionHeader({ title }: Readonly<SectionHeaderProps>): React.JSX.Eleme
 
 /** Profile info row component */
 interface InfoRowProps {
-    icon: keyof typeof Ionicons.glyphMap;
-    label: string;
-    value: string;
-    onEdit?: () => void;
-    isEditable?: boolean;
+    readonly icon: keyof typeof Ionicons.glyphMap;
+    readonly label: string;
+    readonly value: string;
+    readonly onEdit?: () => void;
+    readonly isEditable?: boolean;
 }
 
 function InfoRow({
@@ -174,11 +174,11 @@ function InfoRow({
 
 /** Settings row with toggle or navigation */
 interface SettingsRowProps {
-    icon: keyof typeof Ionicons.glyphMap;
-    label: string;
-    onPress: () => void;
-    rightElement?: React.ReactNode;
-    destructive?: boolean;
+    readonly icon: keyof typeof Ionicons.glyphMap;
+    readonly label: string;
+    readonly onPress: () => void;
+    readonly rightElement?: React.ReactNode;
+    readonly destructive?: boolean;
 }
 
 function SettingsRow({
@@ -220,11 +220,11 @@ function SettingsRow({
 
 /** Username edit modal/inline component */
 interface UsernameEditorProps {
-    currentUsername: string;
-    isLoading: boolean;
-    error: string | null;
-    onSave: (newUsername: string) => Promise<void>;
-    onCancel: () => void;
+    readonly currentUsername: string;
+    readonly isLoading: boolean;
+    readonly error: string | null;
+    readonly onSave: (newUsername: string) => Promise<void>;
+    readonly onCancel: () => void;
 }
 
 function UsernameEditor({
