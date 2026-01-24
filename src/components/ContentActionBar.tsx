@@ -55,12 +55,12 @@ export function ContentActionBar({
             />
             <ActionButton
                 isActive={isInWatchlist}
-                activeIcon="sword-cross"
-                inactiveIcon="sword"
+                activeIcon="bookmark"
+                inactiveIcon="bookmark-outline"
                 activeLabel="En Lista"
                 inactiveLabel="Watchlist"
                 onPress={onToggleWatchlist}
-                iconFamily="MaterialCommunityIcons"
+                iconFamily="Ionicons"
             />
             <ActionButton
                 isActive={isWatched}

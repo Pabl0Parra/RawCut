@@ -17,33 +17,31 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
     const player = useVideoPlayer(asset, player => {
         player.loop = false;
         player.muted = false;
-        player.play();
     });
 
     useEffect(() => {
-        let timer: any;
-        let initTimer: any;
+        // Ensure player starts from beginning after a small delay
+        const startTimeout = setTimeout(() => {
+            player.currentTime = 0;
+            player.replay();
+        }, 100);
 
-        // Wait a bit for video metadata to load so we can get the duration
-        initTimer = setTimeout(() => {
-            const duration = player.duration * 1000;
-            console.log('Video duration:', duration, 'ms');
+        // Listen for when video ends
+        const playToEndSubscription = player.addListener('playToEnd', () => {
+            console.log('Video finished playing');
 
-            timer = setTimeout(() => {
-                console.log('Timer finished - starting fade');
-                Animated.timing(fadeAnim, {
-                    toValue: 0,
-                    duration: 1000,
-                    useNativeDriver: true,
-                }).start(() => {
-                    onFinish();
-                });
-            }, duration || 5000); // Fallback to 5s if duration is 0
-        }, 500);
+            Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 800,
+                useNativeDriver: true,
+            }).start(() => {
+                onFinish();
+            });
+        });
 
         return () => {
-            clearTimeout(initTimer);
-            clearTimeout(timer);
+            clearTimeout(startTimeout);
+            playToEndSubscription.remove();
         };
     }, [player, fadeAnim, onFinish]);
 
@@ -54,6 +52,7 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
                 player={player}
                 contentFit="cover"
                 nativeControls={false}
+                allowsFullscreen={false}
                 allowsPictureInPicture={false}
             />
         </Animated.View>
