@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { Tabs } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useContentStore } from "../../src/stores/contentStore";
@@ -8,6 +7,7 @@ import { useRecommendationStore } from "../../src/stores/recommendationStore";
 
 import { HeaderLeft } from "../../src/components/navigation/HeaderLeft";
 import { HeaderRight } from "../../src/components/navigation/HeaderRight";
+import AnimatedTabBar from "../../src/components/navigation/AnimatedTabBar";
 import {
     HomeIcon,
     FavoritesIcon,
@@ -17,7 +17,6 @@ import {
 } from "../../src/components/navigation/TabBarIcons";
 
 export default function TabLayout() {
-    const insets = useSafeAreaInsets();
     const { user } = useAuthStore();
     const { unreadCount, fetchRecommendations, subscribeToRealtime } = useRecommendationStore();
     const { fetchUserContent, fetchTVProgress } = useContentStore();
@@ -34,21 +33,8 @@ export default function TabLayout() {
 
     return (
         <Tabs
+            tabBar={(props) => <AnimatedTabBar {...props} />}
             screenOptions={{
-                tabBarStyle: {
-                    backgroundColor: Colors.metalGray,
-                    borderTopColor: Colors.metalSilver,
-                    borderTopWidth: 0.5,
-                    height: 52 + insets.bottom,
-                    paddingBottom: insets.bottom,
-
-                },
-                tabBarActiveTintColor: Colors.bloodRed,
-                tabBarInactiveTintColor: Colors.metalSilver,
-                tabBarLabelStyle: {
-                    fontSize: 10,
-                    fontFamily: "Inter_500Medium",
-                },
                 headerStyle: {
                     backgroundColor: Colors.metalBlack,
                 },
@@ -59,10 +45,9 @@ export default function TabLayout() {
                 },
                 headerTitle: "CORTOCRUDO",
                 headerTitleAlign: 'center',
-                headerLeft: HeaderLeft,
                 headerRight: HeaderRight,
             }}
-            // @ts-ignore
+            // @ts-ignore - sceneContainerStyle is supported by underlying navigator but not explicitly in expo-router Tabs type
             sceneContainerStyle={{ backgroundColor: 'transparent' }}
         >
             <Tabs.Screen
@@ -94,7 +79,8 @@ export default function TabLayout() {
                     title: "Sugeridas",
                     headerTitle: "CORTOCRUDO - SUGERIDAS",
                     tabBarIcon: RecommendationsIcon,
-                    tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+                    // Note: Badge is not supported in custom tab bar
+                    // You'd need to add badge support to AnimatedTabBar if needed
                 }}
             />
             <Tabs.Screen
