@@ -16,6 +16,8 @@ import {
     ProfileIcon
 } from "../../src/components/navigation/TabBarIcons";
 
+const renderTabBar = (props: any) => <AnimatedTabBar {...props} />;
+
 export default function TabLayout() {
     const { user } = useAuthStore();
     const { unreadCount, fetchRecommendations, subscribeToRealtime } = useRecommendationStore();
@@ -33,7 +35,7 @@ export default function TabLayout() {
 
     return (
         <Tabs
-            tabBar={(props) => <AnimatedTabBar {...props} />}
+            tabBar={renderTabBar}
             screenOptions={{
                 headerStyle: {
                     backgroundColor: Colors.metalBlack,
