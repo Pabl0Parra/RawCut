@@ -27,6 +27,7 @@ import { ContentActionBar } from "../../../src/components/ContentActionBar";
 import { useContentActions } from "../../../src/hooks/useContentActions";
 import { detailScreenStyles } from "../../../src/styles/detailScreenStyles";
 import { CastMemberList } from "../../../src/components/CastMemberList";
+import { CrewMemberList } from "../../../src/components/CrewMemberList";
 import { ContentHorizontalList } from "../../../src/components/ContentHorizontalList";
 import type { MovieWithDetails } from "../../../src/types/movieDetail.types";
 import {
@@ -196,35 +197,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
         );
     };
 
-    const renderCrewSection = (): React.JSX.Element | null => {
-        if (!movie?.credits) return null;
 
-        const directors = getDirectors(movie.credits.crew);
-        const producers = getProducers(movie.credits.crew);
-
-        if (directors.length === 0 && producers.length === 0) return null;
-
-        return (
-            <View style={detailScreenStyles.sectionContainer}>
-                {directors.length > 0 && (
-                    <View style={detailScreenStyles.crewGroup}>
-                        <Text style={detailScreenStyles.crewLabel}>Dirección</Text>
-                        <Text style={detailScreenStyles.crewNames}>
-                            {formatCrewNames(directors)}
-                        </Text>
-                    </View>
-                )}
-                {producers.length > 0 && (
-                    <View style={detailScreenStyles.crewGroup}>
-                        <Text style={detailScreenStyles.crewLabel}>Producción</Text>
-                        <Text style={detailScreenStyles.crewNames}>
-                            {formatCrewNames(producers)}
-                        </Text>
-                    </View>
-                )}
-            </View>
-        );
-    };
 
     // Generic lists now use shared components
 
@@ -309,7 +282,18 @@ export default function MovieDetailScreen(): React.JSX.Element {
                     </View>
 
                     {/* Crew Info */}
-                    {renderCrewSection()}
+                    {movie?.credits?.crew && (
+                        <>
+                            <CrewMemberList
+                                crew={getDirectors(movie.credits.crew)}
+                                title="Dirección"
+                            />
+                            <CrewMemberList
+                                crew={getProducers(movie.credits.crew).slice(0, 10)}
+                                title="Producción"
+                            />
+                        </>
+                    )}
 
                     {/* Cast */}
                     <CastMemberList cast={movie.credits?.cast || []} />

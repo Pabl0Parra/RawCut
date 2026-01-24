@@ -168,6 +168,29 @@ export const getTVVideos = async (id: number): Promise<{ results: Video[] }> => 
     return fetchTMDb(`/tv/${id}/videos`);
 };
 
+export interface Person {
+    id: number;
+    name: string;
+    biography: string;
+    profile_path: string | null;
+    birthday: string | null;
+    place_of_birth: string | null;
+    known_for_department: string;
+}
+
+export interface PersonCredits {
+    cast: (Movie | TVShow)[];
+    crew: (Movie | TVShow)[];
+}
+
+export const getPersonDetails = async (id: number): Promise<Person> => {
+    return fetchTMDb<Person>(`/person/${id}`);
+};
+
+export const getPersonCredits = async (id: number): Promise<PersonCredits> => {
+    return fetchTMDb<PersonCredits>(`/person/${id}/combined_credits`);
+};
+
 // Helper function to get full image URL
 export const getImageUrl = (path: string | null, size: "w200" | "w300" | "w500" | "original" = "w500"): string | null => {
     if (!path) return null;

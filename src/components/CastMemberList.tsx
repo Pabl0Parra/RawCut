@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, FlatList } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import { getImageUrl } from '../lib/tmdb';
 import { detailScreenStyles } from '../styles/detailScreenStyles';
 
@@ -23,7 +23,11 @@ export const CastMemberList: React.FC<CastMemberListProps> = ({ cast, title = "R
         const profileUrl = getImageUrl(item.profile_path, "w200");
 
         return (
-            <View style={detailScreenStyles.mediaItem}>
+            <TouchableOpacity
+                style={detailScreenStyles.mediaItem}
+                onPress={() => router.push(`/person/${item.id}` as any)}
+                activeOpacity={0.7}
+            >
                 {profileUrl ? (
                     <Image
                         source={{ uri: profileUrl }}
@@ -41,7 +45,7 @@ export const CastMemberList: React.FC<CastMemberListProps> = ({ cast, title = "R
                 <Text style={detailScreenStyles.mediaSubtitle} numberOfLines={2}>
                     {item.character}
                 </Text>
-            </View>
+            </TouchableOpacity>
         );
     };
 

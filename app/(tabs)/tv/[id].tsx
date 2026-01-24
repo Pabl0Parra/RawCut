@@ -40,6 +40,7 @@ import { ContentActionBar } from "../../../src/components/ContentActionBar";
 import { useContentActions } from "../../../src/hooks/useContentActions";
 import { detailScreenStyles } from "../../../src/styles/detailScreenStyles";
 import { CastMemberList } from "../../../src/components/CastMemberList";
+import { CrewMemberList } from "../../../src/components/CrewMemberList";
 import { ContentHorizontalList } from "../../../src/components/ContentHorizontalList";
 
 // Types & Utils
@@ -288,35 +289,7 @@ export default function TVDetailScreen(): React.JSX.Element {
         );
     };
 
-    const renderCrewSection = (): React.JSX.Element | null => {
-        if (!tvShow) return null;
 
-        const hasCreatorsSection = hasCreators(tvShow.created_by);
-        const hasProducersSection = hasProducers(tvShow.credits?.crew);
-
-        if (!hasCreatorsSection && !hasProducersSection) return null;
-
-        return (
-            <View style={detailScreenStyles.sectionContainer}>
-                {hasCreatorsSection && (
-                    <View style={detailScreenStyles.crewGroup}>
-                        <Text style={detailScreenStyles.crewLabel}>Creación</Text>
-                        <Text style={detailScreenStyles.crewNames}>
-                            {getCreators(tvShow.created_by)}
-                        </Text>
-                    </View>
-                )}
-                {hasProducersSection && (
-                    <View style={detailScreenStyles.crewGroup}>
-                        <Text style={detailScreenStyles.crewLabel}>Producción</Text>
-                        <Text style={detailScreenStyles.crewNames}>
-                            {formatCrewNames(getProducers(tvShow.credits?.crew))}
-                        </Text>
-                    </View>
-                )}
-            </View>
-        );
-    };
 
     const renderSeasonItem = ({ item }: { item: Season }): React.JSX.Element => (
         <SeasonCard
@@ -429,7 +402,27 @@ export default function TVDetailScreen(): React.JSX.Element {
                     </View>
 
                     {/* Crew Info */}
-                    {renderCrewSection()}
+                    {tvShow && (
+                        <>
+                            {tvShow.created_by && tvShow.created_by.length > 0 && (
+                                <CrewMemberList
+                                    crew={tvShow.created_by.map(c => ({
+                                        id: c.id,
+                                        name: c.name,
+                                        job: "Creador",
+                                        profile_path: c.profile_path
+                                    }))}
+                                    title="Creación"
+                                />
+                            )}
+                            {tvShow.credits?.crew && (
+                                <CrewMemberList
+                                    crew={getProducers(tvShow.credits.crew).slice(0, 10)}
+                                    title="Producción"
+                                />
+                            )}
+                        </>
+                    )}
 
                     {/* Seasons */}
                     {renderSeasonsSection()}
