@@ -17,6 +17,8 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useAuthStore } from "../../src/stores/authStore";
+import { useRecommendationStore } from "../../src/stores/recommendationStore";
+import { useContentStore } from "../../src/stores/contentStore";
 import { useAvatarUpload } from "../../src/hooks/useAvatarUpload";
 import { Colors } from "../../src/constants/Colors";
 
@@ -295,11 +297,15 @@ export default function ProfileScreen(): React.JSX.Element {
         user,
         updateUsername,
         signOut,
+        deleteAccount,
         fetchProfile,
         isLoading,
         error,
         clearError,
     } = useAuthStore();
+
+    const { clearContent } = useContentStore();
+    const { clearRecommendations } = useRecommendationStore();
 
     const {
         isUploading,
@@ -407,23 +413,43 @@ export default function ProfileScreen(): React.JSX.Element {
     const handleDeleteAccount = useCallback(() => {
         Alert.alert(
             "Eliminar cuenta",
-            "Esta acción es irreversible. Se eliminarán todos tus datos, listas y recomendaciones. ¿Estás seguro?",
+            "Esta acción es irreversible. Se eliminarán todos tus datos, listas y recomendaciones. ¿Estás seguro de que quieres continuar?",
             [
                 { text: "Cancelar", style: "cancel" },
                 {
-                    text: "Eliminar cuenta",
+                    text: "Eliminar cuenta definitivamente",
                     style: "destructive",
                     onPress: () => {
-                        // TODO: Implement account deletion
-                        Alert.alert(
-                            "Próximamente",
-                            "Esta función estará disponible pronto. Contacta soporte para eliminar tu cuenta."
-                        );
+                        (async () => {
+                            // 1. First attempt to delete avatar from storage if exists
+                            if (profile?.avatar_url && user?.id) {
+                                await deleteAvatar(user.id, profile.avatar_url);
+                            }
+
+                            // 2. Call the deletion action
+                            const success = await deleteAccount();
+
+                            if (success) {
+                                // 3. Clear other local stores
+                                clearContent();
+                                clearRecommendations();
+
+                                Alert.alert(
+                                    "Cuenta eliminada",
+                                    "Tu cuenta y todos tus datos han sido eliminados correctamente."
+                                );
+                            } else {
+                                Alert.alert(
+                                    "Error",
+                                    "No se pudo eliminar la cuenta. Por favor, intenta de nuevo o contacta a soporte."
+                                );
+                            }
+                        })();
                     },
                 },
             ]
         );
-    }, []);
+    }, [user?.id, profile?.avatar_url, deleteAccount, deleteAvatar, clearContent, clearRecommendations]);
 
     /** Open external link */
     const openLink = useCallback((url: string) => {

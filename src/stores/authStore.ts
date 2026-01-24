@@ -15,6 +15,7 @@ interface AuthState {
     signOut: () => Promise<void>;
     fetchProfile: () => Promise<void>;
     updateUsername: (newUsername: string) => Promise<boolean>;
+    deleteAccount: () => Promise<boolean>;
     setSession: (session: Session | null) => void;
     setProfile: (profile: Profile | null) => void;
     clearError: () => void;
@@ -231,6 +232,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             return true;
         } catch (err) {
             console.error("Error al actualizar nombre de usuario:", err);
+            set({ isLoading: false, error: "Error de conexión" });
+            return false;
+        }
+    },
+
+    deleteAccount: async () => {
+        set({ isLoading: true, error: null });
+        const { user } = get();
+
+        if (!user) {
+            set({ isLoading: false, error: "No hay sesión activa" });
+            return false;
+        }
+
+        try {
+            // 1. Delete account via RPC (This handles profiles and other cascaded tables)
+            const { error: rpcError } = await supabase.rpc('delete_user_account');
+
+            if (rpcError) {
+                console.error("Store: Error calling delete_user_account RPC:", rpcError);
+                set({ isLoading: false, error: "Error al eliminar la cuenta en el servidor" });
+                return false;
+            }
+
+            // 2. Local cleanup
+            set({
+                user: null,
+                session: null,
+                profile: null,
+                isLoading: false,
+                error: null,
+            });
+
+            return true;
+        } catch (err) {
+            console.error("Error al eliminar cuenta:", err);
             set({ isLoading: false, error: "Error de conexión" });
             return false;
         }
