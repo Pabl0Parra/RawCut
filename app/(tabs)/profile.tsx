@@ -72,7 +72,7 @@ function AvatarSection({
     isUploading,
     uploadProgress,
     onPress,
-}: AvatarSectionProps): React.JSX.Element {
+}: Readonly<AvatarSectionProps>): React.JSX.Element {
     console.log("AvatarSection rendering. Profile username:", username, "Avatar URL:", avatarUrl);
     const initials = getInitials(username, email);
 
@@ -127,7 +127,7 @@ interface SectionHeaderProps {
     title: string;
 }
 
-function SectionHeader({ title }: SectionHeaderProps): React.JSX.Element {
+function SectionHeader({ title }: Readonly<SectionHeaderProps>): React.JSX.Element {
     return <Text style={styles.sectionTitle}>{title}</Text>;
 }
 
@@ -146,7 +146,7 @@ function InfoRow({
     value,
     onEdit,
     isEditable = false,
-}: InfoRowProps): React.JSX.Element {
+}: Readonly<InfoRowProps>): React.JSX.Element {
     return (
         <View style={styles.infoRow}>
             <View style={styles.infoRowLeft}>
@@ -185,7 +185,7 @@ function SettingsRow({
     onPress,
     rightElement,
     destructive = false,
-}: SettingsRowProps): React.JSX.Element {
+}: Readonly<SettingsRowProps>): React.JSX.Element {
     return (
         <TouchableOpacity
             style={styles.settingsRow}
@@ -231,7 +231,7 @@ function UsernameEditor({
     error,
     onSave,
     onCancel,
-}: UsernameEditorProps): React.JSX.Element {
+}: Readonly<UsernameEditorProps>): React.JSX.Element {
     const [value, setValue] = useState(currentUsername);
 
     const handleSave = async () => {
