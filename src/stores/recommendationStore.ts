@@ -183,10 +183,10 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         try {
             const { data, error } = await supabase
                 .from("ratings")
-                .insert({
+                .upsert({
                     recommendation_id: recommendationId,
                     rating,
-                })
+                }, { onConflict: 'recommendation_id' })
                 .select()
                 .single();
 

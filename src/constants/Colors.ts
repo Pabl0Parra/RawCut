@@ -7,6 +7,7 @@ export const Colors = {
     vibrantRed: "#fc3e20",
     white: "#FFFFFF",
     black: "#000000",
+    placeholderGray: "#71717a",
 };
 
 export const Fonts = {

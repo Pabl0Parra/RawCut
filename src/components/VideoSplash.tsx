@@ -21,13 +21,16 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
 
     useEffect(() => {
         const subscription = player.addListener('playToEnd', () => {
-            Animated.timing(fadeAnim, {
-                toValue: 0,
-                duration: 800,
-                useNativeDriver: true,
-            }).start(() => {
-                onFinish();
-            });
+            // Add a delay before starting the fade
+            setTimeout(() => {
+                Animated.timing(fadeAnim, {
+                    toValue: 0,
+                    duration: 800,
+                    useNativeDriver: true,
+                }).start(() => {
+                    onFinish();
+                });
+            }, 1000); // Wait 1 second (1000ms) after video ends
         });
 
         return () => {

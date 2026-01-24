@@ -98,12 +98,16 @@ CREATE POLICY "Users can insert their own content" ON user_content
 CREATE POLICY "Users can delete their own content" ON user_content
   FOR DELETE USING (auth.uid() = user_id);
 
--- Recommendations: Sender/receiver can read, sender creates
+-- Recommendations: Sender/receiver can read, sender creates, receiver marks as read
 CREATE POLICY "View own recommendations" ON recommendations
   FOR SELECT USING (auth.uid() IN (sender_id, receiver_id));
 
 CREATE POLICY "Create recommendations" ON recommendations
   FOR INSERT WITH CHECK (auth.uid() = sender_id);
+
+CREATE POLICY "Update own recommendations" ON recommendations
+  FOR UPDATE USING (auth.uid() = receiver_id)
+  WITH CHECK (auth.uid() = receiver_id);
 
 -- Comments: Sender/receiver can comment and view
 CREATE POLICY "Comment on recommendations" ON recommendation_comments
@@ -124,9 +128,17 @@ CREATE POLICY "View comments" ON recommendation_comments
     )
   );
 
--- Ratings: Receiver creates, both can read
+-- Ratings: Receiver creates/updates, both can read
 CREATE POLICY "Rate recommendations" ON ratings
   FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM recommendations
+      WHERE id = recommendation_id AND receiver_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Update ratings" ON ratings
+  FOR UPDATE USING (
     EXISTS (
       SELECT 1 FROM recommendations
       WHERE id = recommendation_id AND receiver_id = auth.uid()
@@ -157,25 +169,31 @@ CREATE OR REPLACE FUNCTION update_sender_points()
 RETURNS TRIGGER AS $$
 DECLARE
   sender UUID;
-  points_to_add INT := 0;
+  old_points INT := 0;
+  new_points INT := 0;
+  diff INT := 0;
 BEGIN
   -- Get the sender of the recommendation
   SELECT sender_id INTO sender
   FROM recommendations
   WHERE id = NEW.recommendation_id;
 
-  -- Calculate points: +1 for 4 stars, +2 for 5 stars
-  IF NEW.rating >= 4 THEN
-    points_to_add := 1;
-  END IF;
-  IF NEW.rating = 5 THEN
-    points_to_add := 2;
+  -- Calculate new points: +1 for 4 stars, +2 for 5 stars
+  IF NEW.rating >= 4 THEN new_points := 1; END IF;
+  IF NEW.rating = 5 THEN new_points := 2; END IF;
+
+  -- If update, calculate old points to get the diff
+  IF (TG_OP = 'UPDATE') THEN
+    IF OLD.rating >= 4 THEN old_points := 1; END IF;
+    IF OLD.rating = 5 THEN old_points := 2; END IF;
   END IF;
 
+  diff := new_points - old_points;
+
   -- Update sender's points
-  IF points_to_add > 0 THEN
+  IF diff <> 0 THEN
     UPDATE profiles
-    SET points = points + points_to_add
+    SET points = points + diff
     WHERE user_id = sender;
   END IF;
 
@@ -184,9 +202,9 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create trigger for points update
-DROP TRIGGER IF EXISTS on_rating_insert ON ratings;
-CREATE TRIGGER on_rating_insert
-  AFTER INSERT ON ratings
+DROP TRIGGER IF EXISTS on_rating_changes ON ratings;
+CREATE TRIGGER on_rating_changes
+  AFTER INSERT OR UPDATE ON ratings
   FOR EACH ROW
   EXECUTE FUNCTION update_sender_points();
 

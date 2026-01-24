@@ -55,13 +55,31 @@ export default function RootLayout() {
         );
 
         // Check initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            if (session?.user) {
-                fetchProfile();
+        const initSession = async () => {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) {
+                    if (error.message.includes("refresh_token_not_found") || error.message.includes("Refresh Token Not Found")) {
+                        console.warn("Invalid refresh token found, signing out...");
+                        await supabase.auth.signOut();
+                        setSession(null);
+                    } else {
+                        console.error("Initial session error:", error);
+                    }
+                } else {
+                    setSession(session);
+                    if (session?.user) {
+                        await fetchProfile();
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to get initial session:", err);
+            } finally {
+                setIsReady(true);
             }
-            setIsReady(true);
-        });
+        };
+
+        initSession();
 
         // Deep linking handler
         const handleDeepLink = async (url: string | null) => {
