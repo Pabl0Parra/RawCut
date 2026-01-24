@@ -25,19 +25,19 @@ type InputState = "default" | "focused" | "error";
  * Props for AuthFormField component
  */
 export interface AuthFormFieldProps<T extends FieldValues> {
-    control: Control<T>;
-    name: Path<T>;
-    label: string;
-    placeholder: string;
-    error?: string;
-    secureTextEntry?: boolean;
-    keyboardType?: TextInputProps["keyboardType"];
-    autoCapitalize?: TextInputProps["autoCapitalize"];
-    autoCorrect?: boolean;
-    maxLength?: number;
-    returnKeyType?: TextInputProps["returnKeyType"];
-    onSubmitEditing?: () => void;
-    testID?: string;
+    readonly control: Control<T>;
+    readonly name: Path<T>;
+    readonly label: string;
+    readonly placeholder: string;
+    readonly error?: string;
+    readonly secureTextEntry?: boolean;
+    readonly keyboardType?: TextInputProps["keyboardType"];
+    readonly autoCapitalize?: TextInputProps["autoCapitalize"];
+    readonly autoCorrect?: boolean;
+    readonly maxLength?: number;
+    readonly returnKeyType?: TextInputProps["returnKeyType"];
+    readonly onSubmitEditing?: () => void;
+    readonly testID?: string;
 }
 
 /**
@@ -79,7 +79,7 @@ export function AuthFormField<T extends FieldValues>({
     returnKeyType = "next",
     onSubmitEditing,
     testID,
-}: AuthFormFieldProps<T>): React.JSX.Element {
+}: Readonly<AuthFormFieldProps<T>>): React.JSX.Element {
     const [showPassword, setShowPassword] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
 
@@ -110,8 +110,26 @@ export function AuthFormField<T extends FieldValues>({
     );
 
     // Determine current input state for styling
-    const inputState: InputState = error ? "error" : isFocused ? "focused" : "default";
+    let inputState: InputState = "default";
+    if (error) {
+        inputState = "error";
+    } else if (isFocused) {
+        inputState = "focused";
+    }
+
     const borderColor = getBorderColor(inputState);
+
+    // Determine auto-complete and text-content types
+    let autoComplete: any = "off";
+    let textContentType: any = "none";
+
+    if (secureTextEntry) {
+        autoComplete = "password";
+        textContentType = "password";
+    } else if (keyboardType === "email-address") {
+        autoComplete = "email";
+        textContentType = "emailAddress";
+    }
 
     return (
         <View style={styles.inputGroup}>
@@ -147,20 +165,8 @@ export function AuthFormField<T extends FieldValues>({
                                 disabled: false,
                             }}
                             testID={testID ?? `input-${String(name)}`}
-                            autoComplete={
-                                secureTextEntry
-                                    ? "password"
-                                    : keyboardType === "email-address"
-                                        ? "email"
-                                        : "off"
-                            }
-                            textContentType={
-                                secureTextEntry
-                                    ? "password"
-                                    : keyboardType === "email-address"
-                                        ? "emailAddress"
-                                        : "none"
-                            }
+                            autoComplete={autoComplete}
+                            textContentType={textContentType}
                         />
                     )}
                 />
