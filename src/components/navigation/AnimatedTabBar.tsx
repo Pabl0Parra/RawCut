@@ -16,6 +16,10 @@ import Animated, {
 import Svg, { Path } from 'react-native-svg';
 import { Colors } from '../../constants/Colors';
 
+// Constants
+const TAB_BAR_PADDING_BOTTOM = 8;
+const ICON_BOTTOM_PADDING = 4;
+
 // Types
 interface TabLayout {
     readonly x: number;
@@ -180,8 +184,11 @@ export default function AnimatedTabBar({
         transform: [{ translateX: withTiming(xOffset.value, { duration: 250 }) }],
     }));
 
+    // Calculate safe bottom padding (ensure minimum padding even on devices without notch)
+    const safeBottomPadding = Math.max(insets.bottom, TAB_BAR_PADDING_BOTTOM);
+
     return (
-        <View style={[styles.container]}>
+        <View style={[styles.container, { paddingBottom: safeBottomPadding }]}>
             {/* Animated curved background - wrapped in Animated.View */}
             <Animated.View style={[styles.curvedBackground, animatedBackgroundStyle]}>
                 <Svg
@@ -249,7 +256,7 @@ export default function AnimatedTabBar({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: Colors.metalGray,
-        paddingBottom: 4
+        // paddingBottom is now applied dynamically with safe area insets
     },
     curvedBackground: {
         position: 'absolute',
@@ -258,6 +265,7 @@ const styles = StyleSheet.create({
     tabsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-evenly',
+        paddingBottom: ICON_BOTTOM_PADDING,
     },
     tabItem: {
         alignItems: 'center',

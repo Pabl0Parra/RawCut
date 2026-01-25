@@ -222,6 +222,9 @@ export const sendRecommendation = async (
 
         if (error) {
             console.error("Supabase insert error:", error);
+            if (error.code === "23503") {
+                console.warn("Recommendation failure: Foreign Key violation. Profiles entry might be missing.");
+            }
             return { success: false, error: error.message };
         }
 

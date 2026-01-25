@@ -164,7 +164,47 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (data) {
             set({ profile: data });
         } else {
-            console.log("Store: No profile data found");
+            console.log("Store: No profile data found. Attempting to recover/create via RPC...");
+
+            // If profile is missing (trigger failed or record deleted), attempt to create it
+            // using a SECURITY DEFINER RPC function that bypasses RLS timing issues.
+            const metadata = user.user_metadata || {};
+            console.log("Store: User metadata for recovery:", JSON.stringify(metadata));
+
+            const fallbackUsername = metadata.username ||
+                (metadata.full_name || metadata.display_name)?.slice(0, 20) ||
+                `user_${user.id.substring(0, 8)}`;
+
+            const fallbackDisplayName = metadata.full_name ||
+                metadata.display_name ||
+                metadata.username ||
+                null;
+
+            console.log("Store: Calling recover_user_profile RPC with username:", fallbackUsername);
+
+            const { data: rpcData, error: recoveryError } = await supabase.rpc(
+                "recover_user_profile",
+                {
+                    p_user_id: user.id,
+                    p_username: fallbackUsername,
+                    p_display_name: fallbackDisplayName,
+                }
+            );
+
+            if (recoveryError) {
+                console.error("Store: Failed to recover profile via RPC:", JSON.stringify(recoveryError));
+                return;
+            }
+
+            // RPC returns an array, get the first item
+            const recoveredProfile = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+
+            if (recoveredProfile) {
+                console.log("Store: Profile successfully recovered:", JSON.stringify(recoveredProfile));
+                set({ profile: recoveredProfile });
+            } else {
+                console.error("Store: Profile recovery RPC returned no data.");
+            }
         }
     },
 

@@ -241,6 +241,35 @@ CREATE TRIGGER on_auth_user_created
 ALTER PUBLICATION supabase_realtime ADD TABLE recommendation_comments;
 ALTER PUBLICATION supabase_realtime ADD TABLE recommendations;
 ALTER PUBLICATION supabase_realtime ADD TABLE ratings;
+
+-- RPC Function to recover/create missing profile (SECURITY DEFINER bypasses RLS)
+CREATE OR REPLACE FUNCTION recover_user_profile(
+  p_user_id UUID,
+  p_username TEXT,
+  p_display_name TEXT
+)
+RETURNS TABLE (
+  user_id UUID,
+  username VARCHAR(20),
+  display_name TEXT,
+  avatar_url TEXT,
+  points INT,
+  created_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  -- Insert if not exists, return existing if it does
+  INSERT INTO public.profiles (user_id, username, display_name)
+  VALUES (p_user_id, p_username, p_display_name)
+  ON CONFLICT (user_id) DO NOTHING;
+
+  -- Return the profile (either newly created or existing)
+  RETURN QUERY
+  SELECT p.user_id, p.username, p.display_name, p.avatar_url, p.points, p.created_at
+  FROM public.profiles p
+  WHERE p.user_id = p_user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Function to get email by username (used for login)
 CREATE OR REPLACE FUNCTION get_email_by_username(p_username TEXT)
 RETURNS TABLE (email TEXT) AS $$
