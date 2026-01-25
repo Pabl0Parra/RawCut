@@ -5,9 +5,9 @@ import {
     Modal,
     TouchableOpacity,
     TextInput,
-    FlatList,
     ActivityIndicator,
     KeyboardAvoidingView,
+    ScrollView,
     Platform,
     StyleSheet,
     Alert,
@@ -237,13 +237,34 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         if (users.length > 0) {
             return (
                 <View style={styles.searchResults}>
-                    <FlatList
-                        data={users}
-                        keyExtractor={(item) => item.user_id}
-                        keyboardShouldPersistTaps="handled"
-                        renderItem={renderUserItem}
-                        ListEmptyComponent={renderEmptyUserList}
-                    />
+                    {users.map((user) => (
+                        <TouchableOpacity
+                            key={user.user_id}
+                            style={[
+                                styles.searchResultItem,
+                                selectedUser?.user_id === user.user_id && styles.searchResultSelected,
+                            ]}
+                            onPress={() => handleSelectUser(user)}
+                        >
+                            <View style={styles.userItemContent}>
+                                <View>
+                                    {!!user.display_name && (
+                                        <Text style={styles.searchResultText}>
+                                            {user.display_name}
+                                        </Text>
+                                    )}
+                                    <Text style={styles.usernameText}>@{user.username}</Text>
+                                </View>
+                                {selectedUser?.user_id === user.user_id && (
+                                    <Ionicons
+                                        name="checkmark-circle"
+                                        size={20}
+                                        color={Colors.bloodRed}
+                                    />
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    ))}
                 </View>
             );
         }
@@ -273,111 +294,117 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.modalContainer}
             >
-                {/* Header */}
-                <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Recomendar</Text>
-                    <TouchableOpacity onPress={onClose}>
-                        <Text style={styles.closeButtonText}>✕</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Content Preview */}
-                <View style={styles.previewContainer}>
-                    {!!posterUrl && (
-                        <Image
-                            source={{ uri: posterUrl }}
-                            style={styles.previewImage}
-                        />
-                    )}
-                    <View style={styles.previewInfo}>
-                        <Text style={styles.previewTitle}>{contentTitle}</Text>
-                        <Text style={styles.previewYear}>{contentYear}</Text>
-                    </View>
-                </View>
-
-                {/* User Search (if enabled) */}
-                {enableSearch && (
-                    <>
-                        <Text style={styles.inputLabel}>Buscar usuario</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Escribe un nombre de usuario..."
-                            placeholderTextColor="#71717a"
-                            value={searchQuery}
-                            onChangeText={handleSearchUsers}
-                            onFocus={() => updateState({ showUserList: true })}
-                        />
-                    </>
-                )}
-
-                {/* User Selection Label */}
-                {!enableSearch && (
-                    <Text style={styles.inputLabel}>Seleccionar usuario</Text>
-                )}
-
-                {/* User Dropdown */}
-                <TouchableOpacity
-                    style={styles.dropdownButton}
-                    onPress={handleToggleUserList}
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={styles.scrollContent}
                 >
-                    <Text style={styles.dropdownButtonText}>
-                        {selectedUserDisplay}
-                    </Text>
-                    <Ionicons
-                        name={showUserList ? "chevron-up" : "chevron-down"}
-                        size={20}
-                        color={Colors.metalSilver}
-                    />
-                </TouchableOpacity>
-
-                {/* User List */}
-                <View style={styles.userListContainer}>{renderUserList()}</View>
-
-                {/* Selected User Badge */}
-                {!!selectedUser && (
-                    <View style={styles.selectedUserContainer}>
-                        <Text style={styles.selectedUserText}>
-                            Para: @{selectedUser.username}
-                        </Text>
-                        <TouchableOpacity onPress={handleClearSelectedUser}>
-                            <Text style={styles.removeUserText}>✕</Text>
+                    {/* Header */}
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Recomendar</Text>
+                        <TouchableOpacity onPress={onClose}>
+                            <Text style={styles.closeButtonText}>✕</Text>
                         </TouchableOpacity>
                     </View>
-                )}
 
-                {/* Message Input */}
-                <View style={styles.messageContainer}>
-                    <TextInput
-                        style={[styles.input, styles.multilineInput]}
-                        placeholder="¿Por qué recomiendas esto?"
-                        placeholderTextColor="#71717a"
-                        value={message}
-                        onChangeText={(text) => updateState({ message: text })}
-                        maxLength={MAX_MESSAGE_LENGTH}
-                        multiline
-                        numberOfLines={3}
-                    />
-                    <Text style={styles.charCount}>
-                        {message.length}/{MAX_MESSAGE_LENGTH}
-                    </Text>
-                </View>
-
-                {/* Send Button */}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                        style={[styles.sendButton, !canSend && styles.disabledButton]}
-                        onPress={handleSendRecommendation}
-                        disabled={!canSend}
-                    >
-                        {isSending ? (
-                            <ActivityIndicator color="#0a0a0a" />
-                        ) : (
-                            <Text style={styles.sendButtonText}>
-                                Enviar Recomendación
-                            </Text>
+                    {/* Content Preview */}
+                    <View style={styles.previewContainer}>
+                        {!!posterUrl && (
+                            <Image
+                                source={{ uri: posterUrl }}
+                                style={styles.previewImage}
+                            />
                         )}
+                        <View style={styles.previewInfo}>
+                            <Text style={styles.previewTitle}>{contentTitle}</Text>
+                            <Text style={styles.previewYear}>{contentYear}</Text>
+                        </View>
+                    </View>
+
+                    {/* User Search (if enabled) */}
+                    {enableSearch && (
+                        <>
+                            <Text style={styles.inputLabel}>Buscar usuario</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Escribe un nombre de usuario..."
+                                placeholderTextColor="#71717a"
+                                value={searchQuery}
+                                onChangeText={handleSearchUsers}
+                                onFocus={() => updateState({ showUserList: true })}
+                            />
+                        </>
+                    )}
+
+                    {/* User Selection Label */}
+                    {!enableSearch && (
+                        <Text style={styles.inputLabel}>Seleccionar usuario</Text>
+                    )}
+
+                    {/* User Dropdown */}
+                    <TouchableOpacity
+                        style={styles.dropdownButton}
+                        onPress={handleToggleUserList}
+                    >
+                        <Text style={styles.dropdownButtonText}>
+                            {selectedUserDisplay}
+                        </Text>
+                        <Ionicons
+                            name={showUserList ? "chevron-up" : "chevron-down"}
+                            size={20}
+                            color={Colors.metalSilver}
+                        />
                     </TouchableOpacity>
-                </View>
+
+                    {/* User List */}
+                    <View style={styles.userListContainer}>{renderUserList()}</View>
+
+                    {/* Selected User Badge */}
+                    {!!selectedUser && (
+                        <View style={styles.selectedUserContainer}>
+                            <Text style={styles.selectedUserText}>
+                                Para: @{selectedUser.username}
+                            </Text>
+                            <TouchableOpacity onPress={handleClearSelectedUser}>
+                                <Text style={styles.removeUserText}>✕</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    {/* Message Input */}
+                    <View style={styles.messageContainer}>
+                        <TextInput
+                            style={[styles.input, styles.multilineInput]}
+                            placeholder="¿Por qué recomiendas esto?"
+                            placeholderTextColor="#71717a"
+                            value={message}
+                            onChangeText={(text) => updateState({ message: text })}
+                            maxLength={MAX_MESSAGE_LENGTH}
+                            multiline
+                            numberOfLines={3}
+                        />
+                        <Text style={styles.charCount}>
+                            {message.length}/{MAX_MESSAGE_LENGTH}
+                        </Text>
+                    </View>
+
+                    {/* Send Button */}
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={[styles.sendButton, !canSend && styles.disabledButton]}
+                            onPress={handleSendRecommendation}
+                            disabled={!canSend}
+                        >
+                            {isSending ? (
+                                <ActivityIndicator color="#0a0a0a" />
+                            ) : (
+                                <Text style={styles.sendButtonText}>
+                                    Enviar Recomendación
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
             </KeyboardAvoidingView>
         </Modal>
     );
@@ -388,6 +415,9 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.metalBlack,
         padding: 16,
+    } as ViewStyle,
+    scrollContent: {
+        flexGrow: 1,
     } as ViewStyle,
     modalHeader: {
         flexDirection: "row",

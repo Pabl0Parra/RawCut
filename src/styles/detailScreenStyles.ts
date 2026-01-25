@@ -167,7 +167,7 @@ export const detailScreenStyles = StyleSheet.create({
 
     // Spacing
     bottomSpacer: {
-        height: 40,
+        height: 8,
     } as ViewStyle,
 });
 
