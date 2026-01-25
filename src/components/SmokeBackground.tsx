@@ -13,7 +13,7 @@ import { Image } from 'expo-image';
 import * as Crypto from 'expo-crypto';
 
 const { width, height } = Dimensions.get('window');
-const SMOKE_IMAGE = require('../../assets/smoke.png');
+const SMOKE_IMAGE = require('../../assets/smoke.jpg');
 
 const getSecureRandom = () => {
     const array = new Uint32Array(1);

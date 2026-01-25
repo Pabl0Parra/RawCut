@@ -7,7 +7,7 @@
     "icon": "./assets/corto-crudo-logo.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
-    "scheme": "CortoCrudo",
+    "scheme": "cortocrudo",
     "splash": {
       "image": "./assets/corto-crudo-logo.png",
       "resizeMode": "contain",
