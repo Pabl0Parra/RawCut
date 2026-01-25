@@ -206,18 +206,9 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
                     .getPublicUrl(filePath);
 
                 const publicUrl = urlData?.publicUrl;
-                console.log("Avatar public URL generated:", publicUrl);
-
                 // Verify auth state before update
                 const { data, error: authError } = await supabase.auth.getUser();
                 const currentUser = data?.user;
-
-                console.log("Debug Auth Check:", {
-                    targetUserId: userId,
-                    sessionUserId: currentUser?.id,
-                    isMatch: userId === currentUser?.id,
-                    authError
-                });
 
                 if (currentUser?.id !== userId) {
                     console.error("Auth mismatch: Cannot update profile for different user");
@@ -242,7 +233,6 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
                 }
 
                 const rowCount = updatedRows?.length ?? 0;
-                console.log(`Profile update finished. Rows updated: ${rowCount}`);
 
                 if (rowCount === 0) {
                     console.error("WARNING: Profile update affected 0 rows. Possible RLS issue or user_id mismatch.");

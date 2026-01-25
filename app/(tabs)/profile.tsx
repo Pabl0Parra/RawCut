@@ -74,7 +74,6 @@ function AvatarSection({
     uploadProgress,
     onPress,
 }: Readonly<AvatarSectionProps>): React.JSX.Element {
-    console.log("AvatarSection rendering. Profile username:", username, "Avatar URL:", avatarUrl);
     const initials = getInitials(username, email);
 
     return (
@@ -111,14 +110,14 @@ function AvatarSection({
                         </Text>
                     </View>
                 )}
-
-                {/* Camera badge */}
-                {!isUploading && (
-                    <View style={styles.cameraBadge}>
-                        <Ionicons name="camera" size={16} color={Colors.white} />
-                    </View>
-                )}
             </View>
+
+            {/* Camera badge */}
+            {!isUploading && (
+                <View style={styles.cameraBadge}>
+                    <Ionicons name="camera" size={16} color={Colors.white} />
+                </View>
+            )}
         </TouchableOpacity>
     );
 }
@@ -662,6 +661,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     avatarContainer: {
         marginBottom: 16,
+        position: "relative",
     } as ViewStyle,
     avatarWrapper: {
         width: 120,
@@ -713,6 +713,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         borderWidth: 2,
         borderColor: Colors.metalBlack,
+        zIndex: 10,
+        elevation: 5,
     } as ViewStyle,
     displayName: {
         fontSize: 24,

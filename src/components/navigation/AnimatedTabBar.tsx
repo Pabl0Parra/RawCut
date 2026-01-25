@@ -181,7 +181,7 @@ export default function AnimatedTabBar({
     }));
 
     return (
-        <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+        <View style={[styles.container]}>
             {/* Animated curved background - wrapped in Animated.View */}
             <Animated.View style={[styles.curvedBackground, animatedBackgroundStyle]}>
                 <Svg
@@ -249,6 +249,7 @@ export default function AnimatedTabBar({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: Colors.metalGray,
+        paddingBottom: 4
     },
     curvedBackground: {
         position: 'absolute',
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
     tabItem: {
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingTop: 8,
+        paddingTop: 4,
         minWidth: 60,
     },
     tabItemInner: {

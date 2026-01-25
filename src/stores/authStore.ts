@@ -87,7 +87,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 .from("profiles")
                 .select("username")
                 .eq("username", username)
-                .single();
+                .maybeSingle();
 
             if (existingUser) {
                 set({ isLoading: false, error: "Usuario ya existe" });
@@ -151,19 +151,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { user } = get();
         if (!user) return;
 
-        console.log("Store: Fetching profile for user:", user.id);
         const { data, error } = await supabase
             .from("profiles")
             .select("*")
             .eq("user_id", user.id)
-            .single();
+            .maybeSingle();
 
         if (error) {
             console.error("Store: Error fetching profile:", error);
         }
 
         if (data) {
-            console.log("Store: Fetched profile data. Avatar URL:", data.avatar_url);
             set({ profile: data });
         } else {
             console.log("Store: No profile data found");
@@ -197,7 +195,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 .select("username")
                 .eq("username", newUsername)
                 .neq("user_id", user.id)
-                .single();
+                .maybeSingle();
 
             if (existingUser) {
                 set({ isLoading: false, error: "Este nombre de usuario ya está en uso" });
