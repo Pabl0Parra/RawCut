@@ -21,6 +21,8 @@ interface RecommendationState {
     // Actions
     fetchRecommendations: () => Promise<void>;
     addComment: (recommendationId: string, text: string) => Promise<boolean>;
+    deleteComment: (recommendationId: string, commentId: string) => Promise<boolean>;
+    deleteRecommendation: (recommendationId: string) => Promise<boolean>;
     addRating: (recommendationId: string, rating: number) => Promise<boolean>;
     markAllAsRead: () => Promise<void>;
     markCommentsAsRead: (recommendationId: string) => Promise<void>;
@@ -45,6 +47,18 @@ const addCommentToRecs = (
     return recs.map((rec) =>
         rec.id === recommendationId
             ? { ...rec, comments: [...rec.comments, newComment] }
+            : rec
+    );
+};
+
+const removeCommentFromRecs = (
+    recs: EnrichedRecommendation[],
+    recommendationId: string,
+    commentId: string
+): EnrichedRecommendation[] => {
+    return recs.map((rec) =>
+        rec.id === recommendationId
+            ? { ...rec, comments: rec.comments.filter((c) => c.id !== commentId) }
             : rec
     );
 };
@@ -176,6 +190,48 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         }
     },
 
+    deleteComment: async (recommendationId: string, commentId: string) => {
+        try {
+            const { error } = await supabase
+                .from("recommendation_comments")
+                .delete()
+                .eq("id", commentId);
+
+            if (error) throw error;
+
+            set((state) => ({
+                sent: removeCommentFromRecs(state.sent, recommendationId, commentId),
+                received: removeCommentFromRecs(state.received, recommendationId, commentId),
+            }));
+
+            return true;
+        } catch (err) {
+            console.error("Error deleting comment:", err);
+            return false;
+        }
+    },
+
+    deleteRecommendation: async (recommendationId: string) => {
+        try {
+            const { error } = await supabase
+                .from("recommendations")
+                .delete()
+                .eq("id", recommendationId);
+
+            if (error) throw error;
+
+            set((state) => ({
+                sent: state.sent.filter((r) => r.id !== recommendationId),
+                received: state.received.filter((r) => r.id !== recommendationId),
+            }));
+
+            return true;
+        } catch (err) {
+            console.error("Error deleting recommendation:", err);
+            return false;
+        }
+    },
+
     addRating: async (recommendationId: string, rating: number) => {
         const user = useAuthStore.getState().user;
         if (!user) return false;
@@ -282,10 +338,12 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 },
                 (payload) => {
                     const newComment = payload.new as RecommendationComment;
-                    set((state) => ({
-                        sent: addCommentToRecs(state.sent, newComment.recommendation_id, newComment),
-                        received: addCommentToRecs(state.received, newComment.recommendation_id, newComment),
-                    }));
+                    if (newComment.user_id !== user.id) {
+                        set((state) => ({
+                            sent: addCommentToRecs(state.sent, newComment.recommendation_id, newComment),
+                            received: addCommentToRecs(state.received, newComment.recommendation_id, newComment),
+                        }));
+                    }
                 }
             )
             .subscribe();

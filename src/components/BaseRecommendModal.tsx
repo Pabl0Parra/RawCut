@@ -185,42 +185,6 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         }
     };
 
-    const renderUserItem = ({ item }: { item: Profile }): React.JSX.Element => {
-        const isSelected = selectedUser?.user_id === item.user_id;
-
-        return (
-            <TouchableOpacity
-                style={[
-                    styles.searchResultItem,
-                    isSelected && styles.searchResultSelected,
-                ]}
-                onPress={() => handleSelectUser(item)}
-            >
-                <View style={styles.userItemContent}>
-                    <View>
-                        {!!item.display_name && (
-                            <Text style={styles.searchResultText}>
-                                {item.display_name}
-                            </Text>
-                        )}
-                        <Text style={styles.usernameText}>@{item.username}</Text>
-                    </View>
-                    {isSelected && (
-                        <Ionicons
-                            name="checkmark-circle"
-                            size={20}
-                            color={Colors.bloodRed}
-                        />
-                    )}
-                </View>
-            </TouchableOpacity>
-        );
-    };
-
-    const renderEmptyUserList = (): React.JSX.Element => (
-        <Text style={styles.emptyListText}>No se encontraron usuarios</Text>
-    );
-
     const renderUserList = (): React.JSX.Element | null => {
         if (!showUserList) return null;
 

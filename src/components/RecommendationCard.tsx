@@ -13,6 +13,7 @@ import {
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { Alert } from "react-native";
 
 import type {
     RecommendationWithRelations,
@@ -72,6 +73,8 @@ interface RecommendationCardProps {
     onAddComment: (recommendationId: string, text: string) => Promise<boolean>;
     onAddRating: (recommendationId: string, rating: number) => Promise<void>;
     onMarkCommentsRead: (recommendationId: string) => void;
+    onDeleteComment: (recommendationId: string, commentId: string) => Promise<boolean>;
+    onDeleteRecommendation: (recommendationId: string) => Promise<boolean>;
 }
 
 const RecommendationCard: React.FC<RecommendationCardProps> = ({
@@ -84,6 +87,8 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     onAddComment,
     onAddRating,
     onMarkCommentsRead,
+    onDeleteComment,
+    onDeleteRecommendation,
 }) => {
     const [commentText, setCommentText] = useState("");
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -134,6 +139,21 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         } else {
             router.push(`/tv/${tmdb_id}`);
         }
+    };
+
+    const handleDeleteRecommendation = () => {
+        Alert.alert(
+            "Eliminar Recomendación",
+            "¿Estás seguro de que quieres eliminar esta recomendación? Esta acción no se puede deshacer.",
+            [
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Eliminar",
+                    style: "destructive",
+                    onPress: () => onDeleteRecommendation(item.id),
+                },
+            ]
+        );
     };
 
     const numericRating = rating ? rating.rating : 0;
@@ -193,6 +213,15 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         )}
                     </View>
                 </View>
+
+                {/* Delete Button (Header Top Right) */}
+                <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={handleDeleteRecommendation}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                    <Ionicons name="trash-outline" size={20} color={Colors.metalSilver} />
+                </TouchableOpacity>
             </TouchableOpacity>
 
             {/* Expanded Content */}
@@ -225,9 +254,19 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
                                     return (
                                         <View key={comment.id} style={styles.commentItem}>
-                                            <Text style={styles.commentUser}>
-                                                {username}:
-                                            </Text>
+                                            <View style={styles.commentHeader}>
+                                                <Text style={styles.commentUser}>
+                                                    {username}:
+                                                </Text>
+                                                {(isCurrentUser || isReceived) && (
+                                                    <TouchableOpacity
+                                                        onPress={() => onDeleteComment(item.id, comment.id)}
+                                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                                    >
+                                                        <Ionicons name="trash-outline" size={14} color={Colors.metalSilver} />
+                                                    </TouchableOpacity>
+                                                )}
+                                            </View>
                                             <Text style={styles.commentText}>{comment.text}</Text>
                                         </View>
                                     );
@@ -346,6 +385,10 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "bold",
     } as TextStyle,
+    deleteButton: {
+        marginLeft: 8,
+        alignSelf: "flex-start",
+    } as ViewStyle,
     expandedContent: {
         padding: 12,
         borderTopWidth: 1,
@@ -370,6 +413,12 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255,255,255,0.05)",
         padding: 8,
         borderRadius: 6,
+    } as ViewStyle,
+    commentHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 2,
     } as ViewStyle,
     commentUser: {
         color: Colors.bloodRed,

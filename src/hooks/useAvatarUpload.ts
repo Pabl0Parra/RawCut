@@ -207,7 +207,7 @@ export function useAvatarUpload(): UseAvatarUploadReturn {
 
                 const publicUrl = urlData?.publicUrl;
                 // Verify auth state before update
-                const { data, error: authError } = await supabase.auth.getUser();
+                const { data } = await supabase.auth.getUser();
                 const currentUser = data?.user;
 
                 if (currentUser?.id !== userId) {

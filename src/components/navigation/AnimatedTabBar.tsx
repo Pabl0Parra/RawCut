@@ -10,10 +10,9 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
     useAnimatedStyle,
-    withTiming,
+    withSpring,
     useSharedValue,
     useAnimatedReaction,
-    runOnJS,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { Colors } from '../../constants/Colors';
@@ -21,7 +20,7 @@ import { Colors } from '../../constants/Colors';
 // Constants
 const TAB_BAR_PADDING_BOTTOM = 8;
 const ICON_BOTTOM_PADDING = 4;
-const ANIMATION_DURATION = 150;
+const ANIMATION_DURATION = 400;
 
 // Timing config - reuse same object to avoid recreation
 const TIMING_CONFIG = { duration: ANIMATION_DURATION } as const;
@@ -78,19 +77,19 @@ const TabBarItem = memo(function TabBarItem({
     // Circle scale animation (appears when active)
     const animatedCircleStyle = useAnimatedStyle(() => ({
         transform: [
-            { scale: withTiming(active ? 1 : 0, TIMING_CONFIG) },
+            { scale: withSpring(active ? 1 : 0, TIMING_CONFIG) },
         ],
     }), [active]);
 
     // Icon opacity animation
     const animatedIconStyle = useAnimatedStyle(() => ({
-        opacity: withTiming(active ? 1 : 0.5, TIMING_CONFIG),
+        opacity: withSpring(active ? 1 : 0.5, TIMING_CONFIG),
     }), [active]);
 
     // Vertical position animation (moves up when active)
     const animatedContainerStyle = useAnimatedStyle(() => ({
         transform: [
-            { translateY: withTiming(active ? -12 : 0, TIMING_CONFIG) },
+            { translateY: withSpring(active ? -12 : 0, TIMING_CONFIG) },
         ],
     }), [active]);
 
@@ -200,7 +199,7 @@ export default function AnimatedTabBar({
 
     // Animated style for sliding SVG background
     const animatedBackgroundStyle = useAnimatedStyle(() => ({
-        transform: [{ translateX: withTiming(xOffset.value, TIMING_CONFIG) }],
+        transform: [{ translateX: withSpring(xOffset.value, TIMING_CONFIG) }],
     }), []);
 
     // Calculate safe bottom padding

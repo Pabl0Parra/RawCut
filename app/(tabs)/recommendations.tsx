@@ -45,6 +45,8 @@ export default function RecommendationsScreen(): React.JSX.Element {
         addRating,
         markAllAsRead,
         markCommentsAsRead,
+        deleteComment,
+        deleteRecommendation,
     } = useRecommendationStore();
 
     const [state, setState] = useState<RecommendationsScreenState>(INITIAL_RECOMMENDATIONS_STATE);
@@ -121,6 +123,19 @@ export default function RecommendationsScreen(): React.JSX.Element {
         markCommentsAsRead(recommendationId);
     };
 
+    const handleDeleteComment = async (
+        recommendationId: string,
+        commentId: string
+    ): Promise<boolean> => {
+        return await deleteComment(recommendationId, commentId);
+    };
+
+    const handleDeleteRecommendation = async (
+        recommendationId: string
+    ): Promise<boolean> => {
+        return await deleteRecommendation(recommendationId);
+    };
+
     const handleTabChange = (tab: RecommendationTab): void => {
         updateState({ activeTab: tab });
     };
@@ -163,6 +178,8 @@ export default function RecommendationsScreen(): React.JSX.Element {
             onAddComment={handleAddComment}
             onAddRating={handleAddRating}
             onMarkCommentsRead={handleMarkCommentsRead}
+            onDeleteComment={handleDeleteComment}
+            onDeleteRecommendation={handleDeleteRecommendation}
         />
     );
 
