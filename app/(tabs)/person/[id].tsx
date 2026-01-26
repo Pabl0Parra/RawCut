@@ -13,10 +13,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
 
-import { getImageUrl, getPersonDetails, getPersonCredits, type Person, type Movie, type TVShow } from "../../src/lib/tmdb";
-import { Colors } from "../../src/constants/Colors";
-import { detailScreenStyles } from "../../src/styles/detailScreenStyles";
-import { ContentHorizontalList } from "../../src/components/ContentHorizontalList";
+import { getImageUrl, getPersonDetails, getPersonCredits, type Person, type Movie, type TVShow } from "../../../src/lib/tmdb";
+import { Colors } from "../../../src/constants/Colors";
+import { detailScreenStyles } from "../../../src/styles/detailScreenStyles";
+import { ContentHorizontalList } from "../../../src/components/ContentHorizontalList";
 
 export default function PersonDetailScreen(): JSX.Element {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -111,15 +111,18 @@ export default function PersonDetailScreen(): JSX.Element {
                     {person.known_for_department && (
                         <Text style={styles.department}>{person.known_for_department}</Text>
                     )}
+                    {person.place_of_birth && (
+                        <Text style={styles.country}>{person.place_of_birth}</Text>
+                    )}
                 </View>
 
-                <View style={detailScreenStyles.contentContainer}>
-                    {person.biography ? (
-                        <View style={detailScreenStyles.descriptionContainer}>
-                            <Text style={detailScreenStyles.descriptionTitle}>Biografía</Text>
-                            <Text style={detailScreenStyles.descriptionText}>{person.biography}</Text>
-                        </View>
-                    ) : null}
+                <View style={[detailScreenStyles.contentContainer, { marginTop: 0 }]}>
+                    <View style={detailScreenStyles.descriptionContainer}>
+                        <Text style={detailScreenStyles.descriptionTitle}>Biografía</Text>
+                        <Text style={detailScreenStyles.descriptionText}>
+                            {person.biography || "No hay biografía disponible para esta persona."}
+                        </Text>
+                    </View>
 
                     {credits.cast.length > 0 && (
                         <ContentHorizontalList
@@ -183,5 +186,11 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
         letterSpacing: 1,
         marginTop: 4,
+    } as TextStyle,
+    country: {
+        color: Colors.metalSilver,
+        fontSize: 12,
+        marginTop: 2,
+        opacity: 0.8,
     } as TextStyle,
 });

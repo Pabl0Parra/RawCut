@@ -108,6 +108,25 @@ export default function TabLayout() {
                     href: null,
                 }}
             />
+            <Tabs.Screen
+                name="person/[id]"
+                options={{
+                    href: null,
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: Colors.metalBlack,
+                    },
+                    headerTintColor: Colors.white,
+                    headerTitleStyle: {
+                        fontFamily: "BebasNeue_400Regular",
+                        fontSize: 28,
+                    },
+                    headerTitle: "CORTOCRUDO",
+                    headerTitleAlign: 'center',
+                    headerLeft: renderHeaderLeft,
+                    headerRight: renderHeaderRight,
+                }}
+            />
         </Tabs>
     );
 }

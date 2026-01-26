@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, useEffect } from 'react';
+import React, { useReducer, useCallback, useMemo, memo } from 'react';
 import {
     View,
     Text,
@@ -12,6 +12,8 @@ import Animated, {
     useAnimatedStyle,
     withTiming,
     useSharedValue,
+    useAnimatedReaction,
+    runOnJS,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { Colors } from '../../constants/Colors';
@@ -19,6 +21,10 @@ import { Colors } from '../../constants/Colors';
 // Constants
 const TAB_BAR_PADDING_BOTTOM = 8;
 const ICON_BOTTOM_PADDING = 4;
+const ANIMATION_DURATION = 150;
+
+// Timing config - reuse same object to avoid recreation
+const TIMING_CONFIG = { duration: ANIMATION_DURATION } as const;
 
 // Types
 interface TabLayout {
@@ -27,11 +33,11 @@ interface TabLayout {
 }
 
 type LayoutAction = {
-    type: 'ADD_LAYOUT';
-    payload: TabLayout;
+    readonly type: 'ADD_LAYOUT';
+    readonly payload: TabLayout;
 };
 
-interface TabBarComponentProps {
+interface TabBarItemProps {
     readonly active: boolean;
     readonly icon: (props: { color: string; focused: boolean }) => React.ReactNode;
     readonly label: string;
@@ -44,22 +50,23 @@ interface TabBarComponentProps {
 // Reducer for layout management
 function layoutReducer(state: TabLayout[], action: LayoutAction): TabLayout[] {
     if (action.type === 'ADD_LAYOUT') {
-        // Check if this index already exists
         const existingIndex = state.findIndex(item => item.index === action.payload.index);
         if (existingIndex !== -1) {
-            // Update existing
+            // Only update if x value actually changed
+            if (state[existingIndex].x === action.payload.x) {
+                return state;
+            }
             const newState = [...state];
             newState[existingIndex] = action.payload;
             return newState;
         }
-        // Add new
         return [...state, action.payload];
     }
     return state;
 }
 
-// Individual tab component with animations
-function TabBarItem({
+// Individual tab component with animations - MEMOIZED
+const TabBarItem = memo(function TabBarItem({
     active,
     icon,
     label,
@@ -67,25 +74,34 @@ function TabBarItem({
     onPress,
     onLongPress,
     badge,
-}: Readonly<TabBarComponentProps>) {
+}: TabBarItemProps) {
     // Circle scale animation (appears when active)
     const animatedCircleStyle = useAnimatedStyle(() => ({
         transform: [
-            { scale: withTiming(active ? 1 : 0, { duration: 250 }) },
+            { scale: withTiming(active ? 1 : 0, TIMING_CONFIG) },
         ],
-    }));
+    }), [active]);
 
     // Icon opacity animation
     const animatedIconStyle = useAnimatedStyle(() => ({
-        opacity: withTiming(active ? 1 : 0.5, { duration: 250 }),
-    }));
+        opacity: withTiming(active ? 1 : 0.5, TIMING_CONFIG),
+    }), [active]);
 
     // Vertical position animation (moves up when active)
     const animatedContainerStyle = useAnimatedStyle(() => ({
         transform: [
-            { translateY: withTiming(active ? -12 : 0, { duration: 250 }) },
+            { translateY: withTiming(active ? -12 : 0, TIMING_CONFIG) },
         ],
-    }));
+    }), [active]);
+
+    // Memoize icon render to avoid recreation
+    const renderedIcon = useMemo(() =>
+        icon({
+            color: active ? Colors.bloodRed : Colors.metalSilver,
+            focused: active,
+        }),
+        [icon, active]
+    );
 
     return (
         <Pressable
@@ -103,13 +119,10 @@ function TabBarItem({
 
                 {/* Icon */}
                 <Animated.View style={[styles.iconContainer, animatedIconStyle]}>
-                    {icon({
-                        color: active ? Colors.bloodRed : Colors.metalSilver,
-                        focused: active,
-                    })}
+                    {renderedIcon}
                 </Animated.View>
 
-                {/* Badge - placed outside iconContainer to avoid inheriting dimmed opacity when tab is inactive */}
+                {/* Badge */}
                 {badge !== undefined && (
                     <View style={styles.badge}>
                         <Text style={styles.badgeText}>{badge}</Text>
@@ -131,7 +144,7 @@ function TabBarItem({
             </Animated.Text>
         </Pressable>
     );
-}
+});
 
 // Main animated tab bar component
 export default function AnimatedTabBar({
@@ -142,21 +155,27 @@ export default function AnimatedTabBar({
     const insets = useSafeAreaInsets();
     const [layouts, dispatch] = useReducer(layoutReducer, []);
 
-    // Shared value for the x offset - this is what drives the animation
+    // Shared value for the x offset
     const xOffset = useSharedValue(0);
 
-    // Filter to only routes that have a tabBarIcon (these are the ones that render)
-    const visibleRoutes = state.routes.filter(route => {
-        const { options } = descriptors[route.key];
-        return options.tabBarIcon != null;
-    });
-
-    // Find the active index within visible routes only
-    const activeVisibleIndex = visibleRoutes.findIndex(
-        route => route.key === state.routes[state.index]?.key
+    // Memoize visible routes - only recalculate when routes or descriptors change
+    const visibleRoutes = useMemo(() =>
+        state.routes.filter(route => {
+            const { options } = descriptors[route.key];
+            return options.tabBarIcon != null;
+        }),
+        [state.routes, descriptors]
     );
 
-    // Handle layout measurements
+    // Memoize active index calculation
+    const activeVisibleIndex = useMemo(() =>
+        visibleRoutes.findIndex(
+            route => route.key === state.routes[state.index]?.key
+        ),
+        [visibleRoutes, state.routes, state.index]
+    );
+
+    // Handle layout measurements - stable callback
     const handleLayout = useCallback((event: LayoutChangeEvent, index: number) => {
         dispatch({
             type: 'ADD_LAYOUT',
@@ -164,87 +183,104 @@ export default function AnimatedTabBar({
         });
     }, []);
 
-    // Update xOffset when active tab or layouts change
-    // This runs on JS thread and updates the shared value
-    useEffect(() => {
-        // Just check if we have layouts, don't compare to routes length
-        if (layouts.length === 0) {
-            return;
-        }
-
-        const activeLayout = layouts.find(layout => layout.index === activeVisibleIndex);
-        if (!activeLayout) return;
-
-        const newOffset = activeLayout.x - 25;
-        xOffset.value = newOffset;
-    }, [activeVisibleIndex, layouts, xOffset]);
+    // Update xOffset using useAnimatedReaction for smoother updates
+    // This keeps the animation logic on the UI thread
+    useAnimatedReaction(
+        () => {
+            const activeLayout = layouts.find(layout => layout.index === activeVisibleIndex);
+            return activeLayout ? activeLayout.x - 25 : null;
+        },
+        (newOffset, previousOffset) => {
+            if (newOffset !== null && newOffset !== previousOffset) {
+                xOffset.value = newOffset;
+            }
+        },
+        [activeVisibleIndex, layouts]
+    );
 
     // Animated style for sliding SVG background
     const animatedBackgroundStyle = useAnimatedStyle(() => ({
-        transform: [{ translateX: withTiming(xOffset.value, { duration: 250 }) }],
-    }));
+        transform: [{ translateX: withTiming(xOffset.value, TIMING_CONFIG) }],
+    }), []);
 
-    // Calculate safe bottom padding (ensure minimum padding even on devices without notch)
+    // Calculate safe bottom padding
     const safeBottomPadding = Math.max(insets.bottom, TAB_BAR_PADDING_BOTTOM);
 
+    // Memoize container style
+    const containerStyle = useMemo(() =>
+        [styles.container, { paddingBottom: safeBottomPadding }],
+        [safeBottomPadding]
+    );
+
+    // Create memoized press handlers for each tab
+    const createPressHandler = useCallback((routeKey: string, routeName: string, isFocused: boolean) => () => {
+        const event = navigation.emit({
+            type: 'tabPress',
+            target: routeKey,
+            canPreventDefault: true,
+        });
+
+        if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(routeName);
+        }
+    }, [navigation]);
+
+    const createLongPressHandler = useCallback((routeKey: string) => () => {
+        navigation.emit({
+            type: 'tabLongPress',
+            target: routeKey,
+        });
+    }, [navigation]);
+
+    // Pre-compute tab data to avoid recalculations in render
+    const tabsData = useMemo(() =>
+        visibleRoutes.map((route, index) => {
+            const { options } = descriptors[route.key];
+            const isFocused = index === activeVisibleIndex;
+            const icon = options.tabBarIcon as
+                | ((props: { color: string; focused: boolean }) => React.ReactNode)
+                | undefined;
+
+            return {
+                key: route.key,
+                routeName: route.name,
+                isFocused,
+                icon,
+                label: options.title ?? route.name,
+                badge: options.tabBarBadge,
+                index,
+            };
+        }),
+        [visibleRoutes, descriptors, activeVisibleIndex]
+    );
+
     return (
-        <View style={[styles.container, { paddingBottom: safeBottomPadding }]}>
-            {/* Animated curved background - wrapped in Animated.View */}
+        <View style={containerStyle}>
+            {/* Animated curved background */}
             <Animated.View style={[styles.curvedBackground, animatedBackgroundStyle]}>
-                <Svg
-                    width={110}
-                    height={60}
-                    viewBox="0 0 110 60"
-                >
+                <Svg width={110} height={60} viewBox="0 0 110 60">
                     <Path
                         fill={Colors.black}
-                        d="M20 0H0c11.046 0 20 8.953 20 20v5c0 19.33 15.67 35 35 35s35-15.67 35-35v-5c0-11.045 8.954-20 20-20H20z"
+                        d="M20 0H0c11.046 0 20 9.49 20 21.2v5.3c0 20.49 15.67 37.1 35 37.1s35-16.61 35-37.1v-5.3c0-11.708 8.954-21.2 20-21.2H20z"
                     />
                 </Svg>
             </Animated.View>
 
             {/* Tab items */}
             <View style={styles.tabsContainer}>
-                {visibleRoutes.map((route, index) => {
-                    const { options } = descriptors[route.key];
-                    const isFocused = index === activeVisibleIndex;
-
-                    const onPress = () => {
-                        const event = navigation.emit({
-                            type: 'tabPress',
-                            target: route.key,
-                            canPreventDefault: true,
-                        });
-
-                        if (!isFocused && !event.defaultPrevented) {
-                            navigation.navigate(route.name);
-                        }
-                    };
-
-                    const onLongPress = () => {
-                        navigation.emit({
-                            type: 'tabLongPress',
-                            target: route.key,
-                        });
-                    };
-
-                    // Get the icon from options
-                    const icon = options.tabBarIcon as
-                        | ((props: { color: string; focused: boolean }) => React.ReactNode)
-                        | undefined;
-
-                    if (!icon) return null;
+                {tabsData.map((tab) => {
+                    if (!tab.icon) return null;
 
                     return (
                         <TabBarItem
-                            key={route.key}
-                            active={isFocused}
-                            icon={icon}
-                            label={options.title ?? route.name}
-                            onLayout={(e) => handleLayout(e, index)}
-                            onPress={onPress}
-                            onLongPress={onLongPress}
-                            badge={options.tabBarBadge}
+                            key={tab.key}
+                            active={tab.isFocused}
+                            icon={tab.icon}
+                            label={tab.label}
+                            onLayout={(e) => handleLayout(e, tab.index)}
+                            onPress={createPressHandler(tab.key, tab.routeName, tab.isFocused)}
+                            onLongPress={createLongPressHandler(tab.key)}
+                            badge={tab.badge}
                         />
                     );
                 })}
@@ -256,7 +292,6 @@ export default function AnimatedTabBar({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: Colors.metalGray,
-        // paddingBottom is now applied dynamically with safe area insets
     },
     curvedBackground: {
         position: 'absolute',

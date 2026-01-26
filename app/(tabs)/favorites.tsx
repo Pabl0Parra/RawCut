@@ -60,6 +60,7 @@ export default function FavoritesScreen() {
                 emptyTitle="No tienes favoritos aún"
                 emptySubtitle="Explora películas y series para añadir a tus favoritos"
                 emptyIcon="💔"
+                emptyAsset={require("../../assets/icons/broken-heart.png")}
                 onToggleFavorite={handleToggleFavorite}
                 onToggleWatchlist={handleToggleWatchlist}
                 onToggleWatched={handleToggleWatched}

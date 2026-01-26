@@ -15,6 +15,8 @@ import { Colors } from "../constants/Colors";
 import MovieCard from "./MovieCard";
 import type { EnrichedContentItem } from "../hooks/useEnrichedContent";
 
+import { Image } from "expo-image";
+
 interface ContentGridLayoutProps {
     readonly data: EnrichedContentItem[];
     readonly isLoading: boolean;
@@ -22,6 +24,7 @@ interface ContentGridLayoutProps {
     readonly emptyTitle: string;
     readonly emptySubtitle: string;
     readonly emptyIcon: string;
+    readonly emptyAsset?: any;
     readonly onToggleFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => void;
     readonly onToggleWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => void;
     readonly onToggleWatched?: (tmdbId: number, mediaType: "movie" | "tv") => void;
@@ -41,6 +44,7 @@ export function ContentGridLayout({
     emptyTitle,
     emptySubtitle,
     emptyIcon,
+    emptyAsset,
     onToggleFavorite,
     onToggleWatchlist,
     onToggleWatched,
@@ -74,7 +78,11 @@ export function ContentGridLayout({
     if (data.length === 0) {
         return (
             <View style={styles.emptyContainer}>
-                <Text style={styles.largeIcon}>{emptyIcon}</Text>
+                {emptyAsset ? (
+                    <Image source={emptyAsset} style={styles.emptyImage} contentFit="contain" />
+                ) : (
+                    <Text style={styles.largeIcon}>{emptyIcon}</Text>
+                )}
                 <Text style={styles.emptyTitle}>{emptyTitle}</Text>
                 <Text style={styles.emptySubtitle}>{emptySubtitle}</Text>
             </View>
@@ -155,6 +163,11 @@ const styles = StyleSheet.create({
         fontSize: 60,
         marginBottom: 16,
     } as TextStyle,
+    emptyImage: {
+        width: 240,
+        height: 240,
+        marginBottom: 24,
+    } as any,
     emptyTitle: {
         color: "#f4f4f5",
         fontSize: 18,

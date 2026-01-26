@@ -60,6 +60,7 @@ export default function WatchlistScreen() {
                 emptyTitle="Tu lista está vacía"
                 emptySubtitle="Añade películas y series que quieras ver más tarde"
                 emptyIcon="📺"
+                emptyAsset={require("../../assets/icons/broken-heart.png")}
                 onToggleFavorite={handleToggleFavorite}
                 onToggleWatchlist={handleToggleWatchlist}
                 onToggleWatched={handleToggleWatched}
