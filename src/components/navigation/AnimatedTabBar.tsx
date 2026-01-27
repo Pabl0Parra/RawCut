@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontFamily: 'Inter_500Medium',
         marginTop: -4,
-        paddingBottom: 4,
+        paddingBottom: 12,
     },
     badge: {
         position: 'absolute',
