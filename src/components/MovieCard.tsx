@@ -239,12 +239,17 @@ export default function MovieCard({
         if (!dateString) return false;
         const releaseDate = new Date(dateString);
         const today = new Date();
+
+        // Don't show for future releases
+        if (releaseDate > today) return false;
+
         const diffTime = Math.abs(today.getTime() - releaseDate.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays <= 7;
+        // Extend to 14 days
+        return diffDays <= 14;
     };
 
-    const showNewBadge = !isMovie(item) && isNewRelease(item.first_air_date);
+    const showNewBadge = isNewRelease(getReleaseDate(item));
 
     const renderNewBadge = (): JSX.Element | null => {
         if (!showNewBadge) return null;
@@ -337,17 +342,25 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 8,
         right: 8,
-        backgroundColor: Colors.bloodRed,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
+        backgroundColor: Colors.vibrantRed,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
         borderRadius: 4,
         zIndex: 10,
+        // Add elevation/shadow for premium feel
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        elevation: 4,
     } as ViewStyle,
     newBadgeText: {
         color: Colors.white,
         fontSize: 10,
-        fontWeight: "bold",
-        letterSpacing: 0.5,
+        fontWeight: "900",
+        letterSpacing: 1,
+        fontFamily: "Inter_700Bold",
+        textTransform: "uppercase",
     } as TextStyle,
     quickActions: {
         position: "absolute",
