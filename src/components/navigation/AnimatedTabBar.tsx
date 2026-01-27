@@ -113,8 +113,15 @@ const TabBarItem = memo(function TabBarItem({
             accessibilityLabel={label}
         >
             <Animated.View style={[styles.tabItemInner, animatedContainerStyle]}>
-                {/* White circle background */}
-                <Animated.View style={[styles.circleBackground, animatedCircleStyle]} />
+                {/* White circle background - Using SVG to bypass forced dark mode inversion */}
+                <Animated.View style={[styles.circleBackground, animatedCircleStyle]}>
+                    <Svg width={48} height={48} viewBox="0 0 48 48">
+                        <Path
+                            fill="#FFFFFF"
+                            d="M24 0C10.745 0 0 10.745 0 24s10.745 24 24 24 24-10.745 24-24S37.255 0 24 0z"
+                        />
+                    </Svg>
+                </Animated.View>
 
                 {/* Icon */}
                 <Animated.View style={[styles.iconContainer, animatedIconStyle]}>
@@ -317,10 +324,10 @@ const styles = StyleSheet.create({
     },
     circleBackground: {
         position: 'absolute',
-        width: 46,
-        height: 46,
-        borderRadius: 23,
-        backgroundColor: Colors.white,
+        width: 48,
+        height: 48,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     iconContainer: {
         alignItems: 'center',
