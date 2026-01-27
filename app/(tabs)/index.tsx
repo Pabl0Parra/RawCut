@@ -63,6 +63,7 @@ import {
 } from "../../src/utils/contentLoader.utils";
 import { ContinueWatchingCard } from "../../src/components/ContinueWatchingCard";
 import { seasonsToProgressInfo } from "../../src/utils/tvDetail.utils";
+import SmokeBackground from "../../src/components/SmokeBackground";
 
 // ============================================================================
 // Constants
@@ -805,14 +806,14 @@ export default function HomeScreen(): JSX.Element {
 
             {activeTab === "tv" && renderContinueWatching()}
 
-            {/* Filter Modal */}
             <Modal
                 visible={showFilterModal}
                 animationType="slide"
-                presentationStyle="pageSheet"
+                transparent={true} // Keep true for slide animation over context, but container will be opaque
                 onRequestClose={() => setShowFilterModal(false)}
             >
-                <View style={[styles.modalContainer, { backgroundColor: 'rgba(10, 10, 10, 0.7)' }]}>
+                <View style={[styles.modalContainer, { backgroundColor: Colors.metalBlack }]}>
+                    <SmokeBackground />
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Filtrar</Text>
                         <TouchableOpacity onPress={() => setShowFilterModal(false)}>
@@ -1108,6 +1109,7 @@ const styles = StyleSheet.create({
     } as TextStyle,
     modalFooter: {
         paddingTop: 16,
+        paddingBottom: 48,
     } as ViewStyle,
     applyButton: {
         backgroundColor: Colors.bloodRed,

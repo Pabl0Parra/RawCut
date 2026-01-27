@@ -11,6 +11,7 @@ import {
     type ViewStyle,
     type TextStyle,
 } from "react-native";
+import { Image } from 'expo-image';
 import { useFocusEffect, router } from "expo-router";
 
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
@@ -213,7 +214,11 @@ export default function RecommendationsScreen(): React.JSX.Element {
 
         return (
             <View style={styles.emptyContainer}>
-                <Text style={styles.emptyIcon}>📬</Text>
+                <Image
+                    source={require("../../assets/mailbox.png")}
+                    style={{ width: 240, height: 240, marginBottom: 50 }}
+                    contentFit="contain"
+                />
                 <Text style={styles.emptyText}>
                     {isReceivedTab
                         ? "No tienes recomendaciones"

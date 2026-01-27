@@ -223,6 +223,7 @@ export const discoverMovies = async (params: DiscoverParams): Promise<TMDbRespon
     const queryParams: Record<string, string> = {
         page: (params.page || 1).toString(),
         sort_by: params.sort_by || "popularity.desc",
+        "primary_release_date.lte": new Date().toISOString().split('T')[0], // Filter out future movies
     };
 
     if (params.with_genres) queryParams.with_genres = params.with_genres;
@@ -235,6 +236,7 @@ export const discoverTVShows = async (params: DiscoverParams): Promise<TMDbRespo
     const queryParams: Record<string, string> = {
         page: (params.page || 1).toString(),
         sort_by: params.sort_by || "popularity.desc",
+        "first_air_date.lte": new Date().toISOString().split('T')[0], // Filter out future TV shows
     };
 
     if (params.with_genres) queryParams.with_genres = params.with_genres;
