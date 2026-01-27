@@ -23,9 +23,15 @@ import type {
 export const buildDiscoverParams = (config: DiscoverParamsConfig): DiscoverParams => {
     const { currentPage, sortBy, selectedGenre, selectedYear, activeTab } = config;
 
+    // Fix: primary_release_date is for movies only. For TV we must use first_air_date.
+    let finalSortBy = sortBy;
+    if (activeTab === "tv" && sortBy === "primary_release_date.desc") {
+        finalSortBy = "first_air_date.desc";
+    }
+
     const baseParams: DiscoverParams = {
         page: currentPage,
-        sort_by: sortBy,
+        sort_by: finalSortBy,
     };
 
     if (selectedGenre !== null) {

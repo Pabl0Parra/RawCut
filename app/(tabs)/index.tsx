@@ -88,7 +88,7 @@ interface UseContentLoadingParams {
 }
 
 interface UseContentLoadingReturn {
-    loadContent: (reset?: boolean) => Promise<void>;
+    loadContent: (reset?: boolean, overrides?: Partial<Pick<UseContentLoadingParams, 'sortBy' | 'selectedGenre' | 'selectedYear' | 'activeTab'>>) => Promise<void>;
     movies: Movie[];
     tvShows: TVShow[];
     setMovies: React.Dispatch<React.SetStateAction<Movie[]>>;
@@ -117,9 +117,17 @@ const useContentLoading = (
     } = params;
 
     const loadContent = useCallback(
-        async (reset: boolean = false): Promise<void> => {
+        async (reset: boolean = false, overrides?: Partial<Pick<UseContentLoadingParams, 'sortBy' | 'selectedGenre' | 'selectedYear' | 'activeTab'>>): Promise<void> => {
             const currentPage = reset ? 1 : localPage;
-            const shouldUseDiscoverApi = filtersActive && !searchQuery;
+            // If overrides are provided, use them; otherwise use state from params
+            const effectiveSortBy = overrides?.sortBy ?? sortBy;
+            const effectiveGenre = overrides?.selectedGenre !== undefined ? overrides.selectedGenre : selectedGenre;
+            const effectiveYear = overrides?.selectedYear ?? selectedYear;
+            const effectiveTab = overrides?.activeTab ?? activeTab;
+
+            // Filters are active if overrides are used OR if they were already active in state
+            const effectiveFiltersActive = overrides ? true : filtersActive;
+            const shouldUseDiscoverApi = effectiveFiltersActive && !searchQuery;
 
             if (shouldSkipContentLoad(reset, localHasMore, localLoading)) {
                 return;
@@ -130,13 +138,13 @@ const useContentLoading = (
             try {
                 const discoverParams = buildDiscoverParams({
                     currentPage,
-                    sortBy,
-                    selectedGenre,
-                    selectedYear,
-                    activeTab,
+                    sortBy: effectiveSortBy,
+                    selectedGenre: effectiveGenre,
+                    selectedYear: effectiveYear,
+                    activeTab: effectiveTab,
                 });
 
-                if (activeTab === "movies") {
+                if (effectiveTab === "movies") {
                     const { results, totalPages } = await fetchMovieContent(
                         currentPage,
                         shouldUseDiscoverApi,
@@ -390,8 +398,13 @@ export default function HomeScreen(): JSX.Element {
         setPage(1);
         setHasMore(true);
 
-        // Delay to allow modal close animation
-        setTimeout(() => loadContent(true), 100);
+        // Immediately load content with the CURRENT values to avoid closure race conditions
+        loadContent(true, {
+            selectedGenre,
+            selectedYear,
+            sortBy,
+            activeTab
+        });
     };
 
     const handleSearch = async (): Promise<void> => {
