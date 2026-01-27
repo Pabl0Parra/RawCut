@@ -291,10 +291,12 @@ export default function AnimatedTabBar({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: Colors.metalGray,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255, 255, 255, 0.1)',
     },
     curvedBackground: {
         position: 'absolute',
-        top: 0,
+        top: -1,
     },
     tabsContainer: {
         flexDirection: 'row',
@@ -304,7 +306,7 @@ const styles = StyleSheet.create({
     tabItem: {
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingTop: 4,
+        paddingTop: 2,
         minWidth: 60,
     },
     tabItemInner: {
@@ -328,6 +330,7 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontFamily: 'Inter_500Medium',
         marginTop: -4,
+        paddingBottom: 4,
     },
     badge: {
         position: 'absolute',
