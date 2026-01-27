@@ -65,8 +65,14 @@ export default function RootLayout() {
             try {
                 const { data: { session }, error } = await supabase.auth.getSession();
                 if (error) {
-                    if (error.message.includes("refresh_token_not_found") || error.message.includes("Refresh Token Not Found")) {
-                        console.warn("Invalid refresh token found, signing out...");
+                    const isInvalidToken =
+                        error.message.includes("refresh_token_not_found") ||
+                        error.message.includes("Refresh Token Not Found") ||
+                        error.message.includes("Invalid Refresh Token") ||
+                        error.status === 400; // Common status for bad tokens
+
+                    if (isInvalidToken) {
+                        console.warn("Invalid/Explired session found, clearing auth...");
                         await supabase.auth.signOut();
                         setSession(null);
                     } else {
