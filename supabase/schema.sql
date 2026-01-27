@@ -105,9 +105,11 @@ CREATE POLICY "View own recommendations" ON recommendations
 CREATE POLICY "Create recommendations" ON recommendations
   FOR INSERT WITH CHECK (auth.uid() = sender_id);
 
-CREATE POLICY "Update own recommendations" ON recommendations
   FOR UPDATE USING (auth.uid() = receiver_id)
   WITH CHECK (auth.uid() = receiver_id);
+
+CREATE POLICY "Delete own recommendations" ON recommendations
+  FOR DELETE USING (auth.uid() IN (sender_id, receiver_id));
 
 -- Comments: Sender/receiver can comment and view
 CREATE POLICY "Comment on recommendations" ON recommendation_comments
@@ -119,14 +121,14 @@ CREATE POLICY "Comment on recommendations" ON recommendation_comments
     )
   );
 
-CREATE POLICY "View comments" ON recommendation_comments
-  FOR SELECT USING (
-    EXISTS (
       SELECT 1 FROM recommendations r
       WHERE r.id = recommendation_id
         AND auth.uid() IN (r.sender_id, r.receiver_id)
     )
   );
+
+CREATE POLICY "Delete own comments" ON recommendation_comments
+  FOR DELETE USING (auth.uid() = user_id);
 
 -- Ratings: Receiver creates/updates, both can read
 CREATE POLICY "Rate recommendations" ON ratings
