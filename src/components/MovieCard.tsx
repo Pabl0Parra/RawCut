@@ -1,4 +1,4 @@
-import React, { JSX } from "react";
+import React, { JSX, memo, useMemo, useCallback } from "react";
 import {
     View,
     Text,
@@ -118,9 +118,10 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 };
 
 /**
- * Card component for displaying movie/TV show in a grid
+ * Card component for displaying movie/TV show in a grid.
+ * Memoized to prevent re-renders unless essential props change.
  */
-export default function MovieCard({
+const MovieCard = memo(function MovieCard({
     item,
     mediaType,
     isFavorite = false,
@@ -130,29 +131,17 @@ export default function MovieCard({
     onToggleWatchlist,
     onToggleWatched,
 }: Readonly<MovieCardProps>): JSX.Element {
-    const posterUrl = getImageUrl(item.poster_path, "w300");
-    const title = getTitle(item);
-    const year = extractYear(getReleaseDate(item));
-    const rating = formatRating(item.vote_average);
+    const posterUrl = useMemo(() => getImageUrl(item.poster_path, "w300"), [item.poster_path]);
+    const title = useMemo(() => getTitle(item), [item]);
+    const year = useMemo(() => extractYear(getReleaseDate(item)), [item]);
+    const rating = useMemo(() => formatRating(item.vote_average), [item.vote_average]);
 
-    const handlePress = (): void => {
+    const handlePress = useCallback((): void => {
         const path = mediaType === "movie"
             ? `/movie/${item.id}`
             : `/tv/${item.id}`;
         router.push(path as Parameters<typeof router.push>[0]);
-    };
-
-    const handleToggleFavorite = (): void => {
-        onToggleFavorite?.();
-    };
-
-    const handleToggleWatchlist = (): void => {
-        onToggleWatchlist?.();
-    };
-
-    const handleToggleWatched = (): void => {
-        onToggleWatched?.();
-    };
+    }, [item.id, mediaType]);
 
     const renderPoster = (): JSX.Element => {
         if (posterUrl) {
@@ -161,6 +150,7 @@ export default function MovieCard({
                     source={{ uri: posterUrl }}
                     style={styles.poster}
                     contentFit="cover"
+                    transition={200}
                 />
             );
         }
@@ -195,7 +185,7 @@ export default function MovieCard({
                 {onToggleFavorite && (
                     <TouchableOpacity
                         style={styles.quickActionButton}
-                        onPress={handleToggleFavorite}
+                        onPress={onToggleFavorite}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
                         <Ionicons
@@ -208,7 +198,7 @@ export default function MovieCard({
                 {onToggleWatchlist && (
                     <TouchableOpacity
                         style={styles.quickActionButton}
-                        onPress={handleToggleWatchlist}
+                        onPress={onToggleWatchlist}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
                         <Ionicons
@@ -221,7 +211,7 @@ export default function MovieCard({
                 {onToggleWatched && (
                     <TouchableOpacity
                         style={styles.quickActionButton}
-                        onPress={handleToggleWatched}
+                        onPress={onToggleWatched}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
                         <Ionicons
@@ -249,7 +239,7 @@ export default function MovieCard({
         return diffDays <= 14;
     };
 
-    const showNewBadge = isNewRelease(getReleaseDate(item));
+    const showNewBadge = useMemo(() => isNewRelease(getReleaseDate(item)), [item]);
 
     const renderNewBadge = (): JSX.Element | null => {
         if (!showNewBadge) return null;
@@ -292,7 +282,18 @@ export default function MovieCard({
             </TouchableOpacity>
         </View>
     );
-}
+}, (prevProps: Readonly<MovieCardProps>, nextProps: Readonly<MovieCardProps>) => {
+    // Custom comparison to prevent re-renders unless these specific values change
+    return (
+        prevProps.item.id === nextProps.item.id &&
+        prevProps.isFavorite === nextProps.isFavorite &&
+        prevProps.inWatchlist === nextProps.inWatchlist &&
+        prevProps.isWatched === nextProps.isWatched &&
+        prevProps.mediaType === nextProps.mediaType
+    );
+});
+
+export default MovieCard;
 
 const styles = StyleSheet.create({
     container: {

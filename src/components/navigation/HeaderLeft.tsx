@@ -2,10 +2,19 @@ import { Image, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 
 export const HeaderLeft = () => (
-    <TouchableOpacity onPress={() => router.replace("/(tabs)")}>
+    <TouchableOpacity
+        onPress={() => router.replace("/(tabs)")}
+        style={{
+            marginLeft: 16,
+            width: 32,
+            height: 32,
+            justifyContent: 'center',
+            alignItems: 'center'
+        }}
+    >
         <Image
             source={require('../../../assets/icons/metal-hand.png')}
-            style={{ width: 30, height: 30, marginLeft: 16, tintColor: "#fff" }}
+            style={{ width: 28, height: 28, tintColor: "#fff" }}
             resizeMode="contain"
         />
     </TouchableOpacity>

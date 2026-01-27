@@ -433,16 +433,16 @@ export default function HomeScreen(): JSX.Element {
         }
     };
 
-    const handleRefresh = async (): Promise<void> => {
+    const handleRefresh = useCallback(async (): Promise<void> => {
         setRefreshing(true);
         setPage(1);
         setHasMore(true);
         setSearchQuery("");
         await loadContent(true);
         setRefreshing(false);
-    };
+    }, [loadContent]);
 
-    const handleToggleFavorite = async (
+    const handleToggleFavorite = useCallback(async (
         tmdbId: number,
         mediaType: MediaType
     ): Promise<void> => {
@@ -453,9 +453,9 @@ export default function HomeScreen(): JSX.Element {
         } else {
             await addToFavorites(tmdbId, mediaType);
         }
-    };
+    }, [user, isFavorite, removeFromFavorites, addToFavorites]);
 
-    const handleToggleWatchlist = async (
+    const handleToggleWatchlist = useCallback(async (
         tmdbId: number,
         mediaType: MediaType
     ): Promise<void> => {
@@ -466,22 +466,22 @@ export default function HomeScreen(): JSX.Element {
         } else {
             await addToWatchlist(tmdbId, mediaType);
         }
-    };
+    }, [user, isInWatchlist, removeFromWatchlist, addToWatchlist]);
 
-    const handleToggleWatched = async (
+    const handleToggleWatched = useCallback(async (
         tmdbId: number,
         mediaType: MediaType
     ): Promise<void> => {
         await toggleWatched(tmdbId, mediaType);
-    };
+    }, [toggleWatched]);
 
-    const getMediaType = (): MediaType => (activeTab === "movies" ? "movie" : "tv");
+    const getMediaType = useCallback((): MediaType => (activeTab === "movies" ? "movie" : "tv"), [activeTab]);
 
     // ========================================================================
     // Render Functions
     // ========================================================================
 
-    const renderItem = ({ item }: { item: Movie | TVShow }): JSX.Element => {
+    const renderItem = useCallback(({ item }: { item: Movie | TVShow }): JSX.Element => {
         const mediaType = getMediaType();
 
         return (
@@ -496,9 +496,9 @@ export default function HomeScreen(): JSX.Element {
                 onToggleWatched={() => handleToggleWatched(item.id, mediaType)}
             />
         );
-    };
+    }, [getMediaType, isFavorite, isInWatchlist, isWatched, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched]);
 
-    const renderFooter = (): JSX.Element | null => {
+    const renderFooter = useCallback((): JSX.Element | null => {
         if (!loading || data.length === 0) return null;
 
         return (
@@ -506,7 +506,7 @@ export default function HomeScreen(): JSX.Element {
                 <ActivityIndicator size="small" color="#dc2626" />
             </View>
         );
-    };
+    }, [loading, data.length]);
 
     const renderContinueWatchingItem = ({
         item,
@@ -629,7 +629,7 @@ export default function HomeScreen(): JSX.Element {
         <FlatList
             data={data}
             renderItem={renderItem}
-            keyExtractor={(item, index) => `${item.id}-${index}`}
+            keyExtractor={(item) => `${item.id}`}
             numColumns={3}
             columnWrapperStyle={styles.columnWrapper}
             contentContainerStyle={styles.listContent}
@@ -637,6 +637,10 @@ export default function HomeScreen(): JSX.Element {
             onEndReached={() => !isSearching && loadContent()}
             onEndReachedThreshold={0.5}
             ListFooterComponent={renderFooter}
+            initialNumToRender={12}
+            maxToRenderPerBatch={12}
+            windowSize={5}
+            removeClippedSubviews={true}
             refreshControl={
                 <RefreshControl
                     refreshing={refreshing}

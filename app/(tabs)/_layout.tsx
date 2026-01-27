@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Platform } from "react-native";
 import { Tabs } from "expo-router";
 import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -45,12 +46,22 @@ export default function TabLayout() {
                 headerTintColor: Colors.white,
                 headerTitleStyle: {
                     fontFamily: "BebasNeue_400Regular",
-                    fontSize: 28,
+                    fontSize: 26, // Slightly smaller for better fit
+                    marginTop: Platform.OS === 'ios' ? 4 : 0, // Vertical adjustment for Bebas Neue metrics
                 },
                 headerTitle: "CORTOCRUDO",
                 headerTitleAlign: 'center',
                 headerLeft: renderHeaderLeft,
                 headerRight: renderHeaderRight,
+                headerLeftContainerStyle: {
+                    paddingLeft: 0, // We handle margin in the component
+                },
+                headerRightContainerStyle: {
+                    paddingRight: 0, // We handle margin in the component
+                },
+                headerTitleContainerStyle: {
+                    marginHorizontal: 0, // Allow title to take full width for true centering
+                },
             }}
             // @ts-ignore - sceneContainerStyle is supported by underlying navigator but not explicitly in expo-router Tabs type
             sceneContainerStyle={{ backgroundColor: 'transparent' }}
@@ -119,12 +130,16 @@ export default function TabLayout() {
                     headerTintColor: Colors.white,
                     headerTitleStyle: {
                         fontFamily: "BebasNeue_400Regular",
-                        fontSize: 28,
+                        fontSize: 26,
+                        marginTop: Platform.OS === 'ios' ? 4 : 0,
                     },
                     headerTitle: "CORTOCRUDO",
                     headerTitleAlign: 'center',
                     headerLeft: renderHeaderLeft,
                     headerRight: renderHeaderRight,
+                    headerLeftContainerStyle: { paddingLeft: 0 },
+                    headerRightContainerStyle: { paddingRight: 0 },
+                    headerTitleContainerStyle: { marginHorizontal: 0 },
                 }}
             />
         </Tabs>
