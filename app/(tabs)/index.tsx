@@ -13,6 +13,7 @@ import {
     type ViewStyle,
     type TextStyle,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
     MaterialCommunityIcons,
     Feather,
@@ -829,7 +830,7 @@ export default function HomeScreen(): JSX.Element {
                 transparent={true} // Keep true for slide animation over context, but container will be opaque
                 onRequestClose={() => setShowFilterModal(false)}
             >
-                <View style={[styles.modalContainer, { backgroundColor: Colors.metalBlack }]}>
+                <SafeAreaView style={[styles.modalContainer, { backgroundColor: Colors.metalBlack }]}>
                     <SmokeBackground />
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Filtrar</Text>
@@ -872,7 +873,7 @@ export default function HomeScreen(): JSX.Element {
                             <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </SafeAreaView>
             </Modal>
         </View>
     );
