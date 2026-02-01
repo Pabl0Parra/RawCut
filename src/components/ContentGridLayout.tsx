@@ -194,7 +194,6 @@ const styles = StyleSheet.create({
     } as TextStyle,
     columnWrapper: {
         paddingHorizontal: 8,
-        justifyContent: "center",
         gap: 12,
     } as ViewStyle,
     listContent: {
