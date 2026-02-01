@@ -90,6 +90,7 @@ interface UseContentLoadingParams {
 
 interface UseContentLoadingReturn {
     loadContent: (reset?: boolean, overrides?: Partial<Pick<UseContentLoadingParams, 'sortBy' | 'selectedGenre' | 'selectedYear' | 'activeTab'>>) => Promise<void>;
+    loading: boolean;
     movies: Movie[];
     tvShows: TVShow[];
     setMovies: React.Dispatch<React.SetStateAction<Movie[]>>;
@@ -189,6 +190,7 @@ const useContentLoading = (
 
     return {
         loadContent,
+        loading: localLoading,
         movies,
         tvShows,
         setMovies,
@@ -231,6 +233,7 @@ export default function HomeScreen(): JSX.Element {
     // Content Loading Hook
     const {
         loadContent,
+        loading,
         movies,
         tvShows,
         setMovies,
@@ -272,7 +275,6 @@ export default function HomeScreen(): JSX.Element {
     // ========================================================================
 
     const data = activeTab === "movies" ? movies : tvShows;
-    const loading = data.length === 0;
 
     // ========================================================================
     // Effects
@@ -827,7 +829,7 @@ export default function HomeScreen(): JSX.Element {
             <Modal
                 visible={showFilterModal}
                 animationType="slide"
-                transparent={true} // Keep true for slide animation over context, but container will be opaque
+                transparent={true}
                 onRequestClose={() => setShowFilterModal(false)}
             >
                 <SafeAreaView style={[styles.modalContainer, { backgroundColor: Colors.metalBlack }]}>

@@ -1,6 +1,6 @@
 import { Stack, SplashScreen, useRouter, useSegments } from "expo-router";
 import * as Linking from "expo-linking";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
 import {
     useFonts,
@@ -18,27 +18,69 @@ import SmokeBackground from "../src/components/SmokeBackground";
 import { ThemeProvider, DarkTheme } from "@react-navigation/native";
 import { ErrorBoundary } from "../src/components/ErrorBoundary";
 
-import { HeaderLeft } from "../src/components/navigation/HeaderLeft";
-import { HeaderRight } from "../src/components/navigation/HeaderRight";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
-// Prevent the splash screen from auto-hiding
+// Prevent the native splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Maximum time to wait for session initialization before proceeding unauthenticated */
+const SESSION_INIT_TIMEOUT_MS = 10_000;
+
+/** Auth events that warrant a profile re-fetch */
+const PROFILE_FETCH_EVENTS = new Set<AuthChangeEvent>([
+    "SIGNED_IN",
+    "USER_UPDATED",
+]);
+
+// ============================================================================
+// Helpers
+// ============================================================================
 
 const TransparentTheme = {
     ...DarkTheme,
     colors: {
         ...DarkTheme.colors,
-        background: 'transparent',
+        background: "transparent",
     },
 };
 
-const renderHeaderLeft = () => <HeaderLeft />;
-const renderHeaderRight = () => <HeaderRight />;
+/**
+ * Races a promise against a timeout.
+ * Rejects with `Error(message)` if the deadline fires first.
+ */
+function withTimeout<T>(
+    promise: Promise<T>,
+    ms: number,
+    message: string,
+): Promise<T> {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const timeout = new Promise<never>((_resolve, reject) => {
+        timeoutId = setTimeout(() => reject(new Error(message)), ms);
+    });
+
+    return Promise.race([promise, timeout]).finally(() =>
+        clearTimeout(timeoutId),
+    );
+}
+
+function isTimeoutError(err: unknown): boolean {
+    return err instanceof Error && err.message.includes("timed out");
+}
+
+// ============================================================================
+// Root Layout
+// ============================================================================
 
 export default function RootLayout() {
     const { user, setSession, fetchProfile } = useAuthStore();
     const segments = useSegments();
     const router = useRouter();
+
     const [isReady, setIsReady] = useState(false);
     const [isSplashFinished, setIsSplashFinished] = useState(false);
     const [initError, setInitError] = useState<string | null>(null);
@@ -51,62 +93,126 @@ export default function RootLayout() {
         BebasNeue_400Regular,
     });
 
-    // Listen for auth state changes
+    // ────────────────────────────────────────────────────────────────────────
+    // Auth initialization
+    // ────────────────────────────────────────────────────────────────────────
     useEffect(() => {
-        console.log('[RootLayout] Setting up auth listeners...');
+        console.log("[RootLayout] Setting up auth listeners…");
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
-                console.log('[RootLayout] Auth state changed:', { event, hasSession: !!session });
+        // 1. Subscribe to ongoing auth changes.
+        //    Skip INITIAL_SESSION to avoid a double fetchProfile (initSession
+        //    handles it below).
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange(
+            async (event: AuthChangeEvent, session: Session | null) => {
+                console.log("[RootLayout] Auth state changed:", {
+                    event,
+                    hasSession: !!session,
+                });
+
                 setSession(session);
-                if (session?.user) {
-                    await fetchProfile();
+
+                if (PROFILE_FETCH_EVENTS.has(event) && session?.user) {
+                    try {
+                        await fetchProfile();
+                    } catch (err) {
+                        console.warn(
+                            "[RootLayout] fetchProfile (onAuthStateChange) failed:",
+                            err,
+                        );
+                    }
                 }
-            }
+            },
         );
 
-        // Check initial session
-        const initSession = async () => {
-            console.log('[RootLayout] Initializing session...');
+        // 2. Initialise the session from storage (with a hard timeout).
+        const initSession = async (): Promise<void> => {
+            console.log("[RootLayout] Initializing session…");
+
             try {
-                const { data: { session }, error } = await supabase.auth.getSession();
+                const {
+                    data: { session },
+                    error,
+                } = await withTimeout(
+                    supabase.auth.getSession(),
+                    SESSION_INIT_TIMEOUT_MS,
+                    "Session initialization timed out",
+                );
+
                 if (error) {
                     const isInvalidToken =
                         error.message.includes("refresh_token_not_found") ||
                         error.message.includes("Refresh Token Not Found") ||
                         error.message.includes("Invalid Refresh Token") ||
-                        error.status === 400; // Common status for bad tokens
+                        error.status === 400;
 
                     if (isInvalidToken) {
-                        console.warn("[RootLayout] Invalid/Expired session found, clearing auth...");
-                        await supabase.auth.signOut();
+                        // Supabase auto-signs-out on invalid refresh tokens
+                        // (fires SIGNED_OUT before INITIAL_SESSION), so we
+                        // only need to clear local state — no redundant signOut().
+                        console.warn(
+                            "[RootLayout] Invalid/Expired session detected, clearing local state…",
+                        );
                         setSession(null);
                     } else {
-                        console.error("[RootLayout] Initial session error:", error);
-                        setInitError(error.message || "Failed to initialize session");
+                        console.error("[RootLayout] Session error:", error);
+                        setInitError(
+                            error.message || "Failed to initialize session",
+                        );
                     }
                 } else {
-                    console.log('[RootLayout] Session initialized:', { hasSession: !!session });
+                    console.log("[RootLayout] Session initialized:", {
+                        hasSession: !!session,
+                    });
                     setSession(session);
+
                     if (session?.user) {
-                        await fetchProfile();
+                        // Profile fetch is non-critical – wrap with its own timeout
+                        try {
+                            await withTimeout(
+                                fetchProfile(),
+                                SESSION_INIT_TIMEOUT_MS,
+                                "Profile fetch timed out",
+                            );
+                        } catch (profileErr) {
+                            console.warn(
+                                "[RootLayout] Profile fetch failed (non-fatal):",
+                                profileErr,
+                            );
+                            // The profile will be fetched again by useFocusEffect
+                            // in the home screen – don't block startup.
+                        }
                     }
                 }
             } catch (err) {
-                console.error("[RootLayout] Failed to get initial session:", err);
-                setInitError(err instanceof Error ? err.message : "Unknown error");
+                if (isTimeoutError(err)) {
+                    // Timeout: proceed as unauthenticated – the user can still
+                    // log in and a fresh session will be established.
+                    console.warn(
+                        "[RootLayout] Session init timed out, proceeding without session",
+                    );
+                } else {
+                    console.error("[RootLayout] initSession error:", err);
+                    setInitError(
+                        err instanceof Error ? err.message : "Unknown error",
+                    );
+                }
             } finally {
-                console.log('[RootLayout] Session init complete, setting isReady = true');
+                console.log(
+                    "[RootLayout] Session init complete → isReady = true",
+                );
                 setIsReady(true);
             }
         };
 
         initSession();
 
-        // Deep linking handler
-        const handleDeepLink = async (url: string | null) => {
+        // 3. Deep-link handler
+        const handleDeepLink = async (url: string | null): Promise<void> => {
             if (!url) return;
-            console.log('[RootLayout] Handling deep link:', url);
+            console.log("[RootLayout] Handling deep link:", url);
+
             const { queryParams } = Linking.parse(url);
 
             if (queryParams?.access_token && queryParams?.refresh_token) {
@@ -118,124 +224,163 @@ export default function RootLayout() {
                 if (error) {
                     console.error("Deep link auth error:", error);
                 }
-
                 if (data.session) {
                     setSession(data.session);
                 }
             }
         };
 
-        // Listen for deep links
-        const deepLinkSubscription = Linking.addEventListener("url", (event) => {
+        const deepLinkSub = Linking.addEventListener("url", (event) => {
             handleDeepLink(event.url);
         });
-
-        // Initial link check
         Linking.getInitialURL().then(handleDeepLink);
 
         return () => {
             subscription.unsubscribe();
-            deepLinkSubscription.remove();
+            deepLinkSub.remove();
         };
     }, []);
 
-    // Handle Native Splash hiding
+    // ────────────────────────────────────────────────────────────────────────
+    // Hide the native splash as soon as fonts are available so our custom
+    // VideoSplash can take over.
+    // ────────────────────────────────────────────────────────────────────────
     useEffect(() => {
-        // Hide native splash once fonts are loaded
-        // We don't wait for isReady here because we want to show our VideoSplash ASAP
         if (fontsLoaded || fontError) {
-            console.log('[RootLayout] Fonts loaded, hiding native splash', { fontsLoaded, fontError });
+            console.log("[RootLayout] Fonts loaded, hiding native splash");
             SplashScreen.hideAsync();
         }
     }, [fontsLoaded, fontError]);
 
-    // Auth-based routing
+    // ────────────────────────────────────────────────────────────────────────
+    // Auth-based routing – only fires once BOTH the session is resolved AND
+    // the splash is dismissed, guaranteeing the Stack navigator is mounted.
+    // ────────────────────────────────────────────────────────────────────────
+    const shouldShowContent = isReady && isSplashFinished;
+
     useEffect(() => {
-        if (!isReady) {
-            console.log('[RootLayout] Not ready yet, skipping routing');
+        if (!shouldShowContent) {
+            console.log("[RootLayout] Not fully ready, deferring routing");
             return;
         }
 
-        console.log('[RootLayout] Checking auth routing', { user: !!user, segments });
+        console.log("[RootLayout] Auth routing check:", {
+            user: !!user,
+            segments,
+        });
 
         const inAuthGroup = segments[0] === "(tabs)";
-        const inPublicRoute = segments[0] === "login" || segments[0] === "register";
+        const inPublicRoute =
+            segments[0] === "login" || segments[0] === "register";
 
         if (!user && inAuthGroup) {
-            console.log('[RootLayout] Not authenticated, redirecting to login');
-            // Redirect to login if not authenticated
+            console.log("[RootLayout] Unauthenticated → /login");
             router.replace("/login");
         } else if (user && (inPublicRoute || segments[0] === undefined)) {
-            console.log('[RootLayout] Authenticated, redirecting to home');
-            // Redirect to home if authenticated and on auth screens
+            console.log("[RootLayout] Authenticated → /(tabs)");
             router.replace("/(tabs)");
         }
-    }, [user, segments, isReady]);
+    }, [user, segments, shouldShowContent]);
 
-    // Track splash finish
-    useEffect(() => {
-        console.log('[RootLayout] State update:', {
-            fontsLoaded,
-            fontError,
-            isReady,
-            isSplashFinished,
-            shouldShowContent: isReady && isSplashFinished
-        });
-    }, [fontsLoaded, fontError, isReady, isSplashFinished]);
+    // ────────────────────────────────────────────────────────────────────────
+    // Splash callback (stable reference)
+    // ────────────────────────────────────────────────────────────────────────
+    const handleSplashFinish = useCallback(() => {
+        console.log("[RootLayout] Video splash finished");
+        setIsSplashFinished(true);
+    }, []);
 
+    // ────────────────────────────────────────────────────────────────────────
+    // Early bail: fonts not ready yet
+    // ────────────────────────────────────────────────────────────────────────
     if (!fontsLoaded && !fontError) {
-        console.log('[RootLayout] Waiting for fonts...');
         return null;
     }
 
-    // Critical: Only show content when BOTH conditions are met
-    const shouldShowContent = isReady && isSplashFinished;
-
-    // Show error screen if initialization failed
-    if (initError && isSplashFinished) {
-        return (
-            <ThemeProvider value={TransparentTheme}>
-                <View style={styles.container}>
-                    <View style={styles.errorContainer}>
-                        <Text style={styles.errorTitle}>Error de Inicialización</Text>
-                        <Text style={styles.errorMessage}>{initError}</Text>
-                        <Text style={styles.errorHint}>
-                            Por favor, verifica tu conexión e intenta de nuevo.
-                        </Text>
-                    </View>
-                </View>
-            </ThemeProvider>
-        );
-    }
-
+    // ────────────────────────────────────────────────────────────────────────
+    // Render
+    //
+    // KEY ARCHITECTURAL CHANGE: The Stack is ALWAYS mounted.
+    // Splash, loading and error states render as overlays on top.
+    // This prevents the race condition where router.replace() fires
+    // before the navigator exists.
+    // ────────────────────────────────────────────────────────────────────────
     return (
         <ErrorBoundary>
             <ThemeProvider value={TransparentTheme}>
                 <View style={styles.container}>
-                    {shouldShowContent ? (
-                        <>
-                            <SmokeBackground />
-                            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
-                                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                                <Stack.Screen name="login" options={{ headerShown: false }} />
-                                <Stack.Screen name="register" options={{ headerShown: false }} />
-                            </Stack>
-                        </>
-                    ) : (
-                        // Transitional state: splash finished but app not ready
-                        isSplashFinished && !isReady && (
-                            <View style={styles.loadingContainer}>
-                                <ActivityIndicator size="large" color={Colors.bloodRed} />
-                                <Text style={styles.loadingText}>Preparando la aplicación...</Text>
-                            </View>
-                        )
+                    {/* Smoke background – only once the app is fully ready */}
+                    {shouldShowContent && <SmokeBackground />}
+
+                    {/* Always-mounted navigator */}
+                    <Stack
+                        screenOptions={{
+                            headerShown: false,
+                            contentStyle: { backgroundColor: "transparent" },
+                        }}
+                    >
+                        <Stack.Screen
+                            name="(tabs)"
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="login"
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="register"
+                            options={{ headerShown: false }}
+                        />
+                    </Stack>
+
+                    {/* ── Overlay: loading (splash done, session still loading) ── */}
+                    {isSplashFinished && !isReady && (
+                        <View
+                            style={[
+                                StyleSheet.absoluteFill,
+                                styles.loadingOverlay,
+                            ]}
+                        >
+                            <ActivityIndicator
+                                size="large"
+                                color={Colors.bloodRed}
+                            />
+                            <Text style={styles.loadingText}>
+                                Preparando la aplicación…
+                            </Text>
+                        </View>
                     )}
+
+                    {/* ── Overlay: fatal init error ── */}
+                    {initError && isSplashFinished && (
+                        <View
+                            style={[
+                                StyleSheet.absoluteFill,
+                                styles.errorOverlay,
+                            ]}
+                        >
+                            <Text style={styles.errorTitle}>
+                                Error de Inicialización
+                            </Text>
+                            <Text style={styles.errorMessage}>
+                                {initError}
+                            </Text>
+                            <Text style={styles.errorHint}>
+                                Por favor, verifica tu conexión e intenta de
+                                nuevo.
+                            </Text>
+                        </View>
+                    )}
+
+                    {/* ── Overlay: video splash (highest z-index) ── */}
                     {!isSplashFinished && (
-                        <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]}>
-                            <VideoSplash onFinish={() => {
-                                console.log('[RootLayout] Video splash finished');
-                                setIsSplashFinished(true);
-                            }} />
+                        <View
+                            style={[
+                                StyleSheet.absoluteFill,
+                                styles.splashOverlay,
+                            ]}
+                        >
+                            <VideoSplash onFinish={handleSplashFinish} />
                         </View>
                     )}
                 </View>
@@ -244,47 +389,55 @@ export default function RootLayout() {
     );
 }
 
+// ============================================================================
+// Styles
+// ============================================================================
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.metalBlack,
     },
-    errorContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+    splashOverlay: {
+        zIndex: 999,
+    },
+    loadingOverlay: {
+        zIndex: 998,
+        backgroundColor: Colors.metalBlack,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    errorOverlay: {
+        zIndex: 998,
+        backgroundColor: Colors.metalBlack,
+        justifyContent: "center",
+        alignItems: "center",
         padding: 20,
     },
     errorTitle: {
         fontSize: 24,
-        fontFamily: 'Inter_700Bold',
+        fontFamily: "Inter_700Bold",
         color: Colors.bloodRed,
         marginBottom: 12,
-        textAlign: 'center',
+        textAlign: "center",
     },
     errorMessage: {
         fontSize: 16,
-        fontFamily: 'Inter_400Regular',
+        fontFamily: "Inter_400Regular",
         color: Colors.white,
         marginBottom: 8,
-        textAlign: 'center',
+        textAlign: "center",
     },
     errorHint: {
         fontSize: 14,
-        fontFamily: 'Inter_400Regular',
+        fontFamily: "Inter_400Regular",
         color: Colors.metalSilver,
-        textAlign: 'center',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        textAlign: "center",
     },
     loadingText: {
         fontSize: 16,
-        fontFamily: 'Inter_400Regular',
+        fontFamily: "Inter_400Regular",
         color: Colors.metalSilver,
         marginTop: 16,
     },
 });
-
