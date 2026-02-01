@@ -1,6 +1,7 @@
+import { useCallback } from "react";
+import { Keyboard } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
 
 import { registerSchema, RegisterInput } from "../src/schemas/auth";
 import { useAuthStore } from "../src/stores/authStore";
@@ -24,13 +25,22 @@ export default function RegisterScreen() {
         },
     });
 
-    const onSubmit = async (data: RegisterInput) => {
-        clearError();
-        const success = await signUp(data.email, data.password, data.username);
-        if (success) {
-            router.replace("/(tabs)");
-        }
-    };
+    const onSubmit = useCallback(
+        async (data: RegisterInput): Promise<void> => {
+            Keyboard.dismiss();
+            clearError();
+
+            try {
+                await signUp(data.email, data.password, data.username);
+                // Navigation is handled by _layout.tsx's auth routing effect
+                // when the user state changes in the store. Do NOT call
+                // router.replace() here — it would race with the layout.
+            } catch (err) {
+                console.error("[RegisterScreen] Sign up failed:", err);
+            }
+        },
+        [signUp, clearError],
+    );
 
     return (
         <AuthLayout

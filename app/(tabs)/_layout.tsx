@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import { Tabs } from "expo-router";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useContentStore } from "../../src/stores/contentStore";
@@ -14,26 +15,56 @@ import {
     FavoritesIcon,
     WatchlistIcon,
     RecommendationsIcon,
-    ProfileIcon
+    ProfileIcon,
 } from "../../src/components/navigation/TabBarIcons";
 
-const renderTabBar = (props: any) => <AnimatedTabBar {...props} />;
+// ============================================================================
+// Stable references (outside component to avoid re-creation)
+// ============================================================================
+
+const renderTabBar = (props: BottomTabBarProps) => (
+    <AnimatedTabBar {...props} />
+);
 const renderHeaderLeft = () => <HeaderLeft />;
 const renderHeaderRight = () => <HeaderRight />;
 
-export default function TabLayout() {
-    const { user } = useAuthStore();
-    const { unreadCount, fetchRecommendations, subscribeToRealtime } = useRecommendationStore();
-    const { fetchUserContent, fetchTVProgress } = useContentStore();
+const HEADER_TITLE_STYLE = {
+    fontFamily: "BebasNeue_400Regular",
+    fontSize: 26,
+    marginTop: Platform.OS === "ios" ? 4 : 0,
+};
 
+// ============================================================================
+// Tab Layout
+// ============================================================================
+
+export default function TabLayout() {
+    const user = useAuthStore((s) => s.user);
+    const unreadCount = useRecommendationStore((s) => s.unreadCount);
+
+    // ────────────────────────────────────────────────────────────────────
+    // Hydrate stores when authenticated.
+    // Store methods accessed via getState() to keep deps honest and avoid
+    // stale closures — these functions never change but this pattern is
+    // consistent with _layout.tsx and future-proof.
+    // ────────────────────────────────────────────────────────────────────
     useEffect(() => {
-        if (user) {
-            fetchRecommendations();
-            fetchUserContent();
-            fetchTVProgress();
-            const unsubscribe = subscribeToRealtime();
-            return unsubscribe;
-        }
+        if (!user) return;
+
+        const { fetchRecommendations, subscribeToRealtime } =
+            useRecommendationStore.getState();
+        const { fetchUserContent, fetchTVProgress } =
+            useContentStore.getState();
+
+        fetchRecommendations();
+        fetchUserContent();
+        fetchTVProgress();
+
+        const unsubscribe = subscribeToRealtime();
+
+        return () => {
+            unsubscribe();
+        };
     }, [user]);
 
     return (
@@ -44,27 +75,16 @@ export default function TabLayout() {
                     backgroundColor: Colors.metalBlack,
                 },
                 headerTintColor: Colors.white,
-                headerTitleStyle: {
-                    fontFamily: "BebasNeue_400Regular",
-                    fontSize: 26, // Slightly smaller for better fit
-                    marginTop: Platform.OS === 'ios' ? 4 : 0, // Vertical adjustment for Bebas Neue metrics
-                },
+                headerTitleStyle: HEADER_TITLE_STYLE,
                 headerTitle: "CORTOCRUDO",
-                headerTitleAlign: 'center',
+                headerTitleAlign: "center",
                 headerLeft: renderHeaderLeft,
                 headerRight: renderHeaderRight,
-                headerLeftContainerStyle: {
-                    paddingLeft: 0, // We handle margin in the component
-                },
-                headerRightContainerStyle: {
-                    paddingRight: 0, // We handle margin in the component
-                },
-                headerTitleContainerStyle: {
-                    marginHorizontal: 0, // Allow title to take full width for true centering
-                },
+                headerLeftContainerStyle: { paddingLeft: 0 },
+                headerRightContainerStyle: { paddingRight: 0 },
+                headerTitleContainerStyle: { marginHorizontal: 0 },
+                sceneStyle: { backgroundColor: "transparent" },
             }}
-            // @ts-ignore - sceneContainerStyle is supported by underlying navigator but not explicitly in expo-router Tabs type
-            sceneContainerStyle={{ backgroundColor: 'transparent' }}
         >
             <Tabs.Screen
                 name="index"
@@ -128,13 +148,9 @@ export default function TabLayout() {
                         backgroundColor: Colors.metalBlack,
                     },
                     headerTintColor: Colors.white,
-                    headerTitleStyle: {
-                        fontFamily: "BebasNeue_400Regular",
-                        fontSize: 26,
-                        marginTop: Platform.OS === 'ios' ? 4 : 0,
-                    },
+                    headerTitleStyle: HEADER_TITLE_STYLE,
                     headerTitle: "CORTOCRUDO",
-                    headerTitleAlign: 'center',
+                    headerTitleAlign: "center",
                     headerLeft: renderHeaderLeft,
                     headerRight: renderHeaderRight,
                     headerLeftContainerStyle: { paddingLeft: 0 },

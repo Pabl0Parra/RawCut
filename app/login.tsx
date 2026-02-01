@@ -1,6 +1,7 @@
+import { useCallback } from "react";
+import { Keyboard } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
 
 import { loginSchema, LoginInput } from "../src/schemas/auth";
 import { useAuthStore } from "../src/stores/authStore";
@@ -22,13 +23,25 @@ export default function LoginScreen() {
         },
     });
 
-    const onSubmit = async (data: LoginInput) => {
-        clearError();
-        const success = await signIn(data.identifier, data.password);
-        if (success) {
-            router.replace("/(tabs)");
-        }
-    };
+    const onSubmit = useCallback(
+        async (data: LoginInput): Promise<void> => {
+            Keyboard.dismiss();
+            clearError();
+
+            try {
+                await signIn(data.identifier, data.password);
+                // Navigation is handled by _layout.tsx's auth routing effect
+                // when the user state changes in the store. Do NOT call
+                // router.replace() here — it would race with the layout.
+            } catch (err) {
+                // signIn should handle its own error state internally,
+                // but we catch here to prevent unhandled promise rejections
+                // from react-hook-form's handleSubmit.
+                console.error("[LoginScreen] Sign in failed:", err);
+            }
+        },
+        [signIn, clearError],
+    );
 
     return (
         <AuthLayout
@@ -41,7 +54,7 @@ export default function LoginScreen() {
             linkText="¿No tienes cuenta?"
             linkLabel="Regístrate"
             linkHref="/register"
-            showLogo={true}
+            showLogo
         >
             <AuthFormField
                 control={control}

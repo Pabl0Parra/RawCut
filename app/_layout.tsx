@@ -1,7 +1,14 @@
+// app/_layout.tsx
 import { Stack, SplashScreen, useRouter, useSegments } from "expo-router";
 import * as Linking from "expo-linking";
-import { useEffect, useState, useCallback } from "react";
-import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
+import { useEffect, useState, useCallback, useRef } from "react";
+import {
+    View,
+    StyleSheet,
+    ActivityIndicator,
+    Text,
+    TouchableOpacity,
+} from "react-native";
 import {
     useFonts,
     Inter_400Regular,
@@ -27,14 +34,31 @@ SplashScreen.preventAutoHideAsync();
 // Constants
 // ============================================================================
 
-/** Maximum time to wait for session initialization before proceeding unauthenticated */
 const SESSION_INIT_TIMEOUT_MS = 10_000;
 
-/** Auth events that warrant a profile re-fetch */
+/**
+ * Only these auth events should trigger a profile re-fetch.
+ * Notably excludes INITIAL_SESSION (handled by initSession)
+ * and TOKEN_REFRESHED (session exists, profile unchanged).
+ */
 const PROFILE_FETCH_EVENTS = new Set<AuthChangeEvent>([
     "SIGNED_IN",
     "USER_UPDATED",
 ]);
+
+/**
+ * Specific error messages that indicate an invalid/expired refresh token.
+ * Intentionally narrow — we never want to swallow unrelated 400s.
+ */
+const INVALID_TOKEN_MESSAGES = [
+    "refresh_token_not_found",
+    "Refresh Token Not Found",
+    "Invalid Refresh Token",
+] as const;
+
+function isInvalidTokenError(error: { message: string }): boolean {
+    return INVALID_TOKEN_MESSAGES.some((msg) => error.message.includes(msg));
+}
 
 // ============================================================================
 // Helpers
@@ -49,8 +73,8 @@ const TransparentTheme = {
 };
 
 /**
- * Races a promise against a timeout.
- * Rejects with `Error(message)` if the deadline fires first.
+ * Races a promise against a timeout. The original promise continues executing
+ * in the background if the timeout wins — callers should handle cleanup if needed.
  */
 function withTimeout<T>(
     promise: Promise<T>,
@@ -77,13 +101,21 @@ function isTimeoutError(err: unknown): boolean {
 // ============================================================================
 
 export default function RootLayout() {
-    const { user, setSession, fetchProfile } = useAuthStore();
     const segments = useSegments();
     const router = useRouter();
 
     const [isReady, setIsReady] = useState(false);
     const [isSplashFinished, setIsSplashFinished] = useState(false);
     const [initError, setInitError] = useState<string | null>(null);
+
+    // Track whether the component is still mounted for async safety.
+    // Root layouts rarely unmount, but ErrorBoundary resets and
+    // StrictMode double-effects in dev can cause it.
+    const mountedRef = useRef(true);
+
+    // Read auth state reactively for rendering/routing, but access
+    // store methods via getState() inside effects to avoid stale closures.
+    const user = useAuthStore((s) => s.user);
 
     const [fontsLoaded, fontError] = useFonts({
         Inter_400Regular,
@@ -97,25 +129,27 @@ export default function RootLayout() {
     // Auth initialization
     // ────────────────────────────────────────────────────────────────────────
     useEffect(() => {
+        mountedRef.current = true;
         console.log("[RootLayout] Setting up auth listeners…");
 
         // 1. Subscribe to ongoing auth changes.
-        //    Skip INITIAL_SESSION to avoid a double fetchProfile (initSession
-        //    handles it below).
+        //    All store access goes through getState() — never from closures.
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(
             async (event: AuthChangeEvent, session: Session | null) => {
+                if (!mountedRef.current) return;
+
                 console.log("[RootLayout] Auth state changed:", {
                     event,
                     hasSession: !!session,
                 });
 
-                setSession(session);
+                useAuthStore.getState().setSession(session);
 
                 if (PROFILE_FETCH_EVENTS.has(event) && session?.user) {
                     try {
-                        await fetchProfile();
+                        await useAuthStore.getState().fetchProfile();
                     } catch (err) {
                         console.warn(
                             "[RootLayout] fetchProfile (onAuthStateChange) failed:",
@@ -140,21 +174,17 @@ export default function RootLayout() {
                     "Session initialization timed out",
                 );
 
-                if (error) {
-                    const isInvalidToken =
-                        error.message.includes("refresh_token_not_found") ||
-                        error.message.includes("Refresh Token Not Found") ||
-                        error.message.includes("Invalid Refresh Token") ||
-                        error.status === 400;
+                if (!mountedRef.current) return;
 
-                    if (isInvalidToken) {
+                if (error) {
+                    if (isInvalidTokenError(error)) {
                         // Supabase auto-signs-out on invalid refresh tokens
                         // (fires SIGNED_OUT before INITIAL_SESSION), so we
-                        // only need to clear local state — no redundant signOut().
+                        // only need to clear local state.
                         console.warn(
                             "[RootLayout] Invalid/Expired session detected, clearing local state…",
                         );
-                        setSession(null);
+                        useAuthStore.getState().setSession(null);
                     } else {
                         console.error("[RootLayout] Session error:", error);
                         setInitError(
@@ -165,30 +195,29 @@ export default function RootLayout() {
                     console.log("[RootLayout] Session initialized:", {
                         hasSession: !!session,
                     });
-                    setSession(session);
+                    useAuthStore.getState().setSession(session);
 
                     if (session?.user) {
-                        // Profile fetch is non-critical – wrap with its own timeout
                         try {
                             await withTimeout(
-                                fetchProfile(),
+                                useAuthStore.getState().fetchProfile(),
                                 SESSION_INIT_TIMEOUT_MS,
                                 "Profile fetch timed out",
                             );
                         } catch (profileErr) {
+                            // Non-fatal: profile will be retried by
+                            // useFocusEffect in HomeScreen.
                             console.warn(
                                 "[RootLayout] Profile fetch failed (non-fatal):",
                                 profileErr,
                             );
-                            // The profile will be fetched again by useFocusEffect
-                            // in the home screen – don't block startup.
                         }
                     }
                 }
             } catch (err) {
+                if (!mountedRef.current) return;
+
                 if (isTimeoutError(err)) {
-                    // Timeout: proceed as unauthenticated – the user can still
-                    // log in and a fresh session will be established.
                     console.warn(
                         "[RootLayout] Session init timed out, proceeding without session",
                     );
@@ -199,10 +228,12 @@ export default function RootLayout() {
                     );
                 }
             } finally {
-                console.log(
-                    "[RootLayout] Session init complete → isReady = true",
-                );
-                setIsReady(true);
+                if (mountedRef.current) {
+                    console.log(
+                        "[RootLayout] Session init complete → isReady = true",
+                    );
+                    setIsReady(true);
+                }
             }
         };
 
@@ -224,8 +255,8 @@ export default function RootLayout() {
                 if (error) {
                     console.error("Deep link auth error:", error);
                 }
-                if (data.session) {
-                    setSession(data.session);
+                if (data.session && mountedRef.current) {
+                    useAuthStore.getState().setSession(data.session);
                 }
             }
         };
@@ -233,9 +264,15 @@ export default function RootLayout() {
         const deepLinkSub = Linking.addEventListener("url", (event) => {
             handleDeepLink(event.url);
         });
-        Linking.getInitialURL().then(handleDeepLink);
+
+        Linking.getInitialURL()
+            .then(handleDeepLink)
+            .catch((err) => {
+                console.warn("[RootLayout] getInitialURL failed:", err);
+            });
 
         return () => {
+            mountedRef.current = false;
             subscription.unsubscribe();
             deepLinkSub.remove();
         };
@@ -253,14 +290,13 @@ export default function RootLayout() {
     }, [fontsLoaded, fontError]);
 
     // ────────────────────────────────────────────────────────────────────────
-    // Auth-based routing – only fires once BOTH the session is resolved AND
-    // the splash is dismissed, guaranteeing the Stack navigator is mounted.
+    // Auth-based routing
+    //
+    // Depends on actual state values (isReady, isSplashFinished), not derived
+    // variables, so the dependency array is honest and refactor-safe.
     // ────────────────────────────────────────────────────────────────────────
-    const shouldShowContent = isReady && isSplashFinished;
-
     useEffect(() => {
-        if (!shouldShowContent) {
-            console.log("[RootLayout] Not fully ready, deferring routing");
+        if (!isReady || !isSplashFinished) {
             return;
         }
 
@@ -269,25 +305,51 @@ export default function RootLayout() {
             segments,
         });
 
-        const inAuthGroup = segments[0] === "(tabs)";
+        const currentRoot = segments[0];
+        const inAuthGroup = currentRoot === "(tabs)";
         const inPublicRoute =
-            segments[0] === "login" || segments[0] === "register";
+            currentRoot === "login" || currentRoot === "register";
 
         if (!user && inAuthGroup) {
             console.log("[RootLayout] Unauthenticated → /login");
             router.replace("/login");
-        } else if (user && (inPublicRoute || segments[0] === undefined)) {
+        } else if (user && (inPublicRoute || currentRoot === undefined)) {
             console.log("[RootLayout] Authenticated → /(tabs)");
             router.replace("/(tabs)");
         }
-    }, [user, segments, shouldShowContent]);
+    }, [user, segments, isReady, isSplashFinished]);
 
     // ────────────────────────────────────────────────────────────────────────
-    // Splash callback (stable reference)
+    // Stable callbacks
     // ────────────────────────────────────────────────────────────────────────
     const handleSplashFinish = useCallback(() => {
         console.log("[RootLayout] Video splash finished");
         setIsSplashFinished(true);
+    }, []);
+
+    const handleRetryInit = useCallback(() => {
+        setInitError(null);
+        setIsReady(false);
+
+        supabase.auth
+            .getSession()
+            .then(({ data: { session }, error }) => {
+                if (!mountedRef.current) return;
+
+                if (error) {
+                    setInitError(error.message);
+                } else {
+                    useAuthStore.getState().setSession(session);
+                }
+                setIsReady(true);
+            })
+            .catch((err) => {
+                if (!mountedRef.current) return;
+                setInitError(
+                    err instanceof Error ? err.message : "Retry failed",
+                );
+                setIsReady(true);
+            });
     }, []);
 
     // ────────────────────────────────────────────────────────────────────────
@@ -300,19 +362,24 @@ export default function RootLayout() {
     // ────────────────────────────────────────────────────────────────────────
     // Render
     //
-    // KEY ARCHITECTURAL CHANGE: The Stack is ALWAYS mounted.
-    // Splash, loading and error states render as overlays on top.
-    // This prevents the race condition where router.replace() fires
-    // before the navigator exists.
+    // The Stack is ALWAYS mounted so router.replace() never fires against a
+    // non-existent navigator. Overlays block interaction with pointerEvents
+    // until the app is ready.
+    //
+    // IMPORTANT: Because the Stack mounts immediately, (tabs) will render
+    // before auth resolves. Tab screens that make authenticated API calls
+    // MUST guard with: if (!user) return;
+    // This is the correct pattern — screens should be resilient to mounting
+    // before auth is known.
     // ────────────────────────────────────────────────────────────────────────
+    const appReady = isReady && isSplashFinished && !initError;
+
     return (
         <ErrorBoundary>
             <ThemeProvider value={TransparentTheme}>
                 <View style={styles.container}>
-                    {/* Smoke background – only once the app is fully ready */}
-                    {shouldShowContent && <SmokeBackground />}
+                    {appReady && <SmokeBackground />}
 
-                    {/* Always-mounted navigator */}
                     <Stack
                         screenOptions={{
                             headerShown: false,
@@ -333,13 +400,14 @@ export default function RootLayout() {
                         />
                     </Stack>
 
-                    {/* ── Overlay: loading (splash done, session still loading) ── */}
+                    {/* ── Overlay: loading (splash done, session still resolving) ── */}
                     {isSplashFinished && !isReady && (
                         <View
                             style={[
                                 StyleSheet.absoluteFill,
                                 styles.loadingOverlay,
                             ]}
+                            pointerEvents="auto"
                         >
                             <ActivityIndicator
                                 size="large"
@@ -351,13 +419,14 @@ export default function RootLayout() {
                         </View>
                     )}
 
-                    {/* ── Overlay: fatal init error ── */}
+                    {/* ── Overlay: fatal init error with retry ── */}
                     {initError && isSplashFinished && (
                         <View
                             style={[
                                 StyleSheet.absoluteFill,
                                 styles.errorOverlay,
                             ]}
+                            pointerEvents="auto"
                         >
                             <Text style={styles.errorTitle}>
                                 Error de Inicialización
@@ -369,6 +438,15 @@ export default function RootLayout() {
                                 Por favor, verifica tu conexión e intenta de
                                 nuevo.
                             </Text>
+                            <TouchableOpacity
+                                style={styles.retryButton}
+                                onPress={handleRetryInit}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.retryButtonText}>
+                                    Reintentar
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     )}
 
@@ -379,6 +457,7 @@ export default function RootLayout() {
                                 StyleSheet.absoluteFill,
                                 styles.splashOverlay,
                             ]}
+                            pointerEvents="auto"
                         >
                             <VideoSplash onFinish={handleSplashFinish} />
                         </View>
@@ -433,6 +512,23 @@ const styles = StyleSheet.create({
         fontFamily: "Inter_400Regular",
         color: Colors.metalSilver,
         textAlign: "center",
+        marginBottom: 24,
+    },
+    retryButton: {
+        backgroundColor: Colors.bloodRed,
+        paddingHorizontal: 32,
+        paddingVertical: 12,
+        borderRadius: 8,
+        elevation: 3,
+        shadowColor: Colors.bloodRed,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+    },
+    retryButtonText: {
+        fontSize: 16,
+        fontFamily: "Inter_600SemiBold",
+        color: Colors.white,
     },
     loadingText: {
         fontSize: 16,
