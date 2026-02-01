@@ -96,6 +96,23 @@ function isTimeoutError(err: unknown): boolean {
     return err instanceof Error && err.message.includes("timed out");
 }
 
+/**
+ * Non-critical profile fetch with its own timeout.
+ * Failures are logged but never propagated — the profile will be
+ * retried by useFocusEffect in HomeScreen.
+ */
+async function fetchProfileSafely(): Promise<void> {
+    try {
+        await withTimeout(
+            useAuthStore.getState().fetchProfile(),
+            SESSION_INIT_TIMEOUT_MS,
+            "Profile fetch timed out",
+        );
+    } catch (err) {
+        console.warn("[RootLayout] Profile fetch failed (non-fatal):", err);
+    }
+}
+
 // ============================================================================
 // Root Layout
 // ============================================================================
@@ -161,6 +178,25 @@ export default function RootLayout() {
         );
 
         // 2. Initialise the session from storage (with a hard timeout).
+        //    Cognitive complexity kept ≤ 15 by extracting handleSessionError
+        //    and fetchProfileSafely.
+        const handleSessionError = (
+            error: { message: string },
+        ): void => {
+            if (isInvalidTokenError(error)) {
+                // Supabase auto-signs-out on invalid refresh tokens
+                // (fires SIGNED_OUT before INITIAL_SESSION), so we
+                // only need to clear local state.
+                console.warn(
+                    "[RootLayout] Invalid/Expired session detected, clearing local state…",
+                );
+                useAuthStore.getState().setSession(null);
+            } else {
+                console.error("[RootLayout] Session error:", error);
+                setInitError(error.message || "Failed to initialize session");
+            }
+        };
+
         const initSession = async (): Promise<void> => {
             console.log("[RootLayout] Initializing session…");
 
@@ -177,42 +213,17 @@ export default function RootLayout() {
                 if (!mountedRef.current) return;
 
                 if (error) {
-                    if (isInvalidTokenError(error)) {
-                        // Supabase auto-signs-out on invalid refresh tokens
-                        // (fires SIGNED_OUT before INITIAL_SESSION), so we
-                        // only need to clear local state.
-                        console.warn(
-                            "[RootLayout] Invalid/Expired session detected, clearing local state…",
-                        );
-                        useAuthStore.getState().setSession(null);
-                    } else {
-                        console.error("[RootLayout] Session error:", error);
-                        setInitError(
-                            error.message || "Failed to initialize session",
-                        );
-                    }
-                } else {
-                    console.log("[RootLayout] Session initialized:", {
-                        hasSession: !!session,
-                    });
-                    useAuthStore.getState().setSession(session);
+                    handleSessionError(error);
+                    return;
+                }
 
-                    if (session?.user) {
-                        try {
-                            await withTimeout(
-                                useAuthStore.getState().fetchProfile(),
-                                SESSION_INIT_TIMEOUT_MS,
-                                "Profile fetch timed out",
-                            );
-                        } catch (profileErr) {
-                            // Non-fatal: profile will be retried by
-                            // useFocusEffect in HomeScreen.
-                            console.warn(
-                                "[RootLayout] Profile fetch failed (non-fatal):",
-                                profileErr,
-                            );
-                        }
-                    }
+                console.log("[RootLayout] Session initialized:", {
+                    hasSession: !!session,
+                });
+                useAuthStore.getState().setSession(session);
+
+                if (session?.user) {
+                    await fetchProfileSafely();
                 }
             } catch (err) {
                 if (!mountedRef.current) return;
