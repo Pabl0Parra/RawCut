@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, JSX } from "react";
+import React, { useState, useEffect, useCallback, useRef, JSX } from "react";
 import {
     View,
     Text,
@@ -10,8 +10,6 @@ import {
     StyleSheet,
     Modal,
     ScrollView,
-    type ViewStyle,
-    type TextStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -73,14 +71,11 @@ import SmokeBackground from "../../src/components/SmokeBackground";
 const MAX_CONTINUE_WATCHING_ITEMS = 10;
 
 // ============================================================================
-// Custom Hooks
+// Custom Hook — useContentLoading
 // ============================================================================
 
 interface UseContentLoadingParams {
     activeTab: ContentTab;
-    page: number;
-    hasMore: boolean;
-    loading: boolean;
     filtersActive: boolean;
     searchQuery: string;
     sortBy: string;
@@ -88,26 +83,41 @@ interface UseContentLoadingParams {
     selectedYear: string;
 }
 
+type LoadContentOverrides = Partial<
+    Pick<UseContentLoadingParams, "sortBy" | "selectedGenre" | "selectedYear" | "activeTab">
+>;
+
 interface UseContentLoadingReturn {
-    loadContent: (reset?: boolean, overrides?: Partial<Pick<UseContentLoadingParams, 'sortBy' | 'selectedGenre' | 'selectedYear' | 'activeTab'>>) => Promise<void>;
+    loadContent: (reset?: boolean, overrides?: LoadContentOverrides) => Promise<void>;
     loading: boolean;
     movies: Movie[];
     tvShows: TVShow[];
     setMovies: React.Dispatch<React.SetStateAction<Movie[]>>;
     setTVShows: React.Dispatch<React.SetStateAction<TVShow[]>>;
-    setPage: React.Dispatch<React.SetStateAction<number>>;
-    setHasMore: React.Dispatch<React.SetStateAction<boolean>>;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    resetPagination: () => void;
 }
 
+/**
+ * Manages content fetching with pagination, filtering, and search.
+ *
+ * Pagination state (page, hasMore, loading) is stored in refs so that
+ * `loadContent` doesn't recreate on every page increment — this prevents
+ * a cascade of stale closures through effects and callbacks that depend on it.
+ */
 const useContentLoading = (
-    params: UseContentLoadingParams
+    params: UseContentLoadingParams,
 ): UseContentLoadingReturn => {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [tvShows, setTVShows] = useState<TVShow[]>([]);
+    // Exposed as state for rendering (loading spinner, etc.)
     const [localLoading, setLocalLoading] = useState(true);
-    const [localPage, setLocalPage] = useState(1);
-    const [localHasMore, setLocalHasMore] = useState(true);
+
+    // Pagination lives in refs — read by loadContent without causing
+    // callback recreation. Written alongside state updates.
+    const pageRef = useRef(1);
+    const hasMoreRef = useRef(true);
+    const loadingRef = useRef(false);
 
     const {
         activeTab,
@@ -118,23 +128,30 @@ const useContentLoading = (
         selectedYear,
     } = params;
 
+    const resetPagination = useCallback((): void => {
+        pageRef.current = 1;
+        hasMoreRef.current = true;
+    }, []);
+
     const loadContent = useCallback(
-        async (reset: boolean = false, overrides?: Partial<Pick<UseContentLoadingParams, 'sortBy' | 'selectedGenre' | 'selectedYear' | 'activeTab'>>): Promise<void> => {
-            const currentPage = reset ? 1 : localPage;
-            // If overrides are provided, use them; otherwise use state from params
+        async (reset: boolean = false, overrides?: LoadContentOverrides): Promise<void> => {
+            const currentPage = reset ? 1 : pageRef.current;
+
             const effectiveSortBy = overrides?.sortBy ?? sortBy;
-            const effectiveGenre = overrides?.selectedGenre !== undefined ? overrides.selectedGenre : selectedGenre;
+            const effectiveGenre = overrides?.selectedGenre !== undefined
+                ? overrides.selectedGenre
+                : selectedGenre;
             const effectiveYear = overrides?.selectedYear ?? selectedYear;
             const effectiveTab = overrides?.activeTab ?? activeTab;
 
-            // Filters are active if overrides are used OR if they were already active in state
             const effectiveFiltersActive = overrides ? true : filtersActive;
             const shouldUseDiscoverApi = effectiveFiltersActive && !searchQuery;
 
-            if (shouldSkipContentLoad(reset, localHasMore, localLoading)) {
+            if (shouldSkipContentLoad(reset, hasMoreRef.current, loadingRef.current)) {
                 return;
             }
 
+            loadingRef.current = true;
             setLocalLoading(true);
 
             try {
@@ -146,46 +163,28 @@ const useContentLoading = (
                     activeTab: effectiveTab,
                 });
 
-                if (effectiveTab === "movies") {
-                    const { results, totalPages } = await fetchMovieContent(
-                        currentPage,
-                        shouldUseDiscoverApi,
-                        discoverParams
-                    );
+                const isMovies = effectiveTab === "movies";
+                const { results, totalPages } = isMovies
+                    ? await fetchMovieContent(currentPage, shouldUseDiscoverApi, discoverParams)
+                    : await fetchTVContent(currentPage, shouldUseDiscoverApi, discoverParams);
 
-                    setMovies((prev) => mergeContentResults(prev, results, reset));
-                    const pagination = calculatePaginationState(currentPage, totalPages, reset);
-                    setLocalHasMore(pagination.hasMore);
-                    setLocalPage(pagination.nextPage);
+                if (isMovies) {
+                    setMovies((prev: Movie[]) => mergeContentResults(prev, results as Movie[], reset));
                 } else {
-                    const { results, totalPages } = await fetchTVContent(
-                        currentPage,
-                        shouldUseDiscoverApi,
-                        discoverParams
-                    );
-
-                    setTVShows((prev) => mergeContentResults(prev, results, reset));
-                    const pagination = calculatePaginationState(currentPage, totalPages, reset);
-                    setLocalHasMore(pagination.hasMore);
-                    setLocalPage(pagination.nextPage);
+                    setTVShows((prev: TVShow[]) => mergeContentResults(prev, results as TVShow[], reset));
                 }
+
+                const pagination = calculatePaginationState(currentPage, totalPages, reset);
+                hasMoreRef.current = pagination.hasMore;
+                pageRef.current = pagination.nextPage;
             } catch (err) {
-                console.error("Error loading content:", err);
+                console.error("[useContentLoading] Error loading content:", err);
             } finally {
+                loadingRef.current = false;
                 setLocalLoading(false);
             }
         },
-        [
-            activeTab,
-            filtersActive,
-            searchQuery,
-            sortBy,
-            selectedGenre,
-            selectedYear,
-            localPage,
-            localHasMore,
-            localLoading,
-        ]
+        [activeTab, filtersActive, searchQuery, sortBy, selectedGenre, selectedYear],
     );
 
     return {
@@ -195,9 +194,8 @@ const useContentLoading = (
         tvShows,
         setMovies,
         setTVShows,
-        setPage: setLocalPage,
-        setHasMore: setLocalHasMore,
         setLoading: setLocalLoading,
+        resetPagination,
     };
 };
 
@@ -206,19 +204,19 @@ const useContentLoading = (
 // ============================================================================
 
 export default function HomeScreen(): JSX.Element {
-    // Tab State
+    // ── Tab State ───────────────────────────────────────────────────────
     const [activeTab, setActiveTab] = useState<ContentTab>("movies");
 
-    // Search State
+    // ── Search State ────────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
 
-    // UI State
+    // ── UI State ────────────────────────────────────────────────────────
     const [refreshing, setRefreshing] = useState(false);
     const [showProfileBanner, setShowProfileBanner] = useState(false);
     const [showContinueSection, setShowContinueSection] = useState(true);
 
-    // Filter State
+    // ── Filter State ────────────────────────────────────────────────────
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [genres, setGenres] = useState<Genre[]>([]);
     const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
@@ -226,11 +224,11 @@ export default function HomeScreen(): JSX.Element {
     const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_VALUE);
     const [filtersActive, setFiltersActive] = useState(false);
 
-    // Continue Watching State
+    // ── Continue Watching State ─────────────────────────────────────────
     const [continueWatching, setContinueWatching] = useState<ContinueWatchingItem[]>([]);
     const [loadingContinue, setLoadingContinue] = useState(false);
 
-    // Content Loading Hook
+    // ── Content Loading Hook ────────────────────────────────────────────
     const {
         loadContent,
         loading,
@@ -238,14 +236,10 @@ export default function HomeScreen(): JSX.Element {
         tvShows,
         setMovies,
         setTVShows,
-        setPage,
-        setHasMore,
         setLoading,
+        resetPagination,
     } = useContentLoading({
         activeTab,
-        page: 1,
-        hasMore: true,
-        loading: true,
         filtersActive,
         searchQuery,
         sortBy,
@@ -253,37 +247,26 @@ export default function HomeScreen(): JSX.Element {
         selectedYear,
     });
 
-    // Store Hooks
-    const { user } = useAuthStore();
-    const {
-        fetchUserContent,
-        isFavorite,
-        isInWatchlist,
-        isWatched,
-        addToFavorites,
-        removeFromFavorites,
-        addToWatchlist,
-        removeFromWatchlist,
-        toggleWatched,
-        tvProgress,
-        fetchTVProgress,
-        getNextEpisodeToWatch,
-    } = useContentStore();
+    // ── Store Selectors (granular — only re-render when these change) ──
+    const user = useAuthStore((s) => s.user);
+    const isFavorite = useContentStore((s) => s.isFavorite);
+    const isInWatchlist = useContentStore((s) => s.isInWatchlist);
+    const isWatched = useContentStore((s) => s.isWatched);
+    const tvProgress = useContentStore((s) => s.tvProgress);
+    const getNextEpisodeToWatch = useContentStore((s) => s.getNextEpisodeToWatch);
 
-    // ========================================================================
-    // Derived State
-    // ========================================================================
-
+    // ── Derived State ───────────────────────────────────────────────────
     const data = activeTab === "movies" ? movies : tvShows;
+    const mediaType: MediaType = activeTab === "movies" ? "movie" : "tv";
 
-    // ========================================================================
+    // ====================================================================
     // Effects
-    // ========================================================================
+    // ====================================================================
 
     // Initial content load
     useEffect(() => {
         loadContent();
-        loadGenres();
+        loadGenres(activeTab);
     }, []);
 
     // Fetch user content when screen focuses
@@ -291,21 +274,19 @@ export default function HomeScreen(): JSX.Element {
         useCallback(() => {
             if (!user) return;
 
+            const { fetchUserContent, fetchTVProgress } = useContentStore.getState();
             fetchUserContent();
             fetchTVProgress();
 
             const { profile } = useAuthStore.getState();
             const hasGenericUsername = profile?.username?.startsWith("user_") ?? false;
             setShowProfileBanner(hasGenericUsername);
-        }, [user, fetchUserContent, fetchTVProgress])
+        }, [user]),
     );
 
     // Update continue watching when TV progress changes
     useEffect(() => {
-        const shouldLoadContinueWatching =
-            activeTab === "tv" && user && tvProgress.length > 0;
-
-        if (shouldLoadContinueWatching) {
+        if (activeTab === "tv" && user && tvProgress.length > 0) {
             loadContinueWatching();
         } else {
             setContinueWatching([]);
@@ -314,43 +295,44 @@ export default function HomeScreen(): JSX.Element {
 
     // Handle tab changes
     useEffect(() => {
-        setPage(1);
-        setHasMore(true);
+        resetPagination();
         setSearchQuery("");
         resetFilters(false);
         loadContent(true);
-        loadGenres();
+        loadGenres(activeTab);
     }, [activeTab]);
 
-    // ========================================================================
+    // ====================================================================
     // Handlers
-    // ========================================================================
+    // ====================================================================
 
-    const loadGenres = async (): Promise<void> => {
+    const loadGenres = useCallback(async (tab: ContentTab): Promise<void> => {
         try {
-            const data =
-                activeTab === "movies"
-                    ? await getMovieGenres()
-                    : await getTVGenres();
+            const genreData = tab === "movies"
+                ? await getMovieGenres()
+                : await getTVGenres();
 
             const processedGenres = sortGenresAlphabetically(
-                data.genres.map((genre) => ({
+                genreData.genres.map((genre) => ({
                     ...genre,
                     name: processGenreName(genre.name),
-                }))
+                })),
             );
 
             setGenres(processedGenres);
         } catch (err) {
-            console.error("Error loading genres:", err);
+            console.error("[HomeScreen] Error loading genres:", err);
         }
-    };
+    }, []);
 
-    const loadContinueWatching = async (): Promise<void> => {
+    const loadContinueWatching = useCallback(async (): Promise<void> => {
         setLoadingContinue(true);
 
         try {
-            const actualProgress = filterActualEpisodeProgress(tvProgress);
+            const currentTvProgress = useContentStore.getState().tvProgress;
+            const currentIsWatched = useContentStore.getState().isWatched;
+
+            const actualProgress = filterActualEpisodeProgress(currentTvProgress);
             const showIds = extractUniqueShowIds(actualProgress);
 
             if (showIds.length === 0) {
@@ -363,21 +345,21 @@ export default function HomeScreen(): JSX.Element {
                 .map((showId) =>
                     processContinueWatchingShow(
                         showId,
-                        countWatchedEpisodes(tvProgress, showId),
-                        isWatched(showId, "tv")
-                    )
+                        countWatchedEpisodes(currentTvProgress, showId),
+                        currentIsWatched(showId, "tv"),
+                    ),
                 );
 
             const results = await Promise.all(showPromises);
             setContinueWatching(results.filter(isNotNull));
         } catch (err) {
-            console.error("Error loading continue watching:", err);
+            console.error("[HomeScreen] Error loading continue watching:", err);
         } finally {
             setLoadingContinue(false);
         }
-    };
+    }, []);
 
-    const resetFilters = (reload: boolean = true): void => {
+    const resetFilters = useCallback((reload: boolean = true): void => {
         setSelectedGenre(null);
         setSelectedYear("");
         setSortBy(DEFAULT_SORT_VALUE);
@@ -386,31 +368,29 @@ export default function HomeScreen(): JSX.Element {
         if (reload) {
             loadContent(true);
         }
-    };
+    }, [loadContent]);
 
-    const applyFilters = (): void => {
+    const applyFilters = useCallback((): void => {
         const activeFiltersExist = hasActiveFilters(
             selectedGenre,
             selectedYear,
             sortBy,
-            DEFAULT_SORT_VALUE
+            DEFAULT_SORT_VALUE,
         );
 
         setFiltersActive(activeFiltersExist);
         setShowFilterModal(false);
-        setPage(1);
-        setHasMore(true);
+        resetPagination();
 
-        // Immediately load content with the CURRENT values to avoid closure race conditions
         loadContent(true, {
             selectedGenre,
             selectedYear,
             sortBy,
-            activeTab
+            activeTab,
         });
-    };
+    }, [selectedGenre, selectedYear, sortBy, activeTab, loadContent, resetPagination]);
 
-    const handleSearch = async (): Promise<void> => {
+    const handleSearch = useCallback(async (): Promise<void> => {
         if (!searchQuery.trim()) {
             loadContent(true);
             return;
@@ -427,67 +407,81 @@ export default function HomeScreen(): JSX.Element {
                 const response = await searchTVShows(searchQuery);
                 setTVShows(response.results);
             }
-            setHasMore(false);
+            resetPagination();
         } catch (err) {
-            console.error("Error searching:", err);
+            console.error("[HomeScreen] Error searching:", err);
         } finally {
             setLoading(false);
             setIsSearching(false);
         }
-    };
+    }, [searchQuery, activeTab, loadContent, setLoading, setMovies, setTVShows, resetPagination]);
 
     const handleRefresh = useCallback(async (): Promise<void> => {
         setRefreshing(true);
-        setPage(1);
-        setHasMore(true);
+        resetPagination();
         setSearchQuery("");
         await loadContent(true);
         setRefreshing(false);
+    }, [loadContent, resetPagination]);
+
+    const handleClearSearch = useCallback((): void => {
+        setSearchQuery("");
+        loadContent(true);
     }, [loadContent]);
 
-    const handleToggleFavorite = useCallback(async (
-        tmdbId: number,
-        mediaType: MediaType
-    ): Promise<void> => {
-        if (!user) return;
+    const handleToggleFavorite = useCallback(
+        async (tmdbId: number, type: MediaType): Promise<void> => {
+            if (!useAuthStore.getState().user) return;
 
-        if (isFavorite(tmdbId, mediaType)) {
-            await removeFromFavorites(tmdbId, mediaType);
-        } else {
-            await addToFavorites(tmdbId, mediaType);
-        }
-    }, [user, isFavorite, removeFromFavorites, addToFavorites]);
+            try {
+                const store = useContentStore.getState();
+                if (store.isFavorite(tmdbId, type)) {
+                    await store.removeFromFavorites(tmdbId, type);
+                } else {
+                    await store.addToFavorites(tmdbId, type);
+                }
+            } catch (err) {
+                console.error("[HomeScreen] Toggle favorite failed:", err);
+            }
+        },
+        [],
+    );
 
-    const handleToggleWatchlist = useCallback(async (
-        tmdbId: number,
-        mediaType: MediaType
-    ): Promise<void> => {
-        if (!user) return;
+    const handleToggleWatchlist = useCallback(
+        async (tmdbId: number, type: MediaType): Promise<void> => {
+            if (!useAuthStore.getState().user) return;
 
-        if (isInWatchlist(tmdbId, mediaType)) {
-            await removeFromWatchlist(tmdbId, mediaType);
-        } else {
-            await addToWatchlist(tmdbId, mediaType);
-        }
-    }, [user, isInWatchlist, removeFromWatchlist, addToWatchlist]);
+            try {
+                const store = useContentStore.getState();
+                if (store.isInWatchlist(tmdbId, type)) {
+                    await store.removeFromWatchlist(tmdbId, type);
+                } else {
+                    await store.addToWatchlist(tmdbId, type);
+                }
+            } catch (err) {
+                console.error("[HomeScreen] Toggle watchlist failed:", err);
+            }
+        },
+        [],
+    );
 
-    const handleToggleWatched = useCallback(async (
-        tmdbId: number,
-        mediaType: MediaType
-    ): Promise<void> => {
-        await toggleWatched(tmdbId, mediaType);
-    }, [toggleWatched]);
+    const handleToggleWatched = useCallback(
+        async (tmdbId: number, type: MediaType): Promise<void> => {
+            try {
+                await useContentStore.getState().toggleWatched(tmdbId, type);
+            } catch (err) {
+                console.error("[HomeScreen] Toggle watched failed:", err);
+            }
+        },
+        [],
+    );
 
-    const getMediaType = useCallback((): MediaType => (activeTab === "movies" ? "movie" : "tv"), [activeTab]);
-
-    // ========================================================================
+    // ====================================================================
     // Render Functions
-    // ========================================================================
+    // ====================================================================
 
-    const renderItem = useCallback(({ item }: { item: Movie | TVShow }): JSX.Element => {
-        const mediaType = getMediaType();
-
-        return (
+    const renderItem = useCallback(
+        ({ item }: { item: Movie | TVShow }): JSX.Element => (
             <MovieCard
                 item={item}
                 mediaType={mediaType}
@@ -498,8 +492,9 @@ export default function HomeScreen(): JSX.Element {
                 onToggleWatchlist={() => handleToggleWatchlist(item.id, mediaType)}
                 onToggleWatched={() => handleToggleWatched(item.id, mediaType)}
             />
-        );
-    }, [getMediaType, isFavorite, isInWatchlist, isWatched, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched]);
+        ),
+        [mediaType, isFavorite, isInWatchlist, isWatched, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched],
+    );
 
     const renderFooter = useCallback((): JSX.Element | null => {
         if (!loading || data.length === 0) return null;
@@ -511,36 +506,56 @@ export default function HomeScreen(): JSX.Element {
         );
     }, [loading, data.length]);
 
-    const renderContinueWatchingItem = ({
-        item,
-    }: {
-        item: ContinueWatchingItem;
-    }): JSX.Element => {
-        const nextEpisode = getNextEpisodeToWatch(
-            item.show.id,
-            seasonsToProgressInfo(item.show.seasons)
-        );
+    const renderContinueWatchingItem = useCallback(
+        ({ item }: { item: ContinueWatchingItem }): JSX.Element => {
+            const nextEpisode = getNextEpisodeToWatch(
+                item.show.id,
+                seasonsToProgressInfo(item.show.seasons),
+            );
 
-        return (
-            <ContinueWatchingCard
-                item={item}
-                onPress={(showId) => router.push(`/tv/${showId}`)}
-                nextEpisode={nextEpisode}
-            />
-        );
-    };
+            return (
+                <ContinueWatchingCard
+                    item={item}
+                    onPress={(showId) => router.push(`/tv/${showId}`)}
+                    nextEpisode={nextEpisode}
+                />
+            );
+        },
+        [getNextEpisodeToWatch],
+    );
+
+    const handleEndReached = useCallback((): void => {
+        if (!isSearching) {
+            loadContent();
+        }
+    }, [isSearching, loadContent]);
+
+    const handleDismissBanner = useCallback((): void => {
+        setShowProfileBanner(false);
+    }, []);
+
+    const handleDismissContinue = useCallback((): void => {
+        setShowContinueSection(false);
+    }, []);
+
+    const handleOpenFilters = useCallback((): void => {
+        setShowFilterModal(true);
+    }, []);
+
+    const handleCloseFilters = useCallback((): void => {
+        setShowFilterModal(false);
+    }, []);
+
+    // ====================================================================
+    // Section Renderers
+    // ====================================================================
 
     const renderContinueWatching = (): JSX.Element | null => {
         if (activeTab !== "tv" || !showContinueSection) return null;
 
         if (loadingContinue) {
             return (
-                <View
-                    style={[
-                        styles.continueSection,
-                        { height: 160, justifyContent: "center" },
-                    ]}
-                >
+                <View style={[styles.continueSection, styles.continueSectionLoading]}>
                     <ActivityIndicator size="small" color={Colors.bloodRed} />
                 </View>
             );
@@ -552,19 +567,15 @@ export default function HomeScreen(): JSX.Element {
             <View style={styles.continueSection}>
                 <View style={styles.continueHeader}>
                     <Text style={styles.continueTitle}>Continuar Viendo</Text>
-                    <TouchableOpacity onPress={() => setShowContinueSection(false)}>
-                        <Ionicons
-                            name="close-circle"
-                            size={24}
-                            color={Colors.metalSilver}
-                        />
+                    <TouchableOpacity onPress={handleDismissContinue}>
+                        <Ionicons name="close-circle" size={24} color={Colors.metalSilver} />
                     </TouchableOpacity>
                 </View>
                 <FlatList
                     data={continueWatching}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item, index) => `${item.show.id}-${index}`}
+                    keyExtractor={(item) => String(item.show.id)}
                     contentContainerStyle={styles.continueList}
                     renderItem={renderContinueWatchingItem}
                 />
@@ -575,18 +586,10 @@ export default function HomeScreen(): JSX.Element {
     const renderSortOption = (option: SortOption): JSX.Element => (
         <TouchableOpacity
             key={option.value}
-            style={[
-                styles.optionChip,
-                sortBy === option.value && styles.activeOptionChip,
-            ]}
+            style={[styles.optionChip, sortBy === option.value && styles.activeOptionChip]}
             onPress={() => setSortBy(option.value)}
         >
-            <Text
-                style={[
-                    styles.optionText,
-                    sortBy === option.value && styles.activeOptionText,
-                ]}
-            >
+            <Text style={[styles.optionText, sortBy === option.value && styles.activeOptionText]}>
                 {option.label}
             </Text>
         </TouchableOpacity>
@@ -595,106 +598,85 @@ export default function HomeScreen(): JSX.Element {
     const renderGenreChip = (genre: Genre): JSX.Element => (
         <TouchableOpacity
             key={genre.id}
-            style={[
-                styles.genreChip,
-                selectedGenre === genre.id && styles.activeGenreChip,
-            ]}
-            onPress={() =>
-                setSelectedGenre(selectedGenre === genre.id ? null : genre.id)
-            }
+            style={[styles.genreChip, selectedGenre === genre.id && styles.activeGenreChip]}
+            onPress={() => setSelectedGenre(selectedGenre === genre.id ? null : genre.id)}
         >
-            <Text
-                style={[
-                    styles.genreChipText,
-                    selectedGenre === genre.id && styles.activeGenreText,
-                ]}
-            >
+            <Text style={[styles.genreChipText, selectedGenre === genre.id && styles.activeGenreText]}>
                 {genre.name}
             </Text>
         </TouchableOpacity>
     );
 
-    const renderEmptyState = (): JSX.Element => (
-        <View style={styles.centerContainer}>
-            <Text style={styles.emptyIcon}>🎬</Text>
-            <Text style={styles.emptyText}>No se encontraron resultados</Text>
-        </View>
-    );
-
-    const renderLoadingState = (): JSX.Element => (
-        <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color="#dc2626" />
-            <Text style={styles.loadingText}>Cargando contenido...</Text>
-        </View>
-    );
-
-    const renderContentList = (): JSX.Element => (
-        <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={(item) => `${item.id}`}
-            numColumns={3}
-            columnWrapperStyle={styles.columnWrapper}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            onEndReached={() => !isSearching && loadContent()}
-            onEndReachedThreshold={0.5}
-            ListFooterComponent={renderFooter}
-            initialNumToRender={12}
-            maxToRenderPerBatch={12}
-            windowSize={5}
-            removeClippedSubviews={true}
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={handleRefresh}
-                    tintColor="#dc2626"
-                    colors={["#dc2626"]}
-                />
-            }
-        />
-    );
-
     const renderMainContent = (): JSX.Element => {
         if (loading && data.length === 0) {
-            return renderLoadingState();
+            return (
+                <View style={styles.centerContainer}>
+                    <ActivityIndicator size="large" color="#dc2626" />
+                    <Text style={styles.loadingText}>Cargando contenido...</Text>
+                </View>
+            );
         }
+
         if (data.length === 0) {
-            return renderEmptyState();
+            return (
+                <View style={styles.centerContainer}>
+                    <Text style={styles.emptyIcon}>🎬</Text>
+                    <Text style={styles.emptyText}>No se encontraron resultados</Text>
+                </View>
+            );
         }
-        return renderContentList();
+
+        return (
+            <FlatList
+                data={data}
+                renderItem={renderItem}
+                keyExtractor={(item) => String(item.id)}
+                numColumns={3}
+                columnWrapperStyle={styles.columnWrapper}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+                onEndReached={handleEndReached}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={renderFooter}
+                initialNumToRender={12}
+                maxToRenderPerBatch={12}
+                windowSize={5}
+                removeClippedSubviews
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={handleRefresh}
+                        tintColor="#dc2626"
+                        colors={["#dc2626"]}
+                    />
+                }
+            />
+        );
     };
 
-    // ========================================================================
+    // ====================================================================
     // Main Render
-    // ========================================================================
+    // ====================================================================
 
     return (
-        <View style={[styles.safeArea, { paddingTop: 28 }]}>
+        <View style={[styles.safeArea, styles.safeAreaPadding]}>
             {/* Pill Tab System */}
             <View style={styles.tabsContainer}>
                 <View style={styles.tabsWrapper}>
                     <TouchableOpacity
-                        style={[
-                            styles.tab,
-                            activeTab === "movies" ? styles.activeTab : styles.inactiveTab,
-                        ]}
+                        style={[styles.tab, activeTab === "movies" ? styles.activeTab : styles.inactiveTab]}
                         onPress={() => setActiveTab("movies")}
                     >
                         <View style={styles.tabContent}>
                             <MaterialCommunityIcons
                                 name="movie-open-play-outline"
                                 size={24}
-                                color={
-                                    activeTab === "movies" ? Colors.white : Colors.metalSilver
-                                }
+                                color={activeTab === "movies" ? Colors.white : Colors.metalSilver}
                             />
                             <Text
                                 style={[
                                     styles.tabText,
-                                    activeTab === "movies"
-                                        ? styles.activeTabText
-                                        : styles.inactiveTabText,
+                                    activeTab === "movies" ? styles.activeTabText : styles.inactiveTabText,
                                 ]}
                             >
                                 Películas
@@ -703,10 +685,7 @@ export default function HomeScreen(): JSX.Element {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={[
-                            styles.tab,
-                            activeTab === "tv" ? styles.activeTab : styles.inactiveTab,
-                        ]}
+                        style={[styles.tab, activeTab === "tv" ? styles.activeTab : styles.inactiveTab]}
                         onPress={() => setActiveTab("tv")}
                     >
                         <View style={styles.tabContent}>
@@ -718,9 +697,7 @@ export default function HomeScreen(): JSX.Element {
                             <Text
                                 style={[
                                     styles.tabText,
-                                    activeTab === "tv"
-                                        ? styles.activeTabText
-                                        : styles.inactiveTabText,
+                                    activeTab === "tv" ? styles.activeTabText : styles.inactiveTabText,
                                 ]}
                             >
                                 Series
@@ -749,14 +726,10 @@ export default function HomeScreen(): JSX.Element {
                         <TouchableOpacity
                             onPress={(e) => {
                                 e.stopPropagation();
-                                setShowProfileBanner(false);
+                                handleDismissBanner();
                             }}
                         >
-                            <Ionicons
-                                name="close"
-                                size={24}
-                                color="rgba(255,255,255,0.6)"
-                            />
+                            <Ionicons name="close" size={24} color="rgba(255,255,255,0.6)" />
                         </TouchableOpacity>
                     </View>
                 </TouchableOpacity>
@@ -775,31 +748,19 @@ export default function HomeScreen(): JSX.Element {
                             onSubmitEditing={handleSearch}
                             returnKeyType="search"
                         />
-                        {!!searchQuery && (
-                            <TouchableOpacity
-                                style={styles.clearButton}
-                                onPress={() => {
-                                    setSearchQuery("");
-                                    loadContent(true);
-                                }}
-                            >
+                        {searchQuery.length > 0 && (
+                            <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
                                 <Ionicons name="close-circle" size={20} color="#71717a" />
                             </TouchableOpacity>
                         )}
-                        <TouchableOpacity
-                            style={styles.searchButton}
-                            onPress={handleSearch}
-                        >
+                        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
                             <Entypo name="magnifying-glass" size={24} color="#71717a" />
                         </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity
-                        style={[
-                            styles.filterButtonCompact,
-                            filtersActive && styles.activeFilterButton,
-                        ]}
-                        onPress={() => setShowFilterModal(true)}
+                        style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
+                        onPress={handleOpenFilters}
                     >
                         <Ionicons
                             name="filter"
@@ -810,45 +771,38 @@ export default function HomeScreen(): JSX.Element {
                 </View>
 
                 {filtersActive && (
-                    <TouchableOpacity
-                        style={styles.clearFiltersContainer}
-                        onPress={() => resetFilters(true)}
-                    >
-                        <Text style={styles.clearFiltersText}>
-                            Limpiar filtros activos
-                        </Text>
+                    <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
+                        <Text style={styles.clearFiltersText}>Limpiar filtros activos</Text>
                     </TouchableOpacity>
                 )}
             </View>
 
-            {/* Content List */}
+            {/* Content */}
             {renderMainContent()}
-
             {activeTab === "tv" && renderContinueWatching()}
 
+            {/* Filter Modal */}
             <Modal
                 visible={showFilterModal}
                 animationType="slide"
-                transparent={true}
-                onRequestClose={() => setShowFilterModal(false)}
+                transparent
+                onRequestClose={handleCloseFilters}
             >
-                <SafeAreaView style={[styles.modalContainer, { backgroundColor: Colors.metalBlack }]}>
+                <SafeAreaView style={[styles.modalContainer, styles.modalBackground]}>
                     <SmokeBackground />
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Filtrar</Text>
-                        <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+                        <TouchableOpacity onPress={handleCloseFilters}>
                             <Text style={styles.closeButtonText}>✕</Text>
                         </TouchableOpacity>
                     </View>
 
                     <ScrollView contentContainerStyle={styles.modalContent}>
-                        {/* Sort By */}
                         <Text style={styles.sectionHeader}>Ordenar Por</Text>
                         <View style={styles.optionsRow}>
                             {SORT_OPTIONS.map(renderSortOption)}
                         </View>
 
-                        {/* Year */}
                         <Text style={styles.sectionHeader}>Año de Lanzamiento</Text>
                         <TextInput
                             style={styles.yearInput}
@@ -860,7 +814,6 @@ export default function HomeScreen(): JSX.Element {
                             maxLength={4}
                         />
 
-                        {/* Genres */}
                         <Text style={styles.sectionHeader}>Género</Text>
                         <View style={styles.genresRow}>
                             {genres.map(renderGenreChip)}
@@ -868,10 +821,7 @@ export default function HomeScreen(): JSX.Element {
                     </ScrollView>
 
                     <View style={styles.modalFooter}>
-                        <TouchableOpacity
-                            style={styles.applyButton}
-                            onPress={applyFilters}
-                        >
+                        <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
                             <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
                         </TouchableOpacity>
                     </View>
@@ -889,57 +839,36 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: "transparent",
-    } as ViewStyle,
+    },
+    safeAreaPadding: {
+        paddingTop: 28,
+    },
     tabContent: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
         gap: 8,
-    } as ViewStyle,
+    },
     profileBannerTextContainer: {
         flex: 1,
-    } as ViewStyle,
-    filterHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingBottom: 8,
-    } as ViewStyle,
-    filterButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: Colors.metalGray,
-        paddingVertical: 6,
-        paddingHorizontal: 16,
-        borderRadius: 9999,
-        borderWidth: 1,
-        borderColor: Colors.metalSilver,
-    } as ViewStyle,
+    },
     activeFilterButton: {
         backgroundColor: Colors.bloodRed,
         borderColor: Colors.bloodRed,
-    } as ViewStyle,
-    filterButtonText: {
-        color: Colors.metalSilver,
-        fontWeight: "bold",
-    } as TextStyle,
-    activeFilterButtonText: {
-        color: Colors.white,
-    } as TextStyle,
+    },
     clearFiltersText: {
         color: Colors.metalSilver,
         textDecorationLine: "underline",
-    } as TextStyle,
+    },
     controlsContainer: {
         paddingHorizontal: 16,
         paddingBottom: 12,
-    } as ViewStyle,
+    },
     searchAndFilterRow: {
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-    } as ViewStyle,
+    },
     filterButtonCompact: {
         backgroundColor: Colors.metalGray,
         padding: 10,
@@ -948,11 +877,11 @@ const styles = StyleSheet.create({
         borderColor: Colors.metalSilver,
         justifyContent: "center",
         alignItems: "center",
-    } as ViewStyle,
+    },
     clearFiltersContainer: {
         marginTop: 4,
         alignSelf: "flex-end",
-    } as ViewStyle,
+    },
     searchWrapper: {
         flex: 1,
         flexDirection: "row",
@@ -961,106 +890,106 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderColor: Colors.metalSilver,
         borderWidth: 1,
-    } as ViewStyle,
+    },
     searchInput: {
         flex: 1,
         color: "#f4f4f5",
         paddingHorizontal: 16,
         paddingVertical: 12,
-    } as TextStyle,
+    },
     searchButton: {
         paddingHorizontal: 16,
         paddingVertical: 6,
-    } as ViewStyle,
+    },
     clearButton: {
         paddingHorizontal: 8,
         paddingVertical: 6,
-    } as ViewStyle,
-    searchIcon: {
-        fontSize: 20,
-    } as TextStyle,
+    },
     tabsContainer: {
         paddingHorizontal: 16,
         paddingBottom: 12,
         marginTop: -28,
-    } as ViewStyle,
+    },
     tabsWrapper: {
         flexDirection: "row",
         backgroundColor: Colors.metalGray,
         borderRadius: 9999,
-    } as ViewStyle,
+    },
     tab: {
         flex: 1,
         paddingVertical: 12,
         borderRadius: 9999,
-    } as ViewStyle,
+    },
     activeTab: {
         backgroundColor: Colors.bloodRed,
-    } as ViewStyle,
+    },
     inactiveTab: {
         backgroundColor: "transparent",
-    } as ViewStyle,
+    },
     tabText: {
         textAlign: "center",
         fontWeight: "bold",
-    } as TextStyle,
+    },
     activeTabText: {
         color: Colors.white,
-    } as TextStyle,
+    },
     inactiveTabText: {
         color: Colors.metalSilver,
-    } as TextStyle,
+    },
     centerContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-    } as ViewStyle,
+    },
     loadingText: {
         color: Colors.metalSilver,
         marginTop: 16,
-    } as TextStyle,
+    },
     emptyIcon: {
         fontSize: 60,
         marginBottom: 16,
-    } as TextStyle,
+    },
     emptyText: {
         color: Colors.metalSilver,
         fontSize: 18,
-    } as TextStyle,
+    },
     columnWrapper: {
         paddingHorizontal: 8,
         justifyContent: "center",
         gap: 12,
-    } as ViewStyle,
+    },
     listContent: {
         paddingBottom: 20,
-    } as ViewStyle,
+    },
     footerContainer: {
         paddingVertical: 16,
-    } as ViewStyle,
+    },
     modalContainer: {
         flex: 1,
         padding: 16,
-    } as ViewStyle,
+    },
+    modalBackground: {
+        backgroundColor: Colors.metalBlack,
+    },
     modalHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 24,
-    } as ViewStyle,
+    },
     modalTitle: {
         color: "#f4f4f5",
         fontSize: 24,
         fontWeight: "bold",
         fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
+    },
     closeButtonText: {
         color: Colors.bloodRed,
         fontSize: 20,
-    } as TextStyle,
+    },
     modalContent: {
         paddingBottom: 40,
-    } as ViewStyle,
+    },
     sectionHeader: {
         color: Colors.metalSilver,
         fontSize: 14,
@@ -1068,12 +997,12 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
         marginBottom: 12,
         marginTop: 16,
-    } as TextStyle,
+    },
     optionsRow: {
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 8,
-    } as ViewStyle,
+    },
     optionChip: {
         paddingHorizontal: 16,
         paddingVertical: 8,
@@ -1081,18 +1010,18 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.metalGray,
         borderWidth: 1,
         borderColor: Colors.metalSilver,
-    } as ViewStyle,
+    },
     activeOptionChip: {
         backgroundColor: Colors.bloodRed,
         borderColor: Colors.bloodRed,
-    } as ViewStyle,
+    },
     optionText: {
         color: "#f4f4f5",
-    } as TextStyle,
+    },
     activeOptionText: {
         color: Colors.white,
         fontWeight: "bold",
-    } as TextStyle,
+    },
     yearInput: {
         backgroundColor: Colors.metalGray,
         borderWidth: 1,
@@ -1101,12 +1030,12 @@ const styles = StyleSheet.create({
         padding: 12,
         color: "#f4f4f5",
         fontSize: 16,
-    } as TextStyle,
+    },
     genresRow: {
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 8,
-    } as ViewStyle,
+    },
     genreChip: {
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -1114,35 +1043,35 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.metalGray,
         borderWidth: 1,
         borderColor: Colors.metalSilver,
-    } as ViewStyle,
+    },
     activeGenreChip: {
         backgroundColor: Colors.bloodRed,
         borderColor: Colors.bloodRed,
-    } as ViewStyle,
+    },
     genreChipText: {
         color: "#f4f4f5",
         fontSize: 12,
-    } as TextStyle,
+    },
     activeGenreText: {
         color: Colors.white,
         fontWeight: "bold",
-    } as TextStyle,
+    },
     modalFooter: {
         paddingTop: 16,
         paddingBottom: 48,
-    } as ViewStyle,
+    },
     applyButton: {
         backgroundColor: Colors.bloodRed,
         paddingVertical: 16,
         borderRadius: 8,
         alignItems: "center",
-    } as ViewStyle,
+    },
     applyButtonText: {
         color: Colors.white,
         fontWeight: "bold",
         fontSize: 16,
         textTransform: "uppercase",
-    } as TextStyle,
+    },
     profileBanner: {
         marginHorizontal: 16,
         marginBottom: 16,
@@ -1154,21 +1083,21 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
-    } as ViewStyle,
+    },
     profileBannerContent: {
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
-    } as ViewStyle,
+    },
     profileBannerTitle: {
         color: Colors.white,
         fontWeight: "bold",
         fontSize: 14,
-    } as TextStyle,
+    },
     profileBannerSubtitle: {
         color: "rgba(255,255,255,0.9)",
         fontSize: 12,
-    } as TextStyle,
+    },
     continueSection: {
         paddingVertical: 20,
         backgroundColor: "rgba(10, 10, 10, 0.8)",
@@ -1176,26 +1105,27 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderColor: "rgba(255,255,255,0.05)",
         marginVertical: 8,
-    } as ViewStyle,
+    },
+    continueSectionLoading: {
+        height: 160,
+        justifyContent: "center",
+    },
     continueHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         paddingHorizontal: 16,
         marginBottom: 8,
-    } as ViewStyle,
+    },
     continueTitle: {
         color: Colors.white,
         fontSize: 18,
         fontFamily: "BebasNeue_400Regular",
         letterSpacing: 1.5,
-    } as TextStyle,
+    },
     continueList: {
         paddingHorizontal: 16,
         paddingTop: 12,
         gap: 16,
-    } as ViewStyle,
-    continueCard: {
-        width: 280,
-    } as ViewStyle,
+    },
 });
