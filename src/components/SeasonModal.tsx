@@ -61,7 +61,7 @@ export const SeasonModal: React.FC<SeasonModalProps> = ({
         if (isLoading) {
             return (
                 <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color="#dc2626" />
+                    <ActivityIndicator size="large" color={Colors.bloodRed} />
                 </View>
             );
         }
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
     } as ViewStyle,
     title: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 24,
         fontFamily: "BebasNeue_400Regular",
     } as TextStyle,

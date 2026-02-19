@@ -253,7 +253,7 @@ function UsernameEditor({
                     autoCorrect={false}
                     maxLength={20}
                     placeholder="Nombre de usuario"
-                    placeholderTextColor={Colors.placeholderGray}
+                    placeholderTextColor={Colors.textPlaceholder}
                     autoFocus
                     selectTextOnFocus
                 />
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
     } as TextStyle,
     avatarOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        backgroundColor: Colors.overlayDark,
         alignItems: "center",
         justifyContent: "center",
     } as ViewStyle,
@@ -731,9 +731,9 @@ const styles = StyleSheet.create({
     genericPrompt: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "rgba(220, 38, 38, 0.1)",
+        backgroundColor: Colors.glassRedSubtle,
         borderWidth: 1,
-        borderColor: "rgba(220, 38, 38, 0.3)",
+        borderColor: Colors.glassRedBorder,
         borderRadius: 12,
         padding: 14,
         marginBottom: 24,
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: "rgba(113, 113, 122, 0.2)",
+        borderBottomColor: Colors.glassSilver,
     } as ViewStyle,
     infoRowLeft: {
         flexDirection: "row",
@@ -801,7 +801,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         paddingVertical: 14,
         borderBottomWidth: 1,
-        borderBottomColor: "rgba(113, 113, 122, 0.2)",
+        borderBottomColor: Colors.glassSilver,
     } as ViewStyle,
     settingsRowLeft: {
         flexDirection: "row",
@@ -852,7 +852,7 @@ const styles = StyleSheet.create({
         gap: 8,
     } as ViewStyle,
     editorButtonSave: {
-        backgroundColor: "#22c55e",
+        backgroundColor: Colors.successGreen,
         width: 44,
         height: 44,
         borderRadius: 22,

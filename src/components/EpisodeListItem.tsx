@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     } as ViewStyle,
     title: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontWeight: "bold",
         fontSize: 14,
         marginBottom: 4,

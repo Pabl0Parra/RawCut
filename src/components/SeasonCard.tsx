@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(220, 38, 38, 0.4)",
+        backgroundColor: Colors.glassRed,
         justifyContent: "center",
         alignItems: "center",
     } as ViewStyle,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
     } as TextStyle,
     name: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 12,
         fontWeight: "bold",
         textAlign: "center",

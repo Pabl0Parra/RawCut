@@ -65,7 +65,7 @@ export default function TrailerModal({ visible, videoKey, onClose }: Readonly<Tr
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.9)',
+        backgroundColor: Colors.overlayDarker,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 16,
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.metalSilver,
         // Shadow for iOS
-        shadowColor: "#000",
+        shadowColor: Colors.black,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
@@ -103,13 +103,13 @@ const styles = StyleSheet.create({
     playerContainer: {
         width: '100%',
         height: VIDEO_HEIGHT,
-        backgroundColor: '#000',
+        backgroundColor: Colors.black,
     },
     loaderContainer: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1,
-        backgroundColor: '#000',
+        backgroundColor: Colors.black,
     },
 });

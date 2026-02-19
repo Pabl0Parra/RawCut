@@ -107,11 +107,11 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
                         <View style={styles.ratingBox}>
                             <Text style={styles.ratingTitle}>¿Cómo se calcula la puntuación?</Text>
                             <Text style={styles.ratingText}>
-                                La puntuación <Text style={{ color: "#eab308", fontWeight: "bold" }}>⭐ TMDB</Text> refleja la valoración media de los usuarios de The Movie Database.
+                                La puntuación <Text style={{ color: Colors.tmdbYellow, fontWeight: "bold" }}>⭐ TMDB</Text> refleja la valoración media de los usuarios de The Movie Database.
                             </Text>
                             <View style={styles.divider} />
                             <Text style={styles.ratingText}>
-                                La puntuación <Text style={{ color: "#a855f7", fontWeight: "bold" }}>👥 Comunidad</Text> refleja el promedio de votos (0-10) de los usuarios de esta aplicación.
+                                La puntuación <Text style={{ color: Colors.communityPurple, fontWeight: "bold" }}>👥 Comunidad</Text> refleja el promedio de votos (0-10) de los usuarios de esta aplicación.
                             </Text>
                         </View>
                     </Animated.View>
@@ -121,8 +121,7 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
     );
 };
 
-const TMDB_BLUE = "#01b4e4";
-const COMMUNITY_PURPLE = "#a855f7";
+// ─── Styles ─────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     backdrop: {
@@ -175,7 +174,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
     } as ViewStyle,
     tmdbLogo: {
-        backgroundColor: TMDB_BLUE,
+        backgroundColor: Colors.tmdbBlue,
         borderRadius: 6,
         paddingHorizontal: 10,
         paddingVertical: 5,
@@ -202,7 +201,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.inter,
     } as TextStyle,
     link: {
-        color: TMDB_BLUE,
+        color: Colors.tmdbBlue,
         fontWeight: "600",
     } as TextStyle,
     ratingBox: {
@@ -210,7 +209,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 16,
         borderLeftWidth: 3,
-        borderLeftColor: COMMUNITY_PURPLE, // Changed to purple to represent dual nature
+        borderLeftColor: Colors.communityPurple,
     } as ViewStyle,
     ratingTitle: {
         fontSize: 12,

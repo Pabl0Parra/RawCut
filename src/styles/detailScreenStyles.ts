@@ -36,7 +36,7 @@ export const detailScreenStyles = StyleSheet.create({
 
     // Text styles
     title: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 20,
         fontWeight: "bold",
         fontFamily: "BebasNeue_400Regular",
@@ -47,12 +47,12 @@ export const detailScreenStyles = StyleSheet.create({
         marginTop: 4,
     } as TextStyle,
     ratingText: {
-        color: "#eab308",
+        color: Colors.tmdbYellow,
         fontSize: 14,
         marginTop: 4,
     } as TextStyle,
     sectionTitle: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 12,
@@ -67,7 +67,7 @@ export const detailScreenStyles = StyleSheet.create({
         marginVertical: 16,
     } as ViewStyle,
     descriptionTitle: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 8,
@@ -89,7 +89,7 @@ export const detailScreenStyles = StyleSheet.create({
         marginBottom: 4,
     } as TextStyle,
     crewNames: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 14,
     } as TextStyle,
 
@@ -118,7 +118,7 @@ export const detailScreenStyles = StyleSheet.create({
         fontSize: 32,
     } as TextStyle,
     mediaName: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 12,
         marginTop: 8,
         fontWeight: "600",
@@ -135,7 +135,7 @@ export const detailScreenStyles = StyleSheet.create({
         top: 16,
         left: 16,
         zIndex: 10,
-        backgroundColor: "rgba(10, 10, 10, 0.5)",
+        backgroundColor: Colors.overlayMedium,
         borderRadius: 9999,
         padding: 8,
     } as ViewStyle,

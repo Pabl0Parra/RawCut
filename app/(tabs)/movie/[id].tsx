@@ -380,15 +380,15 @@ const localStyles = StyleSheet.create({
         marginTop: 6,
     },
     communityBadge: {
-        backgroundColor: "rgba(168, 85, 247, 0.15)",
+        backgroundColor: Colors.glassPurple,
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 6,
         borderWidth: 1,
-        borderColor: "rgba(168, 85, 247, 0.3)",
+        borderColor: Colors.glassPurpleBorder,
     },
     communityRatingText: {
-        color: "#a855f7",
+        color: Colors.communityPurple,
         fontSize: 14,
         fontWeight: "bold",
     },

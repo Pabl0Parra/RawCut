@@ -9,6 +9,8 @@ import {
     type TextStyle,
 } from "react-native";
 
+import { Colors } from "../constants/Colors";
+
 const VOTE_OPTIONS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 export const VotePicker = memo(function VotePicker({
@@ -48,26 +50,26 @@ export const VotePicker = memo(function VotePicker({
 const styles = StyleSheet.create({
     backdrop: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.85)",
+        backgroundColor: Colors.overlayDark,
         justifyContent: "center",
         alignItems: "center",
         padding: 24,
     } as ViewStyle,
     panel: {
-        backgroundColor: "#141414",
+        backgroundColor: Colors.panelBackground,
         borderRadius: 16,
         padding: 20,
         width: "100%",
         maxWidth: 340,
         borderTopWidth: 2,
-        borderTopColor: "#a855f7",
+        borderTopColor: Colors.communityPurple,
         borderLeftWidth: 1,
-        borderLeftColor: "#a855f722",
+        borderLeftColor: Colors.glassPurpleBorder,
         borderRightWidth: 1,
-        borderRightColor: "#a855f722",
+        borderRightColor: Colors.glassPurpleBorder,
     } as ViewStyle,
     title: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 18,
         fontFamily: "BebasNeue_400Regular",
         letterSpacing: 1,
@@ -85,26 +87,26 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 8,
-        backgroundColor: "#1a1a1a",
+        backgroundColor: Colors.metalGray,
         borderWidth: 1,
-        borderColor: "#333",
+        borderColor: "#333", // Generic dark border, maybe use metalGray or a specific divider? Let's keep #333 for now or create a constant. Wait, Colors.metalGray is #1a1a1a. 
         alignItems: "center",
         justifyContent: "center",
     } as ViewStyle,
     btnActive: {
-        backgroundColor: "#a855f7",
-        borderColor: "#a855f7",
+        backgroundColor: Colors.communityPurple,
+        borderColor: Colors.communityPurple,
     } as ViewStyle,
     btnText: {
-        color: "#8892a4",
+        color: Colors.textMuted,
         fontSize: 14,
         fontWeight: "600",
     } as TextStyle,
     btnTextActive: {
-        color: "#fff",
+        color: Colors.white,
     } as TextStyle,
     hint: {
-        color: "#5a6478",
+        color: "#5a6478", // Muted text, maybe Colors.textMuted or textPlaceholder? Original was #5a6478, Colors.textPlaceholder is #52525b. Close enough.
         fontSize: 10,
         textAlign: "center",
         letterSpacing: 0.5,

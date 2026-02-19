@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     title: {
         flex: 1,
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 24,
         fontFamily: "BebasNeue_400Regular",
     } as TextStyle,
@@ -138,12 +138,12 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     } as TextStyle,
     rating: {
-        color: "#eab308",
+        color: Colors.tmdbYellow,
         fontSize: 18,
         marginTop: 8,
     } as TextStyle,
     sectionTitle: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 18,
         marginTop: 24,
         marginBottom: 8,

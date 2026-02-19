@@ -29,7 +29,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 }) => {
     const iconName = isActive ? activeIcon : inactiveIcon;
     const label = isActive ? activeLabel : inactiveLabel;
-    const iconColor = isActive ? Colors.white : "#f4f4f5";
+    const iconColor = isActive ? Colors.white : Colors.textPrimary;
 
     const renderIcon = (): React.JSX.Element => {
         if (iconFamily === "MaterialCommunityIcons") {
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
     } as TextStyle,
     inactiveButtonText: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 12,
     } as TextStyle,
 });

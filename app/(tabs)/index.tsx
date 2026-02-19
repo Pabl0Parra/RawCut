@@ -575,7 +575,7 @@ export default function HomeScreen(): JSX.Element {
 
         return (
             <View style={styles.footerContainer}>
-                <ActivityIndicator size="small" color="#dc2626" />
+                <ActivityIndicator size="small" color={Colors.bloodRed} />
             </View>
         );
     }, [loading, data.length]);
@@ -685,7 +685,7 @@ export default function HomeScreen(): JSX.Element {
         if (loading && data.length === 0) {
             return (
                 <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color="#dc2626" />
+                    <ActivityIndicator size="large" color={Colors.bloodRed} />
                     <Text style={styles.loadingText}>Cargando contenido...</Text>
                 </View>
             );
@@ -720,8 +720,8 @@ export default function HomeScreen(): JSX.Element {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={handleRefresh}
-                        tintColor="#dc2626"
-                        colors={["#dc2626"]}
+                        tintColor={Colors.bloodRed}
+                        colors={[Colors.bloodRed]}
                     />
                 }
             />
@@ -818,7 +818,7 @@ export default function HomeScreen(): JSX.Element {
                                     handleDismissBanner();
                                 }}
                             >
-                                <Ionicons name="close" size={24} color="rgba(255,255,255,0.6)" />
+                                <Ionicons name="close" size={24} color={Colors.whiteOpacity60} />
                             </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
@@ -831,7 +831,7 @@ export default function HomeScreen(): JSX.Element {
                             <TextInput
                                 style={styles.searchInput}
                                 placeholder="Buscar..."
-                                placeholderTextColor="#71717a"
+                                placeholderTextColor={Colors.metalSilver}
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
                                 onSubmitEditing={handleSearch}
@@ -839,11 +839,11 @@ export default function HomeScreen(): JSX.Element {
                             />
                             {searchQuery.length > 0 && (
                                 <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
-                                    <Ionicons name="close-circle" size={20} color="#71717a" />
+                                    <Ionicons name="close-circle" size={20} color={Colors.metalSilver} />
                                 </TouchableOpacity>
                             )}
                             <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                                <Entypo name="magnifying-glass" size={24} color="#71717a" />
+                                <Entypo name="magnifying-glass" size={24} color={Colors.metalSilver} />
                             </TouchableOpacity>
                         </View>
 
@@ -910,7 +910,7 @@ export default function HomeScreen(): JSX.Element {
                                     <TextInput
                                         style={styles.yearInput}
                                         placeholder="Ej. 2023"
-                                        placeholderTextColor="#52525b"
+                                        placeholderTextColor={Colors.textPlaceholder}
                                         keyboardType="number-pad"
                                         value={selectedYear}
                                         onChangeText={setSelectedYear}
@@ -999,7 +999,7 @@ const styles = StyleSheet.create({
     },
     searchInput: {
         flex: 1,
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         paddingHorizontal: 16,
         paddingVertical: 12,
     },
@@ -1072,20 +1072,22 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.92)",
+        backgroundColor: Colors.overlayDarker,
         justifyContent: "flex-end",
     },
     filterPanel: {
         flex: 1,
-        backgroundColor: "#141414ff",
+        backgroundColor: Colors.panelBackground,
         borderTopLeftRadius: 16,
         borderTopRightRadius: 16,
-        borderTopWidth: 2,
-        borderTopColor: "#01b4e4",
+        borderTopWidth: 1,
+        borderTopColor: Colors.tmdbBlue,
         borderLeftWidth: 1,
-        borderLeftColor: "#01b4e422",
+        borderLeftColor: Colors.glassBlue,
         borderRightWidth: 1,
-        borderRightColor: "#01b4e422",
+        borderRightColor: Colors.glassBlue,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.glassBlue,
         overflow: "hidden",
     },
     modalHandleContainer: {
@@ -1098,7 +1100,7 @@ const styles = StyleSheet.create({
     modalHandle: {
         width: 40,
         height: 4,
-        backgroundColor: "#ffffff33",
+        backgroundColor: Colors.glassWhiteMedium,
         borderRadius: 2,
     },
     modalHeader: {
@@ -1109,7 +1111,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
     },
     modalTitle: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 24,
         fontWeight: "bold",
         fontFamily: "BebasNeue_400Regular",
@@ -1147,7 +1149,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.bloodRed,
     },
     optionText: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
     },
     activeOptionText: {
         color: Colors.white,
@@ -1159,7 +1161,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.metalSilver,
         borderRadius: 8,
         padding: 12,
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 16,
     },
     genresRow: {
@@ -1180,7 +1182,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.bloodRed,
     },
     genreChipText: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 12,
     },
     activeGenreText: {
@@ -1210,7 +1212,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         elevation: 4,
-        shadowColor: "#000",
+        shadowColor: Colors.black,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -1226,15 +1228,15 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     profileBannerSubtitle: {
-        color: "rgba(255,255,255,0.9)",
+        color: Colors.whiteOpacity90,
         fontSize: 12,
     },
     continueSection: {
         paddingVertical: 20,
-        backgroundColor: "rgba(10, 10, 10, 0.8)",
+        backgroundColor: Colors.overlayDark,
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: "rgba(255,255,255,0.05)",
+        borderColor: Colors.glassWhiteSubtle,
         marginVertical: 8,
     },
     continueSectionLoading: {

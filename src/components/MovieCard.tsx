@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(220, 38, 38, 0.5)",
+        backgroundColor: Colors.glassRed,
         justifyContent: "center",
         alignItems: "center",
     } as ViewStyle,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         zIndex: 10,
         // Add elevation/shadow for premium feel
-        shadowColor: "#000",
+        shadowColor: Colors.black,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
         right: 0,
         flexDirection: "row",
         justifyContent: "space-around",
-        backgroundColor: "rgba(10, 10, 10, 0.8)",
+        backgroundColor: Colors.overlayDark,
         paddingVertical: 6,
         zIndex: 20,
     } as ViewStyle,
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     } as ViewStyle,
     title: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 12,
         fontWeight: "600",
     } as TextStyle,
@@ -436,11 +436,11 @@ const styles = StyleSheet.create({
         fontSize: 10,
     } as TextStyle,
     rating: {
-        color: "#eab308",
+        color: Colors.tmdbYellow,
         fontSize: 10,
     } as TextStyle,
     communityRating: {
-        color: "#a855f7",
+        color: Colors.communityPurple,
         fontSize: 10,
     } as TextStyle,
 });
