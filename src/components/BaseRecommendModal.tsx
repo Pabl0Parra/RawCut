@@ -52,7 +52,7 @@ interface RecommendationState {
     message: string;
     searchQuery: string;
     users: Profile[];
-    selectedUser: Profile | null;
+    selectedUsers: Profile[];
     isSending: boolean;
     isLoadingUsers: boolean;
     showUserList: boolean;
@@ -62,7 +62,7 @@ const INITIAL_STATE: RecommendationState = {
     message: "",
     searchQuery: "",
     users: [],
-    selectedUser: null,
+    selectedUsers: [],
     isSending: false,
     isLoadingUsers: false,
     showUserList: true,
@@ -72,7 +72,7 @@ const MAX_MESSAGE_LENGTH = 200;
 
 /**
  * Base recommendation modal component
- * Supports both search-enabled and dropdown-only modes
+ * Supports selecting multiple recipients and both search-enabled / dropdown-only modes
  */
 export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
     visible,
@@ -91,7 +91,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         message,
         searchQuery,
         users,
-        selectedUser,
+        selectedUsers,
         isSending,
         isLoadingUsers,
         showUserList,
@@ -148,12 +148,20 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         [currentUserId, handleLoadAllUsers]
     );
 
-    const handleSelectUser = (user: Profile): void => {
-        updateState({ selectedUser: user, showUserList: false });
+    /** Toggle a user in/out of the selectedUsers list */
+    const handleToggleUser = (user: Profile): void => {
+        const isSelected = selectedUsers.some((u) => u.user_id === user.user_id);
+        const newSelected = isSelected
+            ? selectedUsers.filter((u) => u.user_id !== user.user_id)
+            : [...selectedUsers, user];
+        updateState({ selectedUsers: newSelected });
     };
 
-    const handleClearSelectedUser = (): void => {
-        updateState({ selectedUser: null });
+    /** Remove a specific user from the selection via chip ✕ */
+    const handleRemoveUser = (userId: string): void => {
+        updateState({
+            selectedUsers: selectedUsers.filter((u) => u.user_id !== userId),
+        });
     };
 
     const handleToggleUserList = (): void => {
@@ -161,27 +169,44 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
     };
 
     const handleSendRecommendation = async (): Promise<void> => {
-        if (!currentUserId || !selectedUser) return;
+        if (!currentUserId || selectedUsers.length === 0) return;
 
         updateState({ isSending: true });
 
-        const params: SendRecommendationParams = {
-            senderId: currentUserId,
-            receiverId: selectedUser.user_id,
-            tmdbId: contentId,
-            mediaType,
-            message: message || null,
-        };
-
-        const result = await sendRecommendation(params);
+        const results = await Promise.all(
+            selectedUsers.map((user) => {
+                const params: SendRecommendationParams = {
+                    senderId: currentUserId,
+                    receiverId: user.user_id,
+                    tmdbId: contentId,
+                    mediaType,
+                    message: message || null,
+                };
+                return sendRecommendation(params);
+            })
+        );
 
         updateState({ isSending: false });
 
-        if (result.success) {
-            Alert.alert("¡Éxito!", "¡Recomendación enviada!");
+        const failedCount = results.filter((r) => !r.success).length;
+
+        if (failedCount === 0) {
+            const count = selectedUsers.length;
+            Alert.alert(
+                "¡Éxito!",
+                count === 1
+                    ? "¡Recomendación enviada!"
+                    : `¡Recomendación enviada a ${count} usuarios!`
+            );
+            onClose();
+        } else if (failedCount < selectedUsers.length) {
+            Alert.alert(
+                "Parcialmente enviado",
+                `${selectedUsers.length - failedCount} de ${selectedUsers.length} recomendaciones se enviaron correctamente.`
+            );
             onClose();
         } else {
-            Alert.alert("Error", "Error al enviar recomendación");
+            Alert.alert("Error", "Error al enviar la recomendación");
         }
     };
 
@@ -201,34 +226,41 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         if (users.length > 0) {
             return (
                 <View style={styles.searchResults}>
-                    {users.map((user) => (
-                        <TouchableOpacity
-                            key={user.user_id}
-                            style={[
-                                styles.searchResultItem,
-                                selectedUser?.user_id === user.user_id && styles.searchResultSelected,
-                            ]}
-                            onPress={() => handleSelectUser(user)}
-                        >
-                            <View style={styles.userItemContent}>
-                                <View>
-                                    {!!user.display_name && (
-                                        <Text style={styles.searchResultText}>
-                                            {user.display_name}
+                    {users.map((user) => {
+                        const isSelected = selectedUsers.some(
+                            (u) => u.user_id === user.user_id
+                        );
+                        return (
+                            <TouchableOpacity
+                                key={user.user_id}
+                                style={[
+                                    styles.searchResultItem,
+                                    isSelected && styles.searchResultSelected,
+                                ]}
+                                onPress={() => handleToggleUser(user)}
+                            >
+                                <View style={styles.userItemContent}>
+                                    <View>
+                                        {!!user.display_name && (
+                                            <Text style={styles.searchResultText}>
+                                                {user.display_name}
+                                            </Text>
+                                        )}
+                                        <Text style={styles.usernameText}>
+                                            @{user.username}
                                         </Text>
+                                    </View>
+                                    {isSelected && (
+                                        <Ionicons
+                                            name="checkmark-circle"
+                                            size={20}
+                                            color={Colors.bloodRed}
+                                        />
                                     )}
-                                    <Text style={styles.usernameText}>@{user.username}</Text>
                                 </View>
-                                {selectedUser?.user_id === user.user_id && (
-                                    <Ionicons
-                                        name="checkmark-circle"
-                                        size={20}
-                                        color={Colors.bloodRed}
-                                    />
-                                )}
-                            </View>
-                        </TouchableOpacity>
-                    ))}
+                            </TouchableOpacity>
+                        );
+                    })}
                 </View>
             );
         }
@@ -242,10 +274,18 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         );
     };
 
-    const selectedUserDisplay = selectedUser?.display_name ||
-        (selectedUser ? `@${selectedUser.username}` : "Toca para seleccionar usuario...");
+    const dropdownLabel =
+        selectedUsers.length === 0
+            ? "Toca para seleccionar usuario(s)..."
+            : `${selectedUsers.length} usuario${selectedUsers.length > 1 ? "s" : ""} seleccionado${selectedUsers.length > 1 ? "s" : ""}`;
 
-    const canSend = selectedUser !== null && !isSending;
+    const canSend = selectedUsers.length > 0 && !isSending;
+
+    const sendButtonLabel = isSending
+        ? undefined
+        : selectedUsers.length <= 1
+            ? "Enviar Recomendación"
+            : `Enviar a ${selectedUsers.length} usuarios`;
 
     return (
         <Modal
@@ -302,17 +342,15 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
                     {/* User Selection Label */}
                     {!enableSearch && (
-                        <Text style={styles.inputLabel}>Seleccionar usuario</Text>
+                        <Text style={styles.inputLabel}>Seleccionar usuario(s)</Text>
                     )}
 
-                    {/* User Dropdown */}
+                    {/* User Dropdown toggle */}
                     <TouchableOpacity
                         style={styles.dropdownButton}
                         onPress={handleToggleUserList}
                     >
-                        <Text style={styles.dropdownButtonText}>
-                            {selectedUserDisplay}
-                        </Text>
+                        <Text style={styles.dropdownButtonText}>{dropdownLabel}</Text>
                         <Ionicons
                             name={showUserList ? "chevron-up" : "chevron-down"}
                             size={20}
@@ -323,15 +361,22 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                     {/* User List */}
                     <View style={styles.userListContainer}>{renderUserList()}</View>
 
-                    {/* Selected User Badge */}
-                    {!!selectedUser && (
-                        <View style={styles.selectedUserContainer}>
-                            <Text style={styles.selectedUserText}>
-                                Para: @{selectedUser.username}
-                            </Text>
-                            <TouchableOpacity onPress={handleClearSelectedUser}>
-                                <Text style={styles.removeUserText}>✕</Text>
-                            </TouchableOpacity>
+                    {/* Selected Users Chips */}
+                    {selectedUsers.length > 0 && (
+                        <View style={styles.chipsContainer}>
+                            {selectedUsers.map((user) => (
+                                <View key={user.user_id} style={styles.chip}>
+                                    <Text style={styles.chipText}>
+                                        @{user.username}
+                                    </Text>
+                                    <TouchableOpacity
+                                        onPress={() => handleRemoveUser(user.user_id)}
+                                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    >
+                                        <Text style={styles.chipRemove}>✕</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
                         </View>
                     )}
 
@@ -362,9 +407,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                             {isSending ? (
                                 <ActivityIndicator color="#0a0a0a" />
                             ) : (
-                                <Text style={styles.sendButtonText}>
-                                    Enviar Recomendación
-                                </Text>
+                                <Text style={styles.sendButtonText}>{sendButtonLabel}</Text>
                             )}
                         </TouchableOpacity>
                     </View>
@@ -470,7 +513,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.metalGray,
         borderRadius: 8,
         marginBottom: 16,
-        maxHeight: 180,
+        maxHeight: 200,
         borderWidth: 1,
         borderColor: Colors.bloodRed,
         overflow: "hidden",
@@ -497,11 +540,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
     } as ViewStyle,
-    emptyListText: {
-        color: Colors.metalSilver,
-        padding: 12,
-        textAlign: "center",
-    } as TextStyle,
     emptyUsersContainer: {
         backgroundColor: Colors.metalGray,
         borderRadius: 8,
@@ -513,20 +551,32 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
         textAlign: "center",
     } as TextStyle,
-    selectedUserContainer: {
-        backgroundColor: Colors.metalGray,
-        borderRadius: 8,
-        padding: 12,
+    // Selected users chips row
+    chipsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
         marginBottom: 16,
+    } as ViewStyle,
+    chip: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
+        backgroundColor: "rgba(220, 38, 38, 0.15)",
+        borderWidth: 1,
+        borderColor: Colors.bloodRed,
+        borderRadius: 9999,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        gap: 6,
     } as ViewStyle,
-    selectedUserText: {
+    chipText: {
         color: "#f4f4f5",
+        fontSize: 13,
     } as TextStyle,
-    removeUserText: {
+    chipRemove: {
         color: Colors.bloodRed,
+        fontSize: 12,
+        fontWeight: "bold",
     } as TextStyle,
     messageContainer: {
         flex: 1,

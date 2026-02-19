@@ -516,7 +516,7 @@ export default function HomeScreen(): JSX.Element {
             return (
                 <ContinueWatchingCard
                     item={item}
-                    onPress={(showId) => router.push(`/tv/${showId}`)}
+                    onPress={(showId: number) => router.push(`/tv/${showId}`)}
                     nextEpisode={nextEpisode}
                 />
             );
