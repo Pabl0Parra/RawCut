@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, JSX } from "react";
+import React, { useState, useEffect, useCallback, useRef, JSX, memo } from "react";
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -209,6 +209,53 @@ const useContentLoading = (
 };
 
 // ============================================================================
+// Internal Components
+// ============================================================================
+
+interface MovieCardItemProps {
+    item: Movie | TVShow;
+    mediaType: MediaType;
+    handleToggleFavorite: (id: number, type: MediaType) => Promise<void>;
+    handleToggleWatchlist: (id: number, type: MediaType) => Promise<void>;
+    handleToggleWatched: (id: number, type: MediaType) => Promise<void>;
+    handleVote: (id: number, type: MediaType, vote: number) => Promise<void>;
+}
+
+const MovieCardItem = memo(({
+    item,
+    mediaType,
+    handleToggleFavorite,
+    handleToggleWatchlist,
+    handleToggleWatched,
+    handleVote
+}: MovieCardItemProps) => {
+    // Granular selectors: only re-render this card if its own status changes
+    // Using inline selectors for stability
+    const isFavorite = useContentStore(s => s.isFavorite(item.id, mediaType));
+    const inWatchlist = useContentStore(s => s.isInWatchlist(item.id, mediaType));
+    const isWatched = useContentStore(s => s.isWatched(item.id, mediaType));
+
+    const communityRating = useVoteStore(s => s.getCommunityScore(item.id, mediaType)?.avg);
+    const userVote = useVoteStore(s => s.getUserVote(item.id, mediaType));
+
+    return (
+        <MovieCard
+            item={item}
+            mediaType={mediaType}
+            isFavorite={isFavorite}
+            inWatchlist={inWatchlist}
+            isWatched={isWatched}
+            communityRating={communityRating}
+            userVote={userVote}
+            onToggleFavorite={() => handleToggleFavorite(item.id, mediaType)}
+            onToggleWatchlist={() => handleToggleWatchlist(item.id, mediaType)}
+            onToggleWatched={() => handleToggleWatched(item.id, mediaType)}
+            onVote={(vote) => handleVote(item.id, mediaType, vote)}
+        />
+    );
+});
+
+// ============================================================================
 // Main Component
 // ============================================================================
 
@@ -289,17 +336,8 @@ export default function HomeScreen(): JSX.Element {
 
     // ── Store Selectors (granular — only re-render when these change) ──
     const user = useAuthStore((s) => s.user);
-    // Subscribe to the actual data arrays so the component re-renders when
-    // favorites/watchlist/tvProgress change — function refs are stable and
-    // would never trigger a renderItem rebuild on their own.
-    const favorites = useContentStore((s) => s.favorites);
-    const watchlist = useContentStore((s) => s.watchlist);
     const tvProgress = useContentStore((s) => s.tvProgress);
     const getNextEpisodeToWatch = useContentStore((s) => s.getNextEpisodeToWatch);
-
-    // ── Vote Store ───────────────────────────────────────────────────────
-    const userVotes = useVoteStore((s) => s.userVotes);
-    const communityScores = useVoteStore((s) => s.communityScores);
 
     // ── Derived State ───────────────────────────────────────────────────
     const data = activeTab === "movies" ? movies : tvShows;
@@ -545,29 +583,19 @@ export default function HomeScreen(): JSX.Element {
     // Render Functions
     // ====================================================================
 
+
     const renderItem = useCallback(
-        ({ item }: { item: Movie | TVShow }): JSX.Element => {
-            // Read current state inline so booleans are always fresh.
-            const store = useContentStore.getState();
-            const vStore = useVoteStore.getState();
-            return (
-                <MovieCard
-                    item={item}
-                    mediaType={mediaType}
-                    isFavorite={store.isFavorite(item.id, mediaType)}
-                    inWatchlist={store.isInWatchlist(item.id, mediaType)}
-                    isWatched={store.isWatched(item.id, mediaType)}
-                    communityRating={vStore.getCommunityScore(item.id, mediaType)?.avg}
-                    userVote={vStore.getUserVote(item.id, mediaType)}
-                    onToggleFavorite={() => handleToggleFavorite(item.id, mediaType)}
-                    onToggleWatchlist={() => handleToggleWatchlist(item.id, mediaType)}
-                    onToggleWatched={() => handleToggleWatched(item.id, mediaType)}
-                    onVote={(vote) => handleVote(item.id, mediaType, vote)}
-                />
-            );
-        },
-        // favorites/watchlist/tvProgress/votes subscriptions trigger re-render
-        [mediaType, favorites, watchlist, tvProgress, userVotes, communityScores, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched, handleVote],
+        ({ item }: { item: Movie | TVShow }): JSX.Element => (
+            <MovieCardItem
+                item={item}
+                mediaType={mediaType}
+                handleToggleFavorite={handleToggleFavorite}
+                handleToggleWatchlist={handleToggleWatchlist}
+                handleToggleWatched={handleToggleWatched}
+                handleVote={handleVote}
+            />
+        ),
+        [mediaType, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched, handleVote],
     );
 
     const renderFooter = useCallback((): JSX.Element | null => {
@@ -713,8 +741,9 @@ export default function HomeScreen(): JSX.Element {
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={renderFooter}
                 initialNumToRender={12}
-                maxToRenderPerBatch={12}
-                windowSize={5}
+                maxToRenderPerBatch={6}
+                windowSize={3}
+                updateCellsBatchingPeriod={50}
                 removeClippedSubviews
                 refreshControl={
                     <RefreshControl

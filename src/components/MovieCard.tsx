@@ -254,7 +254,8 @@ const MovieCard = memo(function MovieCard({
         return diffDays <= 14;
     };
 
-    const showNewBadge = useMemo(() => isNewRelease(getReleaseDate(item)), [item]);
+    const releaseDate = useMemo(() => getReleaseDate(item), [item]);
+    const showNewBadge = useMemo(() => isNewRelease(releaseDate), [releaseDate]);
 
     const renderNewBadge = (): JSX.Element | null => {
         if (!showNewBadge) return null;
