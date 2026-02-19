@@ -25,6 +25,7 @@ interface RecommendationState {
     deleteRecommendation: (recommendationId: string) => Promise<boolean>;
     addRating: (recommendationId: string, rating: number) => Promise<boolean>;
     markAllAsRead: () => Promise<void>;
+    markAsRead: (recommendationId: string) => Promise<void>;
     markCommentsAsRead: (recommendationId: string) => Promise<void>;
     subscribeToRealtime: () => () => void;
     clearRecommendations: () => void;
@@ -290,6 +291,36 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
             }));
         } catch (err) {
             console.error("Error marking recommendations as read:", err);
+        }
+    },
+
+    markAsRead: async (recommendationId: string) => {
+        const user = useAuthStore.getState().user;
+        if (!user) return;
+
+        // Only mark if it's actually unread to avoid unnecessary DB calls
+        const rec = get().received.find(r => r.id === recommendationId);
+        if (!rec || rec.is_read) return;
+
+        try {
+            const { error } = await supabase
+                .from("recommendations")
+                .update({ is_read: true })
+                .eq("id", recommendationId);
+
+            if (error) throw error;
+
+            set((state) => {
+                const newReceived = state.received.map(r =>
+                    r.id === recommendationId ? { ...r, is_read: true } : r
+                );
+                return {
+                    received: newReceived,
+                    unreadCount: calculateUnreadCount(state.sent, newReceived, user.id),
+                };
+            });
+        } catch (err) {
+            console.error("Error marking recommendation as read:", err);
         }
     },
 

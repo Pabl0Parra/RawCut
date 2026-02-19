@@ -45,7 +45,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
         isLoading,
         addComment,
         addRating,
-        markAllAsRead,
+        markAsRead,
         markCommentsAsRead,
         deleteComment,
         deleteRecommendation,
@@ -67,14 +67,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
     // Effects
     // ========================================================================
 
-    // Mark as read when screen focuses
-    useFocusEffect(
-        useCallback(() => {
-            if (user && activeTab === "received") {
-                markAllAsRead();
-            }
-        }, [user, activeTab, markAllAsRead])
-    );
+    // No bulk mark-as-read on focus — handled per-item in handleToggleExpand
 
     // Fetch TMDb data for all recommendations
     useEffect(() => {
@@ -104,7 +97,11 @@ export default function RecommendationsScreen(): React.JSX.Element {
     // ========================================================================
 
     const handleToggleExpand = (id: string): void => {
-        updateState({ expandedId: id || null });
+        // Mark the recommendation as read when the user opens it
+        if (activeTab === "received") {
+            markAsRead(id);
+        }
+        updateState({ expandedId: expandedId === id ? null : id });
     };
 
     const handleAddComment = async (

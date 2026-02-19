@@ -250,9 +250,11 @@ export default function HomeScreen(): JSX.Element {
 
     // ── Store Selectors (granular — only re-render when these change) ──
     const user = useAuthStore((s) => s.user);
-    const isFavorite = useContentStore((s) => s.isFavorite);
-    const isInWatchlist = useContentStore((s) => s.isInWatchlist);
-    const isWatched = useContentStore((s) => s.isWatched);
+    // Subscribe to the actual data arrays so the component re-renders when
+    // favorites/watchlist/tvProgress change — function refs are stable and
+    // would never trigger a renderItem rebuild on their own.
+    const favorites = useContentStore((s) => s.favorites);
+    const watchlist = useContentStore((s) => s.watchlist);
     const tvProgress = useContentStore((s) => s.tvProgress);
     const getNextEpisodeToWatch = useContentStore((s) => s.getNextEpisodeToWatch);
 
@@ -482,19 +484,25 @@ export default function HomeScreen(): JSX.Element {
     // ====================================================================
 
     const renderItem = useCallback(
-        ({ item }: { item: Movie | TVShow }): JSX.Element => (
-            <MovieCard
-                item={item}
-                mediaType={mediaType}
-                isFavorite={isFavorite(item.id, mediaType)}
-                inWatchlist={isInWatchlist(item.id, mediaType)}
-                isWatched={isWatched(item.id, mediaType)}
-                onToggleFavorite={() => handleToggleFavorite(item.id, mediaType)}
-                onToggleWatchlist={() => handleToggleWatchlist(item.id, mediaType)}
-                onToggleWatched={() => handleToggleWatched(item.id, mediaType)}
-            />
-        ),
-        [mediaType, isFavorite, isInWatchlist, isWatched, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched],
+        ({ item }: { item: Movie | TVShow }): JSX.Element => {
+            // Read current state inline so booleans are always fresh.
+            const store = useContentStore.getState();
+            return (
+                <MovieCard
+                    item={item}
+                    mediaType={mediaType}
+                    isFavorite={store.isFavorite(item.id, mediaType)}
+                    inWatchlist={store.isInWatchlist(item.id, mediaType)}
+                    isWatched={store.isWatched(item.id, mediaType)}
+                    onToggleFavorite={() => handleToggleFavorite(item.id, mediaType)}
+                    onToggleWatchlist={() => handleToggleWatchlist(item.id, mediaType)}
+                    onToggleWatched={() => handleToggleWatched(item.id, mediaType)}
+                />
+            );
+        },
+        // favorites/watchlist/tvProgress subscriptions trigger re-render,
+        // which causes useCallback to rebuild with fresh closure data.
+        [mediaType, favorites, watchlist, tvProgress, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched],
     );
 
     const renderFooter = useCallback((): JSX.Element | null => {
@@ -804,44 +812,55 @@ export default function HomeScreen(): JSX.Element {
                     transparent
                     onRequestClose={handleCloseFilters}
                 >
-                    <SafeAreaView style={[styles.modalContainer, styles.modalBackground]}>
-                        <SmokeBackground />
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Filtrar</Text>
-                            <TouchableOpacity onPress={handleCloseFilters}>
-                                <Text style={styles.closeButtonText}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <ScrollView contentContainerStyle={styles.modalContent}>
-                            <Text style={styles.sectionHeader}>Ordenar Por</Text>
-                            <View style={styles.optionsRow}>
-                                {SORT_OPTIONS.map(renderSortOption)}
+                    {/* Black backdrop — tap outside to close */}
+                    <TouchableOpacity
+                        style={styles.modalOverlay}
+                        activeOpacity={1}
+                        onPress={handleCloseFilters}
+                    >
+                        {/* Filter panel — stop propagation so tapping inside doesn't close */}
+                        <View
+                            style={styles.filterPanel}
+                            onStartShouldSetResponder={() => true}
+                        >
+                            <SmokeBackground />
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Filtrar</Text>
+                                <TouchableOpacity onPress={handleCloseFilters}>
+                                    <Text style={styles.closeButtonText}>✕</Text>
+                                </TouchableOpacity>
                             </View>
 
-                            <Text style={styles.sectionHeader}>Año de Lanzamiento</Text>
-                            <TextInput
-                                style={styles.yearInput}
-                                placeholder="Ej. 2023"
-                                placeholderTextColor="#52525b"
-                                keyboardType="number-pad"
-                                value={selectedYear}
-                                onChangeText={setSelectedYear}
-                                maxLength={4}
-                            />
+                            <ScrollView contentContainerStyle={styles.modalContent}>
+                                <Text style={styles.sectionHeader}>Ordenar Por</Text>
+                                <View style={styles.optionsRow}>
+                                    {SORT_OPTIONS.map(renderSortOption)}
+                                </View>
 
-                            <Text style={styles.sectionHeader}>Género</Text>
-                            <View style={styles.genresRow}>
-                                {genres.map(renderGenreChip)}
+                                <Text style={styles.sectionHeader}>Año de Lanzamiento</Text>
+                                <TextInput
+                                    style={styles.yearInput}
+                                    placeholder="Ej. 2023"
+                                    placeholderTextColor="#52525b"
+                                    keyboardType="number-pad"
+                                    value={selectedYear}
+                                    onChangeText={setSelectedYear}
+                                    maxLength={4}
+                                />
+
+                                <Text style={styles.sectionHeader}>Género</Text>
+                                <View style={styles.genresRow}>
+                                    {genres.map(renderGenreChip)}
+                                </View>
+                            </ScrollView>
+
+                            <View style={styles.modalFooter}>
+                                <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
+                                    <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
+                                </TouchableOpacity>
                             </View>
-                        </ScrollView>
-
-                        <View style={styles.modalFooter}>
-                            <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
-                                <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
-                            </TouchableOpacity>
                         </View>
-                    </SafeAreaView>
+                    </TouchableOpacity>
                 </Modal>
             </View>
         </GestureDetector>
@@ -981,12 +1000,18 @@ const styles = StyleSheet.create({
     footerContainer: {
         paddingVertical: 16,
     },
-    modalContainer: {
+    modalOverlay: {
         flex: 1,
-        padding: 16,
+        backgroundColor: "rgba(0, 0, 0, 0.92)",
+        justifyContent: "flex-end",
     },
-    modalBackground: {
-        backgroundColor: Colors.metalBlack,
+    filterPanel: {
+        flex: 1,
+        backgroundColor: "#141414ff",
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        overflow: "hidden",
+        padding: 16,
     },
     modalHeader: {
         flexDirection: "row",

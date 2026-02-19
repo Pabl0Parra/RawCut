@@ -108,6 +108,10 @@ const fetchTMDb = async <T>(endpoint: string, params: Record<string, string> = {
     const response = await fetch(url.toString());
 
     if (!response.ok) {
+        if (response.status === 404) {
+            // Content no longer exists in TMDb (deleted/unavailable) — return null silently
+            return null as T;
+        }
         throw new Error(`TMDb API Error: ${response.status}`);
     }
 
