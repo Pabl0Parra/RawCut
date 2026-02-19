@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Image } from 'expo-image';
 import { useFocusEffect, router } from "expo-router";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -285,24 +286,40 @@ export default function RecommendationsScreen(): React.JSX.Element {
         return renderUnauthenticatedState();
     }
 
-    return (
-        <View style={[styles.safeArea, styles.paddedTop]}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={styles.keyboardAvoidingView}
-            >
-                {/* Tab Switcher */}
-                <View style={styles.tabsContainer}>
-                    <View style={styles.tabsWrapper}>
-                        {renderTab("received", "Recibidas", received.length)}
-                        {renderTab("sent", "Enviadas", sent.length)}
-                    </View>
-                </View>
+    // Swipe left → Enviadas (sent), swipe right → Recibidas (received)
+    const swipeGesture = Gesture.Pan()
+        .runOnJS(true)
+        .activeOffsetX([-20, 20])
+        .failOffsetY([-15, 15])
+        .onEnd((e) => {
+            const { translationX, velocityX } = e;
+            if (translationX < -50 || velocityX < -500) {
+                if (activeTab !== "sent") updateState({ activeTab: "sent" });
+            } else if (translationX > 50 || velocityX > 500) {
+                if (activeTab !== "received") updateState({ activeTab: "received" });
+            }
+        });
 
-                {/* Content */}
-                {renderContent()}
-            </KeyboardAvoidingView>
-        </View>
+    return (
+        <GestureDetector gesture={swipeGesture}>
+            <View style={[styles.safeArea, styles.paddedTop]}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={styles.keyboardAvoidingView}
+                >
+                    {/* Tab Switcher */}
+                    <View style={styles.tabsContainer}>
+                        <View style={styles.tabsWrapper}>
+                            {renderTab("received", "Recibidas", received.length)}
+                            {renderTab("sent", "Enviadas", sent.length)}
+                        </View>
+                    </View>
+
+                    {/* Content */}
+                    {renderContent()}
+                </KeyboardAvoidingView>
+            </View>
+        </GestureDetector>
     );
 }
 

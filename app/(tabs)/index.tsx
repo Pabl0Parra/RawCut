@@ -19,6 +19,7 @@ import {
     Ionicons,
 } from "@expo/vector-icons";
 import { useFocusEffect, router } from "expo-router";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import MovieCard from "../../src/components/MovieCard";
 import {
@@ -658,176 +659,192 @@ export default function HomeScreen(): JSX.Element {
     // Main Render
     // ====================================================================
 
+    // Swipe left → TV, swipe right → Movies
+    const swipeGesture = Gesture.Pan()
+        .runOnJS(true)
+        .activeOffsetX([-20, 20])
+        .failOffsetY([-15, 15])
+        .onEnd((e) => {
+            const { translationX, velocityX } = e;
+            if (translationX < -50 || velocityX < -500) {
+                if (activeTab !== "tv") setActiveTab("tv");
+            } else if (translationX > 50 || velocityX > 500) {
+                if (activeTab !== "movies") setActiveTab("movies");
+            }
+        });
+
     return (
-        <View style={[styles.safeArea, styles.safeAreaPadding]}>
-            {/* Pill Tab System */}
-            <View style={styles.tabsContainer}>
-                <View style={styles.tabsWrapper}>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === "movies" ? styles.activeTab : styles.inactiveTab]}
-                        onPress={() => setActiveTab("movies")}
-                    >
-                        <View style={styles.tabContent}>
-                            <MaterialCommunityIcons
-                                name="movie-open-play-outline"
-                                size={24}
-                                color={activeTab === "movies" ? Colors.white : Colors.metalSilver}
-                            />
-                            <Text
-                                style={[
-                                    styles.tabText,
-                                    activeTab === "movies" ? styles.activeTabText : styles.inactiveTabText,
-                                ]}
-                            >
-                                Películas
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === "tv" ? styles.activeTab : styles.inactiveTab]}
-                        onPress={() => setActiveTab("tv")}
-                    >
-                        <View style={styles.tabContent}>
-                            <Feather
-                                name="tv"
-                                size={24}
-                                color={activeTab === "tv" ? Colors.white : Colors.metalSilver}
-                            />
-                            <Text
-                                style={[
-                                    styles.tabText,
-                                    activeTab === "tv" ? styles.activeTabText : styles.inactiveTabText,
-                                ]}
-                            >
-                                Series
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            {/* Profile Setup Banner */}
-            {showProfileBanner && (
-                <TouchableOpacity
-                    style={styles.profileBanner}
-                    onPress={() => router.push("/profile" as Parameters<typeof router.push>[0])}
-                >
-                    <View style={styles.profileBannerContent}>
-                        <Ionicons name="sparkles" size={20} color={Colors.white} />
-                        <View style={styles.profileBannerTextContainer}>
-                            <Text style={styles.profileBannerTitle}>
-                                ¡Dale estilo a tu cuenta!
-                            </Text>
-                            <Text style={styles.profileBannerSubtitle}>
-                                Cambia tu nombre de usuario genérico en tu perfil.
-                            </Text>
-                        </View>
+        <GestureDetector gesture={swipeGesture}>
+            <View style={[styles.safeArea, styles.safeAreaPadding]}>
+                {/* Pill Tab System */}
+                <View style={styles.tabsContainer}>
+                    <View style={styles.tabsWrapper}>
                         <TouchableOpacity
-                            onPress={(e) => {
-                                e.stopPropagation();
-                                handleDismissBanner();
-                            }}
+                            style={[styles.tab, activeTab === "movies" ? styles.activeTab : styles.inactiveTab]}
+                            onPress={() => setActiveTab("movies")}
                         >
-                            <Ionicons name="close" size={24} color="rgba(255,255,255,0.6)" />
+                            <View style={styles.tabContent}>
+                                <MaterialCommunityIcons
+                                    name="movie-open-play-outline"
+                                    size={24}
+                                    color={activeTab === "movies" ? Colors.white : Colors.metalSilver}
+                                />
+                                <Text
+                                    style={[
+                                        styles.tabText,
+                                        activeTab === "movies" ? styles.activeTabText : styles.inactiveTabText,
+                                    ]}
+                                >
+                                    Películas
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.tab, activeTab === "tv" ? styles.activeTab : styles.inactiveTab]}
+                            onPress={() => setActiveTab("tv")}
+                        >
+                            <View style={styles.tabContent}>
+                                <Feather
+                                    name="tv"
+                                    size={24}
+                                    color={activeTab === "tv" ? Colors.white : Colors.metalSilver}
+                                />
+                                <Text
+                                    style={[
+                                        styles.tabText,
+                                        activeTab === "tv" ? styles.activeTabText : styles.inactiveTabText,
+                                    ]}
+                                >
+                                    Series
+                                </Text>
+                            </View>
                         </TouchableOpacity>
                     </View>
-                </TouchableOpacity>
-            )}
-
-            {/* Search and Filter Row */}
-            <View style={styles.controlsContainer}>
-                <View style={styles.searchAndFilterRow}>
-                    <View style={styles.searchWrapper}>
-                        <TextInput
-                            style={styles.searchInput}
-                            placeholder="Buscar..."
-                            placeholderTextColor="#71717a"
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            onSubmitEditing={handleSearch}
-                            returnKeyType="search"
-                        />
-                        {searchQuery.length > 0 && (
-                            <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
-                                <Ionicons name="close-circle" size={20} color="#71717a" />
-                            </TouchableOpacity>
-                        )}
-                        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                            <Entypo name="magnifying-glass" size={24} color="#71717a" />
-                        </TouchableOpacity>
-                    </View>
-
-                    <TouchableOpacity
-                        style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
-                        onPress={handleOpenFilters}
-                    >
-                        <Ionicons
-                            name="filter"
-                            size={20}
-                            color={filtersActive ? Colors.white : Colors.metalSilver}
-                        />
-                    </TouchableOpacity>
                 </View>
 
-                {filtersActive && (
-                    <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
-                        <Text style={styles.clearFiltersText}>Limpiar filtros activos</Text>
+                {/* Profile Setup Banner */}
+                {showProfileBanner && (
+                    <TouchableOpacity
+                        style={styles.profileBanner}
+                        onPress={() => router.push("/profile" as Parameters<typeof router.push>[0])}
+                    >
+                        <View style={styles.profileBannerContent}>
+                            <Ionicons name="sparkles" size={20} color={Colors.white} />
+                            <View style={styles.profileBannerTextContainer}>
+                                <Text style={styles.profileBannerTitle}>
+                                    ¡Dale estilo a tu cuenta!
+                                </Text>
+                                <Text style={styles.profileBannerSubtitle}>
+                                    Cambia tu nombre de usuario genérico en tu perfil.
+                                </Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={(e) => {
+                                    e.stopPropagation();
+                                    handleDismissBanner();
+                                }}
+                            >
+                                <Ionicons name="close" size={24} color="rgba(255,255,255,0.6)" />
+                            </TouchableOpacity>
+                        </View>
                     </TouchableOpacity>
                 )}
+
+                {/* Search and Filter Row */}
+                <View style={styles.controlsContainer}>
+                    <View style={styles.searchAndFilterRow}>
+                        <View style={styles.searchWrapper}>
+                            <TextInput
+                                style={styles.searchInput}
+                                placeholder="Buscar..."
+                                placeholderTextColor="#71717a"
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                onSubmitEditing={handleSearch}
+                                returnKeyType="search"
+                            />
+                            {searchQuery.length > 0 && (
+                                <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
+                                    <Ionicons name="close-circle" size={20} color="#71717a" />
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                                <Entypo name="magnifying-glass" size={24} color="#71717a" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <TouchableOpacity
+                            style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
+                            onPress={handleOpenFilters}
+                        >
+                            <Ionicons
+                                name="filter"
+                                size={20}
+                                color={filtersActive ? Colors.white : Colors.metalSilver}
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                    {filtersActive && (
+                        <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
+                            <Text style={styles.clearFiltersText}>Limpiar filtros activos</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                {/* Content */}
+                {renderMainContent()}
+                {activeTab === "tv" && renderContinueWatching()}
+
+                {/* Filter Modal */}
+                <Modal
+                    visible={showFilterModal}
+                    animationType="slide"
+                    transparent
+                    onRequestClose={handleCloseFilters}
+                >
+                    <SafeAreaView style={[styles.modalContainer, styles.modalBackground]}>
+                        <SmokeBackground />
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Filtrar</Text>
+                            <TouchableOpacity onPress={handleCloseFilters}>
+                                <Text style={styles.closeButtonText}>✕</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView contentContainerStyle={styles.modalContent}>
+                            <Text style={styles.sectionHeader}>Ordenar Por</Text>
+                            <View style={styles.optionsRow}>
+                                {SORT_OPTIONS.map(renderSortOption)}
+                            </View>
+
+                            <Text style={styles.sectionHeader}>Año de Lanzamiento</Text>
+                            <TextInput
+                                style={styles.yearInput}
+                                placeholder="Ej. 2023"
+                                placeholderTextColor="#52525b"
+                                keyboardType="number-pad"
+                                value={selectedYear}
+                                onChangeText={setSelectedYear}
+                                maxLength={4}
+                            />
+
+                            <Text style={styles.sectionHeader}>Género</Text>
+                            <View style={styles.genresRow}>
+                                {genres.map(renderGenreChip)}
+                            </View>
+                        </ScrollView>
+
+                        <View style={styles.modalFooter}>
+                            <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
+                                <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </SafeAreaView>
+                </Modal>
             </View>
-
-            {/* Content */}
-            {renderMainContent()}
-            {activeTab === "tv" && renderContinueWatching()}
-
-            {/* Filter Modal */}
-            <Modal
-                visible={showFilterModal}
-                animationType="slide"
-                transparent
-                onRequestClose={handleCloseFilters}
-            >
-                <SafeAreaView style={[styles.modalContainer, styles.modalBackground]}>
-                    <SmokeBackground />
-                    <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Filtrar</Text>
-                        <TouchableOpacity onPress={handleCloseFilters}>
-                            <Text style={styles.closeButtonText}>✕</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <ScrollView contentContainerStyle={styles.modalContent}>
-                        <Text style={styles.sectionHeader}>Ordenar Por</Text>
-                        <View style={styles.optionsRow}>
-                            {SORT_OPTIONS.map(renderSortOption)}
-                        </View>
-
-                        <Text style={styles.sectionHeader}>Año de Lanzamiento</Text>
-                        <TextInput
-                            style={styles.yearInput}
-                            placeholder="Ej. 2023"
-                            placeholderTextColor="#52525b"
-                            keyboardType="number-pad"
-                            value={selectedYear}
-                            onChangeText={setSelectedYear}
-                            maxLength={4}
-                        />
-
-                        <Text style={styles.sectionHeader}>Género</Text>
-                        <View style={styles.genresRow}>
-                            {genres.map(renderGenreChip)}
-                        </View>
-                    </ScrollView>
-
-                    <View style={styles.modalFooter}>
-                        <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
-                            <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
-                        </TouchableOpacity>
-                    </View>
-                </SafeAreaView>
-            </Modal>
-        </View>
+        </GestureDetector>
     );
 }
 

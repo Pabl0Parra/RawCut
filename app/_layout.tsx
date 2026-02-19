@@ -2,6 +2,7 @@
 import { Stack, SplashScreen, useRouter, useSegments } from "expo-router";
 import * as Linking from "expo-linking";
 import { useEffect, useState, useCallback, useRef } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
     View,
     StyleSheet,
@@ -386,96 +387,98 @@ export default function RootLayout() {
     const appReady = isReady && isSplashFinished && !initError;
 
     return (
-        <ErrorBoundary>
-            <ThemeProvider value={TransparentTheme}>
-                <View style={styles.container}>
-                    {appReady && <SmokeBackground />}
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <ErrorBoundary>
+                <ThemeProvider value={TransparentTheme}>
+                    <View style={styles.container}>
+                        {appReady && <SmokeBackground />}
 
-                    <Stack
-                        screenOptions={{
-                            headerShown: false,
-                            contentStyle: { backgroundColor: "transparent" },
-                        }}
-                    >
-                        <Stack.Screen
-                            name="(tabs)"
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="login"
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="register"
-                            options={{ headerShown: false }}
-                        />
-                    </Stack>
-
-                    {/* ── Overlay: loading (splash done, session still resolving) ── */}
-                    {isSplashFinished && !isReady && (
-                        <View
-                            style={[
-                                StyleSheet.absoluteFill,
-                                styles.loadingOverlay,
-                            ]}
-                            pointerEvents="auto"
+                        <Stack
+                            screenOptions={{
+                                headerShown: false,
+                                contentStyle: { backgroundColor: "transparent" },
+                            }}
                         >
-                            <ActivityIndicator
-                                size="large"
-                                color={Colors.bloodRed}
+                            <Stack.Screen
+                                name="(tabs)"
+                                options={{ headerShown: false }}
                             />
-                            <Text style={styles.loadingText}>
-                                Preparando la aplicación…
-                            </Text>
-                        </View>
-                    )}
+                            <Stack.Screen
+                                name="login"
+                                options={{ headerShown: false }}
+                            />
+                            <Stack.Screen
+                                name="register"
+                                options={{ headerShown: false }}
+                            />
+                        </Stack>
 
-                    {/* ── Overlay: fatal init error with retry ── */}
-                    {initError && isSplashFinished && (
-                        <View
-                            style={[
-                                StyleSheet.absoluteFill,
-                                styles.errorOverlay,
-                            ]}
-                            pointerEvents="auto"
-                        >
-                            <Text style={styles.errorTitle}>
-                                Error de Inicialización
-                            </Text>
-                            <Text style={styles.errorMessage}>
-                                {initError}
-                            </Text>
-                            <Text style={styles.errorHint}>
-                                Por favor, verifica tu conexión e intenta de
-                                nuevo.
-                            </Text>
-                            <TouchableOpacity
-                                style={styles.retryButton}
-                                onPress={handleRetryInit}
-                                activeOpacity={0.7}
+                        {/* ── Overlay: loading (splash done, session still resolving) ── */}
+                        {isSplashFinished && !isReady && (
+                            <View
+                                style={[
+                                    StyleSheet.absoluteFill,
+                                    styles.loadingOverlay,
+                                ]}
+                                pointerEvents="auto"
                             >
-                                <Text style={styles.retryButtonText}>
-                                    Reintentar
+                                <ActivityIndicator
+                                    size="large"
+                                    color={Colors.bloodRed}
+                                />
+                                <Text style={styles.loadingText}>
+                                    Preparando la aplicación…
                                 </Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                            </View>
+                        )}
 
-                    {/* ── Overlay: video splash (highest z-index) ── */}
-                    {!isSplashFinished && (
-                        <View
-                            style={[
-                                StyleSheet.absoluteFill,
-                                styles.splashOverlay,
-                            ]}
-                            pointerEvents="auto"
-                        >
-                            <VideoSplash onFinish={handleSplashFinish} />
-                        </View>
-                    )}
-                </View>
-            </ThemeProvider>
-        </ErrorBoundary>
+                        {/* ── Overlay: fatal init error with retry ── */}
+                        {initError && isSplashFinished && (
+                            <View
+                                style={[
+                                    StyleSheet.absoluteFill,
+                                    styles.errorOverlay,
+                                ]}
+                                pointerEvents="auto"
+                            >
+                                <Text style={styles.errorTitle}>
+                                    Error de Inicialización
+                                </Text>
+                                <Text style={styles.errorMessage}>
+                                    {initError}
+                                </Text>
+                                <Text style={styles.errorHint}>
+                                    Por favor, verifica tu conexión e intenta de
+                                    nuevo.
+                                </Text>
+                                <TouchableOpacity
+                                    style={styles.retryButton}
+                                    onPress={handleRetryInit}
+                                    activeOpacity={0.7}
+                                >
+                                    <Text style={styles.retryButtonText}>
+                                        Reintentar
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
+                        {/* ── Overlay: video splash (highest z-index) ── */}
+                        {!isSplashFinished && (
+                            <View
+                                style={[
+                                    StyleSheet.absoluteFill,
+                                    styles.splashOverlay,
+                                ]}
+                                pointerEvents="auto"
+                            >
+                                <VideoSplash onFinish={handleSplashFinish} />
+                            </View>
+                        )}
+                    </View>
+                </ThemeProvider>
+            </ErrorBoundary>
+        </GestureHandlerRootView>
     );
 }
 
