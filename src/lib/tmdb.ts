@@ -56,6 +56,7 @@ export interface Movie {
     vote_average: number;
     vote_count: number;
     genre_ids: number[];
+    original_language: string;
     popularity: number;
     runtime?: number;
     credits?: Credits;
@@ -72,6 +73,7 @@ export interface TVShow {
     vote_average: number;
     vote_count: number;
     genre_ids: number[];
+    original_language: string;
     popularity: number;
     seasons?: Season[];
     episode_run_time?: number[];
@@ -118,29 +120,44 @@ const fetchTMDb = async <T>(endpoint: string, params: Record<string, string> = {
     return response.json();
 };
 
+const EXCLUDED_LANGUAGES = ["ja", "zh", "ko", "ar"];
+
+const filterByLanguage = <T extends { original_language: string }>(items: T[]): T[] => {
+    if (!items) return [];
+    return items.filter(item => !EXCLUDED_LANGUAGES.includes(item.original_language));
+};
+
 // API Functions
 export const getPopularMovies = async (page: number = 1): Promise<TMDbResponse<Movie>> => {
-    return fetchTMDb<TMDbResponse<Movie>>("/movie/popular", { page: page.toString() });
+    const response = await fetchTMDb<TMDbResponse<Movie>>("/movie/popular", { page: page.toString() });
+    return { ...response, results: filterByLanguage(response.results) };
 };
 
 export const getPopularTVShows = async (page: number = 1): Promise<TMDbResponse<TVShow>> => {
-    return fetchTMDb<TMDbResponse<TVShow>>("/tv/popular", { page: page.toString() });
+    const response = await fetchTMDb<TMDbResponse<TVShow>>("/tv/popular", { page: page.toString() });
+    return { ...response, results: filterByLanguage(response.results) };
 };
 
 export const searchMovies = async (query: string, page: number = 1): Promise<TMDbResponse<Movie>> => {
-    return fetchTMDb<TMDbResponse<Movie>>("/search/movie", { query, page: page.toString() });
+    const response = await fetchTMDb<TMDbResponse<Movie>>("/search/movie", { query, page: page.toString() });
+    return { ...response, results: filterByLanguage(response.results) };
 };
 
 export const searchTVShows = async (query: string, page: number = 1): Promise<TMDbResponse<TVShow>> => {
-    return fetchTMDb<TMDbResponse<TVShow>>("/search/tv", { query, page: page.toString() });
+    const response = await fetchTMDb<TMDbResponse<TVShow>>("/search/tv", { query, page: page.toString() });
+    return { ...response, results: filterByLanguage(response.results) };
 };
 
-export const getMovieDetails = async (id: number): Promise<Movie & { genres: { id: number; name: string }[] }> => {
-    return fetchTMDb(`/movie/${id}`, { append_to_response: "credits" });
+export const getMovieDetails = async (id: number): Promise<(Movie & { genres: { id: number; name: string }[] }) | null> => {
+    const details = await fetchTMDb<Movie & { genres: { id: number; name: string }[] }>(`/movie/${id}`, { append_to_response: "credits" });
+    if (details && EXCLUDED_LANGUAGES.includes(details.original_language)) return null;
+    return details;
 };
 
-export const getTVShowDetails = async (id: number): Promise<TVShow & { genres: { id: number; name: string }[] }> => {
-    return fetchTMDb(`/tv/${id}`, { append_to_response: "credits" });
+export const getTVShowDetails = async (id: number): Promise<(TVShow & { genres: { id: number; name: string }[] }) | null> => {
+    const details = await fetchTMDb<TVShow & { genres: { id: number; name: string }[] }>(`/tv/${id}`, { append_to_response: "credits" });
+    if (details && EXCLUDED_LANGUAGES.includes(details.original_language)) return null;
+    return details;
 };
 
 export const getTVSeasonDetails = async (tvId: number, seasonNumber: number): Promise<Season & { episodes: Episode[] }> => {
@@ -148,11 +165,19 @@ export const getTVSeasonDetails = async (tvId: number, seasonNumber: number): Pr
 };
 
 export const getRelatedMovies = async (id: number): Promise<TMDbResponse<Movie>> => {
-    return fetchTMDb<TMDbResponse<Movie>>(`/movie/${id}/similar`);
+    const response = await fetchTMDb<TMDbResponse<Movie>>(`/movie/${id}/similar`);
+    if (response && response.results) {
+        return { ...response, results: filterByLanguage(response.results) };
+    }
+    return response;
 };
 
 export const getRelatedTVShows = async (id: number): Promise<TMDbResponse<TVShow>> => {
-    return fetchTMDb<TMDbResponse<TVShow>>(`/tv/${id}/similar`);
+    const response = await fetchTMDb<TMDbResponse<TVShow>>(`/tv/${id}/similar`);
+    if (response && response.results) {
+        return { ...response, results: filterByLanguage(response.results) };
+    }
+    return response;
 };
 
 export interface Video {
@@ -192,7 +217,14 @@ export const getPersonDetails = async (id: number): Promise<Person> => {
 };
 
 export const getPersonCredits = async (id: number): Promise<PersonCredits> => {
-    return fetchTMDb<PersonCredits>(`/person/${id}/combined_credits`);
+    const credits = await fetchTMDb<PersonCredits>(`/person/${id}/combined_credits`);
+    if (credits) {
+        return {
+            cast: filterByLanguage(credits.cast as any),
+            crew: filterByLanguage(credits.crew as any),
+        } as PersonCredits;
+    }
+    return credits;
 };
 
 // Helper function to get full image URL
@@ -233,7 +265,8 @@ export const discoverMovies = async (params: DiscoverParams): Promise<TMDbRespon
     if (params.with_genres) queryParams.with_genres = params.with_genres;
     if (params.primary_release_year) queryParams.primary_release_year = params.primary_release_year;
 
-    return fetchTMDb<TMDbResponse<Movie>>("/discover/movie", queryParams);
+    const response = await fetchTMDb<TMDbResponse<Movie>>("/discover/movie", queryParams);
+    return { ...response, results: filterByLanguage(response.results) };
 };
 
 export const discoverTVShows = async (params: DiscoverParams): Promise<TMDbResponse<TVShow>> => {
@@ -246,5 +279,6 @@ export const discoverTVShows = async (params: DiscoverParams): Promise<TMDbRespo
     if (params.with_genres) queryParams.with_genres = params.with_genres;
     if (params.first_air_date_year) queryParams.first_air_date_year = params.first_air_date_year;
 
-    return fetchTMDb<TMDbResponse<TVShow>>("/discover/tv", queryParams);
+    const response = await fetchTMDb<TMDbResponse<TVShow>>("/discover/tv", queryParams);
+    return { ...response, results: filterByLanguage(response.results) };
 };
