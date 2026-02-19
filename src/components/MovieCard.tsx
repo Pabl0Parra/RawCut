@@ -1,9 +1,10 @@
-import React, { JSX, memo, useMemo, useCallback } from "react";
+import React, { JSX, memo, useMemo, useCallback, useState } from "react";
 import {
     View,
     Text,
     TouchableOpacity,
     StyleSheet,
+    Modal,
     type ViewStyle,
     type TextStyle,
     type ImageStyle,
@@ -11,6 +12,7 @@ import {
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { VotePicker } from "./VotePicker";
 
 import { getImageUrl, type Movie, type TVShow } from "../lib/tmdb";
 import { Colors } from "../constants/Colors";
@@ -30,11 +32,20 @@ interface MovieCardProps {
     readonly isFavorite?: boolean;
     readonly inWatchlist?: boolean;
     readonly isWatched?: boolean;
+    readonly communityRating?: number;  // aggregated 0–10
+    readonly userVote?: number;          // this user's vote 0–10
     readonly onToggleFavorite?: () => void;
     readonly onToggleWatchlist?: () => void;
     readonly onToggleWatched?: () => void;
+    readonly onVote?: (vote: number) => void;
     readonly onRecommend?: () => void;
 }
+
+// ─── Vote Picker ──────────────────────────────────────────────────────────────
+
+// ─── Vote Picker ──────────────────────────────────────────────────────────────
+// Replaced by shared component from ./VotePicker.tsx
+
 
 /**
  * Type guard to check if item is a Movie
@@ -127,10 +138,14 @@ const MovieCard = memo(function MovieCard({
     isFavorite = false,
     inWatchlist = false,
     isWatched = false,
+    communityRating,
+    userVote,
     onToggleFavorite,
     onToggleWatchlist,
     onToggleWatched,
+    onVote,
 }: Readonly<MovieCardProps>): JSX.Element {
+    const [showVotePicker, setShowVotePicker] = useState(false);
     const posterUrl = useMemo(() => getImageUrl(item.poster_path, "w300"), [item.poster_path]);
     const title = useMemo(() => getTitle(item), [item]);
     const year = useMemo(() => extractYear(getReleaseDate(item)), [item]);
@@ -277,19 +292,39 @@ const MovieCard = memo(function MovieCard({
                 </Text>
                 <View style={styles.metaRow}>
                     {!!year && <Text style={styles.year}>{year}</Text>}
-                    <Text style={styles.rating}>⭐ {rating}</Text>
+                    <View style={styles.ratingsRow}>
+                        <Text style={styles.rating}>⭐ {rating}</Text>
+                        <TouchableOpacity
+                            onPress={() => setShowVotePicker(true)}
+                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                        >
+                            <Text style={styles.communityRating}>
+                                👥 {communityRating !== undefined
+                                    ? communityRating.toFixed(1)
+                                    : "—"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
+                {showVotePicker && (
+                    <VotePicker
+                        current={userVote}
+                        onSelect={(v) => onVote?.(v)}
+                        onClose={() => setShowVotePicker(false)}
+                    />
+                )}
             </TouchableOpacity>
         </View>
     );
 }, (prevProps: Readonly<MovieCardProps>, nextProps: Readonly<MovieCardProps>) => {
-    // Custom comparison to prevent re-renders unless these specific values change
     return (
         prevProps.item.id === nextProps.item.id &&
         prevProps.isFavorite === nextProps.isFavorite &&
         prevProps.inWatchlist === nextProps.inWatchlist &&
         prevProps.isWatched === nextProps.isWatched &&
-        prevProps.mediaType === nextProps.mediaType
+        prevProps.mediaType === nextProps.mediaType &&
+        prevProps.communityRating === nextProps.communityRating &&
+        prevProps.userVote === nextProps.userVote
     );
 });
 
@@ -391,6 +426,11 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         marginTop: 4,
     } as ViewStyle,
+    ratingsRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    } as ViewStyle,
     year: {
         color: Colors.metalSilver,
         fontSize: 10,
@@ -399,4 +439,11 @@ const styles = StyleSheet.create({
         color: "#eab308",
         fontSize: 10,
     } as TextStyle,
+    communityRating: {
+        color: "#a855f7",
+        fontSize: 10,
+    } as TextStyle,
 });
+
+// ─── VotePicker styles ────────────────────────────────────────────────────────
+// styles (vp) moved to VotePicker.tsx

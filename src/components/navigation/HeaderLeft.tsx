@@ -1,9 +1,12 @@
 import { Image, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
 
-export const HeaderLeft = () => (
+interface HeaderLeftProps {
+    onPress?: () => void;
+}
+
+export const HeaderLeft = ({ onPress }: HeaderLeftProps) => (
     <TouchableOpacity
-        onPress={() => router.replace("/(tabs)")}
+        onPress={onPress}
         style={{
             marginLeft: 16,
             width: 32,

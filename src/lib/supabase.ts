@@ -59,3 +59,12 @@ export interface Rating {
     rating: number;
     created_at: string;
 }
+
+export interface ContentVote {
+    id: string;
+    user_id: string;
+    tmdb_id: number;
+    media_type: "movie" | "tv";
+    vote: number; // 0–10 (matches TMDB scale)
+    created_at: string;
+}

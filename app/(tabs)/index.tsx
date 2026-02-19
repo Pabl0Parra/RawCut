@@ -1,4 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef, JSX } from "react";
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
+    runOnJS,
+    withTiming,
+} from "react-native-reanimated";
 import {
     View,
     Text,
@@ -32,6 +39,7 @@ import {
     type Genre,
 } from "../../src/lib/tmdb";
 import { useContentStore } from "../../src/stores/contentStore";
+import { useVoteStore } from "../../src/stores/voteStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { Colors } from "../../src/constants/Colors";
 
@@ -248,6 +256,37 @@ export default function HomeScreen(): JSX.Element {
         selectedYear,
     });
 
+    // ── Gesture State for Modal ──────────────────────────────────────────
+    const translateY = useSharedValue(0);
+
+    const animatedModalStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: translateY.value }],
+    }));
+
+    const panGesture = Gesture.Pan()
+        .onUpdate((e) => {
+            if (e.translationY > 0) {
+                translateY.value = e.translationY;
+            }
+        })
+        .onEnd((e) => {
+            if (e.translationY > 150 || e.velocityY > 500) {
+                translateY.value = withTiming(1000, {}, () => {
+                    runOnJS(handleCloseFilters)();
+                });
+            } else {
+                translateY.value = withSpring(0);
+            }
+        });
+
+    useEffect(() => {
+        if (showFilterModal) {
+            translateY.value = withSpring(0);
+        } else {
+            translateY.value = 0;
+        }
+    }, [showFilterModal]);
+
     // ── Store Selectors (granular — only re-render when these change) ──
     const user = useAuthStore((s) => s.user);
     // Subscribe to the actual data arrays so the component re-renders when
@@ -257,6 +296,10 @@ export default function HomeScreen(): JSX.Element {
     const watchlist = useContentStore((s) => s.watchlist);
     const tvProgress = useContentStore((s) => s.tvProgress);
     const getNextEpisodeToWatch = useContentStore((s) => s.getNextEpisodeToWatch);
+
+    // ── Vote Store ───────────────────────────────────────────────────────
+    const userVotes = useVoteStore((s) => s.userVotes);
+    const communityScores = useVoteStore((s) => s.communityScores);
 
     // ── Derived State ───────────────────────────────────────────────────
     const data = activeTab === "movies" ? movies : tvShows;
@@ -271,6 +314,14 @@ export default function HomeScreen(): JSX.Element {
         loadContent();
         loadGenres(activeTab);
     }, []);
+
+    // Fetch community vote aggregates whenever visible content changes
+    useEffect(() => {
+        if (data.length === 0) return;
+        const ids = data.map((item) => item.id);
+        useVoteStore.getState().fetchVotes(ids, mediaType);
+    }, [data, mediaType]);
+
 
     // Fetch user content when screen focuses
     useFocusEffect(
@@ -479,6 +530,17 @@ export default function HomeScreen(): JSX.Element {
         [],
     );
 
+    const handleVote = useCallback(
+        async (tmdbId: number, type: MediaType, vote: number): Promise<void> => {
+            try {
+                await useVoteStore.getState().submitVote(tmdbId, type, vote);
+            } catch (err) {
+                console.error("[HomeScreen] Vote failed:", err);
+            }
+        },
+        [],
+    );
+
     // ====================================================================
     // Render Functions
     // ====================================================================
@@ -487,6 +549,7 @@ export default function HomeScreen(): JSX.Element {
         ({ item }: { item: Movie | TVShow }): JSX.Element => {
             // Read current state inline so booleans are always fresh.
             const store = useContentStore.getState();
+            const vStore = useVoteStore.getState();
             return (
                 <MovieCard
                     item={item}
@@ -494,15 +557,17 @@ export default function HomeScreen(): JSX.Element {
                     isFavorite={store.isFavorite(item.id, mediaType)}
                     inWatchlist={store.isInWatchlist(item.id, mediaType)}
                     isWatched={store.isWatched(item.id, mediaType)}
+                    communityRating={vStore.getCommunityScore(item.id, mediaType)?.avg}
+                    userVote={vStore.getUserVote(item.id, mediaType)}
                     onToggleFavorite={() => handleToggleFavorite(item.id, mediaType)}
                     onToggleWatchlist={() => handleToggleWatchlist(item.id, mediaType)}
                     onToggleWatched={() => handleToggleWatched(item.id, mediaType)}
+                    onVote={(vote) => handleVote(item.id, mediaType, vote)}
                 />
             );
         },
-        // favorites/watchlist/tvProgress subscriptions trigger re-render,
-        // which causes useCallback to rebuild with fresh closure data.
-        [mediaType, favorites, watchlist, tvProgress, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched],
+        // favorites/watchlist/tvProgress/votes subscriptions trigger re-render
+        [mediaType, favorites, watchlist, tvProgress, userVotes, communityScores, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched, handleVote],
     );
 
     const renderFooter = useCallback((): JSX.Element | null => {
@@ -819,47 +884,52 @@ export default function HomeScreen(): JSX.Element {
                         onPress={handleCloseFilters}
                     >
                         {/* Filter panel — stop propagation so tapping inside doesn't close */}
-                        <View
-                            style={styles.filterPanel}
-                            onStartShouldSetResponder={() => true}
-                        >
-                            <SmokeBackground />
-                            <View style={styles.modalHeader}>
-                                <Text style={styles.modalTitle}>Filtrar</Text>
-                                <TouchableOpacity onPress={handleCloseFilters}>
-                                    <Text style={styles.closeButtonText}>✕</Text>
-                                </TouchableOpacity>
-                            </View>
-
-                            <ScrollView contentContainerStyle={styles.modalContent}>
-                                <Text style={styles.sectionHeader}>Ordenar Por</Text>
-                                <View style={styles.optionsRow}>
-                                    {SORT_OPTIONS.map(renderSortOption)}
+                        <GestureDetector gesture={panGesture}>
+                            <Animated.View
+                                style={[styles.filterPanel, animatedModalStyle]}
+                                onStartShouldSetResponder={() => true}
+                            >
+                                <View style={styles.modalHandleContainer}>
+                                    <View style={styles.modalHandle} />
+                                </View>
+                                <SmokeBackground />
+                                <View style={styles.modalHeader}>
+                                    <Text style={styles.modalTitle}>Filtrar</Text>
+                                    <TouchableOpacity onPress={handleCloseFilters}>
+                                        <Text style={styles.closeButtonText}>✕</Text>
+                                    </TouchableOpacity>
                                 </View>
 
-                                <Text style={styles.sectionHeader}>Año de Lanzamiento</Text>
-                                <TextInput
-                                    style={styles.yearInput}
-                                    placeholder="Ej. 2023"
-                                    placeholderTextColor="#52525b"
-                                    keyboardType="number-pad"
-                                    value={selectedYear}
-                                    onChangeText={setSelectedYear}
-                                    maxLength={4}
-                                />
+                                <ScrollView contentContainerStyle={styles.modalContent}>
+                                    <Text style={styles.sectionHeader}>Ordenar Por</Text>
+                                    <View style={styles.optionsRow}>
+                                        {SORT_OPTIONS.map(renderSortOption)}
+                                    </View>
 
-                                <Text style={styles.sectionHeader}>Género</Text>
-                                <View style={styles.genresRow}>
-                                    {genres.map(renderGenreChip)}
+                                    <Text style={styles.sectionHeader}>Año de Lanzamiento</Text>
+                                    <TextInput
+                                        style={styles.yearInput}
+                                        placeholder="Ej. 2023"
+                                        placeholderTextColor="#52525b"
+                                        keyboardType="number-pad"
+                                        value={selectedYear}
+                                        onChangeText={setSelectedYear}
+                                        maxLength={4}
+                                    />
+
+                                    <Text style={styles.sectionHeader}>Género</Text>
+                                    <View style={styles.genresRow}>
+                                        {genres.map(renderGenreChip)}
+                                    </View>
+                                </ScrollView>
+
+                                <View style={styles.modalFooter}>
+                                    <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
+                                        <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
+                                    </TouchableOpacity>
                                 </View>
-                            </ScrollView>
-
-                            <View style={styles.modalFooter}>
-                                <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
-                                    <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                            </Animated.View>
+                        </GestureDetector>
                     </TouchableOpacity>
                 </Modal>
             </View>
@@ -1010,14 +1080,33 @@ const styles = StyleSheet.create({
         backgroundColor: "#141414ff",
         borderTopLeftRadius: 16,
         borderTopRightRadius: 16,
+        borderTopWidth: 2,
+        borderTopColor: "#01b4e4",
+        borderLeftWidth: 1,
+        borderLeftColor: "#01b4e422",
+        borderRightWidth: 1,
+        borderRightColor: "#01b4e422",
         overflow: "hidden",
-        padding: 16,
+    },
+    modalHandleContainer: {
+        width: "100%",
+        height: 24,
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 100,
+    },
+    modalHandle: {
+        width: 40,
+        height: 4,
+        backgroundColor: "#ffffff33",
+        borderRadius: 2,
     },
     modalHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 24,
+        paddingHorizontal: 16,
     },
     modalTitle: {
         color: "#f4f4f5",

@@ -23,6 +23,8 @@ import { ContentPoster } from "../../../src/components/ContentPoster";
 import { GenreList } from "../../../src/components/GenreList";
 import { ContentActionBar } from "../../../src/components/ContentActionBar";
 import { useContentActions } from "../../../src/hooks/useContentActions";
+import { useVoteStore } from "../../../src/stores/voteStore";
+import { VotePicker } from "../../../src/components/VotePicker";
 import { detailScreenStyles } from "../../../src/styles/detailScreenStyles";
 import { CastMemberList } from "../../../src/components/CastMemberList";
 import { CrewMemberList } from "../../../src/components/CrewMemberList";
@@ -86,6 +88,17 @@ export default function MovieDetailScreen(): React.JSX.Element {
         handleToggleWatched,
     } = useContentActions();
 
+    // ── Community Voting ──
+    const [showVotePicker, setShowVotePicker] = useState(false);
+    const userVotes = useVoteStore((s) => s.userVotes);
+    const communityScores = useVoteStore((s) => s.communityScores);
+    const fetchVotes = useVoteStore((s) => s.fetchVotes);
+    const submitVote = useVoteStore((s) => s.submitVote);
+
+    const userVote = movie ? useVoteStore.getState().getUserVote(movie.id, "movie") : undefined;
+    const communityRating = movie ? useVoteStore.getState().getCommunityScore(movie.id, "movie")?.avg : undefined;
+
+
     // ========================================================================
     // State Helpers
     // ========================================================================
@@ -119,8 +132,10 @@ export default function MovieDetailScreen(): React.JSX.Element {
         const movieId = parseMovieId(id);
         if (movieId !== null) {
             loadMovie(movieId);
+            fetchVotes([movieId], "movie");
         }
-    }, [id, loadMovie]);
+    }, [id, loadMovie, fetchVotes]);
+
 
     // ========================================================================
     // Action Handlers
@@ -145,6 +160,16 @@ export default function MovieDetailScreen(): React.JSX.Element {
     const handleCloseTrailerModal = (): void => {
         updateState({ showTrailerModal: false });
     };
+
+    const handleVote = async (vote: number): Promise<void> => {
+        if (!movie) return;
+        try {
+            await submitVote(movie.id, "movie", vote);
+        } catch (err) {
+            console.error("Error submitting vote:", err);
+        }
+    };
+
 
     // ========================================================================
     // Render Helpers
@@ -243,11 +268,23 @@ export default function MovieDetailScreen(): React.JSX.Element {
                             <Text style={detailScreenStyles.yearText}>
                                 {formatMovieMetadata(movie.release_date, movie.runtime)}
                             </Text>
-                            <Text style={detailScreenStyles.ratingText}>
-                                ⭐ {formatRating(movie.vote_average)}/10
-                            </Text>
+                            <View style={localStyles.ratingsRow}>
+                                <Text style={detailScreenStyles.ratingText}>
+                                    ⭐ {formatRating(movie.vote_average)}/10
+                                </Text>
+                                <TouchableOpacity
+                                    onPress={() => setShowVotePicker(true)}
+                                    activeOpacity={0.7}
+                                    style={localStyles.communityBadge}
+                                >
+                                    <Text style={localStyles.communityRatingText}>
+                                        👥 {communityRating !== undefined ? communityRating.toFixed(1) : "—"}/10
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
+
 
                     {/* Genres */}
                     <GenreList genres={movie.genres || []} />
@@ -318,15 +355,45 @@ export default function MovieDetailScreen(): React.JSX.Element {
                 />
             )}
 
-            {/* Trailer Modal */}
             <TrailerModal
                 visible={showTrailerModal}
                 videoKey={trailerKey}
                 onClose={handleCloseTrailerModal}
             />
+
+            {showVotePicker && movie && (
+                <VotePicker
+                    current={userVote}
+                    onSelect={handleVote}
+                    onClose={() => setShowVotePicker(false)}
+                />
+            )}
         </SafeAreaView>
     );
 }
+
+const localStyles = StyleSheet.create({
+    ratingsRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        marginTop: 6,
+    },
+    communityBadge: {
+        backgroundColor: "rgba(168, 85, 247, 0.15)",
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: "rgba(168, 85, 247, 0.3)",
+    },
+    communityRatingText: {
+        color: "#a855f7",
+        fontSize: 14,
+        fontWeight: "bold",
+    },
+});
+
 
 // ============================================================================
 // Styles
