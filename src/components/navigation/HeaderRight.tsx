@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "../../constants/Colors";
 import { useAuthStore } from "../../stores/authStore";
 
-/** Get initials from username or email */
 function getInitials(username: string | undefined, email: string | undefined): string {
     if (username && !username.startsWith("user_")) {
         return username.slice(0, 2).toUpperCase();
@@ -146,12 +145,12 @@ const styles = StyleSheet.create({
         minWidth: 200,
         borderWidth: 1,
         borderColor: Colors.metalSilver,
-        // Shadow for iOS
+        
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
-        // Elevation for Android
+        
         elevation: 10,
     },
     userInfo: {

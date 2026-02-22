@@ -7,9 +7,6 @@ import {
 import type { MediaType } from "../types/movieDetail.types";
 import { ActionButton } from "./ActionButton";
 
-/**
- * Props for ContentActionBar component
- */
 export interface ContentActionBarProps {
     readonly contentId: number;
     readonly mediaType: MediaType;
@@ -22,10 +19,6 @@ export interface ContentActionBarProps {
     readonly currentUserId?: string;
 }
 
-/**
- * Shared action button bar for content detail screens
- * Displays favorite, watchlist, and watched toggle buttons
- */
 export function ContentActionBar({
     isFavorite,
     isInWatchlist,

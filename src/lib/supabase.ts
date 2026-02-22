@@ -14,7 +14,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     },
 });
 
-// Database types
 export interface Profile {
     user_id: string;
     username: string;
@@ -65,6 +64,6 @@ export interface ContentVote {
     user_id: string;
     tmdb_id: number;
     media_type: "movie" | "tv";
-    vote: number; // 0–10 (matches TMDB scale)
+    vote: number; 
     created_at: string;
 }

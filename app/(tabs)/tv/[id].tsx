@@ -22,7 +22,6 @@ import { useContentStore } from "../../../src/stores/contentStore";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { Colors } from "../../../src/constants/Colors";
 
-// Components
 import TrailerModal from "../../../src/components/TrailerModal";
 import ContentRecommendModal from "../../../src/components/ContentRecommendModal";
 import SeasonCard from "../../../src/components/SeasonCard";
@@ -40,7 +39,6 @@ import { CastMemberList } from "../../../src/components/CastMemberList";
 import { CrewMemberList } from "../../../src/components/CrewMemberList";
 import { ContentHorizontalList } from "../../../src/components/ContentHorizontalList";
 
-// Types & Utils
 import type {
     TVDetailScreenState,
     NextEpisodeInfo,
@@ -60,11 +58,6 @@ import {
     getBackdropUrl,
     parseTVShowId,
 } from "../../../src/utils/tvDetail.utils";
-
-// ============================================================================
-// ============================================================================
-// Main Component
-// ============================================================================
 
 export default function TVDetailScreen(): React.JSX.Element {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -102,7 +95,7 @@ export default function TVDetailScreen(): React.JSX.Element {
         handleToggleWatched,
     } = useContentActions();
 
-    // ── Community Voting ──
+    
     const [showVotePicker, setShowVotePicker] = useState(false);
     const userVotes = useVoteStore((s) => s.userVotes);
     const communityScores = useVoteStore((s) => s.communityScores);
@@ -112,18 +105,17 @@ export default function TVDetailScreen(): React.JSX.Element {
     const userVote = tvShow ? useVoteStore.getState().getUserVote(tvShow.id, "tv") : undefined;
     const communityRating = tvShow ? useVoteStore.getState().getCommunityScore(tvShow.id, "tv")?.avg : undefined;
 
-
-    // ========================================================================
-    // State Helpers
-    // ========================================================================
+    
+    
+    
 
     const updateState = (updates: Partial<TVDetailScreenState>): void => {
         setState((prev) => ({ ...prev, ...updates }));
     };
 
-    // ========================================================================
-    // Data Loading
-    // ========================================================================
+    
+    
+    
 
     const loadTVShow = useCallback(async (tvId: number): Promise<void> => {
         updateState({ isLoading: true });
@@ -153,12 +145,11 @@ export default function TVDetailScreen(): React.JSX.Element {
         }
     }, [id, user, loadTVShow, fetchTVProgress, fetchVotes]);
 
+    
+    
+    
 
-    // ========================================================================
-    // Action Handlers
-    // ========================================================================
-
-    // Action handlers now provided by useContentActions hook
+    
 
     const handleWatchTrailer = (): void => {
         if (trailerKey) {
@@ -228,24 +219,31 @@ export default function TVDetailScreen(): React.JSX.Element {
         }
     };
 
+    const handleOpenVotePicker = (): void => {
+        if (!user) {
+            router.push("/login");
+            return;
+        }
+        setShowVotePicker(true);
+    };
 
     const checkEpisodeWatched = (seasonNumber: number, episodeNumber: number): boolean => {
         if (!tvShow) return false;
         return isEpisodeWatched(tvShow.id, seasonNumber, episodeNumber);
     };
 
-    // ========================================================================
-    // Computed Values
-    // ========================================================================
+    
+    
+    
 
     const getNextEpisode = (): NextEpisodeInfo | null => {
         if (!tvShow?.seasons) return null;
         return getNextEpisodeToWatch(tvShow.id, seasonsToProgressInfo(tvShow.seasons));
     };
 
-    // ========================================================================
-    // Render Helpers
-    // ========================================================================
+    
+    
+    
 
     const renderLoadingState = (): React.JSX.Element => (
         <SafeAreaView style={detailScreenStyles.safeArea}>
@@ -277,13 +275,7 @@ export default function TVDetailScreen(): React.JSX.Element {
         );
     };
 
-    // Backdrop, poster, genres, and action buttons now use shared components
-
-
-
-
-
-
+    
 
     const renderRecommendButton = (): React.JSX.Element | null => {
         if (!user) return null;
@@ -304,8 +296,6 @@ export default function TVDetailScreen(): React.JSX.Element {
             </TouchableOpacity>
         );
     };
-
-
 
     const renderSeasonItem = ({ item }: { item: Season }): React.JSX.Element => (
         <SeasonCard
@@ -334,12 +324,11 @@ export default function TVDetailScreen(): React.JSX.Element {
         );
     };
 
-    // Generic lists now use shared components
+    
 
-
-    // ========================================================================
-    // Main Render
-    // ========================================================================
+    
+    
+    
 
     if (isLoading) {
         return renderLoadingState();
@@ -354,7 +343,7 @@ export default function TVDetailScreen(): React.JSX.Element {
     return (
         <SafeAreaView style={detailScreenStyles.safeArea} edges={["left", "right"]}>
             <ScrollView showsVerticalScrollIndicator={false}>
-                {/* Back Button */}
+                {}
                 <TouchableOpacity
                     style={detailScreenStyles.backButton}
                     onPress={() => router.back()}
@@ -362,10 +351,10 @@ export default function TVDetailScreen(): React.JSX.Element {
                     <Text style={detailScreenStyles.backButtonText}>←</Text>
                 </TouchableOpacity>
 
-                {/* Next Episode Badge */}
+                {}
                 {renderNextEpisodeBadge()}
 
-                {/* Backdrop */}
+                {}
                 <ContentBackdrop
                     backdropUrl={getBackdropUrl(tvShow.backdrop_path ?? null)}
                     trailerKey={trailerKey}
@@ -373,7 +362,7 @@ export default function TVDetailScreen(): React.JSX.Element {
                 />
 
                 <View style={detailScreenStyles.contentContainer}>
-                    {/* Header Row */}
+                    {}
                     <View style={detailScreenStyles.headerRow}>
                         <ContentPoster
                             posterUrl={getPosterUrl(tvShow.poster_path ?? null, "w300")}
@@ -390,7 +379,7 @@ export default function TVDetailScreen(): React.JSX.Element {
                                     ⭐ {formatRating(tvShow.vote_average)}/10
                                 </Text>
                                 <TouchableOpacity
-                                    onPress={() => setShowVotePicker(true)}
+                                    onPress={handleOpenVotePicker}
                                     activeOpacity={0.7}
                                     style={localStyles.communityBadge}
                                 >
@@ -402,11 +391,10 @@ export default function TVDetailScreen(): React.JSX.Element {
                         </View>
                     </View>
 
-
-                    {/* Genres */}
+                    {}
                     <GenreList genres={tvShow.genres || []} />
 
-                    {/* Action Buttons */}
+                    {}
                     <ContentActionBar
                         contentId={tvShow.id}
                         mediaType={TV_MEDIA_TYPE}
@@ -419,10 +407,10 @@ export default function TVDetailScreen(): React.JSX.Element {
                         currentUserId={user?.id}
                     />
 
-                    {/* Recommend Button */}
+                    {}
                     {renderRecommendButton()}
 
-                    {/* Description */}
+                    {}
                     <View style={detailScreenStyles.descriptionContainer}>
                         <Text style={detailScreenStyles.descriptionTitle}>Sinopsis</Text>
                         <Text style={detailScreenStyles.descriptionText}>
@@ -430,7 +418,7 @@ export default function TVDetailScreen(): React.JSX.Element {
                         </Text>
                     </View>
 
-                    {/* Crew Info */}
+                    {}
                     {tvShow && (
                         <>
                             {tvShow.created_by && tvShow.created_by.length > 0 && (
@@ -453,25 +441,25 @@ export default function TVDetailScreen(): React.JSX.Element {
                         </>
                     )}
 
-                    {/* Seasons */}
+                    {}
                     {renderSeasonsSection()}
 
-                    {/* Cast */}
+                    {}
                     <CastMemberList cast={tvShow.credits?.cast || []} />
 
-                    {/* Related Shows */}
+                    {}
                     <ContentHorizontalList
                         data={relatedShows}
                         title="Relacionadas"
                         mediaType="tv"
                     />
 
-                    {/* Bottom Spacing */}
+                    {}
                     <View style={detailScreenStyles.bottomSpacer} />
                 </View>
             </ScrollView>
 
-            {/* Recommend Modal */}
+            {}
             <ContentRecommendModal
                 visible={showRecommendModal}
                 onClose={handleCloseRecommendModal}
@@ -483,7 +471,7 @@ export default function TVDetailScreen(): React.JSX.Element {
                 currentUserId={user?.id}
             />
 
-            {/* Season Modal */}
+            {}
             <SeasonModal
                 visible={showSeasonModal}
                 onClose={handleCloseSeasonModal}
@@ -496,7 +484,7 @@ export default function TVDetailScreen(): React.JSX.Element {
                 isEpisodeWatched={checkEpisodeWatched}
             />
 
-            {/* Episode Modal */}
+            {}
             <EpisodeModal
                 visible={showEpisodeModal}
                 onClose={handleCloseEpisodeModal}
@@ -542,13 +530,8 @@ const localStyles = StyleSheet.create({
     },
 });
 
-
-// ============================================================================
-// Styles
-// ============================================================================
-
 const styles = StyleSheet.create({
-    // Only TV-specific styles or overrides not covered by detailScreenStyles
+    
     nextBadgeContainer: {
         position: "absolute",
         top: 16,

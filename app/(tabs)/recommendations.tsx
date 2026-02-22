@@ -33,10 +33,6 @@ import {
 } from "../../src/types/recommendations.types";
 import { fetchTmdbDataBatch } from "../../src/utils/recommendations.utils";
 
-// ============================================================================
-// Main Component
-// ============================================================================
-
 export default function RecommendationsScreen(): React.JSX.Element {
     const { user } = useAuthStore();
     const {
@@ -55,24 +51,31 @@ export default function RecommendationsScreen(): React.JSX.Element {
 
     const { activeTab, tmdbData, expandedId } = state;
 
-    // ========================================================================
-    // State Helpers
-    // ========================================================================
+
+
+
 
     const updateState = (updates: Partial<RecommendationsScreenState>): void => {
         setState((prev) => ({ ...prev, ...updates }));
     };
 
-    // ========================================================================
-    // Effects
-    // ========================================================================
 
-    // No bulk mark-as-read on focus — handled per-item in handleToggleExpand
 
-    // Fetch TMDb data for all recommendations
+
+
+
+
+    useFocusEffect(
+        useCallback(() => {
+            if (!user) return;
+            useRecommendationStore.getState().fetchRecommendations();
+        }, [user])
+    );
+
+
     useEffect(() => {
         const loadTmdbData = async (): Promise<void> => {
-            // Cast to proper type - the store should return this shape
+
             const allRecs = [
                 ...(sent as RecommendationWithRelations[]),
                 ...(received as RecommendationWithRelations[]),
@@ -92,15 +95,11 @@ export default function RecommendationsScreen(): React.JSX.Element {
         loadTmdbData();
     }, [sent, received]);
 
-    // ========================================================================
-    // Handlers
-    // ========================================================================
-
     const handleToggleExpand = (id: string): void => {
-        // Mark the recommendation as read when the user opens it
         if (activeTab === "received") {
             markAsRead(id);
         }
+        markCommentsAsRead(id);
         updateState({ expandedId: expandedId === id ? null : id });
     };
 
@@ -143,9 +142,9 @@ export default function RecommendationsScreen(): React.JSX.Element {
         router.push("/login");
     };
 
-    // ========================================================================
-    // Derived Data
-    // ========================================================================
+
+
+
 
     const data = activeTab === "received"
         ? (received as RecommendationWithRelations[])
@@ -153,9 +152,9 @@ export default function RecommendationsScreen(): React.JSX.Element {
 
     const isReceived = activeTab === "received";
 
-    // ========================================================================
-    // Render Helpers
-    // ========================================================================
+
+
+
 
     const getTmdbDataForItem = (item: RecommendationWithRelations): TmdbContentData => {
         const key = createTmdbCacheKey(item.media_type, item.tmdb_id);
@@ -275,15 +274,15 @@ export default function RecommendationsScreen(): React.JSX.Element {
         );
     };
 
-    // ========================================================================
-    // Main Render
-    // ========================================================================
+
+
+
 
     if (!user) {
         return renderUnauthenticatedState();
     }
 
-    // Swipe left → Enviadas (sent), swipe right → Recibidas (received)
+
     const swipeGesture = Gesture.Pan()
         .runOnJS(true)
         .activeOffsetX([-20, 20])
@@ -304,7 +303,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={styles.keyboardAvoidingView}
                 >
-                    {/* Tab Switcher */}
+                    { }
                     <View style={styles.tabsContainer}>
                         <View style={styles.tabsWrapper}>
                             {renderTab("received", "Recibidas", received.length)}
@@ -312,17 +311,13 @@ export default function RecommendationsScreen(): React.JSX.Element {
                         </View>
                     </View>
 
-                    {/* Content */}
+                    { }
                     {renderContent()}
                 </KeyboardAvoidingView>
             </View>
         </GestureDetector>
     );
 }
-
-// ============================================================================
-// Styles
-// ============================================================================
 
 const styles = StyleSheet.create({
     safeArea: {

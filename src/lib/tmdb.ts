@@ -2,7 +2,6 @@ const TMDB_API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY || "";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 export const TMDB_IMAGE_BASE = process.env.EXPO_PUBLIC_TMDB_IMAGE_BASE || "https://image.tmdb.org/t/p/w500";
 
-// Types
 export interface CastMember {
     id: number;
     name: string;
@@ -97,11 +96,10 @@ export interface TMDbResponse<T> {
     total_results: number;
 }
 
-// API Helper
 const fetchTMDb = async <T>(endpoint: string, params: Record<string, string> = {}): Promise<T> => {
     const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
     url.searchParams.append("api_key", TMDB_API_KEY);
-    url.searchParams.append("language", "es-ES"); // Spanish language for all responses
+    url.searchParams.append("language", "es-ES"); 
 
     Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value);
@@ -111,7 +109,7 @@ const fetchTMDb = async <T>(endpoint: string, params: Record<string, string> = {
 
     if (!response.ok) {
         if (response.status === 404) {
-            // Content no longer exists in TMDb (deleted/unavailable) — return null silently
+            
             return null as T;
         }
         throw new Error(`TMDb API Error: ${response.status}`);
@@ -127,7 +125,6 @@ const filterByLanguage = <T extends { original_language: string }>(items: T[]): 
     return items.filter(item => !EXCLUDED_LANGUAGES.includes(item.original_language));
 };
 
-// API Functions
 export const getPopularMovies = async (page: number = 1): Promise<TMDbResponse<Movie>> => {
     const response = await fetchTMDb<TMDbResponse<Movie>>("/movie/popular", { page: page.toString() });
     return { ...response, results: filterByLanguage(response.results) };
@@ -227,12 +224,10 @@ export const getPersonCredits = async (id: number): Promise<PersonCredits> => {
     return credits;
 };
 
-// Helper function to get full image URL
 export const getImageUrl = (path: string | null, size: "w200" | "w300" | "w500" | "original" = "w500"): string | null => {
     if (!path) return null;
     return `https://image.tmdb.org/t/p/${size}${path}`;
 };
-
 
 export interface Genre {
     id: number;
@@ -241,8 +236,8 @@ export interface Genre {
 
 export interface DiscoverParams {
     with_genres?: string;
-    primary_release_year?: string; // For Movies
-    first_air_date_year?: string; // For TV
+    primary_release_year?: string; 
+    first_air_date_year?: string; 
     sort_by?: string;
     page?: number;
 }
@@ -259,7 +254,7 @@ export const discoverMovies = async (params: DiscoverParams): Promise<TMDbRespon
     const queryParams: Record<string, string> = {
         page: (params.page || 1).toString(),
         sort_by: params.sort_by || "popularity.desc",
-        "primary_release_date.lte": new Date().toISOString().split('T')[0], // Filter out future movies
+        "primary_release_date.lte": new Date().toISOString().split('T')[0], 
     };
 
     if (params.with_genres) queryParams.with_genres = params.with_genres;
@@ -273,7 +268,7 @@ export const discoverTVShows = async (params: DiscoverParams): Promise<TMDbRespo
     const queryParams: Record<string, string> = {
         page: (params.page || 1).toString(),
         sort_by: params.sort_by || "popularity.desc",
-        "first_air_date.lte": new Date().toISOString().split('T')[0], // Filter out future TV shows
+        "first_air_date.lte": new Date().toISOString().split('T')[0], 
     };
 
     if (params.with_genres) queryParams.with_genres = params.with_genres;

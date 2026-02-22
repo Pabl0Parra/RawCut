@@ -21,17 +21,14 @@ import { useContentStore } from "../../src/stores/contentStore";
 import { useAvatarUpload } from "../../src/hooks/useAvatarUpload";
 import { Colors } from "../../src/constants/Colors";
 
-/** App version - should be synced with app.json */
 const APP_VERSION = "1.0.0";
 
-/** External links */
 const LINKS = {
     help: "https://cortoCrudo.app/help",
     privacy: "https://cortoCrudo.app/privacy",
     terms: "https://cortoCrudo.app/terms",
 } as const;
 
-/** Format date to localized string */
 function formatMemberSince(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString("es-ES", {
@@ -41,7 +38,6 @@ function formatMemberSince(dateString: string): string {
     });
 }
 
-/** Get initials from username or email */
 function getInitials(username: string | undefined, email: string | undefined): string {
     if (username && !username.startsWith("user_")) {
         return username.slice(0, 2).toUpperCase();
@@ -52,11 +48,6 @@ function getInitials(username: string | undefined, email: string | undefined): s
     return "??";
 }
 
-// ============================================================================
-// Sub-Components
-// ============================================================================
-
-/** Avatar component with upload capability */
 interface AvatarSectionProps {
     readonly avatarUrl: string | null;
     readonly username: string | undefined;
@@ -93,7 +84,7 @@ function AvatarSection({
                         style={styles.avatarImage}
                         contentFit="cover"
                         transition={200}
-                        onError={() => console.log("Profile Image Load Error for URL:", avatarUrl)}
+                        onError={() => console.warn("[Profile] Avatar image failed to load")}
                     />
                 ) : (
                     <View style={styles.avatarPlaceholder}>
@@ -101,7 +92,7 @@ function AvatarSection({
                     </View>
                 )}
 
-                {/* Upload overlay */}
+                {}
                 {isUploading && (
                     <View style={styles.avatarOverlay}>
                         <ActivityIndicator size="large" color={Colors.white} />
@@ -112,7 +103,7 @@ function AvatarSection({
                 )}
             </View>
 
-            {/* Camera badge */}
+            {}
             {!isUploading && (
                 <View style={styles.cameraBadge}>
                     <Ionicons name="camera" size={16} color={Colors.white} />
@@ -122,7 +113,6 @@ function AvatarSection({
     );
 }
 
-/** Section header component */
 interface SectionHeaderProps {
     readonly title: string;
 }
@@ -131,7 +121,6 @@ function SectionHeader({ title }: Readonly<SectionHeaderProps>): React.JSX.Eleme
     return <Text style={styles.sectionTitle}>{title}</Text>;
 }
 
-/** Profile info row component */
 interface InfoRowProps {
     readonly icon: keyof typeof Ionicons.glyphMap;
     readonly label: string;
@@ -170,7 +159,6 @@ function InfoRow({
     );
 }
 
-/** Settings row with toggle or navigation */
 interface SettingsRowProps {
     readonly icon: keyof typeof Ionicons.glyphMap;
     readonly label: string;
@@ -216,7 +204,6 @@ function SettingsRow({
     );
 }
 
-/** Username edit modal/inline component */
 interface UsernameEditorProps {
     readonly currentUsername: string;
     readonly isLoading: boolean;
@@ -285,10 +272,6 @@ function UsernameEditor({
     );
 }
 
-// ============================================================================
-// Main Component
-// ============================================================================
-
 export default function ProfileScreen(): React.JSX.Element {
     const {
         profile,
@@ -318,14 +301,14 @@ export default function ProfileScreen(): React.JSX.Element {
 
     const isGenericUsername = profile?.username?.startsWith("user_");
 
-    // Clear errors when leaving edit mode
+    
     useEffect(() => {
         if (!isEditingUsername) {
             clearError();
         }
     }, [isEditingUsername, clearError]);
 
-    /** Handle avatar press - show picker options */
+    
     const handleAvatarPress = useCallback(() => {
         const options: Array<{
             text: string;
@@ -360,7 +343,7 @@ export default function ProfileScreen(): React.JSX.Element {
                 },
             ];
 
-        // Add remove option if avatar exists
+        
         if (profile?.avatar_url) {
             options.push({
                 text: "Eliminar foto",
@@ -383,7 +366,7 @@ export default function ProfileScreen(): React.JSX.Element {
         Alert.alert("Foto de perfil", "Elige una opción", options);
     }, [user?.id, profile?.avatar_url, pickAndUploadAvatar, deleteAvatar, fetchProfile]);
 
-    /** Handle username update */
+    
     const handleUpdateUsername = useCallback(
         async (newUsername: string) => {
             const success = await updateUsername(newUsername);
@@ -395,7 +378,7 @@ export default function ProfileScreen(): React.JSX.Element {
         [updateUsername]
     );
 
-    /** Handle sign out */
+    
     const handleSignOut = useCallback(() => {
         Alert.alert(
             "Cerrar sesión",
@@ -407,7 +390,7 @@ export default function ProfileScreen(): React.JSX.Element {
         );
     }, [signOut]);
 
-    /** Handle delete account */
+    
     const handleDeleteAccount = useCallback(() => {
         Alert.alert(
             "Eliminar cuenta",
@@ -419,16 +402,16 @@ export default function ProfileScreen(): React.JSX.Element {
                     style: "destructive",
                     onPress: () => {
                         (async () => {
-                            // 1. First attempt to delete avatar from storage if exists
+                            
                             if (profile?.avatar_url && user?.id) {
                                 await deleteAvatar(user.id, profile.avatar_url);
                             }
 
-                            // 2. Call the deletion action
+                            
                             const success = await deleteAccount();
 
                             if (success) {
-                                // 3. Clear other local stores
+                                
                                 clearContent();
                                 clearRecommendations();
 
@@ -449,12 +432,12 @@ export default function ProfileScreen(): React.JSX.Element {
         );
     }, [user?.id, profile?.avatar_url, deleteAccount, deleteAvatar, clearContent, clearRecommendations]);
 
-    /** Show settings coming soon */
+    
     const showComingSoon = useCallback((feature: string) => {
         Alert.alert("Próximamente", `${feature} estará disponible pronto.`);
     }, []);
 
-    // Show avatar error if present
+    
     useEffect(() => {
         if (avatarError) {
             Alert.alert("Error", avatarError);
@@ -471,7 +454,7 @@ export default function ProfileScreen(): React.JSX.Element {
                 showsVerticalScrollIndicator={false}
                 extraScrollHeight={Platform.select({ ios: 20, android: 40 })}
             >
-                {/* Header with Avatar */}
+                {}
                 <View style={styles.header}>
                     <AvatarSection
                         avatarUrl={profile?.avatar_url ?? null}
@@ -487,7 +470,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     <Text style={styles.emailText}>{user?.email}</Text>
                 </View>
 
-                {/* Generic username prompt */}
+                {}
                 {isGenericUsername && !isEditingUsername && (
                     <TouchableOpacity
                         style={styles.genericPrompt}
@@ -506,7 +489,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     </TouchableOpacity>
                 )}
 
-                {/* Profile Information Section */}
+                {}
                 <View style={styles.section}>
                     <SectionHeader title="Información del perfil" />
 
@@ -548,7 +531,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     />
                 </View>
 
-                {/* Settings Section */}
+                {}
                 <View style={styles.section}>
                     <SectionHeader title="Configuración" />
 
@@ -571,7 +554,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     />
                 </View>
 
-                {/* About Section */}
+                {}
                 <View style={styles.section}>
                     <SectionHeader title="Acerca de" />
 
@@ -604,7 +587,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     </View>
                 </View>
 
-                {/* Account Section */}
+                {}
                 <View style={styles.section}>
                     <SectionHeader title="Cuenta" />
 
@@ -616,7 +599,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     />
                 </View>
 
-                {/* Sign Out Button */}
+                {}
                 <TouchableOpacity
                     style={styles.signOutButton}
                     onPress={handleSignOut}
@@ -626,7 +609,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     <Text style={styles.signOutText}>Cerrar Sesión</Text>
                 </TouchableOpacity>
 
-                {/* Footer */}
+                {}
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>CortoCrudo v{APP_VERSION}</Text>
                     <Text style={styles.footerAuthor}>Made with ❤️ by Pabl0Parra</Text>
@@ -635,10 +618,6 @@ export default function ProfileScreen(): React.JSX.Element {
         </View>
     );
 }
-
-// ============================================================================
-// Styles
-// ============================================================================
 
 const styles = StyleSheet.create({
     container: {
@@ -654,7 +633,7 @@ const styles = StyleSheet.create({
         paddingBottom: 40,
     } as ViewStyle,
 
-    // Header
+    
     header: {
         alignItems: "center",
         marginBottom: 24,
@@ -727,7 +706,7 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
     } as TextStyle,
 
-    // Generic username prompt
+    
     genericPrompt: {
         flexDirection: "row",
         alignItems: "center",
@@ -746,7 +725,7 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     } as TextStyle,
 
-    // Sections
+    
     section: {
         backgroundColor: Colors.metalGray,
         borderRadius: 16,
@@ -762,7 +741,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     } as TextStyle,
 
-    // Info rows
+    
     infoRow: {
         flexDirection: "row",
         alignItems: "center",
@@ -794,7 +773,7 @@ const styles = StyleSheet.create({
         padding: 8,
     } as ViewStyle,
 
-    // Settings rows
+    
     settingsRow: {
         flexDirection: "row",
         alignItems: "center",
@@ -827,7 +806,7 @@ const styles = StyleSheet.create({
         marginLeft: "auto",
     } as TextStyle,
 
-    // Username editor
+    
     editorContainer: {
         paddingVertical: 8,
     } as ViewStyle,
@@ -873,7 +852,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     } as TextStyle,
 
-    // Sign out button
+    
     signOutButton: {
         flexDirection: "row",
         alignItems: "center",
@@ -892,7 +871,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     } as TextStyle,
 
-    // Footer
+    
     footer: {
         alignItems: "center",
         marginTop: 32,

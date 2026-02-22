@@ -8,11 +8,6 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "scheme": "cortocrudo",
-    "splash": {
-      "image": "./assets/corto-crudo-logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#000000"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.CortoCrudo.app"
@@ -33,7 +28,14 @@
     "plugins": [
       "expo-router",
       "expo-font",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "CortoCrudo necesita acceso a tus fotos para actualizar tu foto de perfil.",
+          "cameraPermission": "CortoCrudo necesita acceso a la cámara para tomar una foto de perfil."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

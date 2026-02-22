@@ -4,9 +4,6 @@ import type { BaseRecommendModalProps } from "./BaseRecommendModal";
 import type { Movie } from "../lib/tmdb";
 import { extractYear } from "../utils/movieDetail.utils";
 
-/**
- * Props for RecommendModal (movie-specific)
- */
 export interface RecommendModalProps {
     visible: boolean;
     onClose: () => void;
@@ -15,10 +12,6 @@ export interface RecommendModalProps {
     currentUserId: string | undefined;
 }
 
-/**
- * Movie recommendation modal with search functionality
- * Wraps BaseRecommendModal with movie-specific props
- */
 export const RecommendModal: React.FC<RecommendModalProps> = ({
     visible,
     onClose,
@@ -35,7 +28,7 @@ export const RecommendModal: React.FC<RecommendModalProps> = ({
         posterUrl,
         mediaType: "movie",
         currentUserId,
-        enableSearch: true, // Enable search for movie modal
+        enableSearch: true, 
     };
 
     return <BaseRecommendModal {...baseProps} />;

@@ -6,19 +6,12 @@ import { Ionicons } from "@expo/vector-icons";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BACKDROP_ASPECT_RATIO = 0.56;
 
-/**
- * Props for ContentBackdrop component
- */
 export interface ContentBackdropProps {
     readonly backdropUrl: string | null;
     readonly trailerKey?: string | null;
     readonly onPlayTrailer?: () => void;
 }
 
-/**
- * Shared backdrop component for content detail screens
- * Displays backdrop image with optional play button overlay for trailers
- */
 export function ContentBackdrop({
     backdropUrl,
     trailerKey,

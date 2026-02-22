@@ -32,9 +32,9 @@ export default function RegisterScreen() {
 
             try {
                 await signUp(data.email, data.password, data.username);
-                // Navigation is handled by _layout.tsx's auth routing effect
-                // when the user state changes in the store. Do NOT call
-                // router.replace() here — it would race with the layout.
+                
+                
+                
             } catch (err) {
                 console.error("[RegisterScreen] Sign up failed:", err);
             }

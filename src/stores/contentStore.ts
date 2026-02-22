@@ -18,7 +18,7 @@ interface ContentState {
     isLoading: boolean;
     error: string | null;
 
-    // Actions
+    
     fetchUserContent: () => Promise<void>;
     fetchTVProgress: () => Promise<void>;
     addToFavorites: (tmdbId: number, mediaType: "movie" | "tv") => Promise<boolean>;
@@ -95,7 +95,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
         }
 
         try {
-            // Check if already in favorites to avoid duplicates if state is out of sync
+            
             if (get().isFavorite(tmdbId, mediaType)) {
                 return true;
             }
@@ -108,7 +108,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
             }).select().single();
 
             if (error) {
-                // Ignore "already exists" errors (duplicate key value violates unique constraint)
+                
                 if (error.code === '23505') {
                     return true;
                 }
@@ -160,7 +160,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
         }
 
         try {
-            // Check if already in watchlist to avoid duplicates if state is out of sync
+            
             if (get().isInWatchlist(tmdbId, mediaType)) {
                 return true;
             }
@@ -173,7 +173,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
             }).select().single();
 
             if (error) {
-                // Ignore "already exists" errors
+                
                 if (error.code === '23505') {
                     return true;
                 }
@@ -370,12 +370,12 @@ export const useContentStore = create<ContentState>((set, get) => ({
     getNextEpisodeToWatch: (tmdbId: number, seasons: { season_number: number; episode_count: number }[]) => {
         const watched = get().tvProgress.filter((p) => p.tmdb_id === tmdbId);
         if (watched.length === 0) {
-            // If nothing watched, next is S1 E1 (or the first season available)
+            
             const firstSeason = seasons.find(s => s.season_number > 0) || seasons[0];
             return firstSeason ? { season: firstSeason.season_number, episode: 1 } : null;
         }
 
-        // Sort watched by season and episode
+        
         const sortedWatched = [...watched].sort((a, b) => {
             if (a.season_number !== b.season_number) return a.season_number - b.season_number;
             return a.episode_number - b.episode_number;
@@ -385,10 +385,10 @@ export const useContentStore = create<ContentState>((set, get) => ({
         const currentSeason = seasons.find(s => s.season_number === lastWatched.season_number);
 
         if (currentSeason && lastWatched.episode_number < currentSeason.episode_count) {
-            // Next episode in the same season
+            
             return { season: lastWatched.season_number, episode: lastWatched.episode_number + 1 };
         } else {
-            // Next episode in the next season
+            
             const nextSeason = seasons
                 .filter(s => s.season_number > lastWatched.season_number)
                 .sort((a, b) => a.season_number - b.season_number)[0];
@@ -402,7 +402,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
         if (showEpisodes.length === 0) return null;
         return {
             watched: showEpisodes.length,
-            total: 0, // Should be updated with real total from TMDB if needed
+            total: 0, 
         };
     },
 

@@ -18,7 +18,7 @@ const SMOKE_IMAGE = require('../../assets/smoke.jpg');
 const getSecureRandom = () => {
     const array = new Uint32Array(1);
     Crypto.getRandomValues(array);
-    return array[0] / 4294967295; // Max Uint32 value
+    return array[0] / 4294967295; 
 };
 
 interface SmokePuffProps {
@@ -42,32 +42,32 @@ const SmokePuff = ({ delay, duration, startX, startY, scaleStart, scaleEnd }: Sm
             delay,
             withRepeat(
                 withSequence(
-                    withTiming(0.4, { duration: duration / 2 }), // fade in to 0.4 opacity (subtle)
-                    withTiming(0, { duration: duration / 2 })  // fade out
+                    withTiming(0.4, { duration: duration / 2 }), 
+                    withTiming(0, { duration: duration / 2 })  
                 ),
                 -1
             )
         );
 
-        // Subtle sideways movement
+        
         translateX.value = withDelay(
             delay,
             withRepeat(withTiming(startX + (getSecureRandom() * 100 - 50), { duration: duration, easing: Easing.linear }), -1, true)
         );
 
-        // Upward drift
+        
         translateY.value = withDelay(
             delay,
             withRepeat(withTiming(startY - 300, { duration: duration, easing: Easing.linear }), -1)
         );
 
-        // Expansion
+        
         scale.value = withDelay(
             delay,
             withRepeat(withTiming(scaleEnd, { duration: duration }), -1)
         );
 
-        // Rotation
+        
         rotate.value = withDelay(delay, withRepeat(withTiming(rotate.value + 45, { duration: duration }), -1));
 
     }, []);

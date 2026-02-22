@@ -11,7 +11,7 @@ interface TrailerModalProps {
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-// Calculate height based on 16:9 aspect ratio
+
 const VIDEO_HEIGHT = (SCREEN_WIDTH - 32) * 9 / 16;
 
 export default function TrailerModal({ visible, videoKey, onClose }: Readonly<TrailerModalProps>) {
@@ -77,12 +77,12 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: Colors.metalSilver,
-        // Shadow for iOS
+        
         shadowColor: Colors.black,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
-        // Elevation for Android
+        
         elevation: 10,
     },
     header: {

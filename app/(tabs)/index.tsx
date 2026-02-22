@@ -72,16 +72,9 @@ import {
 import { ContinueWatchingCard } from "../../src/components/ContinueWatchingCard";
 import { seasonsToProgressInfo } from "../../src/utils/tvDetail.utils";
 import SmokeBackground from "../../src/components/SmokeBackground";
-
-// ============================================================================
-// Constants
-// ============================================================================
+import { useForYouContent, type ForYouRecommendation } from "../../src/hooks/useForYouContent";
 
 const MAX_CONTINUE_WATCHING_ITEMS = 10;
-
-// ============================================================================
-// Custom Hook — useContentLoading
-// ============================================================================
 
 interface UseContentLoadingParams {
     activeTab: ContentTab;
@@ -107,23 +100,16 @@ interface UseContentLoadingReturn {
     resetPagination: () => void;
 }
 
-/**
- * Manages content fetching with pagination, filtering, and search.
- *
- * Pagination state (page, hasMore, loading) is stored in refs so that
- * `loadContent` doesn't recreate on every page increment — this prevents
- * a cascade of stale closures through effects and callbacks that depend on it.
- */
 const useContentLoading = (
     params: UseContentLoadingParams,
 ): UseContentLoadingReturn => {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [tvShows, setTVShows] = useState<TVShow[]>([]);
-    // Exposed as state for rendering (loading spinner, etc.)
+
     const [localLoading, setLocalLoading] = useState(true);
 
-    // Pagination lives in refs — read by loadContent without causing
-    // callback recreation. Written alongside state updates.
+
+
     const pageRef = useRef(1);
     const hasMoreRef = useRef(true);
     const loadingRef = useRef(false);
@@ -208,10 +194,6 @@ const useContentLoading = (
     };
 };
 
-// ============================================================================
-// Internal Components
-// ============================================================================
-
 interface MovieCardItemProps {
     item: Movie | TVShow;
     mediaType: MediaType;
@@ -219,6 +201,7 @@ interface MovieCardItemProps {
     handleToggleWatchlist: (id: number, type: MediaType) => Promise<void>;
     handleToggleWatched: (id: number, type: MediaType) => Promise<void>;
     handleVote: (id: number, type: MediaType, vote: number) => Promise<void>;
+    fullWidth?: boolean;
 }
 
 const MovieCardItem = memo(({
@@ -227,10 +210,11 @@ const MovieCardItem = memo(({
     handleToggleFavorite,
     handleToggleWatchlist,
     handleToggleWatched,
-    handleVote
+    handleVote,
+    fullWidth
 }: MovieCardItemProps) => {
-    // Granular selectors: only re-render this card if its own status changes
-    // Using inline selectors for stability
+
+
     const isFavorite = useContentStore(s => s.isFavorite(item.id, mediaType));
     const inWatchlist = useContentStore(s => s.isInWatchlist(item.id, mediaType));
     const isWatched = useContentStore(s => s.isWatched(item.id, mediaType));
@@ -251,28 +235,25 @@ const MovieCardItem = memo(({
             onToggleWatchlist={() => handleToggleWatchlist(item.id, mediaType)}
             onToggleWatched={() => handleToggleWatched(item.id, mediaType)}
             onVote={(vote) => handleVote(item.id, mediaType, vote)}
+            fullWidth={fullWidth}
         />
     );
 });
 
-// ============================================================================
-// Main Component
-// ============================================================================
-
 export default function HomeScreen(): JSX.Element {
-    // ── Tab State ───────────────────────────────────────────────────────
+
     const [activeTab, setActiveTab] = useState<ContentTab>("movies");
 
-    // ── Search State ────────────────────────────────────────────────────
+
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
 
-    // ── UI State ────────────────────────────────────────────────────────
+
     const [refreshing, setRefreshing] = useState(false);
     const [showProfileBanner, setShowProfileBanner] = useState(false);
     const [showContinueSection, setShowContinueSection] = useState(true);
 
-    // ── Filter State ────────────────────────────────────────────────────
+
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [genres, setGenres] = useState<Genre[]>([]);
     const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
@@ -280,11 +261,17 @@ export default function HomeScreen(): JSX.Element {
     const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_VALUE);
     const [filtersActive, setFiltersActive] = useState(false);
 
-    // ── Continue Watching State ─────────────────────────────────────────
+
     const [continueWatching, setContinueWatching] = useState<ContinueWatchingItem[]>([]);
     const [loadingContinue, setLoadingContinue] = useState(false);
 
-    // ── Content Loading Hook ────────────────────────────────────────────
+
+    const {
+        recommendations,
+        loadingForYou,
+        fetchForYouContent,
+    } = useForYouContent(activeTab);
+
     const {
         loadContent,
         loading,
@@ -303,7 +290,7 @@ export default function HomeScreen(): JSX.Element {
         selectedYear,
     });
 
-    // ── Gesture State for Modal ──────────────────────────────────────────
+
     const translateY = useSharedValue(0);
 
     const animatedModalStyle = useAnimatedStyle(() => ({
@@ -334,26 +321,26 @@ export default function HomeScreen(): JSX.Element {
         }
     }, [showFilterModal]);
 
-    // ── Store Selectors (granular — only re-render when these change) ──
+
     const user = useAuthStore((s) => s.user);
     const tvProgress = useContentStore((s) => s.tvProgress);
     const getNextEpisodeToWatch = useContentStore((s) => s.getNextEpisodeToWatch);
 
-    // ── Derived State ───────────────────────────────────────────────────
+
     const data = activeTab === "movies" ? movies : tvShows;
     const mediaType: MediaType = activeTab === "movies" ? "movie" : "tv";
 
-    // ====================================================================
-    // Effects
-    // ====================================================================
 
-    // Initial content load
+
+
+
+
     useEffect(() => {
         loadContent();
         loadGenres(activeTab);
     }, []);
 
-    // Fetch community vote aggregates whenever visible content changes
+
     useEffect(() => {
         if (data.length === 0) return;
         const ids = data.map((item) => item.id);
@@ -361,7 +348,6 @@ export default function HomeScreen(): JSX.Element {
     }, [data, mediaType]);
 
 
-    // Fetch user content when screen focuses
     useFocusEffect(
         useCallback(() => {
             if (!user) return;
@@ -376,16 +362,16 @@ export default function HomeScreen(): JSX.Element {
         }, [user]),
     );
 
-    // Update continue watching when TV progress changes
+
     useEffect(() => {
-        if (activeTab === "tv" && user && tvProgress.length > 0) {
+        if (activeTab === "foryou" && user && tvProgress.length > 0) {
             loadContinueWatching();
         } else {
             setContinueWatching([]);
         }
     }, [activeTab, tvProgress.length, user]);
 
-    // Handle tab changes
+
     useEffect(() => {
         resetPagination();
         setSearchQuery("");
@@ -394,9 +380,9 @@ export default function HomeScreen(): JSX.Element {
         loadGenres(activeTab);
     }, [activeTab]);
 
-    // ====================================================================
-    // Handlers
-    // ====================================================================
+
+
+
 
     const loadGenres = useCallback(async (tab: ContentTab): Promise<void> => {
         try {
@@ -579,9 +565,8 @@ export default function HomeScreen(): JSX.Element {
         [],
     );
 
-    // ====================================================================
-    // Render Functions
-    // ====================================================================
+
+
 
 
     const renderItem = useCallback(
@@ -648,12 +633,12 @@ export default function HomeScreen(): JSX.Element {
         setShowFilterModal(false);
     }, []);
 
-    // ====================================================================
-    // Section Renderers
-    // ====================================================================
+
+
+
 
     const renderContinueWatching = (): JSX.Element | null => {
-        if (activeTab !== "tv" || !showContinueSection) return null;
+        if (!showContinueSection) return null;
 
         if (loadingContinue) {
             return (
@@ -673,14 +658,13 @@ export default function HomeScreen(): JSX.Element {
                         <Ionicons name="close-circle" size={24} color={Colors.metalSilver} />
                     </TouchableOpacity>
                 </View>
-                <FlatList
-                    data={continueWatching}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item) => String(item.show.id)}
-                    contentContainerStyle={styles.continueList}
-                    renderItem={renderContinueWatchingItem}
-                />
+                <View style={styles.continueListVertical}>
+                    {continueWatching.map(item => (
+                        <React.Fragment key={String(item.show.id)}>
+                            {renderContinueWatchingItem({ item })}
+                        </React.Fragment>
+                    ))}
+                </View>
             </View>
         );
     };
@@ -708,6 +692,50 @@ export default function HomeScreen(): JSX.Element {
             </Text>
         </TouchableOpacity>
     );
+
+    const renderForYouContent = (): JSX.Element | null => {
+        if (activeTab !== "foryou") return null;
+
+        if (loadingForYou && recommendations.length === 0 && !loadingContinue) {
+            return (
+                <View style={styles.centerContainer}>
+                    <ActivityIndicator size="large" color={Colors.bloodRed} />
+                    <Text style={styles.loadingText}>Preparando recomendaciones...</Text>
+                </View>
+            );
+        }
+
+        return (
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
+            >
+                {renderContinueWatching()}
+                {recommendations.map((rec) => (
+                    <View key={rec.id} style={styles.continueSection}>
+                        <View style={styles.continueHeader}>
+                            <Text style={styles.continueTitle}>{rec.title}</Text>
+                        </View>
+                        <View style={styles.recommendationGrid}>
+                            {rec.items.slice(0, 6).map(item => (
+                                <View key={item.id} style={styles.recommendationGridItem}>
+                                    <MovieCardItem
+                                        item={item}
+                                        mediaType={rec.mediaType}
+                                        handleToggleFavorite={handleToggleFavorite}
+                                        handleToggleWatchlist={handleToggleWatchlist}
+                                        handleToggleWatched={handleToggleWatched}
+                                        handleVote={handleVote}
+                                        fullWidth={true}
+                                    />
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+                ))}
+            </ScrollView>
+        );
+    };
 
     const renderMainContent = (): JSX.Element => {
         if (loading && data.length === 0) {
@@ -757,30 +785,53 @@ export default function HomeScreen(): JSX.Element {
         );
     };
 
-    // ====================================================================
-    // Main Render
-    // ====================================================================
 
-    // Swipe left → TV, swipe right → Movies
+
+
+
+
+    const tabs: ContentTab[] = ["foryou", "movies", "tv"];
     const swipeGesture = Gesture.Pan()
         .runOnJS(true)
         .activeOffsetX([-20, 20])
         .failOffsetY([-15, 15])
         .onEnd((e) => {
             const { translationX, velocityX } = e;
+            const currentIndex = tabs.indexOf(activeTab);
             if (translationX < -50 || velocityX < -500) {
-                if (activeTab !== "tv") setActiveTab("tv");
+                if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1]);
             } else if (translationX > 50 || velocityX > 500) {
-                if (activeTab !== "movies") setActiveTab("movies");
+                if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1]);
             }
         });
 
     return (
         <GestureDetector gesture={swipeGesture}>
             <View style={[styles.safeArea, styles.safeAreaPadding]}>
-                {/* Pill Tab System */}
+                { }
                 <View style={styles.tabsContainer}>
                     <View style={styles.tabsWrapper}>
+                        <TouchableOpacity
+                            style={[styles.tab, activeTab === "foryou" ? styles.activeTab : styles.inactiveTab]}
+                            onPress={() => setActiveTab("foryou")}
+                        >
+                            <View style={styles.tabContent}>
+                                <MaterialCommunityIcons
+                                    name="hand-pointing-right"
+                                    size={24}
+                                    color={activeTab === "foryou" ? Colors.white : Colors.metalSilver}
+                                />
+                                <Text
+                                    style={[
+                                        styles.tabText,
+                                        activeTab === "foryou" ? styles.activeTabText : styles.inactiveTabText,
+                                    ]}
+                                >
+                                    Para ti
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+
                         <TouchableOpacity
                             style={[styles.tab, activeTab === "movies" ? styles.activeTab : styles.inactiveTab]}
                             onPress={() => setActiveTab("movies")}
@@ -825,7 +876,7 @@ export default function HomeScreen(): JSX.Element {
                     </View>
                 </View>
 
-                {/* Profile Setup Banner */}
+                { }
                 {showProfileBanner && (
                     <TouchableOpacity
                         style={styles.profileBanner}
@@ -853,66 +904,66 @@ export default function HomeScreen(): JSX.Element {
                     </TouchableOpacity>
                 )}
 
-                {/* Search and Filter Row */}
-                <View style={styles.controlsContainer}>
-                    <View style={styles.searchAndFilterRow}>
-                        <View style={styles.searchWrapper}>
-                            <TextInput
-                                style={styles.searchInput}
-                                placeholder="Buscar..."
-                                placeholderTextColor={Colors.metalSilver}
-                                value={searchQuery}
-                                onChangeText={setSearchQuery}
-                                onSubmitEditing={handleSearch}
-                                returnKeyType="search"
-                            />
-                            {searchQuery.length > 0 && (
-                                <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
-                                    <Ionicons name="close-circle" size={20} color={Colors.metalSilver} />
+                { }
+                {activeTab !== "foryou" && (
+                    <View style={styles.controlsContainer}>
+                        <View style={styles.searchAndFilterRow}>
+                            <View style={styles.searchWrapper}>
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Buscar..."
+                                    placeholderTextColor={Colors.metalSilver}
+                                    value={searchQuery}
+                                    onChangeText={setSearchQuery}
+                                    onSubmitEditing={handleSearch}
+                                    returnKeyType="search"
+                                />
+                                {searchQuery.length > 0 && (
+                                    <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
+                                        <Ionicons name="close-circle" size={20} color={Colors.metalSilver} />
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                                    <Entypo name="magnifying-glass" size={24} color={Colors.metalSilver} />
                                 </TouchableOpacity>
-                            )}
-                            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                                <Entypo name="magnifying-glass" size={24} color={Colors.metalSilver} />
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
+                                onPress={handleOpenFilters}
+                            >
+                                <Ionicons
+                                    name="filter"
+                                    size={20}
+                                    color={filtersActive ? Colors.white : Colors.metalSilver}
+                                />
                             </TouchableOpacity>
                         </View>
 
-                        <TouchableOpacity
-                            style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
-                            onPress={handleOpenFilters}
-                        >
-                            <Ionicons
-                                name="filter"
-                                size={20}
-                                color={filtersActive ? Colors.white : Colors.metalSilver}
-                            />
-                        </TouchableOpacity>
+                        {filtersActive && (
+                            <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
+                                <Text style={styles.clearFiltersText}>Limpiar filtros activos</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
+                )}
 
-                    {filtersActive && (
-                        <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
-                            <Text style={styles.clearFiltersText}>Limpiar filtros activos</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
+                {activeTab !== "foryou" ? renderMainContent() : renderForYouContent()}
 
-                {/* Content */}
-                {renderMainContent()}
-                {activeTab === "tv" && renderContinueWatching()}
-
-                {/* Filter Modal */}
+                { }
                 <Modal
                     visible={showFilterModal}
                     animationType="slide"
                     transparent
                     onRequestClose={handleCloseFilters}
                 >
-                    {/* Black backdrop — tap outside to close */}
+                    { }
                     <TouchableOpacity
                         style={styles.modalOverlay}
                         activeOpacity={1}
                         onPress={handleCloseFilters}
                     >
-                        {/* Filter panel — stop propagation so tapping inside doesn't close */}
+                        { }
                         <GestureDetector gesture={panGesture}>
                             <Animated.View
                                 style={[styles.filterPanel, animatedModalStyle]}
@@ -966,10 +1017,6 @@ export default function HomeScreen(): JSX.Element {
     );
 }
 
-// ============================================================================
-// Styles
-// ============================================================================
-
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
@@ -997,7 +1044,7 @@ const styles = StyleSheet.create({
     },
     controlsContainer: {
         paddingHorizontal: 16,
-        paddingBottom: 12,
+        paddingBottom: 8,
     },
     searchAndFilterRow: {
         flexDirection: "row",
@@ -1006,7 +1053,7 @@ const styles = StyleSheet.create({
     },
     filterButtonCompact: {
         backgroundColor: Colors.metalGray,
-        padding: 10,
+        padding: 8,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: Colors.metalSilver,
@@ -1030,7 +1077,7 @@ const styles = StyleSheet.create({
         flex: 1,
         color: Colors.textPrimary,
         paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingVertical: 8,
     },
     searchButton: {
         paddingHorizontal: 16,
@@ -1042,7 +1089,7 @@ const styles = StyleSheet.create({
     },
     tabsContainer: {
         paddingHorizontal: 16,
-        paddingBottom: 12,
+        paddingBottom: 8,
         marginTop: -28,
     },
     tabsWrapper: {
@@ -1052,7 +1099,7 @@ const styles = StyleSheet.create({
     },
     tab: {
         flex: 1,
-        paddingVertical: 12,
+        paddingVertical: 8,
         borderRadius: 9999,
     },
     activeTab: {
@@ -1265,7 +1312,8 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.overlayDark,
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: Colors.glassWhiteSubtle,
+        borderTopColor: Colors.glassWhiteSubtle,
+        borderBottomColor: Colors.glassWhiteSubtle,
         marginVertical: 8,
     },
     continueSectionLoading: {
@@ -1285,9 +1333,18 @@ const styles = StyleSheet.create({
         fontFamily: "BebasNeue_400Regular",
         letterSpacing: 1.5,
     },
-    continueList: {
+    continueListVertical: {
         paddingHorizontal: 16,
         paddingTop: 12,
-        gap: 16,
+    },
+    recommendationGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        paddingTop: 12,
+        gap: 12,
+    },
+    recommendationGridItem: {
+        flexBasis: '30%',
     },
 });

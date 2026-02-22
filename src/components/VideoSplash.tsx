@@ -7,7 +7,7 @@ interface VideoSplashProps {
     onFinish: () => void;
 }
 
-const SPLASH_TIMEOUT_MS = 8000; // 8 seconds maximum
+const SPLASH_TIMEOUT_MS = 8000; 
 
 export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
     const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -16,7 +16,7 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
     const hasFinished = useRef(false);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Keep ref updated
+    
     onFinishRef.current = onFinish;
 
     const finishSplash = () => {
@@ -25,7 +25,7 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
 
         console.log('[VideoSplash] Finishing splash screen');
 
-        // Clear timeout if it exists
+        
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
@@ -53,7 +53,7 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
         if (hasSetupListener.current) return;
         hasSetupListener.current = true;
 
-        // Set up timeout fallback
+        
         timeoutRef.current = setTimeout(() => {
             console.warn('[VideoSplash] Timeout reached, forcing splash to finish');
             finishSplash();
@@ -64,7 +64,7 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
             finishSplash();
         });
 
-        // Listen for errors
+        
         const errorSubscription = player.addListener('statusChange', (status) => {
             if (status.error) {
                 console.error('[VideoSplash] Video error:', status.error);

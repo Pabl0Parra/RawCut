@@ -1,4 +1,4 @@
-// app/_layout.tsx
+
 import { Stack, SplashScreen, useRouter, useSegments } from "expo-router";
 import * as Linking from "expo-linking";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -21,36 +21,21 @@ import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
 import { supabase } from "../src/lib/supabase";
 import { useAuthStore } from "../src/stores/authStore";
 import { Colors } from "../src/constants/Colors";
-import VideoSplash from "../src/components/VideoSplash";
 import SmokeBackground from "../src/components/SmokeBackground";
 import { ThemeProvider, DarkTheme } from "@react-navigation/native";
 import { ErrorBoundary } from "../src/components/ErrorBoundary";
 
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
-// Prevent the native splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
-// ============================================================================
-// Constants
-// ============================================================================
+const SESSION_INIT_TIMEOUT_MS = 8_000;
 
-const SESSION_INIT_TIMEOUT_MS = 10_000;
-
-/**
- * Only these auth events should trigger a profile re-fetch.
- * Notably excludes INITIAL_SESSION (handled by initSession)
- * and TOKEN_REFRESHED (session exists, profile unchanged).
- */
 const PROFILE_FETCH_EVENTS = new Set<AuthChangeEvent>([
     "SIGNED_IN",
     "USER_UPDATED",
 ]);
 
-/**
- * Specific error messages that indicate an invalid/expired refresh token.
- * Intentionally narrow — we never want to swallow unrelated 400s.
- */
 const INVALID_TOKEN_MESSAGES = [
     "refresh_token_not_found",
     "Refresh Token Not Found",
@@ -61,10 +46,6 @@ function isInvalidTokenError(error: { message: string }): boolean {
     return INVALID_TOKEN_MESSAGES.some((msg) => error.message.includes(msg));
 }
 
-// ============================================================================
-// Helpers
-// ============================================================================
-
 const TransparentTheme = {
     ...DarkTheme,
     colors: {
@@ -73,10 +54,6 @@ const TransparentTheme = {
     },
 };
 
-/**
- * Races a promise against a timeout. The original promise continues executing
- * in the background if the timeout wins — callers should handle cleanup if needed.
- */
 function withTimeout<T>(
     promise: Promise<T>,
     ms: number,
@@ -97,42 +74,48 @@ function isTimeoutError(err: unknown): boolean {
     return err instanceof Error && err.message.includes("timed out");
 }
 
-/**
- * Non-critical profile fetch with its own timeout.
- * Failures are logged but never propagated — the profile will be
- * retried by useFocusEffect in HomeScreen.
- */
-async function fetchProfileSafely(): Promise<void> {
+function isNetworkError(err: unknown): boolean {
+    if (!(err instanceof Error)) return false;
+    const msg = err.message.toLowerCase();
+    return (
+        msg.includes("network request failed") ||
+        msg.includes("network error") ||
+        msg.includes("failed to fetch") ||
+        msg.includes("could not connect") ||
+        msg.includes("etimedout") ||
+        msg.includes("econnrefused")
+    );
+}
+
+async function fetchProfileSafely(): Promise<boolean> {
     try {
         await withTimeout(
             useAuthStore.getState().fetchProfile(),
             SESSION_INIT_TIMEOUT_MS,
             "Profile fetch timed out",
         );
+        return false;
     } catch (err) {
         console.warn("[RootLayout] Profile fetch failed (non-fatal):", err);
+        return isTimeoutError(err) || isNetworkError(err);
     }
 }
-
-// ============================================================================
-// Root Layout
-// ============================================================================
 
 export default function RootLayout() {
     const segments = useSegments();
     const router = useRouter();
 
     const [isReady, setIsReady] = useState(false);
-    const [isSplashFinished, setIsSplashFinished] = useState(false);
     const [initError, setInitError] = useState<string | null>(null);
+    const [isOffline, setIsOffline] = useState(false);
 
-    // Track whether the component is still mounted for async safety.
-    // Root layouts rarely unmount, but ErrorBoundary resets and
-    // StrictMode double-effects in dev can cause it.
+    
+    
+    
     const mountedRef = useRef(true);
 
-    // Read auth state reactively for rendering/routing, but access
-    // store methods via getState() inside effects to avoid stale closures.
+    
+    
     const user = useAuthStore((s) => s.user);
 
     const [fontsLoaded, fontError] = useFonts({
@@ -143,15 +126,15 @@ export default function RootLayout() {
         BebasNeue_400Regular,
     });
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Auth initialization
-    // ────────────────────────────────────────────────────────────────────────
+    
+    
+    
     useEffect(() => {
         mountedRef.current = true;
         console.log("[RootLayout] Setting up auth listeners…");
 
-        // 1. Subscribe to ongoing auth changes.
-        //    All store access goes through getState() — never from closures.
+        
+        
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(
@@ -178,16 +161,16 @@ export default function RootLayout() {
             },
         );
 
-        // 2. Initialise the session from storage (with a hard timeout).
-        //    Cognitive complexity kept ≤ 15 by extracting handleSessionError
-        //    and fetchProfileSafely.
+        
+        
+        
         const handleSessionError = (
             error: { message: string },
         ): void => {
             if (isInvalidTokenError(error)) {
-                // Supabase auto-signs-out on invalid refresh tokens
-                // (fires SIGNED_OUT before INITIAL_SESSION), so we
-                // only need to clear local state.
+                
+                
+                
                 console.warn(
                     "[RootLayout] Invalid/Expired session detected, clearing local state…",
                 );
@@ -224,15 +207,21 @@ export default function RootLayout() {
                 useAuthStore.getState().setSession(session);
 
                 if (session?.user) {
-                    await fetchProfileSafely();
+                    const networkFailed = await fetchProfileSafely();
+                    if (networkFailed && mountedRef.current) {
+                        setIsOffline(true);
+                    }
                 }
             } catch (err) {
                 if (!mountedRef.current) return;
 
-                if (isTimeoutError(err)) {
+                if (isTimeoutError(err) || isNetworkError(err)) {
+                    
+                    
                     console.warn(
-                        "[RootLayout] Session init timed out, proceeding without session",
+                        "[RootLayout] Session init failed due to network/timeout, proceeding offline",
                     );
+                    setIsOffline(true);
                 } else {
                     console.error("[RootLayout] initSession error:", err);
                     setInitError(
@@ -251,7 +240,7 @@ export default function RootLayout() {
 
         initSession();
 
-        // 3. Deep-link handler
+        
         const handleDeepLink = async (url: string | null): Promise<void> => {
             if (!url) return;
             console.log("[RootLayout] Handling deep link:", url);
@@ -290,10 +279,10 @@ export default function RootLayout() {
         };
     }, []);
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Hide the native splash as soon as fonts are available so our custom
-    // VideoSplash can take over.
-    // ────────────────────────────────────────────────────────────────────────
+    
+    
+    
+    
     useEffect(() => {
         if (fontsLoaded || fontError) {
             console.log("[RootLayout] Fonts loaded, hiding native splash");
@@ -301,14 +290,14 @@ export default function RootLayout() {
         }
     }, [fontsLoaded, fontError]);
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Auth-based routing
-    //
-    // Depends on actual state values (isReady, isSplashFinished), not derived
-    // variables, so the dependency array is honest and refactor-safe.
-    // ────────────────────────────────────────────────────────────────────────
+    
+    
+    
+    
+    
+    
     useEffect(() => {
-        if (!isReady || !isSplashFinished) {
+        if (!isReady) {
             return;
         }
 
@@ -329,22 +318,20 @@ export default function RootLayout() {
             console.log("[RootLayout] Authenticated → /(tabs)");
             router.replace("/(tabs)");
         }
-    }, [user, segments, isReady, isSplashFinished]);
+    }, [user, segments, isReady]);
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Stable callbacks
-    // ────────────────────────────────────────────────────────────────────────
-    const handleSplashFinish = useCallback(() => {
-        console.log("[RootLayout] Video splash finished");
-        setIsSplashFinished(true);
-    }, []);
-
+    
+    
     const handleRetryInit = useCallback(() => {
         setInitError(null);
+        setIsOffline(false);
         setIsReady(false);
 
-        supabase.auth
-            .getSession()
+        withTimeout(
+            supabase.auth.getSession(),
+            SESSION_INIT_TIMEOUT_MS,
+            "Session initialization timed out",
+        )
             .then(({ data: { session }, error }) => {
                 if (!mountedRef.current) return;
 
@@ -357,34 +344,40 @@ export default function RootLayout() {
             })
             .catch((err) => {
                 if (!mountedRef.current) return;
-                setInitError(
-                    err instanceof Error ? err.message : "Retry failed",
-                );
+                if (isTimeoutError(err) || isNetworkError(err)) {
+                    console.warn("[RootLayout] Retry failed due to network/timeout, proceeding offline");
+                    setIsOffline(true);
+                } else {
+                    setInitError(
+                        err instanceof Error ? err.message : "Retry failed",
+                    );
+                }
                 setIsReady(true);
             });
     }, []);
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Early bail: fonts not ready yet
-    // ────────────────────────────────────────────────────────────────────────
+    
+    
+    
     if (!fontsLoaded && !fontError) {
         return null;
     }
 
-    // ────────────────────────────────────────────────────────────────────────
-    // Render
-    //
-    // The Stack is ALWAYS mounted so router.replace() never fires against a
-    // non-existent navigator. Overlays block interaction with pointerEvents
-    // until the app is ready.
-    //
-    // IMPORTANT: Because the Stack mounts immediately, (tabs) will render
-    // before auth resolves. Tab screens that make authenticated API calls
-    // MUST guard with: if (!user) return;
-    // This is the correct pattern — screens should be resilient to mounting
-    // before auth is known.
-    // ────────────────────────────────────────────────────────────────────────
-    const appReady = isReady && isSplashFinished && !initError;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    const appReady = isReady && !initError;
+    const showOfflineBanner = isOffline;
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
@@ -413,8 +406,17 @@ export default function RootLayout() {
                             />
                         </Stack>
 
-                        {/* ── Overlay: loading (splash done, session still resolving) ── */}
-                        {isSplashFinished && !isReady && (
+                        {}
+                        {showOfflineBanner && (
+                            <View style={styles.offlineBanner} pointerEvents="box-none">
+                                <Text style={styles.offlineBannerText}>
+                                    📡 Sin conexión — algunas funciones no estarán disponibles
+                                </Text>
+                            </View>
+                        )}
+
+                        {}
+                        {!isReady && (
                             <View
                                 style={[
                                     StyleSheet.absoluteFill,
@@ -432,8 +434,8 @@ export default function RootLayout() {
                             </View>
                         )}
 
-                        {/* ── Overlay: fatal init error with retry ── */}
-                        {initError && isSplashFinished && (
+                        {}
+                        {initError && (
                             <View
                                 style={[
                                     StyleSheet.absoluteFill,
@@ -463,18 +465,6 @@ export default function RootLayout() {
                             </View>
                         )}
 
-                        {/* ── Overlay: video splash (highest z-index) ── */}
-                        {!isSplashFinished && (
-                            <View
-                                style={[
-                                    StyleSheet.absoluteFill,
-                                    styles.splashOverlay,
-                                ]}
-                                pointerEvents="auto"
-                            >
-                                <VideoSplash onFinish={handleSplashFinish} />
-                            </View>
-                        )}
                     </View>
                 </ThemeProvider>
             </ErrorBoundary>
@@ -482,17 +472,10 @@ export default function RootLayout() {
     );
 }
 
-// ============================================================================
-// Styles
-// ============================================================================
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.metalBlack,
-    },
-    splashOverlay: {
-        zIndex: 999,
     },
     loadingOverlay: {
         zIndex: 998,
@@ -549,5 +532,22 @@ const styles = StyleSheet.create({
         fontFamily: "Inter_400Regular",
         color: Colors.metalSilver,
         marginTop: 16,
+    },
+    offlineBanner: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 997,
+        backgroundColor: "rgba(30, 30, 30, 0.92)",
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        alignItems: "center",
+    },
+    offlineBannerText: {
+        fontSize: 13,
+        fontFamily: "Inter_400Regular",
+        color: Colors.metalSilver,
+        textAlign: "center",
     },
 });

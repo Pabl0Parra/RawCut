@@ -33,10 +33,6 @@ interface ContentGridLayoutProps {
     readonly isWatched?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
 }
 
-/**
- * Grid layout for favorites/watchlist screens matching the home screen style.
- * Displays content in a 3-column poster grid using MovieCard.
- */
 export function ContentGridLayout({
     data,
     isLoading,
@@ -90,7 +86,7 @@ export function ContentGridLayout({
     }
 
     const renderItem = ({ item }: { item: EnrichedContentItem }): JSX.Element => {
-        // Convert EnrichedContentItem to the shape MovieCard expects
+        
         const cardItem = {
             id: item.tmdb_id,
             title: item.title,

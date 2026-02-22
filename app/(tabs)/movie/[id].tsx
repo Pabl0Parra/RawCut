@@ -39,10 +39,6 @@ import {
     parseMovieId,
 } from "../../../src/utils/movieDetail.utils";
 
-// ============================================================================
-// Types
-// ============================================================================
-
 interface MovieDetailState {
     movie: MovieWithDetails | null;
     relatedMovies: Movie[];
@@ -60,10 +56,6 @@ const INITIAL_STATE: MovieDetailState = {
     showRecommendModal: false,
     showTrailerModal: false,
 };
-
-// ============================================================================
-// Main Component
-// ============================================================================
 
 export default function MovieDetailScreen(): React.JSX.Element {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -88,7 +80,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
         handleToggleWatched,
     } = useContentActions();
 
-    // ── Community Voting ──
+    
     const [showVotePicker, setShowVotePicker] = useState(false);
     const userVotes = useVoteStore((s) => s.userVotes);
     const communityScores = useVoteStore((s) => s.communityScores);
@@ -98,18 +90,17 @@ export default function MovieDetailScreen(): React.JSX.Element {
     const userVote = movie ? useVoteStore.getState().getUserVote(movie.id, "movie") : undefined;
     const communityRating = movie ? useVoteStore.getState().getCommunityScore(movie.id, "movie")?.avg : undefined;
 
-
-    // ========================================================================
-    // State Helpers
-    // ========================================================================
+    
+    
+    
 
     const updateState = (updates: Partial<MovieDetailState>): void => {
         setState((prev) => ({ ...prev, ...updates }));
     };
 
-    // ========================================================================
-    // Data Loading
-    // ========================================================================
+    
+    
+    
 
     const loadMovie = useCallback(async (movieId: number): Promise<void> => {
         updateState({ isLoading: true });
@@ -136,12 +127,11 @@ export default function MovieDetailScreen(): React.JSX.Element {
         }
     }, [id, loadMovie, fetchVotes]);
 
+    
+    
+    
 
-    // ========================================================================
-    // Action Handlers
-    // ========================================================================
-
-    // Action handlers now provided by useContentActions hook
+    
 
     const handleWatchTrailer = (): void => {
         if (trailerKey) {
@@ -170,10 +160,17 @@ export default function MovieDetailScreen(): React.JSX.Element {
         }
     };
 
+    const handleOpenVotePicker = (): void => {
+        if (!user) {
+            router.push("/login");
+            return;
+        }
+        setShowVotePicker(true);
+    };
 
-    // ========================================================================
-    // Render Helpers
-    // ========================================================================
+    
+    
+    
 
     const renderLoadingState = (): React.JSX.Element => (
         <SafeAreaView style={detailScreenStyles.safeArea}>
@@ -191,13 +188,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
         </SafeAreaView>
     );
 
-    // Backdrop, poster, genres, and action buttons now use shared components
-
-
-
-
-
-
+    
 
     const renderRecommendButton = (): React.JSX.Element | null => {
         if (!user) return null;
@@ -219,13 +210,11 @@ export default function MovieDetailScreen(): React.JSX.Element {
         );
     };
 
+    
 
-
-    // Generic lists now use shared components
-
-    // ========================================================================
-    // Main Render
-    // ========================================================================
+    
+    
+    
 
     if (isLoading) {
         return renderLoadingState();
@@ -240,7 +229,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
     return (
         <SafeAreaView style={detailScreenStyles.safeArea} edges={["left", "right"]}>
             <ScrollView showsVerticalScrollIndicator={false}>
-                {/* Back Button */}
+                {}
                 <TouchableOpacity
                     style={detailScreenStyles.backButton}
                     onPress={() => router.back()}
@@ -248,16 +237,16 @@ export default function MovieDetailScreen(): React.JSX.Element {
                     <Text style={detailScreenStyles.backButtonText}>←</Text>
                 </TouchableOpacity>
 
-                {/* Backdrop */}
+                {}
                 <ContentBackdrop
                     backdropUrl={getImageUrl(movie.backdrop_path ?? null, "original")}
                     trailerKey={trailerKey}
                     onPlayTrailer={handleWatchTrailer}
                 />
 
-                {/* Content */}
+                {}
                 <View style={detailScreenStyles.contentContainer}>
-                    {/* Header Row */}
+                    {}
                     <View style={detailScreenStyles.headerRow}>
                         <ContentPoster
                             posterUrl={getImageUrl(movie.poster_path ?? null, "w300")}
@@ -273,7 +262,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
                                     ⭐ {formatRating(movie.vote_average)}/10
                                 </Text>
                                 <TouchableOpacity
-                                    onPress={() => setShowVotePicker(true)}
+                                    onPress={handleOpenVotePicker}
                                     activeOpacity={0.7}
                                     style={localStyles.communityBadge}
                                 >
@@ -285,11 +274,10 @@ export default function MovieDetailScreen(): React.JSX.Element {
                         </View>
                     </View>
 
-
-                    {/* Genres */}
+                    {}
                     <GenreList genres={movie.genres || []} />
 
-                    {/* Action Buttons */}
+                    {}
                     <ContentActionBar
                         contentId={movie.id}
                         mediaType="movie"
@@ -302,12 +290,10 @@ export default function MovieDetailScreen(): React.JSX.Element {
                         currentUserId={user?.id}
                     />
 
-                    {/* Recommend Button */}
+                    {}
                     {renderRecommendButton()}
 
-
-
-                    {/* Description */}
+                    {}
                     <View style={detailScreenStyles.descriptionContainer}>
                         <Text style={detailScreenStyles.descriptionTitle}>Sinopsis</Text>
                         <Text style={detailScreenStyles.descriptionText}>
@@ -315,7 +301,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
                         </Text>
                     </View>
 
-                    {/* Crew Info */}
+                    {}
                     {movie?.credits?.crew && (
                         <>
                             <CrewMemberList
@@ -329,22 +315,22 @@ export default function MovieDetailScreen(): React.JSX.Element {
                         </>
                     )}
 
-                    {/* Cast */}
+                    {}
                     <CastMemberList cast={movie.credits?.cast || []} />
 
-                    {/* Related Movies */}
+                    {}
                     <ContentHorizontalList
                         data={relatedMovies}
                         title="Relacionadas"
                         mediaType="movie"
                     />
 
-                    {/* Bottom Spacing */}
+                    {}
                     <View style={detailScreenStyles.bottomSpacer} />
                 </View>
             </ScrollView>
 
-            {/* Recommend Modal */}
+            {}
             {movie && (
                 <RecommendModal
                     visible={showRecommendModal}
@@ -394,13 +380,8 @@ const localStyles = StyleSheet.create({
     },
 });
 
-
-// ============================================================================
-// Styles
-// ============================================================================
-
 const styles = StyleSheet.create({
-    // Only movie-specific styles or overrides not covered by detailScreenStyles
+    
     backdropContainer: {
         position: "relative",
     } as ViewStyle,

@@ -19,7 +19,6 @@ import { Link, type LinkProps } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Colors } from "../constants/Colors";
 
-/** Animation configuration constants */
 const ANIMATION_CONFIG = {
     duration: 300,
     useNativeDriver: true,
@@ -29,7 +28,6 @@ const ANIMATION_CONFIG = {
     logoOpacityKeyboardClosed: 1,
 } as const;
 
-/** KeyboardAwareScrollView configuration */
 const SCROLL_CONFIG = {
     extraScrollHeight: Platform.select({ ios: 40, android: 20 }) ?? 30,
     extraHeight: Platform.select({ ios: 120, android: 100 }) ?? 110,
@@ -38,9 +36,6 @@ const SCROLL_CONFIG = {
     keyboardOpeningTime: 250,
 } as const;
 
-/**
- * Props for AuthLayout component
- */
 export interface AuthLayoutProps {
     readonly children: ReactNode;
     readonly title: string;
@@ -55,10 +50,6 @@ export interface AuthLayoutProps {
     readonly showLogo?: boolean;
 }
 
-/**
- * Custom hook to handle keyboard-driven logo animations
- * Returns animated values for scale and opacity transitions
- */
 function useKeyboardAnimation() {
     const logoScale = useRef(new Animated.Value(ANIMATION_CONFIG.logoScaleKeyboardClosed)).current;
     const logoOpacity = useRef(new Animated.Value(ANIMATION_CONFIG.logoOpacityKeyboardClosed)).current;
@@ -86,7 +77,7 @@ function useKeyboardAnimation() {
             ]).start();
         };
 
-        // Platform-specific keyboard event names
+        
         const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
         const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
@@ -107,16 +98,10 @@ function useKeyboardAnimation() {
     return { logoScale, logoOpacity };
 }
 
-/**
- * Dismisses the keyboard when called
- */
 function dismissKeyboard(): void {
     Keyboard.dismiss();
 }
 
-/**
- * Animated Logo component for the login screen
- */
 interface AnimatedLogoProps {
     readonly scale: Animated.Value;
     readonly opacity: Animated.Value;
@@ -147,9 +132,6 @@ function AnimatedLogo({ scale, opacity }: Readonly<AnimatedLogoProps>): React.JS
     );
 }
 
-/**
- * Static Logo component for the register screen
- */
 interface StaticLogoProps {
     readonly title: string;
     readonly subtitle: string;
@@ -166,9 +148,6 @@ function StaticLogo({ title, subtitle }: Readonly<StaticLogoProps>): React.JSX.E
     );
 }
 
-/**
- * Error message display component
- */
 interface ErrorMessageProps {
     readonly message: string;
 }
@@ -181,9 +160,6 @@ function ErrorMessage({ message }: Readonly<ErrorMessageProps>): React.JSX.Eleme
     );
 }
 
-/**
- * Submit button component
- */
 interface SubmitButtonProps {
     readonly onPress: () => void;
     readonly isLoading: boolean;
@@ -207,9 +183,6 @@ function SubmitButton({ onPress, isLoading, text }: Readonly<SubmitButtonProps>)
     );
 }
 
-/**
- * Navigation link component
- */
 interface AuthLinkProps {
     readonly text: string;
     readonly label: string;
@@ -229,17 +202,6 @@ function AuthLink({ text, label, href }: Readonly<AuthLinkProps>): React.JSX.Ele
     );
 }
 
-/**
- * Shared layout component for authentication screens
- * Provides consistent structure for login and register screens
- *
- * Features:
- * - Animated logo that shrinks when keyboard appears (login only)
- * - Auto-scroll to focused input field
- * - Tap outside to dismiss keyboard
- * - Platform-specific keyboard handling (iOS/Android)
- * - Accessible and properly typed
- */
 export function AuthLayout({
     children,
     title,
@@ -271,29 +233,29 @@ export function AuthLayout({
                         keyboardOpeningTime={SCROLL_CONFIG.keyboardOpeningTime}
                         bounces={false}
                     >
-                        {/* Animated Logo for Login Screen */}
+                        {}
                         {showLogo && (
                             <AnimatedLogo scale={logoScale} opacity={logoOpacity} />
                         )}
 
-                        {/* Static Logo for Register Screen */}
+                        {}
                         {!showLogo && <StaticLogo title={title} subtitle={subtitle} />}
 
                         <View style={styles.formContainer}>
-                            {/* Error Message */}
+                            {}
                             {!!error && <ErrorMessage message={error} />}
 
-                            {/* Form Fields */}
+                            {}
                             {children}
 
-                            {/* Submit Button */}
+                            {}
                             <SubmitButton
                                 onPress={onSubmit}
                                 isLoading={isLoading}
                                 text={submitButtonText}
                             />
 
-                            {/* Navigation Link */}
+                            {}
                             <AuthLink text={linkText} label={linkLabel} href={linkHref} />
                         </View>
                     </KeyboardAwareScrollView>
@@ -328,7 +290,7 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     } as ViewStyle,
     animatedLogoContainer: {
-        // Prevent layout shift during animation
+        
         overflow: "visible",
     } as ViewStyle,
     logoText: {

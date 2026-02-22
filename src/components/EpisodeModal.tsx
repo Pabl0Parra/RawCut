@@ -16,9 +16,6 @@ import { Colors } from "../constants/Colors";
 import type { EpisodeModalProps } from "../types/tvDetail.types";
 import { getStillUrl, formatRating } from "../utils/tvDetail.utils";
 
-/**
- * Modal component for displaying detailed episode information
- */
 export const EpisodeModal: React.FC<EpisodeModalProps> = ({
     visible,
     onClose,

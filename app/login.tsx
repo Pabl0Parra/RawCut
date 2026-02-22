@@ -30,13 +30,13 @@ export default function LoginScreen() {
 
             try {
                 await signIn(data.identifier, data.password);
-                // Navigation is handled by _layout.tsx's auth routing effect
-                // when the user state changes in the store. Do NOT call
-                // router.replace() here — it would race with the layout.
+                
+                
+                
             } catch (err) {
-                // signIn should handle its own error state internally,
-                // but we catch here to prevent unhandled promise rejections
-                // from react-hook-form's handleSubmit.
+                
+                
+                
                 console.error("[LoginScreen] Sign in failed:", err);
             }
         },

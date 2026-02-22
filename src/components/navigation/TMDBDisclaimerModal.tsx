@@ -64,13 +64,13 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
             animationType="fade"
             onRequestClose={onClose}
         >
-            {/* Full-screen backdrop */}
+            {}
             <TouchableOpacity
                 style={styles.backdrop}
                 activeOpacity={1}
                 onPress={onClose}
             >
-                {/* Card — stop touch propagation */}
+                {}
                 <GestureDetector gesture={panGesture}>
                     <Animated.View
                         style={[styles.card, animatedCardStyle]}
@@ -80,12 +80,12 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
                             <View style={styles.modalHandle} />
                         </View>
 
-                        {/* Close button */}
+                        {}
                         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
                             <Text style={styles.closeIcon}>✕</Text>
                         </TouchableOpacity>
 
-                        {/* TMDB logo row */}
+                        {}
                         <View style={styles.tmdbRow}>
                             <View style={styles.tmdbLogo}>
                                 <Text style={styles.tmdbLogoText}>TMDB</Text>
@@ -93,7 +93,7 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
                             <Text style={styles.tmdbBadge}>Fuente de datos</Text>
                         </View>
 
-                        {/* Disclaimer text */}
+                        {}
                         <Text style={styles.disclaimerText}>
                             La información sobre películas y series (títulos, sinopsis, pósters,
                             fechas de estreno y valoraciones) es proporcionada por{" "}
@@ -103,7 +103,7 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
                             certificada por TMDB.
                         </Text>
 
-                        {/* Rating info box */}
+                        {}
                         <View style={styles.ratingBox}>
                             <Text style={styles.ratingTitle}>¿Cómo se calcula la puntuación?</Text>
                             <Text style={styles.ratingText}>
@@ -120,8 +120,6 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
         </Modal>
     );
 };
-
-// ─── Styles ─────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     backdrop: {

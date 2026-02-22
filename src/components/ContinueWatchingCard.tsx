@@ -20,10 +20,6 @@ interface ContinueWatchingCardProps {
     nextEpisode?: { season: number; episode: number } | null;
 }
 
-/**
- * Redesigned card for the "Continuar Viendo" section.
- * Uses backdrop image, integrated progress bar, and play button overlay.
- */
 export const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
     item,
     onPress,
@@ -52,17 +48,17 @@ export const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
                     </View>
                 )}
 
-                {/* Visual Overlay layer for better depth */}
+                {/* Overlay oscuro para legibilidad */}
                 <View style={styles.overlay} />
 
-                {/* Central Play Icon */}
+                {/* Ícono de Play central */}
                 <View style={styles.playOverlay}>
                     <View style={styles.playCircle}>
                         <Ionicons name="play" size={24} color={Colors.white} />
                     </View>
                 </View>
 
-                {/* Next Episode Badge */}
+                {/* Etiqueta de Siguiente Episodio */}
                 {nextEpisode && (
                     <View style={styles.nextBadge}>
                         <Text style={styles.nextBadgeLabel}>SIGUIENTE</Text>
@@ -72,7 +68,7 @@ export const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
                     </View>
                 )}
 
-                {/* Bottom-aligned high-contrast Progress Bar */}
+                {/* Barra de Progreso */}
                 <View style={styles.progressBarBg}>
                     <View style={[styles.progressBarFill, { width: `${progressPercentage}%` }]} />
                 </View>
@@ -92,17 +88,17 @@ export const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        width: 280,
-        marginRight: 16,
+        width: '100%',
+        marginBottom: 16,
     } as ViewStyle,
     imageWrapper: {
-        width: 280,
+        width: '100%',
         aspectRatio: 16 / 9,
         borderRadius: 12,
         overflow: 'hidden',
         backgroundColor: Colors.metalGray,
         position: 'relative',
-        // Shadow for premium feel on iOS and Android
+
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
@@ -130,12 +126,12 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         borderRadius: 25,
-        backgroundColor: 'rgba(220, 38, 38, 0.9)', // Colors.bloodRed with high opacity
+        backgroundColor: 'rgba(220, 38, 38, 0.9)',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 2,
         borderColor: 'rgba(255,255,255,0.4)',
-        paddingLeft: 4, // Visual centering for the play triangle
+        paddingLeft: 4,
     } as ViewStyle,
     nextBadge: {
         position: 'absolute',
@@ -146,7 +142,7 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         borderRadius: 6,
         borderWidth: 1,
-        borderColor: 'rgba(220, 38, 38, 0.8)', // Subtler bloodRed border
+        borderColor: 'rgba(220, 38, 38, 0.8)',
         alignItems: 'center',
     } as ViewStyle,
     nextBadgeLabel: {

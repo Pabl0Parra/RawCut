@@ -6,6 +6,7 @@ import {
     StyleSheet,
     TextInput,
     ActivityIndicator,
+    Alert,
     type ViewStyle,
     type TextStyle,
     type ImageStyle,
@@ -13,7 +14,6 @@ import {
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Alert } from "react-native";
 
 import type {
     RecommendationWithRelations,
@@ -24,10 +24,6 @@ import { STAR_RATINGS } from "../types/recommendations.types";
 import { Colors } from "../constants/Colors";
 import { getImageUrl } from "../lib/tmdb";
 
-/**
- * Reusable star rating component
- * Displays 5 stars with optional interactivity for rating
- */
 export const StarRating: React.FC<StarRatingProps> = ({
     recommendationId,
     currentRating,
@@ -104,13 +100,11 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         comments,
     } = item;
 
-    // tmdbData.poster is string | null (path)
     const posterUrl = getImageUrl(tmdbData.poster, "w200");
 
     const handlePress = () => {
         onToggleExpand(item.id);
 
-        // If expanding and there are unread comments, mark them as read
         if (!isExpanded && comments && comments.length > 0) {
             const hasUnread = comments.some(c => !c.is_read && c.user_id !== currentUserId);
             if (hasUnread) {
@@ -118,6 +112,10 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
             }
         }
     };
+
+    const hasUnreadReply = !isReceived &&
+        comments != null &&
+        comments.some(c => c.user_id !== currentUserId && !c.is_read);
 
     const handleSubmitComment = async () => {
         if (!commentText.trim()) return;
@@ -158,18 +156,13 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
     const numericRating = rating ? rating.rating : 0;
 
-    // Formatting date manually to avoid external dependency issues
     const dateObj = new Date(created_at);
     const formattedDate = dateObj.toLocaleDateString("es-ES", {
         day: 'numeric', month: 'short'
     });
-    // Fallback if locale fails or native not supported (unlikely in RN)
-    // const formattedDateText = `${dateObj.getDate()}/${dateObj.getMonth() + 1}`;
-
 
     return (
         <View style={styles.card}>
-            {/* Header / Summary */}
             <TouchableOpacity
                 style={styles.header}
                 onPress={handlePress}
@@ -214,20 +207,20 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     </View>
                 </View>
 
-                {/* Delete Button (Header Top Right) */}
                 <TouchableOpacity
-                    style={styles.deleteButton}
+                    style={styles.actionButtonContainer}
                     onPress={handleDeleteRecommendation}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
+                    {hasUnreadReply && (
+                        <View style={styles.unreadDot} />
+                    )}
                     <Ionicons name="trash-outline" size={20} color={Colors.metalSilver} />
                 </TouchableOpacity>
             </TouchableOpacity>
 
-            {/* Expanded Content */}
             {isExpanded && (
                 <View style={styles.expandedContent}>
-                    {/* Rating Section (Only for receiver) */}
                     {isReceived && (
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Tu Calificación</Text>
@@ -240,7 +233,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         </View>
                     )}
 
-                    {/* Comments Section */}
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Comentarios</Text>
 
@@ -385,9 +377,17 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "bold",
     } as TextStyle,
-    deleteButton: {
+    actionButtonContainer: {
         marginLeft: 8,
         alignSelf: "flex-start",
+        alignItems: "center",
+    } as ViewStyle,
+    unreadDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: Colors.bloodRed,
+        marginBottom: 4,
     } as ViewStyle,
     expandedContent: {
         padding: 12,

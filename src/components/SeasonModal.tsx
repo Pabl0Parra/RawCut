@@ -16,9 +16,6 @@ import EpisodeListItem from "./EpisodeListItem";
 import type { SeasonModalProps } from "../types/tvDetail.types";
 import type { Episode } from "../lib/tmdb";
 
-/**
- * Modal component for displaying season episodes with watched tracking
- */
 export const SeasonModal: React.FC<SeasonModalProps> = ({
     visible,
     onClose,

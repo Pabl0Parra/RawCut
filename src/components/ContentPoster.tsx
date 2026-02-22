@@ -3,18 +3,11 @@ import { View, Text, StyleSheet, type ViewStyle, type TextStyle, type ImageStyle
 import { Image } from "expo-image";
 import { Colors } from "../constants/Colors";
 
-/**
- * Props for ContentPoster component
- */
 export interface ContentPosterProps {
     readonly posterUrl: string | null;
     readonly placeholderIcon?: string;
 }
 
-/**
- * Shared poster component for content detail screens
- * Displays poster image with placeholder fallback
- */
 export function ContentPoster({
     posterUrl,
     placeholderIcon = "🎬",

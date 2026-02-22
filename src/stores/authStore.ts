@@ -9,7 +9,7 @@ interface AuthState {
     isLoading: boolean;
     error: string | null;
 
-    // Actions
+    
     signIn: (identifier: string, password: string) => Promise<boolean>;
     signUp: (email: string, password: string, username: string) => Promise<boolean>;
     signOut: () => Promise<void>;
@@ -32,12 +32,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ isLoading: true, error: null });
 
         try {
-            // Check if identifier is email or username
+            
             const isEmail = identifier.includes("@");
             let email = identifier;
 
             if (!isEmail) {
-                // Look up email by username using RPC
+                
                 const { data: rpcData, error: rpcError } = await supabase.rpc(
                     "get_email_by_username",
                     { p_username: identifier }
@@ -68,7 +68,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 error: null,
             });
 
-            // Fetch profile
+            
             await get().fetchProfile();
             return true;
         } catch (err) {
@@ -82,7 +82,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ isLoading: true, error: null });
 
         try {
-            // Check if username is available
+            
             const { data: existingUser } = await supabase
                 .from("profiles")
                 .select("username")
@@ -94,7 +94,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 return false;
             }
 
-            // Sign up
+            
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -116,8 +116,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 return false;
             }
 
-            // Profile is created automatically by database trigger 'on_auth_user_created'
-            // which executes 'handle_new_user()' in Supabase.
+            
+            
 
             set({
                 user: data.user,
@@ -145,6 +145,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             isLoading: false,
             error: null,
         });
+        
+        
+        
+        const { useContentStore } = require("./contentStore");
+        
+        const { useRecommendationStore } = require("./recommendationStore");
+        useContentStore.getState().clearContent();
+        useRecommendationStore.getState().clearRecommendations();
     },
 
     fetchProfile: async () => {
@@ -164,12 +172,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (data) {
             set({ profile: data });
         } else {
-            console.log("Store: No profile data found. Attempting to recover/create via RPC...");
-
-            // If profile is missing (trigger failed or record deleted), attempt to create it
-            // using a SECURITY DEFINER RPC function that bypasses RLS timing issues.
+            
+            
             const metadata = user.user_metadata || {};
-            console.log("Store: User metadata for recovery:", JSON.stringify(metadata));
 
             const fallbackUsername = metadata.username ||
                 (metadata.full_name || metadata.display_name)?.slice(0, 20) ||
@@ -179,8 +184,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 metadata.display_name ||
                 metadata.username ||
                 null;
-
-            console.log("Store: Calling recover_user_profile RPC with username:", fallbackUsername);
 
             const { data: rpcData, error: recoveryError } = await supabase.rpc(
                 "recover_user_profile",
@@ -192,18 +195,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             );
 
             if (recoveryError) {
-                console.error("Store: Failed to recover profile via RPC:", JSON.stringify(recoveryError));
+                console.error("[authStore] Failed to recover profile via RPC:", recoveryError.message);
                 return;
             }
 
-            // RPC returns an array, get the first item
+            
             const recoveredProfile = Array.isArray(rpcData) ? rpcData[0] : rpcData;
 
             if (recoveredProfile) {
-                console.log("Store: Profile successfully recovered:", JSON.stringify(recoveredProfile));
                 set({ profile: recoveredProfile });
             } else {
-                console.error("Store: Profile recovery RPC returned no data.");
+                console.error("[authStore] Profile recovery RPC returned no data.");
             }
         }
     },
@@ -215,7 +217,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
     },
     setProfile: (profile: Profile | null) => {
-        console.log("Store: Setting profile with avatar_url:", profile?.avatar_url);
         set({ profile });
     },
 
@@ -229,7 +230,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
 
         try {
-            // Check if username is available
+            
             const { data: existingUser } = await supabase
                 .from("profiles")
                 .select("username")
@@ -242,7 +243,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 return false;
             }
 
-            // Update username
+            
             const { data: updatedRows, error } = await supabase
                 .from("profiles")
                 .update({ username: newUsername })
@@ -260,7 +261,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 return false;
             }
 
-            // Update local profile
+            
             set({
                 profile: { ...profile, username: newUsername },
                 isLoading: false,
@@ -285,7 +286,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
 
         try {
-            // 1. Delete account via RPC (This handles profiles and other cascaded tables)
+            
             const { error: rpcError } = await supabase.rpc('delete_user_account');
 
             if (rpcError) {
@@ -294,7 +295,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 return false;
             }
 
-            // 2. Local cleanup
+            
             set({
                 user: null,
                 session: null,

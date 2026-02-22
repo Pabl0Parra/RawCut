@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     emptyTitle: {
-        color: "#f4f4f5", // zinc-100
+        color: "#f4f4f5", 
         fontSize: 18,
         textAlign: "center",
         marginBottom: 8,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     cardTitle: {
-        color: "#f4f4f5", // zinc-100
+        color: "#f4f4f5", 
         fontWeight: "bold",
         fontSize: 16,
     },
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     cardRating: {
-        color: "#eab308", // yellow-500
+        color: "#eab308", 
         fontSize: 14,
         marginTop: 4,
     },

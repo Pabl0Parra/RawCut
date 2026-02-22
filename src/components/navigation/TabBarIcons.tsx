@@ -6,7 +6,6 @@ interface TabBarIconProps {
     focused: boolean;
 }
 
-// Increased size to 24 for better visibility with animated background
 const ICON_SIZE = 24;
 
 export const HomeIcon = ({ color, focused }: TabBarIconProps) => (

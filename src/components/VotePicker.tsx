@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         backgroundColor: Colors.metalGray,
         borderWidth: 1,
-        borderColor: "#333", // Generic dark border, maybe use metalGray or a specific divider? Let's keep #333 for now or create a constant. Wait, Colors.metalGray is #1a1a1a. 
+        borderColor: "#333", 
         alignItems: "center",
         justifyContent: "center",
     } as ViewStyle,
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
         color: Colors.white,
     } as TextStyle,
     hint: {
-        color: "#5a6478", // Muted text, maybe Colors.textMuted or textPlaceholder? Original was #5a6478, Colors.textPlaceholder is #52525b. Close enough.
+        color: "#5a6478", 
         fontSize: 10,
         textAlign: "center",
         letterSpacing: 0.5,

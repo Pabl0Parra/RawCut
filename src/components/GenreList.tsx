@@ -2,25 +2,15 @@ import React from "react";
 import { View, Text, StyleSheet, type ViewStyle, type TextStyle } from "react-native";
 import { Colors } from "../constants/Colors";
 
-/**
- * Genre type
- */
 export interface Genre {
     readonly id: number;
     readonly name: string;
 }
 
-/**
- * Props for GenreList component
- */
 export interface GenreListProps {
     readonly genres: Genre[];
 }
 
-/**
- * Shared genre list component for content detail screens
- * Displays genre badges in a horizontal row
- */
 export function GenreList({ genres }: Readonly<GenreListProps>): React.JSX.Element | null {
     if (!genres || genres.length === 0) return null;
 

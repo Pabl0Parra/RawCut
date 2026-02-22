@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Registration schema
 export const registerSchema = z.object({
     username: z
         .string()
@@ -18,7 +17,6 @@ export const registerSchema = z.object({
     path: ["confirmPassword"],
 });
 
-// Login schema
 export const loginSchema = z.object({
     identifier: z
         .string()
@@ -26,7 +24,6 @@ export const loginSchema = z.object({
     password: z.string().min(1, "Ingresa tu contraseña"),
 });
 
-// Comment schema
 export const commentSchema = z.object({
     text: z
         .string()
@@ -34,7 +31,6 @@ export const commentSchema = z.object({
         .max(500, "Máximo 500 caracteres"),
 });
 
-// Recommendation message schema
 export const recommendationSchema = z.object({
     message: z
         .string()
@@ -42,7 +38,6 @@ export const recommendationSchema = z.object({
         .optional(),
 });
 
-// Types
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CommentInput = z.infer<typeof commentSchema>;

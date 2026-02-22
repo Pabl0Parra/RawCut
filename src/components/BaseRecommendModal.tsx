@@ -20,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { Colors } from "../constants/Colors";
 import type { Profile } from "../lib/supabase";
+import { supabase } from "../lib/supabase";
 import {
     loadAllUsers,
     searchUsers,
@@ -30,9 +31,6 @@ import type {
     MediaType,
 } from "../types/movieDetail.types";
 
-/**
- * Props for BaseRecommendModal
- */
 export interface BaseRecommendModalProps {
     visible: boolean;
     onClose: () => void;
@@ -45,9 +43,6 @@ export interface BaseRecommendModalProps {
     enableSearch?: boolean;
 }
 
-/**
- * State for the recommendation modal
- */
 interface RecommendationState {
     message: string;
     searchQuery: string;
@@ -70,10 +65,6 @@ const INITIAL_STATE: RecommendationState = {
 
 const MAX_MESSAGE_LENGTH = 200;
 
-/**
- * Base recommendation modal component
- * Supports selecting multiple recipients and both search-enabled / dropdown-only modes
- */
 export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
     visible,
     onClose,
@@ -97,7 +88,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         showUserList,
     } = state;
 
-    // Reset state when modal opens
+    
     useEffect(() => {
         if (visible) {
             setState(INITIAL_STATE);
@@ -116,7 +107,9 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
         try {
             const loadedUsers = await loadAllUsers(currentUserId);
-            updateState({ users: loadedUsers, isLoadingUsers: false });
+            
+            const filtered = loadedUsers.filter((u) => u.user_id !== currentUserId);
+            updateState({ users: filtered, isLoadingUsers: false });
         } catch (err) {
             console.error("Error loading users:", err);
             updateState({ isLoadingUsers: false });
@@ -148,7 +141,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         [currentUserId, handleLoadAllUsers]
     );
 
-    /** Toggle a user in/out of the selectedUsers list */
+    
     const handleToggleUser = (user: Profile): void => {
         const isSelected = selectedUsers.some((u) => u.user_id === user.user_id);
         const newSelected = isSelected
@@ -157,7 +150,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         updateState({ selectedUsers: newSelected });
     };
 
-    /** Remove a specific user from the selection via chip ✕ */
+    
     const handleRemoveUser = (userId: string): void => {
         updateState({
             selectedUsers: selectedUsers.filter((u) => u.user_id !== userId),
@@ -173,8 +166,30 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
         updateState({ isSending: true });
 
+        
+        const receiverIds = selectedUsers.map((u) => u.user_id);
+        const { data: existing } = await supabase
+            .from("recommendations")
+            .select("receiver_id")
+            .eq("sender_id", currentUserId)
+            .eq("tmdb_id", contentId)
+            .eq("media_type", mediaType)
+            .in("receiver_id", receiverIds);
+
+        const alreadySentTo = new Set((existing ?? []).map((r: { receiver_id: string }) => r.receiver_id));
+        const newRecipients = selectedUsers.filter((u) => !alreadySentTo.has(u.user_id));
+
+        if (newRecipients.length === 0) {
+            updateState({ isSending: false });
+            Alert.alert(
+                "Ya enviada",
+                "Ya has recomendado este título a todos los usuarios seleccionados."
+            );
+            return;
+        }
+
         const results = await Promise.all(
-            selectedUsers.map((user) => {
+            newRecipients.map((user) => {
                 const params: SendRecommendationParams = {
                     senderId: currentUserId,
                     receiverId: user.user_id,
@@ -189,20 +204,24 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         updateState({ isSending: false });
 
         const failedCount = results.filter((r) => !r.success).length;
+        const skippedCount = alreadySentTo.size;
 
         if (failedCount === 0) {
-            const count = selectedUsers.length;
+            const count = newRecipients.length;
+            const skippedNote = skippedCount > 0
+                ? ` (${skippedCount} ya enviada${skippedCount > 1 ? "s" : ""})`
+                : "";
             Alert.alert(
                 "¡Éxito!",
                 count === 1
-                    ? "¡Recomendación enviada!"
-                    : `¡Recomendación enviada a ${count} usuarios!`
+                    ? `¡Recomendación enviada!${skippedNote}`
+                    : `¡Recomendación enviada a ${count} usuarios!${skippedNote}`
             );
             onClose();
-        } else if (failedCount < selectedUsers.length) {
+        } else if (failedCount < newRecipients.length) {
             Alert.alert(
                 "Parcialmente enviado",
-                `${selectedUsers.length - failedCount} de ${selectedUsers.length} recomendaciones se enviaron correctamente.`
+                `${newRecipients.length - failedCount} de ${newRecipients.length} recomendaciones se enviaron correctamente.`
             );
             onClose();
         } else {
@@ -303,7 +322,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                     keyboardShouldPersistTaps="handled"
                     contentContainerStyle={styles.scrollContent}
                 >
-                    {/* Header */}
+                    {}
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Recomendar</Text>
                         <TouchableOpacity onPress={onClose}>
@@ -311,7 +330,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                         </TouchableOpacity>
                     </View>
 
-                    {/* Content Preview */}
+                    {}
                     <View style={styles.previewContainer}>
                         {!!posterUrl && (
                             <Image
@@ -325,7 +344,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                         </View>
                     </View>
 
-                    {/* User Search (if enabled) */}
+                    {}
                     {enableSearch && (
                         <>
                             <Text style={styles.inputLabel}>Buscar usuario</Text>
@@ -340,12 +359,12 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                         </>
                     )}
 
-                    {/* User Selection Label */}
+                    {}
                     {!enableSearch && (
                         <Text style={styles.inputLabel}>Seleccionar usuario(s)</Text>
                     )}
 
-                    {/* User Dropdown toggle */}
+                    {}
                     <TouchableOpacity
                         style={styles.dropdownButton}
                         onPress={handleToggleUserList}
@@ -358,10 +377,10 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                         />
                     </TouchableOpacity>
 
-                    {/* User List */}
+                    {}
                     <View style={styles.userListContainer}>{renderUserList()}</View>
 
-                    {/* Selected Users Chips */}
+                    {}
                     {selectedUsers.length > 0 && (
                         <View style={styles.chipsContainer}>
                             {selectedUsers.map((user) => (
@@ -380,7 +399,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                         </View>
                     )}
 
-                    {/* Message Input */}
+                    {}
                     <View style={styles.messageContainer}>
                         <TextInput
                             style={[styles.input, styles.multilineInput]}
@@ -397,7 +416,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                         </Text>
                     </View>
 
-                    {/* Send Button */}
+                    {}
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity
                             style={[styles.sendButton, !canSend && styles.disabledButton]}
@@ -551,7 +570,7 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
         textAlign: "center",
     } as TextStyle,
-    // Selected users chips row
+    
     chipsContainer: {
         flexDirection: "row",
         flexWrap: "wrap",

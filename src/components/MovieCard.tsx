@@ -39,6 +39,7 @@ interface MovieCardProps {
     readonly onToggleWatched?: () => void;
     readonly onVote?: (vote: number) => void;
     readonly onRecommend?: () => void;
+    readonly fullWidth?: boolean;
 }
 
 // ─── Vote Picker ──────────────────────────────────────────────────────────────
@@ -144,6 +145,7 @@ const MovieCard = memo(function MovieCard({
     onToggleWatchlist,
     onToggleWatched,
     onVote,
+    fullWidth = false,
 }: Readonly<MovieCardProps>): JSX.Element {
     const [showVotePicker, setShowVotePicker] = useState(false);
     const posterUrl = useMemo(() => getImageUrl(item.poster_path, "w300"), [item.poster_path]);
@@ -268,7 +270,7 @@ const MovieCard = memo(function MovieCard({
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, fullWidth && styles.fullWidthContainer]}>
             <View style={styles.posterContainer}>
                 <TouchableOpacity
                     onPress={handlePress}
@@ -336,6 +338,9 @@ const styles = StyleSheet.create({
         width: "30%",
         marginBottom: 16,
         gap: 4,
+    } as ViewStyle,
+    fullWidthContainer: {
+        width: "100%",
     } as ViewStyle,
     posterContainer: {
         position: "relative",

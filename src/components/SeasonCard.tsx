@@ -15,9 +15,6 @@ import { Colors } from "../constants/Colors";
 import type { SeasonCardProps } from "../types/tvDetail.types";
 import { getPosterUrl } from "../utils/tvDetail.utils";
 
-/**
- * Card component for displaying a TV season with watched status overlay
- */
 export const SeasonCard: React.FC<SeasonCardProps> = ({
     season,
     tvShowId,

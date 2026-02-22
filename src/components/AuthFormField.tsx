@@ -18,12 +18,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../constants/Colors";
 
-/** Input visual states for styling */
 type InputState = "default" | "focused" | "error";
 
-/**
- * Props for AuthFormField component
- */
 export interface AuthFormFieldProps<T extends FieldValues> {
     readonly control: Control<T>;
     readonly name: Path<T>;
@@ -40,9 +36,6 @@ export interface AuthFormFieldProps<T extends FieldValues> {
     readonly testID?: string;
 }
 
-/**
- * Get border color based on input state
- */
 function getBorderColor(state: InputState): string {
     switch (state) {
         case "focused":
@@ -54,17 +47,6 @@ function getBorderColor(state: InputState): string {
     }
 }
 
-/**
- * Reusable form field component for authentication screens
- * Integrates with react-hook-form and supports password visibility toggle
- *
- * Features:
- * - Password visibility toggle with accessible button
- * - Focus state visual feedback
- * - Error state display
- * - Proper accessibility labels
- * - Return key support for form navigation
- */
 export function AuthFormField<T extends FieldValues>({
     control,
     name,
@@ -109,7 +91,7 @@ export function AuthFormField<T extends FieldValues>({
         []
     );
 
-    // Determine current input state for styling
+    
     let inputState: InputState = "default";
     if (error) {
         inputState = "error";
@@ -119,7 +101,7 @@ export function AuthFormField<T extends FieldValues>({
 
     const borderColor = getBorderColor(inputState);
 
-    // Determine auto-complete and text-content types
+    
     let autoComplete: any = "off";
     let textContentType: any = "none";
 
@@ -203,10 +185,8 @@ export function AuthFormField<T extends FieldValues>({
     );
 }
 
-/** Placeholder gray color - add to Colors if not present */
 const PLACEHOLDER_GRAY = "#71717a";
 
-// Extend Colors type safety
 const ExtendedColors = {
     ...Colors,
     placeholderGray: PLACEHOLDER_GRAY,

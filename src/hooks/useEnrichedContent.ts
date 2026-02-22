@@ -12,21 +12,13 @@ export interface EnrichedContentItem {
 
 export function useEnrichedContent(rawItems: any[]) {
     const [enrichedItems, setEnrichedItems] = useState<EnrichedContentItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(rawItems.length > 0);
 
     const enrichItems = useCallback(async () => {
         if (!rawItems || rawItems.length === 0) {
             setEnrichedItems([]);
             setIsLoading(false);
             return;
-        }
-
-        // Optimization: Check if the content actually changed to avoid re-fetching
-        if (enrichedItems.length > 0 && rawItems.length === enrichedItems.length) {
-            const isSame = rawItems.every(item =>
-                enrichedItems.some(ei => ei.tmdb_id === item.tmdb_id && ei.media_type === item.media_type)
-            );
-            if (isSame) return;
         }
 
         setIsLoading(true);
@@ -36,6 +28,8 @@ export function useEnrichedContent(rawItems: any[]) {
                     try {
                         if (item.media_type === "movie") {
                             const details = await getMovieDetails(item.tmdb_id);
+                            
+                            if (!details) throw new Error("TMDb item not found");
                             return {
                                 id: item.id,
                                 tmdb_id: item.tmdb_id,
@@ -46,6 +40,8 @@ export function useEnrichedContent(rawItems: any[]) {
                             };
                         } else {
                             const details = await getTVShowDetails(item.tmdb_id);
+                            
+                            if (!details) throw new Error("TMDb item not found");
                             return {
                                 id: item.id,
                                 tmdb_id: item.tmdb_id,
@@ -56,7 +52,8 @@ export function useEnrichedContent(rawItems: any[]) {
                             };
                         }
                     } catch (err) {
-                        console.error(`Error enriching item ${item.tmdb_id}:`, err);
+                        
+                        console.warn(`[useEnrichedContent] Item ${item.tmdb_id} unavailable:`, err);
                         return {
                             id: item.id,
                             tmdb_id: item.tmdb_id,
@@ -74,11 +71,13 @@ export function useEnrichedContent(rawItems: any[]) {
         } finally {
             setIsLoading(false);
         }
-    }, [rawItems, enrichedItems]);
+        
+        
+    }, [rawItems]);
 
     useEffect(() => {
         enrichItems();
-    }, [rawItems]);
+    }, [enrichItems]);
 
     return { enrichedItems, isLoading };
 }

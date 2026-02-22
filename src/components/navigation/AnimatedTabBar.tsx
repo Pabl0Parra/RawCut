@@ -17,15 +17,12 @@ import Animated, {
 import Svg, { Path } from 'react-native-svg';
 import { Colors } from '../../constants/Colors';
 
-// Constants
 const TAB_BAR_PADDING_BOTTOM = 8;
 const ICON_BOTTOM_PADDING = 4;
 const ANIMATION_DURATION = 400;
 
-// Timing config - reuse same object to avoid recreation
 const TIMING_CONFIG = { duration: ANIMATION_DURATION } as const;
 
-// Types
 interface TabLayout {
     readonly x: number;
     readonly index: number;
@@ -46,12 +43,11 @@ interface TabBarItemProps {
     readonly badge?: string | number;
 }
 
-// Reducer for layout management
 function layoutReducer(state: TabLayout[], action: LayoutAction): TabLayout[] {
     if (action.type === 'ADD_LAYOUT') {
         const existingIndex = state.findIndex(item => item.index === action.payload.index);
         if (existingIndex !== -1) {
-            // Only update if x value actually changed
+            
             if (state[existingIndex].x === action.payload.x) {
                 return state;
             }
@@ -64,7 +60,6 @@ function layoutReducer(state: TabLayout[], action: LayoutAction): TabLayout[] {
     return state;
 }
 
-// Individual tab component with animations - MEMOIZED
 const TabBarItem = memo(function TabBarItem({
     active,
     icon,
@@ -74,26 +69,26 @@ const TabBarItem = memo(function TabBarItem({
     onLongPress,
     badge,
 }: TabBarItemProps) {
-    // Circle scale animation (appears when active)
+    
     const animatedCircleStyle = useAnimatedStyle(() => ({
         transform: [
             { scale: withSpring(active ? 1 : 0, TIMING_CONFIG) },
         ],
     }), [active]);
 
-    // Icon opacity animation
+    
     const animatedIconStyle = useAnimatedStyle(() => ({
         opacity: withSpring(active ? 1 : 0.5, TIMING_CONFIG),
     }), [active]);
 
-    // Vertical position animation (moves up when active)
+    
     const animatedContainerStyle = useAnimatedStyle(() => ({
         transform: [
             { translateY: withSpring(active ? -12 : 0, TIMING_CONFIG) },
         ],
     }), [active]);
 
-    // Memoize icon render to avoid recreation
+    
     const renderedIcon = useMemo(() =>
         icon({
             color: active ? Colors.bloodRed : Colors.metalSilver,
@@ -113,7 +108,7 @@ const TabBarItem = memo(function TabBarItem({
             accessibilityLabel={label}
         >
             <Animated.View style={[styles.tabItemInner, animatedContainerStyle]}>
-                {/* White circle background - Using SVG to bypass forced dark mode inversion */}
+                {}
                 <Animated.View style={[styles.circleBackground, animatedCircleStyle]}>
                     <Svg width={48} height={48} viewBox="0 0 48 48">
                         <Path
@@ -123,12 +118,12 @@ const TabBarItem = memo(function TabBarItem({
                     </Svg>
                 </Animated.View>
 
-                {/* Icon */}
+                {}
                 <Animated.View style={[styles.iconContainer, animatedIconStyle]}>
                     {renderedIcon}
                 </Animated.View>
 
-                {/* Badge */}
+                {}
                 {badge !== undefined && (
                     <View style={styles.badge}>
                         <Text style={styles.badgeText}>{badge}</Text>
@@ -136,7 +131,7 @@ const TabBarItem = memo(function TabBarItem({
                 )}
             </Animated.View>
 
-            {/* Label - only visible when not active */}
+            {}
             <Animated.Text
                 style={[
                     styles.label,
@@ -152,7 +147,6 @@ const TabBarItem = memo(function TabBarItem({
     );
 });
 
-// Main animated tab bar component
 export default function AnimatedTabBar({
     state,
     descriptors,
@@ -161,10 +155,10 @@ export default function AnimatedTabBar({
     const insets = useSafeAreaInsets();
     const [layouts, dispatch] = useReducer(layoutReducer, []);
 
-    // Shared value for the x offset
+    
     const xOffset = useSharedValue(0);
 
-    // Memoize visible routes - only recalculate when routes or descriptors change
+    
     const visibleRoutes = useMemo(() =>
         state.routes.filter(route => {
             const { options } = descriptors[route.key];
@@ -173,7 +167,7 @@ export default function AnimatedTabBar({
         [state.routes, descriptors]
     );
 
-    // Memoize active index calculation
+    
     const activeVisibleIndex = useMemo(() =>
         visibleRoutes.findIndex(
             route => route.key === state.routes[state.index]?.key
@@ -181,7 +175,7 @@ export default function AnimatedTabBar({
         [visibleRoutes, state.routes, state.index]
     );
 
-    // Handle layout measurements - stable callback
+    
     const handleLayout = useCallback((event: LayoutChangeEvent, index: number) => {
         dispatch({
             type: 'ADD_LAYOUT',
@@ -189,8 +183,8 @@ export default function AnimatedTabBar({
         });
     }, []);
 
-    // Update xOffset using useAnimatedReaction for smoother updates
-    // This keeps the animation logic on the UI thread
+    
+    
     useAnimatedReaction(
         () => {
             const activeLayout = layouts.find(layout => layout.index === activeVisibleIndex);
@@ -204,21 +198,21 @@ export default function AnimatedTabBar({
         [activeVisibleIndex, layouts]
     );
 
-    // Animated style for sliding SVG background
+    
     const animatedBackgroundStyle = useAnimatedStyle(() => ({
         transform: [{ translateX: withSpring(xOffset.value, TIMING_CONFIG) }],
     }), []);
 
-    // Calculate safe bottom padding
+    
     const safeBottomPadding = Math.max(insets.bottom, TAB_BAR_PADDING_BOTTOM);
 
-    // Memoize container style
+    
     const containerStyle = useMemo(() =>
         [styles.container, { paddingBottom: safeBottomPadding }],
         [safeBottomPadding]
     );
 
-    // Create memoized press handlers for each tab
+    
     const createPressHandler = useCallback((routeKey: string, routeName: string, isFocused: boolean) => () => {
         const event = navigation.emit({
             type: 'tabPress',
@@ -238,7 +232,7 @@ export default function AnimatedTabBar({
         });
     }, [navigation]);
 
-    // Pre-compute tab data to avoid recalculations in render
+    
     const tabsData = useMemo(() =>
         visibleRoutes.map((route, index) => {
             const { options } = descriptors[route.key];
@@ -262,7 +256,7 @@ export default function AnimatedTabBar({
 
     return (
         <View style={containerStyle}>
-            {/* Animated curved background */}
+            {}
             <Animated.View style={[styles.curvedBackground, animatedBackgroundStyle]}>
                 <Svg width={110} height={60} viewBox="0 0 110 60">
                     <Path
@@ -272,7 +266,7 @@ export default function AnimatedTabBar({
                 </Svg>
             </Animated.View>
 
-            {/* Tab items */}
+            {}
             <View style={styles.tabsContainer}>
                 {tabsData.map((tab) => {
                     if (!tab.icon) return null;
@@ -318,7 +312,7 @@ const styles = StyleSheet.create({
     },
     tabItemInner: {
         width: 50,
-        height: 50,
+        height: 35,
         alignItems: 'center',
         justifyContent: 'center',
     },

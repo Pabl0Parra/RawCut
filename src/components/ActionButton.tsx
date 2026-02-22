@@ -14,10 +14,6 @@ import type { ActionButtonProps } from "../types/movieDetail.types";
 type IoniconsName = keyof typeof Ionicons.glyphMap;
 type MaterialCommunityIconsName = keyof typeof MaterialCommunityIcons.glyphMap;
 
-/**
- * Reusable action button component for favorite, watchlist, and watched actions
- * Supports both Ionicons and MaterialCommunityIcons
- */
 export const ActionButton: React.FC<ActionButtonProps> = ({
     isActive,
     activeIcon,

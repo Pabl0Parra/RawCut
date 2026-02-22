@@ -15,9 +15,6 @@ import { Colors } from "../constants/Colors";
 import type { EpisodeListItemProps } from "../types/tvDetail.types";
 import { getStillUrl, formatRating } from "../utils/tvDetail.utils";
 
-/**
- * List item component for displaying an episode with watched toggle
- */
 export const EpisodeListItem: React.FC<EpisodeListItemProps> = ({
     episode,
     tvShowId,

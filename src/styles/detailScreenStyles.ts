@@ -1,12 +1,8 @@
 import { StyleSheet, type ViewStyle, type TextStyle, type ImageStyle } from "react-native";
 import { Colors } from "../constants/Colors";
 
-/**
- * Common styles shared between movie and TV detail screens
- * Extracted to reduce duplication and ensure consistency
- */
 export const detailScreenStyles = StyleSheet.create({
-    // Container styles
+    
     safeArea: {
         flex: 1,
         backgroundColor: "transparent",
@@ -24,7 +20,7 @@ export const detailScreenStyles = StyleSheet.create({
         marginVertical: 16,
     } as ViewStyle,
 
-    // Header styles
+    
     headerRow: {
         flexDirection: "row",
     } as ViewStyle,
@@ -34,7 +30,7 @@ export const detailScreenStyles = StyleSheet.create({
         marginTop: 64,
     } as ViewStyle,
 
-    // Text styles
+    
     title: {
         color: Colors.textPrimary,
         fontSize: 20,
@@ -62,7 +58,7 @@ export const detailScreenStyles = StyleSheet.create({
         color: Colors.metalSilver,
     } as TextStyle,
 
-    // Description styles
+    
     descriptionContainer: {
         marginVertical: 16,
     } as ViewStyle,
@@ -78,7 +74,7 @@ export const detailScreenStyles = StyleSheet.create({
         lineHeight: 20,
     } as TextStyle,
 
-    // Crew styles
+    
     crewGroup: {
         marginBottom: 12,
     } as ViewStyle,
@@ -93,7 +89,7 @@ export const detailScreenStyles = StyleSheet.create({
         fontSize: 14,
     } as TextStyle,
 
-    // Media list styles (cast, related content)
+    
     horizontalList: {
         paddingHorizontal: 16,
         gap: 12,
@@ -129,7 +125,7 @@ export const detailScreenStyles = StyleSheet.create({
         marginTop: 2,
     } as TextStyle,
 
-    // Button styles
+    
     backButton: {
         position: "absolute",
         top: 16,
@@ -165,7 +161,7 @@ export const detailScreenStyles = StyleSheet.create({
         textTransform: "uppercase",
     } as TextStyle,
 
-    // Spacing
+    
     bottomSpacer: {
         height: 8,
     } as ViewStyle,

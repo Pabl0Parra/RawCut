@@ -19,10 +19,6 @@ import {
     ProfileIcon,
 } from "../../src/components/navigation/TabBarIcons";
 
-// ============================================================================
-// Stable references (outside component to avoid re-creation)
-// ============================================================================
-
 const renderTabBar = (props: BottomTabBarProps) => (
     <AnimatedTabBar {...props} />
 );
@@ -33,10 +29,6 @@ const HEADER_TITLE_STYLE = {
     fontSize: 26,
     marginTop: Platform.OS === "ios" ? 4 : 0,
 };
-
-// ============================================================================
-// Tab Layout
-// ============================================================================
 
 export default function TabLayout() {
     const user = useAuthStore((s) => s.user);
@@ -50,12 +42,12 @@ export default function TabLayout() {
         [openDisclaimer],
     );
 
-    // ────────────────────────────────────────────────────────────────────
-    // Hydrate stores when authenticated.
-    // Store methods accessed via getState() to keep deps honest and avoid
-    // stale closures — these functions never change but this pattern is
-    // consistent with _layout.tsx and future-proof.
-    // ────────────────────────────────────────────────────────────────────
+    
+    
+    
+    
+    
+    
     useEffect(() => {
         if (!user) return;
 

@@ -33,7 +33,7 @@ export default function PersonDetailScreen(): JSX.Element {
             ]);
             setPerson(details);
 
-            // Helper to deduplicate by ID
+            
             const deduplicate = (items: (Movie | TVShow)[]) => {
                 const map = new Map<number, Movie | TVShow>();
                 items.forEach(item => {
@@ -44,7 +44,7 @@ export default function PersonDetailScreen(): JSX.Element {
                 return Array.from(map.values());
             };
 
-            // Deduplicate, sort by popularity and filter unique entries
+            
             setCredits({
                 cast: deduplicate(creditsData.cast)
                     .sort((a, b) => b.popularity - a.popularity)
@@ -128,7 +128,7 @@ export default function PersonDetailScreen(): JSX.Element {
                         <ContentHorizontalList
                             data={credits.cast}
                             title="Como Actor/Actriz"
-                            mediaType="movie" // ContentHorizontalList handles items with both title (movie) and name (tv) correctly
+                            mediaType="movie" 
                         />
                     )}
 

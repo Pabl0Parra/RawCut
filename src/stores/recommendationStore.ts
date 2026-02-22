@@ -18,7 +18,7 @@ interface RecommendationState {
     error: string | null;
     unreadCount: number;
 
-    // Actions
+
     fetchRecommendations: () => Promise<void>;
     addComment: (recommendationId: string, text: string) => Promise<boolean>;
     deleteComment: (recommendationId: string, commentId: string) => Promise<boolean>;
@@ -31,7 +31,6 @@ interface RecommendationState {
     clearRecommendations: () => void;
 }
 
-// Helpers
 const processRecommendations = (data: any[]): EnrichedRecommendation[] => {
     return data.map((rec) => ({
         ...rec,
@@ -120,7 +119,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         set({ isLoading: true, error: null });
 
         try {
-            // Fetch sent recommendations
+
             const { data: sentData, error: sentError } = await supabase
                 .from("recommendations")
                 .select(`
@@ -132,7 +131,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 .eq("sender_id", user.id)
                 .order("created_at", { ascending: false });
 
-            // Fetch received recommendations
+
             const { data: receivedData, error: receivedError } = await supabase
                 .from("recommendations")
                 .select(`
@@ -249,7 +248,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
 
             if (error) throw error;
 
-            // Also mark as read if it wasn't already
+
             await supabase
                 .from("recommendations")
                 .update({ is_read: true })
@@ -285,10 +284,14 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
 
             if (error) throw error;
 
-            set((state) => ({
-                received: state.received.map(r => ({ ...r, is_read: true })),
-                unreadCount: 0,
-            }));
+            set((state) => {
+                const newReceived = state.received.map(r => ({ ...r, is_read: true }));
+                return {
+                    received: newReceived,
+
+                    unreadCount: calculateUnreadCount(state.sent, newReceived, user.id),
+                };
+            });
         } catch (err) {
             console.error("Error marking recommendations as read:", err);
         }
@@ -298,7 +301,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         const user = useAuthStore.getState().user;
         if (!user) return;
 
-        // Only mark if it's actually unread to avoid unnecessary DB calls
+
         const rec = get().received.find(r => r.id === recommendationId);
         if (!rec || rec.is_read) return;
 
@@ -357,7 +360,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         const user = useAuthStore.getState().user;
         if (!user) return () => { };
 
-        // Subscribe to new comments
         const commentsChannel = supabase
             .channel("comments-changes")
             .on(
@@ -370,16 +372,20 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 (payload) => {
                     const newComment = payload.new as RecommendationComment;
                     if (newComment.user_id !== user.id) {
-                        set((state) => ({
-                            sent: addCommentToRecs(state.sent, newComment.recommendation_id, newComment),
-                            received: addCommentToRecs(state.received, newComment.recommendation_id, newComment),
-                        }));
+                        set((state) => {
+                            const newSent = addCommentToRecs(state.sent, newComment.recommendation_id, newComment);
+                            const newReceived = addCommentToRecs(state.received, newComment.recommendation_id, newComment);
+                            return {
+                                sent: newSent,
+                                received: newReceived,
+                                unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
+                            };
+                        });
                     }
                 }
             )
             .subscribe();
 
-        // Subscribe to new recommendations
         const recommendationsChannel = supabase
             .channel("recommendations-changes")
             .on(
@@ -391,8 +397,29 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                     filter: `receiver_id=eq.${user.id}`,
                 },
                 () => {
-                    // Refresh all recommendations when a new one arrives
                     get().fetchRecommendations();
+                }
+            )
+            .on(
+                "postgres_changes",
+                {
+                    event: "DELETE",
+                    schema: "public",
+                    table: "recommendations",
+                },
+                (payload) => {
+                    const deletedId = payload.old?.id as string | undefined;
+                    if (!deletedId) return;
+
+                    set((state) => {
+                        const newReceived = state.received.filter((r) => r.id !== deletedId);
+                        const newSent = state.sent.filter((r) => r.id !== deletedId);
+                        return {
+                            sent: newSent,
+                            received: newReceived,
+                            unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
+                        };
+                    });
                 }
             )
             .subscribe();
