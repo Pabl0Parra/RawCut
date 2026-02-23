@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Colors } from "../constants/Colors";
 import type { Profile } from "../lib/supabase";
@@ -88,7 +89,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         showUserList,
     } = state;
 
-    
+
     useEffect(() => {
         if (visible) {
             setState(INITIAL_STATE);
@@ -107,7 +108,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
         try {
             const loadedUsers = await loadAllUsers(currentUserId);
-            
+
             const filtered = loadedUsers.filter((u) => u.user_id !== currentUserId);
             updateState({ users: filtered, isLoadingUsers: false });
         } catch (err) {
@@ -141,7 +142,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         [currentUserId, handleLoadAllUsers]
     );
 
-    
+
     const handleToggleUser = (user: Profile): void => {
         const isSelected = selectedUsers.some((u) => u.user_id === user.user_id);
         const newSelected = isSelected
@@ -150,7 +151,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         updateState({ selectedUsers: newSelected });
     };
 
-    
+
     const handleRemoveUser = (userId: string): void => {
         updateState({
             selectedUsers: selectedUsers.filter((u) => u.user_id !== userId),
@@ -166,7 +167,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
         updateState({ isSending: true });
 
-        
+
         const receiverIds = selectedUsers.map((u) => u.user_id);
         const { data: existing } = await supabase
             .from("recommendations")
@@ -310,128 +311,130 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         <Modal
             visible={visible}
             animationType="slide"
-            presentationStyle="pageSheet"
+            presentationStyle="overFullScreen"
             onRequestClose={onClose}
         >
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={styles.modalContainer}
-            >
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                    contentContainerStyle={styles.scrollContent}
+            <SafeAreaView style={styles.safeArea}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={styles.modalContainer}
                 >
-                    {}
+                    { }
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Recomendar</Text>
-                        <TouchableOpacity onPress={onClose}>
-                            <Text style={styles.closeButtonText}>✕</Text>
+                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                            <Ionicons name="close" size={24} color={Colors.white} />
                         </TouchableOpacity>
                     </View>
 
-                    {}
-                    <View style={styles.previewContainer}>
-                        {!!posterUrl && (
-                            <Image
-                                source={{ uri: posterUrl }}
-                                style={styles.previewImage}
-                            />
-                        )}
-                        <View style={styles.previewInfo}>
-                            <Text style={styles.previewTitle}>{contentTitle}</Text>
-                            <Text style={styles.previewYear}>{contentYear}</Text>
-                        </View>
-                    </View>
-
-                    {}
-                    {enableSearch && (
-                        <>
-                            <Text style={styles.inputLabel}>Buscar usuario</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Escribe un nombre de usuario..."
-                                placeholderTextColor="#71717a"
-                                value={searchQuery}
-                                onChangeText={handleSearchUsers}
-                                onFocus={() => updateState({ showUserList: true })}
-                            />
-                        </>
-                    )}
-
-                    {}
-                    {!enableSearch && (
-                        <Text style={styles.inputLabel}>Seleccionar usuario(s)</Text>
-                    )}
-
-                    {}
-                    <TouchableOpacity
-                        style={styles.dropdownButton}
-                        onPress={handleToggleUserList}
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                        contentContainerStyle={styles.scrollContent}
                     >
-                        <Text style={styles.dropdownButtonText}>{dropdownLabel}</Text>
-                        <Ionicons
-                            name={showUserList ? "chevron-up" : "chevron-down"}
-                            size={20}
-                            color={Colors.metalSilver}
-                        />
-                    </TouchableOpacity>
-
-                    {}
-                    <View style={styles.userListContainer}>{renderUserList()}</View>
-
-                    {}
-                    {selectedUsers.length > 0 && (
-                        <View style={styles.chipsContainer}>
-                            {selectedUsers.map((user) => (
-                                <View key={user.user_id} style={styles.chip}>
-                                    <Text style={styles.chipText}>
-                                        @{user.username}
-                                    </Text>
-                                    <TouchableOpacity
-                                        onPress={() => handleRemoveUser(user.user_id)}
-                                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                                    >
-                                        <Text style={styles.chipRemove}>✕</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            ))}
-                        </View>
-                    )}
-
-                    {}
-                    <View style={styles.messageContainer}>
-                        <TextInput
-                            style={[styles.input, styles.multilineInput]}
-                            placeholder="¿Por qué recomiendas esto?"
-                            placeholderTextColor="#71717a"
-                            value={message}
-                            onChangeText={(text) => updateState({ message: text })}
-                            maxLength={MAX_MESSAGE_LENGTH}
-                            multiline
-                            numberOfLines={3}
-                        />
-                        <Text style={styles.charCount}>
-                            {message.length}/{MAX_MESSAGE_LENGTH}
-                        </Text>
-                    </View>
-
-                    {}
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity
-                            style={[styles.sendButton, !canSend && styles.disabledButton]}
-                            onPress={handleSendRecommendation}
-                            disabled={!canSend}
-                        >
-                            {isSending ? (
-                                <ActivityIndicator color="#0a0a0a" />
-                            ) : (
-                                <Text style={styles.sendButtonText}>{sendButtonLabel}</Text>
+                        { }
+                        <View style={styles.previewContainer}>
+                            {!!posterUrl && (
+                                <Image
+                                    source={{ uri: posterUrl }}
+                                    style={styles.previewImage}
+                                />
                             )}
+                            <View style={styles.previewInfo}>
+                                <Text style={styles.previewTitle}>{contentTitle}</Text>
+                                <Text style={styles.previewYear}>{contentYear}</Text>
+                            </View>
+                        </View>
+
+                        { }
+                        {enableSearch && (
+                            <>
+                                <Text style={styles.inputLabel}>Buscar usuario</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Escribe un nombre de usuario..."
+                                    placeholderTextColor="#71717a"
+                                    value={searchQuery}
+                                    onChangeText={handleSearchUsers}
+                                    onFocus={() => updateState({ showUserList: true })}
+                                />
+                            </>
+                        )}
+
+                        { }
+                        {!enableSearch && (
+                            <Text style={styles.inputLabel}>Seleccionar usuario(s)</Text>
+                        )}
+
+                        { }
+                        <TouchableOpacity
+                            style={styles.dropdownButton}
+                            onPress={handleToggleUserList}
+                        >
+                            <Text style={styles.dropdownButtonText}>{dropdownLabel}</Text>
+                            <Ionicons
+                                name={showUserList ? "chevron-up" : "chevron-down"}
+                                size={20}
+                                color={Colors.metalSilver}
+                            />
                         </TouchableOpacity>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+
+                        { }
+                        <View style={styles.userListContainer}>{renderUserList()}</View>
+
+                        { }
+                        {selectedUsers.length > 0 && (
+                            <View style={styles.chipsContainer}>
+                                {selectedUsers.map((user) => (
+                                    <View key={user.user_id} style={styles.chip}>
+                                        <Text style={styles.chipText}>
+                                            @{user.username}
+                                        </Text>
+                                        <TouchableOpacity
+                                            onPress={() => handleRemoveUser(user.user_id)}
+                                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                        >
+                                            <Text style={styles.chipRemove}>✕</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
+
+                        { }
+                        <View style={styles.messageContainer}>
+                            <TextInput
+                                style={[styles.input, styles.multilineInput]}
+                                placeholder="¿Por qué recomiendas esto?"
+                                placeholderTextColor="#71717a"
+                                value={message}
+                                onChangeText={(text) => updateState({ message: text })}
+                                maxLength={MAX_MESSAGE_LENGTH}
+                                multiline
+                                numberOfLines={3}
+                            />
+                            <Text style={styles.charCount}>
+                                {message.length}/{MAX_MESSAGE_LENGTH}
+                            </Text>
+                        </View>
+
+                        { }
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity
+                                style={[styles.sendButton, !canSend && styles.disabledButton]}
+                                onPress={handleSendRecommendation}
+                                disabled={!canSend}
+                            >
+                                {isSending ? (
+                                    <ActivityIndicator color="#0a0a0a" />
+                                ) : (
+                                    <Text style={styles.sendButtonText}>{sendButtonLabel}</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
         </Modal>
     );
 };
@@ -440,10 +443,16 @@ const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
         backgroundColor: Colors.metalBlack,
-        padding: 16,
+    } as ViewStyle,
+    safeArea: {
+        flex: 1,
+        backgroundColor: Colors.metalBlack,
+        paddingHorizontal: 16,
+        paddingTop: Platform.OS === 'android' ? 16 : 0,
     } as ViewStyle,
     scrollContent: {
         flexGrow: 1,
+        paddingBottom: 24,
     } as ViewStyle,
     modalHeader: {
         flexDirection: "row",
@@ -456,6 +465,11 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontFamily: "BebasNeue_400Regular",
     } as TextStyle,
+    closeButton: {
+        padding: 4,
+        backgroundColor: Colors.bloodRed,
+        borderRadius: 20,
+    } as ViewStyle,
     closeButtonText: {
         color: Colors.bloodRed,
         fontSize: 18,
@@ -570,7 +584,7 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
         textAlign: "center",
     } as TextStyle,
-    
+
     chipsContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
@@ -602,12 +616,12 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     charCount: {
         color: Colors.metalSilver,
-        fontSize: 12,
+        fontSize: 10,
         textAlign: "right",
         marginTop: 4,
     } as TextStyle,
     buttonContainer: {
-        paddingTop: 16,
+        paddingTop: 10,
     } as ViewStyle,
     sendButton: {
         backgroundColor: Colors.bloodRed,
