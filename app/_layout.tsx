@@ -20,6 +20,7 @@ import {
 import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
 import { supabase } from "../src/lib/supabase";
 import { useAuthStore } from "../src/stores/authStore";
+import { usePushNotifications } from "../src/hooks/usePushNotifications";
 import { Colors } from "../src/constants/Colors";
 import SmokeBackground from "../src/components/SmokeBackground";
 import { ThemeProvider, DarkTheme } from "@react-navigation/native";
@@ -105,17 +106,19 @@ export default function RootLayout() {
     const segments = useSegments();
     const router = useRouter();
 
+    usePushNotifications();
+
     const [isReady, setIsReady] = useState(false);
     const [initError, setInitError] = useState<string | null>(null);
     const [isOffline, setIsOffline] = useState(false);
 
-    
-    
-    
+
+
+
     const mountedRef = useRef(true);
 
-    
-    
+
+
     const user = useAuthStore((s) => s.user);
 
     const [fontsLoaded, fontError] = useFonts({
@@ -126,15 +129,15 @@ export default function RootLayout() {
         BebasNeue_400Regular,
     });
 
-    
-    
-    
+
+
+
     useEffect(() => {
         mountedRef.current = true;
         console.log("[RootLayout] Setting up auth listeners…");
 
-        
-        
+
+
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(
@@ -161,16 +164,16 @@ export default function RootLayout() {
             },
         );
 
-        
-        
-        
+
+
+
         const handleSessionError = (
             error: { message: string },
         ): void => {
             if (isInvalidTokenError(error)) {
-                
-                
-                
+
+
+
                 console.warn(
                     "[RootLayout] Invalid/Expired session detected, clearing local state…",
                 );
@@ -216,8 +219,8 @@ export default function RootLayout() {
                 if (!mountedRef.current) return;
 
                 if (isTimeoutError(err) || isNetworkError(err)) {
-                    
-                    
+
+
                     console.warn(
                         "[RootLayout] Session init failed due to network/timeout, proceeding offline",
                     );
@@ -240,7 +243,7 @@ export default function RootLayout() {
 
         initSession();
 
-        
+
         const handleDeepLink = async (url: string | null): Promise<void> => {
             if (!url) return;
             console.log("[RootLayout] Handling deep link:", url);
@@ -279,10 +282,10 @@ export default function RootLayout() {
         };
     }, []);
 
-    
-    
-    
-    
+
+
+
+
     useEffect(() => {
         if (fontsLoaded || fontError) {
             console.log("[RootLayout] Fonts loaded, hiding native splash");
@@ -290,12 +293,12 @@ export default function RootLayout() {
         }
     }, [fontsLoaded, fontError]);
 
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     useEffect(() => {
         if (!isReady) {
             return;
@@ -320,8 +323,8 @@ export default function RootLayout() {
         }
     }, [user, segments, isReady]);
 
-    
-    
+
+
     const handleRetryInit = useCallback(() => {
         setInitError(null);
         setIsOffline(false);
@@ -356,26 +359,26 @@ export default function RootLayout() {
             });
     }, []);
 
-    
-    
-    
+
+
+
     if (!fontsLoaded && !fontError) {
         return null;
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
     const appReady = isReady && !initError;
     const showOfflineBanner = isOffline;
 
@@ -406,7 +409,7 @@ export default function RootLayout() {
                             />
                         </Stack>
 
-                        {}
+                        { }
                         {showOfflineBanner && (
                             <View style={styles.offlineBanner} pointerEvents="box-none">
                                 <Text style={styles.offlineBannerText}>
@@ -415,7 +418,7 @@ export default function RootLayout() {
                             </View>
                         )}
 
-                        {}
+                        { }
                         {!isReady && (
                             <View
                                 style={[
@@ -434,7 +437,7 @@ export default function RootLayout() {
                             </View>
                         )}
 
-                        {}
+                        { }
                         {initError && (
                             <View
                                 style={[

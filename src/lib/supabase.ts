@@ -21,6 +21,7 @@ export interface Profile {
     avatar_url: string | null;
     points: number;
     created_at: string;
+    expo_push_token?: string | null;
 }
 
 export interface UserContent {
@@ -64,6 +65,6 @@ export interface ContentVote {
     user_id: string;
     tmdb_id: number;
     media_type: "movie" | "tv";
-    vote: number; 
+    vote: number;
     created_at: string;
 }

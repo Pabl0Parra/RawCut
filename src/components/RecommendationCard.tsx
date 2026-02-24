@@ -18,46 +18,11 @@ import { router } from "expo-router";
 import type {
     RecommendationWithRelations,
     TmdbContentData,
-    StarRatingProps,
 } from "../types/recommendations.types";
-import { STAR_RATINGS } from "../types/recommendations.types";
 import { Colors } from "../constants/Colors";
 import { getImageUrl } from "../lib/tmdb";
 
-export const StarRating: React.FC<StarRatingProps> = ({
-    recommendationId,
-    currentRating,
-    canRate,
-    onRate,
-}) => {
-    const handlePress = (star: number): void => {
-        if (canRate) {
-            onRate(recommendationId, star);
-        }
-    };
-
-    const isStarFilled = (star: number): boolean => {
-        return star <= currentRating;
-    };
-
-    return (
-        <View style={styles.starContainer}>
-            {STAR_RATINGS.map((star) => (
-                <TouchableOpacity
-                    key={star}
-                    onPress={() => handlePress(star)}
-                    disabled={!canRate}
-                    activeOpacity={canRate ? 0.7 : 1}
-                    hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
-                >
-                    <Text style={styles.star}>
-                        {isStarFilled(star) ? "⭐" : "☆"}
-                    </Text>
-                </TouchableOpacity>
-            ))}
-        </View>
-    );
-};
+// StarRating component removed as requested.
 
 interface RecommendationCardProps {
     item: RecommendationWithRelations;
@@ -67,7 +32,6 @@ interface RecommendationCardProps {
     currentUserId: string | undefined;
     onToggleExpand: (id: string) => void;
     onAddComment: (recommendationId: string, text: string) => Promise<boolean>;
-    onAddRating: (recommendationId: string, rating: number) => Promise<void>;
     onMarkCommentsRead: (recommendationId: string) => void;
     onDeleteComment: (recommendationId: string, commentId: string) => Promise<boolean>;
     onDeleteRecommendation: (recommendationId: string) => Promise<boolean>;
@@ -81,7 +45,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     currentUserId,
     onToggleExpand,
     onAddComment,
-    onAddRating,
     onMarkCommentsRead,
     onDeleteComment,
     onDeleteRecommendation,
@@ -96,7 +59,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         media_type,
         message,
         created_at,
-        rating,
         comments,
     } = item;
 
@@ -154,8 +116,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         );
     };
 
-    const numericRating = rating ? rating.rating : 0;
-
     const dateObj = new Date(created_at);
     const formattedDate = dateObj.toLocaleDateString("es-ES", {
         day: 'numeric', month: 'short'
@@ -199,11 +159,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     )}
 
                     <View style={styles.statusRow}>
-                        {numericRating > 0 && (
-                            <View style={styles.ratingBadge}>
-                                <Text style={styles.ratingText}>⭐ {numericRating}/5</Text>
-                            </View>
-                        )}
+                        {/* Rating badge removed as requested */}
                     </View>
                 </View>
 
@@ -221,17 +177,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
             {isExpanded && (
                 <View style={styles.expandedContent}>
-                    {isReceived && (
-                        <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Tu Calificación</Text>
-                            <StarRating
-                                recommendationId={item.id}
-                                currentRating={numericRating}
-                                canRate={true}
-                                onRate={onAddRating}
-                            />
-                        </View>
-                    )}
+                    {/* Your Rating section removed as requested */}
 
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Comentarios</Text>
@@ -296,13 +242,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 };
 
 const styles = StyleSheet.create({
-    starContainer: {
-        flexDirection: "row",
-        gap: 4,
-    } as ViewStyle,
-    star: {
-        fontSize: 24,
-    } as TextStyle,
+    // starContainer and star styles removed
     card: {
         backgroundColor: "rgba(30, 30, 30, 0.9)",
         borderRadius: 12,
@@ -368,15 +308,7 @@ const styles = StyleSheet.create({
         gap: 8,
         marginTop: "auto",
     } as ViewStyle,
-    ratingBadge: {
-        flexDirection: "row",
-        alignItems: "center",
-    } as ViewStyle,
-    ratingText: {
-        color: "#eab308",
-        fontSize: 12,
-        fontWeight: "bold",
-    } as TextStyle,
+    // ratingBadge and ratingText styles removed
     actionButtonContainer: {
         marginLeft: 8,
         alignSelf: "flex-start",

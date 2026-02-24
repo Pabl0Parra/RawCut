@@ -1,8 +1,30 @@
 {
-    "css.customData": [
-        ".vscode/tailwind.css-data.json"
-    ],
-    "css.validate": true,
-    "scss.validate": true,
-    "less.validate": true
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "css.customData": [
+    ".vscode/tailwind.css-data.json"
+  ],
+  "css.validate": true,
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ],
+  "less.validate": true,
+  "scss.validate": true
 }

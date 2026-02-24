@@ -40,7 +40,6 @@ export default function RecommendationsScreen(): React.JSX.Element {
         received,
         isLoading,
         addComment,
-        addRating,
         markAsRead,
         markCommentsAsRead,
         deleteComment,
@@ -110,12 +109,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
         return await addComment(recommendationId, text);
     };
 
-    const handleAddRating = async (
-        recommendationId: string,
-        rating: number
-    ): Promise<void> => {
-        await addRating(recommendationId, rating);
-    };
+    // handleAddRating removed as requested.
 
     const handleMarkCommentsRead = (recommendationId: string): void => {
         markCommentsAsRead(recommendationId);
@@ -174,7 +168,6 @@ export default function RecommendationsScreen(): React.JSX.Element {
             currentUserId={user?.id}
             onToggleExpand={handleToggleExpand}
             onAddComment={handleAddComment}
-            onAddRating={handleAddRating}
             onMarkCommentsRead={handleMarkCommentsRead}
             onDeleteComment={handleDeleteComment}
             onDeleteRecommendation={handleDeleteRecommendation}

@@ -15,6 +15,7 @@ import {
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useRouter } from "expo-router";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 import { useContentStore } from "../../src/stores/contentStore";
@@ -92,7 +93,7 @@ function AvatarSection({
                     </View>
                 )}
 
-                {}
+                { }
                 {isUploading && (
                     <View style={styles.avatarOverlay}>
                         <ActivityIndicator size="large" color={Colors.white} />
@@ -103,7 +104,7 @@ function AvatarSection({
                 )}
             </View>
 
-            {}
+            { }
             {!isUploading && (
                 <View style={styles.cameraBadge}>
                     <Ionicons name="camera" size={16} color={Colors.white} />
@@ -273,6 +274,7 @@ function UsernameEditor({
 }
 
 export default function ProfileScreen(): React.JSX.Element {
+    const router = useRouter();
     const {
         profile,
         user,
@@ -301,14 +303,14 @@ export default function ProfileScreen(): React.JSX.Element {
 
     const isGenericUsername = profile?.username?.startsWith("user_");
 
-    
+
     useEffect(() => {
         if (!isEditingUsername) {
             clearError();
         }
     }, [isEditingUsername, clearError]);
 
-    
+
     const handleAvatarPress = useCallback(() => {
         const options: Array<{
             text: string;
@@ -343,7 +345,7 @@ export default function ProfileScreen(): React.JSX.Element {
                 },
             ];
 
-        
+
         if (profile?.avatar_url) {
             options.push({
                 text: "Eliminar foto",
@@ -366,7 +368,7 @@ export default function ProfileScreen(): React.JSX.Element {
         Alert.alert("Foto de perfil", "Elige una opción", options);
     }, [user?.id, profile?.avatar_url, pickAndUploadAvatar, deleteAvatar, fetchProfile]);
 
-    
+
     const handleUpdateUsername = useCallback(
         async (newUsername: string) => {
             const success = await updateUsername(newUsername);
@@ -378,7 +380,7 @@ export default function ProfileScreen(): React.JSX.Element {
         [updateUsername]
     );
 
-    
+
     const handleSignOut = useCallback(() => {
         Alert.alert(
             "Cerrar sesión",
@@ -390,7 +392,7 @@ export default function ProfileScreen(): React.JSX.Element {
         );
     }, [signOut]);
 
-    
+
     const handleDeleteAccount = useCallback(() => {
         Alert.alert(
             "Eliminar cuenta",
@@ -402,16 +404,16 @@ export default function ProfileScreen(): React.JSX.Element {
                     style: "destructive",
                     onPress: () => {
                         (async () => {
-                            
+
                             if (profile?.avatar_url && user?.id) {
                                 await deleteAvatar(user.id, profile.avatar_url);
                             }
 
-                            
+
                             const success = await deleteAccount();
 
                             if (success) {
-                                
+
                                 clearContent();
                                 clearRecommendations();
 
@@ -432,12 +434,12 @@ export default function ProfileScreen(): React.JSX.Element {
         );
     }, [user?.id, profile?.avatar_url, deleteAccount, deleteAvatar, clearContent, clearRecommendations]);
 
-    
+
     const showComingSoon = useCallback((feature: string) => {
         Alert.alert("Próximamente", `${feature} estará disponible pronto.`);
     }, []);
 
-    
+
     useEffect(() => {
         if (avatarError) {
             Alert.alert("Error", avatarError);
@@ -454,7 +456,7 @@ export default function ProfileScreen(): React.JSX.Element {
                 showsVerticalScrollIndicator={false}
                 extraScrollHeight={Platform.select({ ios: 20, android: 40 })}
             >
-                {}
+                { }
                 <View style={styles.header}>
                     <AvatarSection
                         avatarUrl={profile?.avatar_url ?? null}
@@ -470,7 +472,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     <Text style={styles.emailText}>{user?.email}</Text>
                 </View>
 
-                {}
+                { }
                 {isGenericUsername && !isEditingUsername && (
                     <TouchableOpacity
                         style={styles.genericPrompt}
@@ -489,7 +491,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     </TouchableOpacity>
                 )}
 
-                {}
+                { }
                 <View style={styles.section}>
                     <SectionHeader title="Información del perfil" />
 
@@ -531,7 +533,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     />
                 </View>
 
-                {}
+                { }
                 <View style={styles.section}>
                     <SectionHeader title="Configuración" />
 
@@ -554,26 +556,26 @@ export default function ProfileScreen(): React.JSX.Element {
                     />
                 </View>
 
-                {}
+                { }
                 <View style={styles.section}>
                     <SectionHeader title="Acerca de" />
 
                     <SettingsRow
                         icon="help-circle-outline"
                         label="Centro de ayuda"
-                        onPress={() => showComingSoon("Centro de ayuda")}
+                        onPress={() => router.push("/help")}
                     />
 
                     <SettingsRow
                         icon="shield-checkmark-outline"
                         label="Política de privacidad"
-                        onPress={() => showComingSoon("Política de privacidad")}
+                        onPress={() => router.push("/privacy")}
                     />
 
                     <SettingsRow
                         icon="document-text-outline"
                         label="Términos de servicio"
-                        onPress={() => showComingSoon("Términos de servicio")}
+                        onPress={() => router.push("/terms")}
                     />
 
                     <View style={styles.versionRow}>
@@ -587,7 +589,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     </View>
                 </View>
 
-                {}
+                { }
                 <View style={styles.section}>
                     <SectionHeader title="Cuenta" />
 
@@ -599,7 +601,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     />
                 </View>
 
-                {}
+                { }
                 <TouchableOpacity
                     style={styles.signOutButton}
                     onPress={handleSignOut}
@@ -609,7 +611,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     <Text style={styles.signOutText}>Cerrar Sesión</Text>
                 </TouchableOpacity>
 
-                {}
+                { }
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>CortoCrudo v{APP_VERSION}</Text>
                     <Text style={styles.footerAuthor}>Made with ❤️ by Pabl0Parra</Text>
@@ -633,7 +635,7 @@ const styles = StyleSheet.create({
         paddingBottom: 40,
     } as ViewStyle,
 
-    
+
     header: {
         alignItems: "center",
         marginBottom: 24,
@@ -706,7 +708,7 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
     } as TextStyle,
 
-    
+
     genericPrompt: {
         flexDirection: "row",
         alignItems: "center",
@@ -725,7 +727,7 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     } as TextStyle,
 
-    
+
     section: {
         backgroundColor: Colors.metalGray,
         borderRadius: 16,
@@ -741,7 +743,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     } as TextStyle,
 
-    
+
     infoRow: {
         flexDirection: "row",
         alignItems: "center",
@@ -773,7 +775,7 @@ const styles = StyleSheet.create({
         padding: 8,
     } as ViewStyle,
 
-    
+
     settingsRow: {
         flexDirection: "row",
         alignItems: "center",
@@ -806,7 +808,7 @@ const styles = StyleSheet.create({
         marginLeft: "auto",
     } as TextStyle,
 
-    
+
     editorContainer: {
         paddingVertical: 8,
     } as ViewStyle,
@@ -852,7 +854,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     } as TextStyle,
 
-    
+
     signOutButton: {
         flexDirection: "row",
         alignItems: "center",
@@ -871,7 +873,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     } as TextStyle,
 
-    
+
     footer: {
         alignItems: "center",
         marginTop: 32,

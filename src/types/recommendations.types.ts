@@ -22,13 +22,6 @@ export const createTmdbCacheKey = (mediaType: MediaType, tmdbId: number): string
     return `${mediaType}-${tmdbId}`;
 };
 
-export interface StarRatingProps {
-    recommendationId: string;
-    currentRating: number;
-    canRate: boolean;
-    onRate: (recommendationId: string, rating: number) => void;
-}
-
 export interface RecommendationCardProps {
     item: RecommendationWithRelations;
     tmdbData: TmdbContentData;
@@ -37,8 +30,9 @@ export interface RecommendationCardProps {
     currentUserId: string | undefined;
     onToggleExpand: (id: string) => void;
     onAddComment: (recommendationId: string, text: string) => Promise<boolean>;
-    onAddRating: (recommendationId: string, rating: number) => Promise<void>;
     onMarkCommentsRead: (recommendationId: string) => void;
+    onDeleteComment: (recommendationId: string, commentId: string) => Promise<boolean>;
+    onDeleteRecommendation: (recommendationId: string) => Promise<boolean>;
 }
 
 export interface RecommendationsScreenState {
@@ -56,8 +50,6 @@ export const INITIAL_RECOMMENDATIONS_STATE: RecommendationsScreenState = {
     newComment: "",
     isSendingComment: false,
 };
-
-export const STAR_RATINGS = [1, 2, 3, 4, 5] as const;
 
 export const MAX_COMMENT_LENGTH = 500;
 
