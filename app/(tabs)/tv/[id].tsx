@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -60,6 +61,7 @@ import {
 } from "../../../src/utils/tvDetail.utils";
 
 export default function TVDetailScreen(): React.JSX.Element {
+    const { t } = useTranslation();
     const { id } = useLocalSearchParams<{ id: string }>();
     const [state, setState] = useState<TVDetailScreenState>(INITIAL_TV_DETAIL_STATE);
 
@@ -95,27 +97,16 @@ export default function TVDetailScreen(): React.JSX.Element {
         handleToggleWatched,
     } = useContentActions();
 
-    
     const [showVotePicker, setShowVotePicker] = useState(false);
-    const userVotes = useVoteStore((s) => s.userVotes);
-    const communityScores = useVoteStore((s) => s.communityScores);
     const fetchVotes = useVoteStore((s) => s.fetchVotes);
     const submitVote = useVoteStore((s) => s.submitVote);
 
     const userVote = tvShow ? useVoteStore.getState().getUserVote(tvShow.id, "tv") : undefined;
     const communityRating = tvShow ? useVoteStore.getState().getCommunityScore(tvShow.id, "tv")?.avg : undefined;
 
-    
-    
-    
-
     const updateState = (updates: Partial<TVDetailScreenState>): void => {
         setState((prev) => ({ ...prev, ...updates }));
     };
-
-    
-    
-    
 
     const loadTVShow = useCallback(async (tvId: number): Promise<void> => {
         updateState({ isLoading: true });
@@ -144,12 +135,6 @@ export default function TVDetailScreen(): React.JSX.Element {
             }
         }
     }, [id, user, loadTVShow, fetchTVProgress, fetchVotes]);
-
-    
-    
-    
-
-    
 
     const handleWatchTrailer = (): void => {
         if (trailerKey) {
@@ -232,18 +217,10 @@ export default function TVDetailScreen(): React.JSX.Element {
         return isEpisodeWatched(tvShow.id, seasonNumber, episodeNumber);
     };
 
-    
-    
-    
-
     const getNextEpisode = (): NextEpisodeInfo | null => {
         if (!tvShow?.seasons) return null;
         return getNextEpisodeToWatch(tvShow.id, seasonsToProgressInfo(tvShow.seasons));
     };
-
-    
-    
-    
 
     const renderLoadingState = (): React.JSX.Element => (
         <SafeAreaView style={detailScreenStyles.safeArea}>
@@ -256,7 +233,7 @@ export default function TVDetailScreen(): React.JSX.Element {
     const renderErrorState = (): React.JSX.Element => (
         <SafeAreaView style={detailScreenStyles.safeArea}>
             <View style={detailScreenStyles.centerContainer}>
-                <Text style={detailScreenStyles.errorText}>Serie no encontrada</Text>
+                <Text style={detailScreenStyles.errorText}>{t('details.tvNotFound')}</Text>
             </View>
         </SafeAreaView>
     );
@@ -267,15 +244,13 @@ export default function TVDetailScreen(): React.JSX.Element {
 
         return (
             <View style={styles.nextBadgeContainer}>
-                <Text style={styles.nextBadgeLabel}>SIGUIENTE</Text>
+                <Text style={styles.nextBadgeLabel}>{t('details.next')}</Text>
                 <Text style={styles.nextBadgeValue}>
                     S{nextEpisode.season} E{nextEpisode.episode}
                 </Text>
             </View>
         );
     };
-
-    
 
     const renderRecommendButton = (): React.JSX.Element | null => {
         if (!user) return null;
@@ -291,7 +266,7 @@ export default function TVDetailScreen(): React.JSX.Element {
                         size={24}
                         color={Colors.white}
                     />
-                    <Text style={detailScreenStyles.recommendButtonText}>Recomendar</Text>
+                    <Text style={detailScreenStyles.recommendButtonText}>{t('details.recommend')}</Text>
                 </View>
             </TouchableOpacity>
         );
@@ -311,7 +286,7 @@ export default function TVDetailScreen(): React.JSX.Element {
 
         return (
             <View style={detailScreenStyles.sectionContainer}>
-                <Text style={detailScreenStyles.sectionTitle}>Temporadas</Text>
+                <Text style={detailScreenStyles.sectionTitle}>{t('details.seasons')}</Text>
                 <FlatList
                     data={tvShow.seasons}
                     keyExtractor={(item, index) => `season-${item.id}-${index}`}
@@ -323,12 +298,6 @@ export default function TVDetailScreen(): React.JSX.Element {
             </View>
         );
     };
-
-    
-
-    
-    
-    
 
     if (isLoading) {
         return renderLoadingState();
@@ -343,7 +312,6 @@ export default function TVDetailScreen(): React.JSX.Element {
     return (
         <SafeAreaView style={detailScreenStyles.safeArea} edges={["left", "right"]}>
             <ScrollView showsVerticalScrollIndicator={false}>
-                {}
                 <TouchableOpacity
                     style={detailScreenStyles.backButton}
                     onPress={() => router.back()}
@@ -351,10 +319,8 @@ export default function TVDetailScreen(): React.JSX.Element {
                     <Text style={detailScreenStyles.backButtonText}>←</Text>
                 </TouchableOpacity>
 
-                {}
                 {renderNextEpisodeBadge()}
 
-                {}
                 <ContentBackdrop
                     backdropUrl={getBackdropUrl(tvShow.backdrop_path ?? null)}
                     trailerKey={trailerKey}
@@ -362,7 +328,6 @@ export default function TVDetailScreen(): React.JSX.Element {
                 />
 
                 <View style={detailScreenStyles.contentContainer}>
-                    {}
                     <View style={detailScreenStyles.headerRow}>
                         <ContentPoster
                             posterUrl={getPosterUrl(tvShow.poster_path ?? null, "w300")}
@@ -371,7 +336,6 @@ export default function TVDetailScreen(): React.JSX.Element {
                         <View style={detailScreenStyles.infoContainer}>
                             <Text style={detailScreenStyles.title}>{tvShow.name}</Text>
                             <Text style={detailScreenStyles.yearText}>
-
                                 {extractYear(tvShow.first_air_date)}
                             </Text>
                             <View style={localStyles.ratingsRow}>
@@ -391,10 +355,8 @@ export default function TVDetailScreen(): React.JSX.Element {
                         </View>
                     </View>
 
-                    {}
                     <GenreList genres={tvShow.genres || []} />
 
-                    {}
                     <ContentActionBar
                         contentId={tvShow.id}
                         mediaType={TV_MEDIA_TYPE}
@@ -407,18 +369,15 @@ export default function TVDetailScreen(): React.JSX.Element {
                         currentUserId={user?.id}
                     />
 
-                    {}
                     {renderRecommendButton()}
 
-                    {}
                     <View style={detailScreenStyles.descriptionContainer}>
-                        <Text style={detailScreenStyles.descriptionTitle}>Sinopsis</Text>
+                        <Text style={detailScreenStyles.descriptionTitle}>{t('details.overview')}</Text>
                         <Text style={detailScreenStyles.descriptionText}>
-                            {tvShow.overview || "Sin descripción disponible"}
+                            {tvShow.overview || t('details.noOverview')}
                         </Text>
                     </View>
 
-                    {}
                     {tvShow && (
                         <>
                             {tvShow.created_by && tvShow.created_by.length > 0 && (
@@ -426,40 +385,35 @@ export default function TVDetailScreen(): React.JSX.Element {
                                     crew={tvShow.created_by.map(c => ({
                                         id: c.id,
                                         name: c.name,
-                                        job: "Creador",
+                                        job: t('details.creator'),
                                         profile_path: c.profile_path
                                     }))}
-                                    title="Creación"
+                                    title={t('details.creation')}
                                 />
                             )}
                             {tvShow.credits?.crew && (
                                 <CrewMemberList
-                                    crew={getProducers(tvShow.credits.crew).slice(0, 10)}
-                                    title="Producción"
+                                    crew={getProducers(tvShow.credits.crew).slice(0, 5)}
+                                    title={t('details.production')}
                                 />
                             )}
                         </>
                     )}
 
-                    {}
                     {renderSeasonsSection()}
 
-                    {}
-                    <CastMemberList cast={tvShow.credits?.cast || []} />
+                    <CastMemberList cast={tvShow.credits?.cast || []} title={t('details.cast')} />
 
-                    {}
                     <ContentHorizontalList
                         data={relatedShows}
-                        title="Relacionadas"
+                        title={t('details.related')}
                         mediaType="tv"
                     />
 
-                    {}
                     <View style={detailScreenStyles.bottomSpacer} />
                 </View>
             </ScrollView>
 
-            {}
             <ContentRecommendModal
                 visible={showRecommendModal}
                 onClose={handleCloseRecommendModal}
@@ -471,7 +425,6 @@ export default function TVDetailScreen(): React.JSX.Element {
                 currentUserId={user?.id}
             />
 
-            {}
             <SeasonModal
                 visible={showSeasonModal}
                 onClose={handleCloseSeasonModal}
@@ -484,7 +437,6 @@ export default function TVDetailScreen(): React.JSX.Element {
                 isEpisodeWatched={checkEpisodeWatched}
             />
 
-            {}
             <EpisodeModal
                 visible={showEpisodeModal}
                 onClose={handleCloseEpisodeModal}
@@ -497,7 +449,7 @@ export default function TVDetailScreen(): React.JSX.Element {
                 onClose={handleCloseTrailerModal}
             />
 
-            {showVotePicker && tvShow && (
+            {showVotePicker && (
                 <VotePicker
                     current={userVote}
                     onSelect={handleVote}
@@ -531,7 +483,6 @@ const localStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-    
     nextBadgeContainer: {
         position: "absolute",
         top: 16,

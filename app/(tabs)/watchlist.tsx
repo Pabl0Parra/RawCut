@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { View, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "expo-router";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -7,6 +8,7 @@ import { useEnrichedContent } from "../../src/hooks/useEnrichedContent";
 import { ContentGridLayout } from "../../src/components/ContentGridLayout";
 
 export default function WatchlistScreen() {
+    const { t } = useTranslation();
     const { user } = useAuthStore();
     const {
         watchlist,
@@ -57,8 +59,8 @@ export default function WatchlistScreen() {
                 data={enrichedItems}
                 isLoading={isLoading}
                 isAuthenticated={!!user}
-                emptyTitle="Tu lista está vacía"
-                emptySubtitle="Añade películas y series que quieras ver más tarde"
+                emptyTitle={t("watchlist.emptyTitle")}
+                emptySubtitle={t("watchlist.emptySubtitle")}
                 emptyIcon="📺"
                 emptyAsset={require("../../assets/icons/broken-heart.png")}
                 onToggleFavorite={handleToggleFavorite}

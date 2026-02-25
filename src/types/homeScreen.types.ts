@@ -54,12 +54,13 @@ export interface ContinueWatchingItem {
 export interface SortOption {
     label: string;
     value: string;
+    translationKey: string;
 }
 
 export const SORT_OPTIONS: readonly SortOption[] = [
-    { label: "Popularidad", value: "popularity.desc" },
-    { label: "Mejor Valorados", value: "vote_average.desc" },
-    { label: "Más Recientes", value: "primary_release_date.desc" },
+    { label: "Popularidad", value: "popularity.desc", translationKey: "common.sortByPopularity" },
+    { label: "Mejor Valorados", value: "vote_average.desc", translationKey: "common.sortByRating" },
+    { label: "Más Recientes", value: "primary_release_date.desc", translationKey: "common.sortByRecent" },
 ] as const;
 
 export const DEFAULT_SORT_VALUE = "popularity.desc" as const;

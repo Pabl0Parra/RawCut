@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Platform } from "react-native";
 import { Tabs } from "expo-router";
+import { useTranslation } from "react-i18next";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -31,6 +32,7 @@ const HEADER_TITLE_STYLE = {
 };
 
 export default function TabLayout() {
+    const { t } = useTranslation();
     const user = useAuthStore((s) => s.user);
     const unreadCount = useRecommendationStore((s) => s.unreadCount);
     const [showDisclaimer, setShowDisclaimer] = useState(false);
@@ -42,12 +44,6 @@ export default function TabLayout() {
         [openDisclaimer],
     );
 
-    
-    
-    
-    
-    
-    
     useEffect(() => {
         if (!user) return;
 
@@ -77,7 +73,7 @@ export default function TabLayout() {
                     },
                     headerTintColor: Colors.white,
                     headerTitleStyle: HEADER_TITLE_STYLE,
-                    headerTitle: "CORTOCRUDO",
+                    headerTitle: "RAW CUT",
                     headerTitleAlign: "center",
                     headerLeft: renderHeaderLeft,
                     headerRight: renderHeaderRight,
@@ -90,31 +86,31 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name="index"
                     options={{
-                        title: "Inicio",
+                        title: t("tabs.home"),
                         tabBarIcon: HomeIcon,
                     }}
                 />
                 <Tabs.Screen
                     name="favorites"
                     options={{
-                        title: "Favoritos",
-                        headerTitle: "CORTOCRUDO - FAVORITOS",
+                        title: t("tabs.favorites"),
+                        headerTitle: `RAW CUT - ${t("tabs.favorites").toUpperCase()}`,
                         tabBarIcon: FavoritesIcon,
                     }}
                 />
                 <Tabs.Screen
                     name="watchlist"
                     options={{
-                        title: "Watchlist",
-                        headerTitle: "CORTOCRUDO - WATCHLIST",
+                        title: t("tabs.watchlist"),
+                        headerTitle: `RAW CUT - ${t("tabs.watchlist").toUpperCase()}`,
                         tabBarIcon: WatchlistIcon,
                     }}
                 />
                 <Tabs.Screen
                     name="recommendations"
                     options={{
-                        title: "Sugeridas",
-                        headerTitle: "CORTOCRUDO - SUGERIDAS",
+                        title: t("tabs.recommendations"),
+                        headerTitle: `RAW CUT - ${t("tabs.recommendations").toUpperCase()}`,
                         tabBarIcon: RecommendationsIcon,
                         tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
                     }}
@@ -122,8 +118,8 @@ export default function TabLayout() {
                 <Tabs.Screen
                     name="profile"
                     options={{
-                        title: "Perfil",
-                        headerTitle: "CORTOCRUDO - PERFIL",
+                        title: t("tabs.profile"),
+                        headerTitle: `RAW CUT - ${t("tabs.profile").toUpperCase()}`,
                         tabBarIcon: ProfileIcon,
                         href: null,
                     }}
@@ -150,7 +146,7 @@ export default function TabLayout() {
                         },
                         headerTintColor: Colors.white,
                         headerTitleStyle: HEADER_TITLE_STYLE,
-                        headerTitle: "CORTOCRUDO",
+                        headerTitle: "RAW CUT",
                         headerTitleAlign: "center",
                         headerLeft: renderHeaderLeft,
                         headerRight: renderHeaderRight,

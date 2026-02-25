@@ -8,6 +8,7 @@ import {
     type ViewStyle,
     type TextStyle,
 } from "react-native";
+import { useTranslation, Trans } from "react-i18next";
 import { Colors, Fonts } from "../../constants/Colors";
 import Animated, {
     useSharedValue,
@@ -27,6 +28,7 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
     visible,
     onClose,
 }) => {
+    const { t } = useTranslation();
     const translateY = useSharedValue(0);
 
     const animatedCardStyle = useAnimatedStyle(() => ({
@@ -64,13 +66,11 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
             animationType="fade"
             onRequestClose={onClose}
         >
-            {}
             <TouchableOpacity
                 style={styles.backdrop}
                 activeOpacity={1}
                 onPress={onClose}
             >
-                {}
                 <GestureDetector gesture={panGesture}>
                     <Animated.View
                         style={[styles.card, animatedCardStyle]}
@@ -80,38 +80,38 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
                             <View style={styles.modalHandle} />
                         </View>
 
-                        {}
                         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
                             <Text style={styles.closeIcon}>✕</Text>
                         </TouchableOpacity>
 
-                        {}
                         <View style={styles.tmdbRow}>
                             <View style={styles.tmdbLogo}>
                                 <Text style={styles.tmdbLogoText}>TMDB</Text>
                             </View>
-                            <Text style={styles.tmdbBadge}>Fuente de datos</Text>
+                            <Text style={styles.tmdbBadge}>{t('disclaimer.badge')}</Text>
                         </View>
 
-                        {}
                         <Text style={styles.disclaimerText}>
-                            La información sobre películas y series (títulos, sinopsis, pósters,
-                            fechas de estreno y valoraciones) es proporcionada por{" "}
-                            <Text style={styles.link}>The Movie Database (TMDB)</Text>
-                            {". "}
-                            Esta aplicación utiliza la API de TMDB pero no está respaldada ni
-                            certificada por TMDB.
+                            <Trans
+                                i18nKey="disclaimer.text"
+                                components={[<Text style={styles.link} key="tmdb-link" />]}
+                            />
                         </Text>
 
-                        {}
                         <View style={styles.ratingBox}>
-                            <Text style={styles.ratingTitle}>¿Cómo se calcula la puntuación?</Text>
+                            <Text style={styles.ratingTitle}>{t('disclaimer.ratingTitle')}</Text>
                             <Text style={styles.ratingText}>
-                                La puntuación <Text style={{ color: Colors.tmdbYellow, fontWeight: "bold" }}>⭐ TMDB</Text> refleja la valoración media de los usuarios de The Movie Database.
+                                <Trans
+                                    i18nKey="disclaimer.ratingTmdb"
+                                    components={[<Text style={{ color: Colors.tmdbYellow, fontWeight: "bold" }} key="tmdb-bold" />]}
+                                />
                             </Text>
                             <View style={styles.divider} />
                             <Text style={styles.ratingText}>
-                                La puntuación <Text style={{ color: Colors.communityPurple, fontWeight: "bold" }}>👥 Comunidad</Text> refleja el promedio de votos (0-10) de los usuarios de esta aplicación.
+                                <Trans
+                                    i18nKey="disclaimer.ratingCommunity"
+                                    components={[<Text style={{ color: Colors.communityPurple, fontWeight: "bold" }} key="community-bold" />]}
+                                />
                             </Text>
                         </View>
                     </Animated.View>

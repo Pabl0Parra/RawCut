@@ -1,4 +1,12 @@
 {
+    "movieCard": {
+        "posterAltText": "Pòster de {{title}}",
+        "noPosterAltText": "Sense pòster per a {{title}}",
+        "addFavorite": "Afegir a preferits",
+        "removeFavorite": "Treure de preferits",
+        "addToWatchlist": "Afegir a la llista",
+        "removeFromWatchlist": "Treure de la llista"
+    },
     "common": {
         "loading": "Carregant...",
         "loadingContent": "Carregant contingut...",
@@ -13,6 +21,9 @@
         "clearFilters": "Netejar filtres actius",
         "applyFilters": "Aplicar Filtres",
         "sortBy": "Ordenar Per",
+        "sortByPopularity": "Popularitat",
+        "sortByRating": "Millor Valorats",
+        "sortByRecent": "Més Recents",
         "releaseYear": "Any d'Estrena",
         "genre": "Gènere",
         "exampleYear": "Ex. 2023",
@@ -33,9 +44,12 @@
         "profile": "Perfil"
     },
     "home": {
-        "continueWatching": "Continuar Veient",
-        "bannerTitle": "Dona-li estil al teu compte!",
-        "bannerSubtitle": "Canvia el teu nom d'usuari genèric al teu perfil."
+        "continueWatching": "Continuar veient",
+        "bannerTitle": "Dóna estil al teu compte!",
+        "bannerSubtitle": "Canvia el teu nom d'usuari genèric al teu perfil.",
+        "becauseYouLiked": "Perquè t'ha agradat \"{{title}}\"",
+        "popularMovies": "Pel·lícules Populars",
+        "popularTV": "Sèries Populars"
     },
     "favorites": {
         "emptyTitle": "Encara no tens preferits",
@@ -60,7 +74,25 @@
         "comments": "Comentaris",
         "writeComment": "Escriu un comentari...",
         "noComments": "Encara no hi ha comentaris.",
-        "you": "Tu"
+        "you": "Tu",
+        "errorLoadUsers": "No s'han pogut carregar els usuaris",
+        "alreadySentTitle": "Ja enviada",
+        "alreadySentText": "Ja has recomanat aquest títol a tots els usuaris seleccionats.",
+        "successSent": "Recomanació enviada!",
+        "successSentMultiple": "Recomanació enviada a {{count}} usuaris!",
+        "partialSent": "Parcialment enviat",
+        "partialSentText": "{{success}} de {{total}} recomanacions s'han enviat correctament.",
+        "errorSend": "Error en enviar la recomanació",
+        "noOtherUsers": "No hi ha altres usuaris disponibles",
+        "tapToSelect": "Toca per seleccionar usuari(s)...",
+        "usersSelected": "{{count}} usuari(s) seleccionado(s)",
+        "sendButton": "Enviar Recomanació",
+        "sendToMultiple": "Enviar a {{count}} usuaris",
+        "recommend": "Recomanar",
+        "searchUser": "Buscar usuari",
+        "searchPlaceholder": "Escriu un nom d'usuari...",
+        "selectUsers": "Seleccionar usuari(s)",
+        "whyRecommend": "Per què recomanes això?"
     },
     "contentGrid": {
         "unauthTitle": "Inicia sessió per veure la teva llista"
@@ -73,7 +105,7 @@
         "identifierPlaceholder": "tu@email.com o usuari",
         "password": "Contrasenya",
         "passwordPlaceholder": "••••••••",
-        "registerTitle": "CortoCrudo",
+        "registerTitle": "RawCut",
         "registerSubtitle": "Crea el teu compte",
         "registerButton": "Crear Compte",
         "alreadyAccount": "Ja tens compte?",
@@ -83,7 +115,9 @@
         "emailPlaceholder": "tu@email.com",
         "passwordMin": "Mínim 8 caràcters",
         "confirmPassword": "Confirmar Contrasenya",
-        "confirmPasswordPlaceholder": "Repeteix la teva contrasenya"
+        "confirmPasswordPlaceholder": "Repeteix la teva contrasenya",
+        "showPassword": "Mostrar contrasenya",
+        "hidePassword": "Ocultar contrasenya"
     },
     "profile": {
         "title": "Perfil",
@@ -149,54 +183,89 @@
         "title": "Centre d'Ajuda",
         "searchPlaceholder": "Cerca el teu dubte (ex. recomanar, perfil)...",
         "noResults": "No hem trobat respostes per a aquesta cerca.",
-        "needHelp": "Encara necessites ajuda?",
-        "supportSubtitle": "Envia'ns un correu i et respondrem al més aviat possible.",
-        "contactSupport": "Contactar a Suport",
-        "q1": "Què és CortoCrudo?",
-        "a1": "CortoCrudo és la teva aplicació personal per portar un registre de les pel·lícules i sèries que has vist, descobrir nous títols i compartir recomanacions directament amb els teus amics.",
-        "q2": "Com afegeixo una pel·lícula a les meves llistes?",
-        "a2": "Cerca qualsevol pel·lícula o sèrie a la pestanya d'Inici. En seleccionar-la, veuràs opcions per afegir-la a \"Preferits\" o a la teva \"Llista de seguiment\" (Watchlist) tocant els botons sota el pòster.",
-        "q3": "Com recomano una pel·lícula als meus amics?",
-        "a3": "A la pantalla de detalls de qualsevol títol, prem el botó \"Recomanar\". S'obrirà una pantalla on podràs cercar els teus amics pel seu nom d'usuari, escriure un missatge i enviar-los la recomanació. Ells la rebran a la seva pestanya \"Per a tu\".",
-        "q4": "Puc veure les pel·lícules directament a l'app?",
-        "a4": "No, CortoCrudo funciona com un diari i recomanador personal. Utilitzem l'API de TMDb per donar-te tota la informació i metadades dels títols, però no proveïm serveis d'streaming.",
-        "q5": "Per què no veig pel·lícules en català o espanyol?",
-        "a5": "Si una pel·lícula o sèrie no té una traducció oficial a la base de dades global de TMDb, es mostrarà el seu títol i sinopsi original.",
-        "q6": "Com canvio el meu nom d'usuari genèric?",
-        "a6": "Vés a la pestanya de \"Perfil\". A la secció \"Informació del perfil\", prem el botó d'edició al costat del teu nom d'usuari per personalitzar-lo.",
-        "q7": "Com elimino el meu compte?",
-        "a7": "Pots eliminar el teu compte i totes les seves dades permanentment des de la pestanya de \"Perfil\", desplaçant-te cap avall fins a la secció \"Compte\" i seleccionant \"Eliminar compte\"."
+        "faqs": {
+            "q1": "Què és RawCut?",
+            "a1": "RawCut és la teva aplicació personal per portar un registre de les pel·lícules i sèries que has vist, descobrir nous títols i compartir recomanacions directament amb els teus amics.",
+            "q2": "Com afegeixo una pel·lícula a les meves llistes?",
+            "a2": "Cerca qualsevol pel·lícula o sèrie a la pestanya d'Inici. En seleccionar-la, veuràs opcions per afegir-la a \"Preferits\" o a la teva \"Llista de seguiment\" (Watchlist) tocant els botons sota el pòster.",
+            "q3": "Com recomano una pel·lícula als meus amics?",
+            "a3": "A la pantalla de detalls de qualsevol títol, prem el botó \"Recomanar\". S'obrirà una pantalla on podràs cercar els teus amics pel seu nom d'usuari, escriure un missatge i enviar-los la recomanació. Ells la rebran a la seva pestanya \"Per a tu\".",
+            "q4": "Puc veure les pel·lícules directament a l'app?",
+            "a4": "No, RawCut funciona com un diari i recomanador personal. Utilitzem l'API de TMDb per donar-te tota la informació i metadades dels títols, però no proveïm serveis d'streaming.",
+            "q5": "Per què no veig pel·lícules en el meu idioma?",
+            "a5": "Si una pel·lícula o sèrie no té una traducció oficial a la base de dades global de TMDb, es mostrarà el seu títol i sinopsi original.",
+            "q6": "Com canvio el meu nom d'usuari genèric?",
+            "a6": "Vés a la pestanya de \"Perfil\". A la secció \"Informació del perfil\", prem el botó d'edició al costat del teu nom d'usuari per personalitzar-lo.",
+            "q7": "Com elimino el meu compte?",
+            "a7": "Pots eliminar el teu compte i totes les seves dades permanentment des de la pestanya de \"Perfil\", desplaçant-te cap avall fins a la secció \"Compte\" i seleccionant \"Eliminar compte\"."
+        },
+        "contact": {
+            "title": "Encara necessites ajuda?",
+            "subtitle": "Envia'ns un correu i et respondrem al més aviat possible.",
+            "button": "Contactar a Suport",
+            "subject": "Ajuda amb RawCut",
+            "body": "Hola,\n\nNecessito ajuda amb el següent:\n\n"
+        }
     },
     "privacy": {
         "title": "Política de Privadesa",
         "lastUpdated": "Última actualització: Febrer 2026",
-        "p1": "A CortoCrudo, valorem i respectem la seva privadesa. Aquesta Política de Privadesa descriu com recopilem, utilitzem i protegim la seva informació personal quan utilitza la nostra aplicació mòbil.",
+        "p1": "A RawCut, valorem i respectem la seva privadesa. Aquesta Política de Privadesa descriu com recopilem, utilitzem i protegim la seva informació personal quan utilitza la nostra aplicació mòbil.",
         "s1Title": "1. Informació que recopilem",
         "s1Text": "Recopilem la informació que vostè ens proporciona directament en crear un compte, com la seva adreça de correu electrònic, nom d'usuari (opcional) i contrasenya. També recopilem dades sobre el seu ús de l'aplicació, com les pel·lícules i sèries que afegeix a les seves llistes de preferits, el seu progrés de visualització i les seves recomanacions.",
         "s2Title": "2. Ús de la informació",
-        "s2Text": "Utilitzem la seva informació personal únicament per proporcionar i millorar els serveis de CortoCrudo. Això inclou autenticar el seu compte, sincronitzar les seves llistes entre dispositius i habilitar funcions socials com les recomanacions entre usuaris.",
+        "s2Text": "Utilitzem la seva informació personal únicament per proporcionar i millorar els serveis de RawCut. Això inclou autenticar el seu compte, sincronitzar les seves llistes entre dispositius i habilitar funcions socials com les recomanacions entre usuaris.",
         "s3Title": "3. Emmagatzematge i Protecció",
-        "s3Text": "Tota la informació personal (incloent credencials de compte, llistes i progrés) s'emmagatzema de manera segura utilitzant Supabase, una plataforma de base de dades segura de tercers. Les seves contrasenyes són encriptades per Supabase i no són accessibles per a nosaltres.",
+        "s3Text": "Tota la information personal (incloent credencials de compte, llistes i progrés) s'emmagatzema de manera segura utilitzant Supabase, una plataforma de base de dades segura de tercers. Les seves contrasenyes són encriptades per Supabase i no són accessibles per a nosaltres.",
         "s4Title": "4. Serveis de Tercers",
-        "s4Text": "CortoCrudo utilitza la interfície de programació d'aplicacions (API) de TMDb (The Movie Database) per obtenir informació sobre pel·lícules, sèries i imatges relacionades. No compartim la seva informació personal amb TMDb. El seu ús de la informació proveïda per TMDb està subjecte a els seus propis termes i polítiques.",
+        "s4Text": "RawCut utilitza la interfície de programació d'aplicacions (API) de TMDb (The Movie Database) per obtenir informació sobre pel·lícules, sèries i imatges relacionades. No compartim la seva informació personal amb TMDb. El seu ús de la informació proveïda per TMDb està subjecte a els seus propis termes i polítiques.",
         "s5Title": "5. Drets de l'Usuari",
-        "s5Text": "Vostè té el control total sobre les seves dades. Pot eliminar el seu compte i tota la informació associada a ell (incloent llistes de reproducció i recomanacions) en qualsevol moment des de la secció \"Compte\" a la pestanya de Perfil.",
+        "s5Text": "Vostè té el control total sobre les seves dades. Pot eliminar el seu compte i tota la informació associada a ell (incloent lllistes de reproducció i recomanacions) en qualsevol moment des de la secció \"Compte\" a la pestanya de Perfil.",
         "s6Title": "6. Canvis a aquesta política",
         "s6Text": "Podem actualitzar aquesta Política de Privadesa ocasionalment per reflectir canvis en les nostres pràctiques. Li notificarem qualsevol actualització important dins de l'aplicació."
     },
     "terms": {
         "title": "Termes de Servei",
         "lastUpdated": "Última actualització: Febrer 2026",
-        "p1": "Benvingut a CortoCrudo. En descarregar, accedir o utilitzar aquesta aplicació, vostè accepta estar subjecte als següents Termes de Servei.",
+        "p1": "Benvingut a RawCut. En descarregar, accedir o utilitzar aquesta aplicació, vostè accepta estar subjecte als següents Termes de Servei.",
         "s1Title": "1. Propòsit de l'Aplicació",
-        "s1Text": "CortoCrudo és una aplicació dissenyada per organitzar, rastrejar i descobrir contingut d'entreteniment (pel·lícules i sèries de televisió). L'aplicació NO proporciona streaming, transmissió o descàrrega de contingut multimèdia protegit per drets d'autor.",
+        "s1Text": "RawCut és una aplicació dissenyada per organitzar, rastrejar i descobrir contingut d'entreteniment (pel·lícules i sèries de televisió). L'aplicació NO proporciona streaming, transmissió o descàrrega de contingut multimèdia protegit per drets d'autor.",
         "s2Title": "2. Comptes d'Usuari",
-        "s2Text": "Per utilitzar totes les funcions de CortoCrudo, ha de crear un compte. Vostè és responsable de mantenir la confidencialitat de les seves credencials d'inici de sessió i de totes les activitats que ocorrin sota el seu compte. CortoCrudo no es fa responsable per cap pèrdua o dany derivat del seu incompliment d'aquesta obligació de seguretat.",
+        "s2Text": "Per utilitzar totes les funcions de RawCut, ha de crear un compte. Vostè és responsable de mantenir la confidencialitat de les seves credencials d'inici de sessió i de totes les activitats que ocorrin sota el seu compte. RawCut no se fa responsable per cap pèrdua o dany derivat del seu incompliment d'aquesta obligació de seguretat.",
         "s3Title": "3. Ús Acceptable",
-        "s3Text": "Vostè accepta utilitzar CortoCrudo només per a fins lícits i d'una manera que no infringeixi els drets de, restringeixi o inhibeixi l'ús de l'aplicació per part de tercers. No ha d'utilitzar l'aplicació per transmetre contingut maliciós, assetjar altres usuaris o intentar accedir a informació d'altres usuaris.",
+        "s3Text": "Vostè accepta utilitzar RawCut només per a fins lícits i d'una manera que no infringeixi els drets de, restringeixi o inhibeixi l'ús de l'aplicació per part de tercers. No ha d'utilitzar l'aplicació per transmetre contingut maliciós, assetjar altres usuaris o intentar accedir a informació d'altres usuaris.",
         "s4Title": "4. Descàrrec de Responsabilitat de TMDb",
-        "s4Text": "Aquest producte utilitza l'API de TMDb (The Movie Database) per proporcionar metadades i imatges però NO està recolzat, certificat ni afiliat a TMDb. Tota la informació relacionada amb pel·lícules i sèries és propietat de TMDb i dels seus respectius autors/creadors.",
+        "s4Text": "Aquest producte utilitza l'API de TMDb (The Movie Database) per proporcionar metadates i imatges però NO està recolzat, certificat ni afiliat a TMDb. Tota la informació relacionada amb pel·lícules i sèries és propietat de TMDb i dels seus respectius autors/creadors.",
         "s5Title": "5. Modificació dels Termes",
         "s5Text": "Ens reservem el dret de modificar o reemplaçar aquests Termes en qualsevol moment. Si publiquem una actualització, l'ús continuat de l'aplicació constituirà la seva acceptació dels nous termes."
+    },
+    "details": {
+        "notFound": "Pel·lícula no trobada",
+        "tvNotFound": "Sèrie no trobada",
+        "recommend": "Recomanar",
+        "overview": "Sinopsi",
+        "noOverview": "Sense descripció disponible",
+        "directing": "Direcció",
+        "production": "Producció",
+        "creation": "Creació",
+        "creator": "Creador",
+        "cast": "Repartiment",
+        "related": "Relacionades",
+        "seasons": "Temporades",
+        "next": "SEGÜENT"
+    },
+    "disclaimer": {
+        "badge": "Font de dades",
+        "text": "La informació sobre pel·lícules i sèries (títols, sinopsis, pòsters, dates d'estrena i valoracions) és proporcionada per <0>The Movie Database (TMDB)</0>. Aquesta aplicació utilitza l'API de TMDB per obtenir dades però no està recolzada ni certificada per TMDB.",
+        "ratingTitle": "Com es calcula la puntuació?",
+        "ratingTmdb": "La puntuació <0>⭐ TMDB</0> reflecteix la valoració mitjana dels usuaris de The Movie Database.",
+        "ratingCommunity": "La puntuació <0>👥 Comunitat</0> reflecteix la mitjana de vots (0-10) dels usuaris d'aquesta aplicació."
+    },
+    "person": {
+        "notFound": "Persona no trobada",
+        "biography": "Biografia",
+        "noBiography": "No hi ha biografia disponible per a aquesta persona.",
+        "cast": "Com a Actor/Actriu",
+        "crew": "En Producció / Direcció"
     }
 }

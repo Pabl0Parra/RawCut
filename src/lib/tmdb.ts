@@ -1,3 +1,5 @@
+import i18next from "i18next";
+
 const TMDB_API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY || "";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 export const TMDB_IMAGE_BASE = process.env.EXPO_PUBLIC_TMDB_IMAGE_BASE || "https://image.tmdb.org/t/p/w500";
@@ -99,7 +101,11 @@ export interface TMDbResponse<T> {
 const fetchTMDb = async <T>(endpoint: string, params: Record<string, string> = {}): Promise<T> => {
     const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
     url.searchParams.append("api_key", TMDB_API_KEY);
-    url.searchParams.append("language", "es-ES"); 
+    
+    // Map i18next language to TMDB language
+    const currentLang = i18next.language;
+    const lang = currentLang === "ca" ? "ca-ES" : currentLang === "en" ? "en-US" : "es-ES";
+    url.searchParams.append("language", lang);
 
     Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value);
@@ -109,7 +115,6 @@ const fetchTMDb = async <T>(endpoint: string, params: Record<string, string> = {
 
     if (!response.ok) {
         if (response.status === 404) {
-            
             return null as T;
         }
         throw new Error(`TMDb API Error: ${response.status}`);

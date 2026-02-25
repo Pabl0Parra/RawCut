@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { View, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "expo-router";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -8,6 +9,7 @@ import { ContentGridLayout } from "../../src/components/ContentGridLayout";
 import type { MediaType } from "../../src/types/homeScreen.types";
 
 export default function FavoritesScreen() {
+    const { t } = useTranslation();
     const user = useAuthStore((s) => s.user);
     const favorites = useContentStore((s) => s.favorites);
     const isFavorite = useContentStore((s) => s.isFavorite);
@@ -72,8 +74,8 @@ export default function FavoritesScreen() {
                 data={enrichedItems}
                 isLoading={isLoading}
                 isAuthenticated={!!user}
-                emptyTitle="No tienes favoritos aún"
-                emptySubtitle="Explora películas y series para añadir a tus favoritos"
+                emptyTitle={t("favorites.emptyTitle")}
+                emptySubtitle={t("favorites.emptySubtitle")}
                 emptyIcon="💔"
                 emptyAsset={require("../../assets/icons/broken-heart.png")}
                 onToggleFavorite={handleToggleFavorite}

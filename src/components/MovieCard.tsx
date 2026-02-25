@@ -1,4 +1,5 @@
 import React, { JSX, memo, useMemo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -121,6 +122,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
             style={styles.quickActionButton}
             onPress={onPress}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityLabel={isActive ? activeLabel : inactiveLabel}
         >
             {iconFamily === "Ionicons" && (
                 <Ionicons name={iconName} size={16} color={color} />
@@ -147,6 +149,7 @@ const MovieCard = memo(function MovieCard({
     onVote,
     fullWidth = false,
 }: Readonly<MovieCardProps>): JSX.Element {
+    const { t } = useTranslation();
     const [showVotePicker, setShowVotePicker] = useState(false);
     const posterUrl = useMemo(() => getImageUrl(item.poster_path, "w300"), [item.poster_path]);
     const title = useMemo(() => getTitle(item), [item]);
@@ -168,12 +171,13 @@ const MovieCard = memo(function MovieCard({
                     style={styles.poster}
                     contentFit="cover"
                     transition={200}
+                    accessibilityLabel={t("movieCard.posterAltText", { title: title })}
                 />
             );
         }
 
         return (
-            <View style={styles.posterPlaceholder}>
+            <View style={styles.posterPlaceholder} accessibilityLabel={t("movieCard.noPosterAltText", { title: title })}>
                 <Text style={styles.posterPlaceholderIcon}>
                     {mediaType === "movie" ? "🎬" : "📺"}
                 </Text>
@@ -185,9 +189,9 @@ const MovieCard = memo(function MovieCard({
         if (!isWatched) return null;
 
         return (
-            <View style={styles.watchedOverlay}>
+            <View style={styles.watchedOverlay} accessibilityLabel={t("common.watched")}>
                 <Ionicons name="checkmark-circle" size={28} color={Colors.white} />
-                <Text style={styles.watchedText}>VISTO</Text>
+                <Text style={styles.watchedText}>{t("common.watched")}</Text>
             </View>
         );
     };
@@ -204,6 +208,7 @@ const MovieCard = memo(function MovieCard({
                         style={styles.quickActionButton}
                         onPress={onToggleFavorite}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        accessibilityLabel={isFavorite ? t("movieCard.removeFavorite") : t("movieCard.addFavorite")}
                     >
                         <Ionicons
                             name={isFavorite ? "skull" : "skull-outline"}
@@ -217,6 +222,7 @@ const MovieCard = memo(function MovieCard({
                         style={styles.quickActionButton}
                         onPress={onToggleWatchlist}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        accessibilityLabel={inWatchlist ? t("movieCard.removeFromWatchlist") : t("movieCard.addToWatchlist")}
                     >
                         <Ionicons
                             name={inWatchlist ? "bookmark" : "bookmark-outline"}
@@ -264,7 +270,7 @@ const MovieCard = memo(function MovieCard({
 
         return (
             <View style={styles.newBadge}>
-                <Text style={styles.newBadgeText}>NUEVO</Text>
+                <Text style={styles.newBadgeText}>{t("common.new")}</Text>
             </View>
         );
     };

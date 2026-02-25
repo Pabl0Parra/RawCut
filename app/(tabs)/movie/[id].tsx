@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -58,6 +59,7 @@ const INITIAL_STATE: MovieDetailState = {
 };
 
 export default function MovieDetailScreen(): React.JSX.Element {
+    const { t } = useTranslation();
     const { id } = useLocalSearchParams<{ id: string }>();
     const [state, setState] = useState<MovieDetailState>(INITIAL_STATE);
 
@@ -80,27 +82,16 @@ export default function MovieDetailScreen(): React.JSX.Element {
         handleToggleWatched,
     } = useContentActions();
 
-    
     const [showVotePicker, setShowVotePicker] = useState(false);
-    const userVotes = useVoteStore((s) => s.userVotes);
-    const communityScores = useVoteStore((s) => s.communityScores);
     const fetchVotes = useVoteStore((s) => s.fetchVotes);
     const submitVote = useVoteStore((s) => s.submitVote);
 
     const userVote = movie ? useVoteStore.getState().getUserVote(movie.id, "movie") : undefined;
     const communityRating = movie ? useVoteStore.getState().getCommunityScore(movie.id, "movie")?.avg : undefined;
 
-    
-    
-    
-
     const updateState = (updates: Partial<MovieDetailState>): void => {
         setState((prev) => ({ ...prev, ...updates }));
     };
-
-    
-    
-    
 
     const loadMovie = useCallback(async (movieId: number): Promise<void> => {
         updateState({ isLoading: true });
@@ -126,12 +117,6 @@ export default function MovieDetailScreen(): React.JSX.Element {
             fetchVotes([movieId], "movie");
         }
     }, [id, loadMovie, fetchVotes]);
-
-    
-    
-    
-
-    
 
     const handleWatchTrailer = (): void => {
         if (trailerKey) {
@@ -168,10 +153,6 @@ export default function MovieDetailScreen(): React.JSX.Element {
         setShowVotePicker(true);
     };
 
-    
-    
-    
-
     const renderLoadingState = (): React.JSX.Element => (
         <SafeAreaView style={detailScreenStyles.safeArea}>
             <View style={detailScreenStyles.centerContainer}>
@@ -183,12 +164,10 @@ export default function MovieDetailScreen(): React.JSX.Element {
     const renderErrorState = (): React.JSX.Element => (
         <SafeAreaView style={detailScreenStyles.safeArea}>
             <View style={detailScreenStyles.centerContainer}>
-                <Text style={detailScreenStyles.errorText}>Película no encontrada</Text>
+                <Text style={detailScreenStyles.errorText}>{t('details.notFound')}</Text>
             </View>
         </SafeAreaView>
     );
-
-    
 
     const renderRecommendButton = (): React.JSX.Element | null => {
         if (!user) return null;
@@ -204,17 +183,11 @@ export default function MovieDetailScreen(): React.JSX.Element {
                         size={24}
                         color={Colors.white}
                     />
-                    <Text style={detailScreenStyles.recommendButtonText}>Recomendar</Text>
+                    <Text style={detailScreenStyles.recommendButtonText}>{t('details.recommend')}</Text>
                 </View>
             </TouchableOpacity>
         );
     };
-
-    
-
-    
-    
-    
 
     if (isLoading) {
         return renderLoadingState();
@@ -229,7 +202,6 @@ export default function MovieDetailScreen(): React.JSX.Element {
     return (
         <SafeAreaView style={detailScreenStyles.safeArea} edges={["left", "right"]}>
             <ScrollView showsVerticalScrollIndicator={false}>
-                {}
                 <TouchableOpacity
                     style={detailScreenStyles.backButton}
                     onPress={() => router.back()}
@@ -237,16 +209,13 @@ export default function MovieDetailScreen(): React.JSX.Element {
                     <Text style={detailScreenStyles.backButtonText}>←</Text>
                 </TouchableOpacity>
 
-                {}
                 <ContentBackdrop
                     backdropUrl={getImageUrl(movie.backdrop_path ?? null, "original")}
                     trailerKey={trailerKey}
                     onPlayTrailer={handleWatchTrailer}
                 />
 
-                {}
                 <View style={detailScreenStyles.contentContainer}>
-                    {}
                     <View style={detailScreenStyles.headerRow}>
                         <ContentPoster
                             posterUrl={getImageUrl(movie.poster_path ?? null, "w300")}
@@ -274,10 +243,8 @@ export default function MovieDetailScreen(): React.JSX.Element {
                         </View>
                     </View>
 
-                    {}
                     <GenreList genres={movie.genres || []} />
 
-                    {}
                     <ContentActionBar
                         contentId={movie.id}
                         mediaType="movie"
@@ -290,56 +257,47 @@ export default function MovieDetailScreen(): React.JSX.Element {
                         currentUserId={user?.id}
                     />
 
-                    {}
                     {renderRecommendButton()}
 
-                    {}
                     <View style={detailScreenStyles.descriptionContainer}>
-                        <Text style={detailScreenStyles.descriptionTitle}>Sinopsis</Text>
+                        <Text style={detailScreenStyles.descriptionTitle}>{t('details.overview')}</Text>
                         <Text style={detailScreenStyles.descriptionText}>
-                            {movie.overview || "Sin descripción disponible"}
+                            {movie.overview || t('details.noOverview')}
                         </Text>
                     </View>
 
-                    {}
                     {movie?.credits?.crew && (
                         <>
                             <CrewMemberList
                                 crew={getDirectors(movie.credits.crew)}
-                                title="Dirección"
+                                title={t('details.directing')}
                             />
                             <CrewMemberList
-                                crew={getProducers(movie.credits.crew).slice(0, 10)}
-                                title="Producción"
+                                crew={getProducers(movie.credits.crew).slice(0, 5)}
+                                title={t('details.production')}
                             />
                         </>
                     )}
 
-                    {}
-                    <CastMemberList cast={movie.credits?.cast || []} />
+                    <CastMemberList cast={movie.credits?.cast || []} title={t('details.cast')} />
 
-                    {}
                     <ContentHorizontalList
                         data={relatedMovies}
-                        title="Relacionadas"
+                        title={t('details.related')}
                         mediaType="movie"
                     />
 
-                    {}
                     <View style={detailScreenStyles.bottomSpacer} />
                 </View>
             </ScrollView>
 
-            {}
-            {movie && (
-                <RecommendModal
-                    visible={showRecommendModal}
-                    onClose={handleCloseRecommendModal}
-                    movie={movie}
-                    posterUrl={posterUrl}
-                    currentUserId={user?.id}
-                />
-            )}
+            <RecommendModal
+                visible={showRecommendModal}
+                onClose={handleCloseRecommendModal}
+                movie={movie}
+                posterUrl={posterUrl}
+                currentUserId={user?.id}
+            />
 
             <TrailerModal
                 visible={showTrailerModal}
@@ -347,7 +305,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
                 onClose={handleCloseTrailerModal}
             />
 
-            {showVotePicker && movie && (
+            {showVotePicker && (
                 <VotePicker
                     current={userVote}
                     onSelect={handleVote}
@@ -378,51 +336,4 @@ const localStyles = StyleSheet.create({
         fontSize: 14,
         fontWeight: "bold",
     },
-});
-
-const styles = StyleSheet.create({
-    
-    backdropContainer: {
-        position: "relative",
-    } as ViewStyle,
-    backdropPlaceholder: {
-        backgroundColor: Colors.metalGray,
-    } as ViewStyle,
-    playButtonOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(0,0,0,0.2)",
-    } as ViewStyle,
-    playTrailerText: {
-        color: "white",
-        fontSize: 14,
-        fontWeight: "bold",
-        marginTop: -10,
-        textShadowColor: "rgba(0,0,0,0.75)",
-        textShadowOffset: { width: -1, height: 1 },
-        textShadowRadius: 10,
-    } as TextStyle,
-    genresContainer: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 8,
-        marginTop: 16,
-    } as ViewStyle,
-    genreBadge: {
-        backgroundColor: Colors.metalGray,
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 9999,
-        borderWidth: 1,
-        borderColor: Colors.metalSilver,
-    } as ViewStyle,
-    genreText: {
-        color: "#f4f4f5",
-        fontSize: 12,
-    } as TextStyle,
 });

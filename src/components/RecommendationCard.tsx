@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -49,6 +50,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     onDeleteComment,
     onDeleteRecommendation,
 }) => {
+    const { t, i18n } = useTranslation();
     const [commentText, setCommentText] = useState("");
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
@@ -103,17 +105,17 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
     const handleDeleteRecommendation = () => {
         Alert.alert(
-            "Eliminar Recomendación",
-            "¿Estás seguro de que quieres eliminar esta recomendación? Esta acción no se puede deshacer.",
+            t("recommendations.deleteTitle"),
+            t("recommendations.deleteText"),
             [
-                { text: "Cancelar", style: "cancel" },
+                { text: t("common.cancel"), style: "cancel" },
                 {
-                    text: "Eliminar",
+                    text: t("common.delete"),
                     style: "destructive",
                     onPress: async () => {
                         const success = await onDeleteRecommendation(item.id);
                         if (!success) {
-                            Alert.alert("Error", "No se pudo eliminar la recomendación. Inténtalo de nuevo.");
+                            Alert.alert(t("profile.alerts.errorTitle"), t("profile.alerts.errorDeleteAccount"));
                         }
                     },
                 },
@@ -122,7 +124,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     };
 
     const dateObj = new Date(created_at);
-    const formattedDate = dateObj.toLocaleDateString("es-ES", {
+    const formattedDate = dateObj.toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : i18n.language === 'en' ? 'en-US' : 'es-ES', {
         day: 'numeric', month: 'short'
     });
 
@@ -146,7 +148,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 <View style={styles.headerContent}>
                     <View style={styles.topRow}>
                         <Text style={styles.title} numberOfLines={1}>
-                            {tmdbData.title || "Cargando..."}
+                            {tmdbData.title || t("common.loading")}
                         </Text>
                         <Text style={styles.date}>
                             {formattedDate}
@@ -154,7 +156,9 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     </View>
 
                     <Text style={styles.userText}>
-                        {isReceived ? `De: ${sender?.username || "Usuario"}` : `Para: ${receiver?.username || "Usuario"}`}
+                        {isReceived
+                            ? t("recommendations.from", { user: sender?.username || t("profile.title") })
+                            : t("recommendations.to", { user: receiver?.username || t("profile.title") })}
                     </Text>
 
                     {message && (
@@ -185,7 +189,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     {/* Your Rating section removed as requested */}
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Comentarios</Text>
+                        <Text style={styles.sectionTitle}>{t("recommendations.comments")}</Text>
 
                         {comments && comments.length > 0 ? (
                             <View style={styles.commentsList}>
@@ -193,7 +197,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                                     const isCurrentUser = comment.user_id === currentUserId;
                                     const isSender = comment.user_id === sender?.user_id;
                                     const otherUserName = isSender ? sender?.username : receiver?.username;
-                                    const username = isCurrentUser ? "Tú" : otherUserName;
+                                    const username = isCurrentUser ? t("recommendations.you") : otherUserName;
 
                                     return (
                                         <View key={comment.id} style={styles.commentItem}>
@@ -206,7 +210,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                                                         onPress={async () => {
                                                             const success = await onDeleteComment(item.id, comment.id);
                                                             if (!success) {
-                                                                Alert.alert("Error", "No se pudo eliminar el comentario.");
+                                                                Alert.alert(t("profile.alerts.errorTitle"), t("profile.alerts.errorDeleteAccount"));
                                                             }
                                                         }}
                                                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -221,13 +225,13 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                                 })}
                             </View>
                         ) : (
-                            <Text style={styles.noCommentsText}>No hay comentarios aún.</Text>
+                            <Text style={styles.noCommentsText}>{t("recommendations.noComments")}</Text>
                         )}
 
                         <View style={styles.inputContainer}>
                             <TextInput
                                 style={styles.input}
-                                placeholder="Escribe un comentario..."
+                                placeholder={t("recommendations.writeComment")}
                                 placeholderTextColor={Colors.metalSilver}
                                 value={commentText}
                                 onChangeText={setCommentText}

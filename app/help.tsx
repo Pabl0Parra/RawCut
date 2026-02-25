@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     View,
     Text,
@@ -30,58 +31,61 @@ interface FAQItem {
     answer: string;
 }
 
-const FAQS: FAQItem[] = [
+const getFAQS = (t: any): FAQItem[] => [
     {
         id: '1',
-        question: '¿Qué es CortoCrudo?',
-        answer: 'CortoCrudo es tu aplicación personal para mantener un registro de las películas y series que has visto, descubrir nuevos títulos y compartir recomendaciones directamente con tus amigos.',
+        question: t('help.faqs.q1'),
+        answer: t('help.faqs.a1'),
     },
     {
         id: '2',
-        question: '¿Cómo agrego una película a mis listas?',
-        answer: 'Busca cualquier película o serie en la pestaña de Inicio. Al seleccionarla, verás opciones para agregarla a "Favoritos" o a tu "Lista de seguimiento" (Watchlist) tocando los botones debajo del póster.',
+        question: t('help.faqs.q2'),
+        answer: t('help.faqs.a2'),
     },
     {
         id: '3',
-        question: '¿Cómo recomiendo una película a mis amigos?',
-        answer: 'En la pantalla de detalles de cualquier título, presiona el botón "Recomendar". Se abrirá una pantalla donde podrás buscar a tus amigos por su nombre de usuario, escribir un mensaje y enviarles la recomendación. Ellos la recibirán en su pestaña "Para ti".',
+        question: t('help.faqs.q3'),
+        answer: t('help.faqs.a3'),
     },
     {
         id: '4',
-        question: '¿Puedo ver las películas directamente en la app?',
-        answer: 'No, CortoCrudo funciona como un diario y recomendador personal. Utilizamos la API de TMDb para brindarte toda la información y metadatos de los títulos, pero no proveemos servicios de streaming.',
+        question: t('help.faqs.q4'),
+        answer: t('help.faqs.a4'),
     },
     {
         id: '5',
-        question: '¿Por qué no veo películas en español?',
-        answer: 'Si una película o serie no tiene una traducción oficial al español en la base de datos global de TMDb, se mostrará su título y sinopsis original.',
+        question: t('help.faqs.q5'),
+        answer: t('help.faqs.a5'),
     },
     {
         id: '6',
-        question: '¿Cómo cambio mi nombre de usuario genérico?',
-        answer: 'Ve a la pestaña de "Perfil". En la sección "Información del perfil", presiona el botón de edición junto a tu nombre de usuario para personalizarlo.',
+        question: t('help.faqs.q6'),
+        answer: t('help.faqs.a6'),
     },
     {
         id: '7',
-        question: '¿Cómo elimino mi cuenta?',
-        answer: 'Puedes eliminar tu cuenta y todos sus datos permanentemente desde la pestaña de "Perfil", desplazándote hacia abajo hasta la sección "Cuenta" y seleccionando "Eliminar cuenta".',
+        question: t('help.faqs.q7'),
+        answer: t('help.faqs.a7'),
     },
 ];
 
 export default function HelpCenterScreen(): React.JSX.Element {
+    const { t } = useTranslation();
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
+    const faqs = useMemo(() => getFAQS(t), [t]);
+
     const filteredFAQs = useMemo(() => {
-        if (!searchQuery.trim()) return FAQS;
+        if (!searchQuery.trim()) return faqs;
         const lowerQuery = searchQuery.toLowerCase();
-        return FAQS.filter(
+        return faqs.filter(
             (faq) =>
                 faq.question.toLowerCase().includes(lowerQuery) ||
                 faq.answer.toLowerCase().includes(lowerQuery)
         );
-    }, [searchQuery]);
+    }, [searchQuery, faqs]);
 
     const handleToggleExpand = (id: string) => {
         LayoutAnimation.configureNext({
@@ -103,8 +107,8 @@ export default function HelpCenterScreen(): React.JSX.Element {
 
     const handleContactSupport = () => {
         const supportEmail = 'frontend.bcn.dev@gmail.com';
-        const subject = 'Soporte CortoCrudo';
-        const body = '¡Hola! Necesito ayuda con lo siguiente:\n\n';
+        const subject = t('help.contact.subject');
+        const body = t('help.contact.body');
         const mailtoUrl = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
         Linking.canOpenURL(mailtoUrl).then((supported) => {
@@ -122,7 +126,7 @@ export default function HelpCenterScreen(): React.JSX.Element {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={Colors.white} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Centro de Ayuda</Text>
+                <Text style={styles.headerTitle}>{t('help.title')}</Text>
                 <View style={styles.headerRight} />
             </View>
 
@@ -130,7 +134,7 @@ export default function HelpCenterScreen(): React.JSX.Element {
                 <Ionicons name="search" size={20} color={Colors.metalSilver} style={styles.searchIcon} />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Busca tu duda (ej. recomendar, perfil)..."
+                    placeholder={t('help.searchPlaceholder')}
                     placeholderTextColor="#71717a"
                     value={searchQuery}
                     onChangeText={setSearchQuery}
@@ -149,7 +153,7 @@ export default function HelpCenterScreen(): React.JSX.Element {
                 {filteredFAQs.length === 0 ? (
                     <View style={styles.emptyContainer}>
                         <Ionicons name="help-circle-outline" size={48} color={Colors.metalSilver} />
-                        <Text style={styles.emptyText}>No encontramos respuestas para esa búsqueda.</Text>
+                        <Text style={styles.emptyText}>{t('help.noResults')}</Text>
                     </View>
                 ) : (
                     <View style={styles.faqList}>
@@ -184,11 +188,11 @@ export default function HelpCenterScreen(): React.JSX.Element {
                 )}
 
                 <View style={styles.supportSection}>
-                    <Text style={styles.supportTitle}>¿Aún necesitas ayuda?</Text>
-                    <Text style={styles.supportSubtitle}>Envíanos un correo y te responderemos lo antes posible.</Text>
+                    <Text style={styles.supportTitle}>{t('help.contact.title')}</Text>
+                    <Text style={styles.supportSubtitle}>{t('help.contact.subtitle')}</Text>
                     <TouchableOpacity style={styles.supportButton} onPress={handleContactSupport}>
                         <Ionicons name="mail" size={20} color={Colors.white} />
-                        <Text style={styles.supportButtonText}>Contactar a Soporte</Text>
+                        <Text style={styles.supportButtonText}>{t('help.contact.button')}</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>

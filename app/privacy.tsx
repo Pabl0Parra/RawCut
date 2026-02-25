@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../src/constants/Colors';
 
 export default function PrivacyPolicyScreen(): React.JSX.Element {
+    const { t } = useTranslation();
     const router = useRouter();
 
     return (
@@ -14,61 +16,45 @@ export default function PrivacyPolicyScreen(): React.JSX.Element {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={Colors.white} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Política de Privacidad</Text>
+                <Text style={styles.headerTitle}>{t('privacy.title')}</Text>
                 <View style={styles.headerRight} />
             </View>
 
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-                <Text style={styles.lastUpdated}>Última actualización: Febrero 2026</Text>
+                <Text style={styles.lastUpdated}>{t('privacy.lastUpdated')}</Text>
 
                 <Text style={styles.paragraph}>
-                    En CortoCrudo, valoramos y respetamos su privacidad. Esta Política de Privacidad describe
-                    cómo recopilamos, utilizamos y protegemos su información personal cuando utiliza
-                    nuestra aplicación móvil.
+                    {t('privacy.p1')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>1. Información que recopilamos</Text>
+                <Text style={styles.sectionTitle}>{t('privacy.s1Title')}</Text>
                 <Text style={styles.paragraph}>
-                    Recopilamos la información que usted nos proporciona directamente al crear una cuenta,
-                    como su dirección de correo electrónico, nombre de usuario (opcional) y contraseña. También
-                    recopilamos datos sobre su uso de la aplicación, como las películas y series que agrega a
-                    sus listas de favoritos, su progreso de visualización y sus recomendaciones.
+                    {t('privacy.s1Text')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>2. Uso de la información</Text>
+                <Text style={styles.sectionTitle}>{t('privacy.s2Title')}</Text>
                 <Text style={styles.paragraph}>
-                    Utilizamos su información personal únicamente para proporcionar y mejorar los servicios
-                    de CortoCrudo. Esto incluye autenticar su cuenta, sincronizar sus listas entre
-                    dispositivos y habilitar funciones sociales como las recomendaciones entre usuarios.
+                    {t('privacy.s2Text')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>3. Almacenamiento y Protección</Text>
+                <Text style={styles.sectionTitle}>{t('privacy.s3Title')}</Text>
                 <Text style={styles.paragraph}>
-                    Toda la información personal (incluyendo credenciales de cuenta, listas y progreso) se
-                    almacena de manera segura utilizando Supabase, una plataforma de base de datos segura de
-                    terceros. Sus contraseñas son encriptadas por Supabase y no son accesibles para nosotros.
+                    {t('privacy.s3Text')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>4. Servicios de Terceros</Text>
+                <Text style={styles.sectionTitle}>{t('privacy.s4Title')}</Text>
                 <Text style={styles.paragraph}>
-                    CortoCrudo utiliza la interfaz de programación de aplicaciones (API) de TMDb
-                    (The Movie Database) para obtener información sobre películas, series e imágenes
-                    relacionadas. No compartimos su información personal con TMDb. Su uso de la
-                    información provista por TMDb está sujeto a sus propios términos y políticas.
+                    {t('privacy.s4Text')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>5. Derechos del Usuario</Text>
+                <Text style={styles.sectionTitle}>{t('privacy.s5Title')}</Text>
                 <Text style={styles.paragraph}>
-                    Usted tiene el control total sobre sus datos. Puede eliminar su cuenta y toda la
-                    información asociada a ella (incluyendo listas de reproducción y recomendaciones) en cualquier
-                    momento desde la sección "Cuenta" en la pestaña de Perfil.
+                    {t('privacy.s5Text')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>6. Cambios a esta política</Text>
+                <Text style={styles.sectionTitle}>{t('privacy.s6Title')}</Text>
                 <Text style={styles.paragraph}>
-                    Podemos actualizar esta Política de Privacidad ocasionalmente para reflejar cambios en
-                    nuestras prácticas. Le notificaremos cualquier actualización importante dentro de la
-                    aplicación.
+                    {t('privacy.s6Text')}
                 </Text>
             </ScrollView>
         </SafeAreaView>

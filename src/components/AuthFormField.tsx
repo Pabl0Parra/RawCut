@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -62,6 +63,7 @@ export function AuthFormField<T extends FieldValues>({
     onSubmitEditing,
     testID,
 }: Readonly<AuthFormFieldProps<T>>): React.JSX.Element {
+    const { t } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
 
@@ -158,7 +160,7 @@ export function AuthFormField<T extends FieldValues>({
                         onPress={togglePasswordVisibility}
                         activeOpacity={0.7}
                         accessibilityLabel={
-                            showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                            showPassword ? t("auth.hidePassword") : t("auth.showPassword")
                         }
                         accessibilityRole="button"
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}

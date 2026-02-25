@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Keyboard } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +10,7 @@ import { AuthLayout } from "../src/components/AuthLayout";
 import { AuthFormField } from "../src/components/AuthFormField";
 
 export default function RegisterScreen() {
+    const { t } = useTranslation();
     const { signUp, isLoading, error, clearError } = useAuthStore();
 
     const {
@@ -32,9 +34,9 @@ export default function RegisterScreen() {
 
             try {
                 await signUp(data.email, data.password, data.username);
-                
-                
-                
+
+
+
             } catch (err) {
                 console.error("[RegisterScreen] Sign up failed:", err);
             }
@@ -44,22 +46,22 @@ export default function RegisterScreen() {
 
     return (
         <AuthLayout
-            title="CortoCrudo"
-            subtitle="Crea tu cuenta"
+            title={t("auth.registerTitle")}
+            subtitle={t("auth.registerSubtitle")}
             error={error}
             isLoading={isLoading}
             onSubmit={handleSubmit(onSubmit)}
-            submitButtonText="Crear Cuenta"
-            linkText="¿Ya tienes cuenta?"
-            linkLabel="Inicia Sesión"
+            submitButtonText={t("auth.registerButton")}
+            linkText={t("auth.alreadyAccount")}
+            linkLabel={t("common.signIn")}
             linkHref="/login"
             showLogo={false}
         >
             <AuthFormField
                 control={control}
                 name="username"
-                label="Nombre de Usuario"
-                placeholder="usuario_123"
+                label={t("auth.username")}
+                placeholder={t("auth.usernamePlaceholder")}
                 error={errors.username?.message}
                 maxLength={20}
             />
@@ -67,8 +69,8 @@ export default function RegisterScreen() {
             <AuthFormField
                 control={control}
                 name="email"
-                label="Email"
-                placeholder="tu@email.com"
+                label={t("auth.email")}
+                placeholder={t("auth.emailPlaceholder")}
                 error={errors.email?.message}
                 keyboardType="email-address"
             />
@@ -76,8 +78,8 @@ export default function RegisterScreen() {
             <AuthFormField
                 control={control}
                 name="password"
-                label="Contraseña"
-                placeholder="Mínimo 8 caracteres"
+                label={t("auth.password")}
+                placeholder={t("auth.passwordMin")}
                 error={errors.password?.message}
                 secureTextEntry
             />
@@ -85,8 +87,8 @@ export default function RegisterScreen() {
             <AuthFormField
                 control={control}
                 name="confirmPassword"
-                label="Confirmar Contraseña"
-                placeholder="Repite tu contraseña"
+                label={t("auth.confirmPassword")}
+                placeholder={t("auth.confirmPasswordPlaceholder")}
                 error={errors.confirmPassword?.message}
                 secureTextEntry
             />

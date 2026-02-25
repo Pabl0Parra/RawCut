@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 
 import { getImageUrl, getPersonDetails, getPersonCredits, type Person, type Movie, type TVShow } from "../../../src/lib/tmdb";
 import { Colors } from "../../../src/constants/Colors";
@@ -19,6 +20,7 @@ import { detailScreenStyles } from "../../../src/styles/detailScreenStyles";
 import { ContentHorizontalList } from "../../../src/components/ContentHorizontalList";
 
 export default function PersonDetailScreen(): JSX.Element {
+    const { t } = useTranslation();
     const { id } = useLocalSearchParams<{ id: string }>();
     const [person, setPerson] = useState<Person | null>(null);
     const [credits, setCredits] = useState<{ cast: (Movie | TVShow)[], crew: (Movie | TVShow)[] }>({ cast: [], crew: [] });
@@ -33,7 +35,6 @@ export default function PersonDetailScreen(): JSX.Element {
             ]);
             setPerson(details);
 
-            
             const deduplicate = (items: (Movie | TVShow)[]) => {
                 const map = new Map<number, Movie | TVShow>();
                 items.forEach(item => {
@@ -44,7 +45,6 @@ export default function PersonDetailScreen(): JSX.Element {
                 return Array.from(map.values());
             };
 
-            
             setCredits({
                 cast: deduplicate(creditsData.cast)
                     .sort((a, b) => b.popularity - a.popularity)
@@ -81,7 +81,7 @@ export default function PersonDetailScreen(): JSX.Element {
         return (
             <SafeAreaView style={detailScreenStyles.safeArea}>
                 <View style={detailScreenStyles.centerContainer}>
-                    <Text style={detailScreenStyles.errorText}>Persona no encontrada</Text>
+                    <Text style={detailScreenStyles.errorText}>{t('person.notFound')}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -118,24 +118,24 @@ export default function PersonDetailScreen(): JSX.Element {
 
                 <View style={[detailScreenStyles.contentContainer, { marginTop: 0 }]}>
                     <View style={detailScreenStyles.descriptionContainer}>
-                        <Text style={detailScreenStyles.descriptionTitle}>Biografía</Text>
+                        <Text style={detailScreenStyles.descriptionTitle}>{t('person.biography')}</Text>
                         <Text style={detailScreenStyles.descriptionText}>
-                            {person.biography || "No hay biografía disponible para esta persona."}
+                            {person.biography || t('person.noBiography')}
                         </Text>
                     </View>
 
                     {credits.cast.length > 0 && (
                         <ContentHorizontalList
                             data={credits.cast}
-                            title="Como Actor/Actriz"
-                            mediaType="movie" 
+                            title={t('person.cast')}
+                            mediaType="movie"
                         />
                     )}
 
                     {credits.crew.length > 0 && (
                         <ContentHorizontalList
                             data={credits.crew}
-                            title="En Producción / Dirección"
+                            title={t('person.crew')}
                             mediaType="movie"
                         />
                     )}

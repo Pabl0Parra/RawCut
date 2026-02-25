@@ -1,4 +1,12 @@
 {
+    "movieCard": {
+        "posterAltText": "{{title}} poster",
+        "noPosterAltText": "No poster for {{title}}",
+        "addFavorite": "Add to favorites",
+        "removeFavorite": "Remove from favorites",
+        "addToWatchlist": "Add to watchlist",
+        "removeFromWatchlist": "Remove from watchlist"
+    },
     "common": {
         "loading": "Loading...",
         "loadingContent": "Loading content...",
@@ -13,6 +21,9 @@
         "clearFilters": "Clear active filters",
         "applyFilters": "Apply Filters",
         "sortBy": "Sort By",
+        "sortByPopularity": "Popularity",
+        "sortByRating": "Top Rated",
+        "sortByRecent": "Most Recent",
         "releaseYear": "Release Year",
         "genre": "Genre",
         "exampleYear": "E.g. 2023",
@@ -35,7 +46,10 @@
     "home": {
         "continueWatching": "Continue Watching",
         "bannerTitle": "Style your account!",
-        "bannerSubtitle": "Change your generic username in your profile."
+        "bannerSubtitle": "Change your generic username in your profile.",
+        "becauseYouLiked": "Because you liked \"{{title}}\"",
+        "popularMovies": "Popular Movies",
+        "popularTV": "Popular TV Shows"
     },
     "favorites": {
         "emptyTitle": "You have no favorites yet",
@@ -60,7 +74,25 @@
         "comments": "Comments",
         "writeComment": "Write a comment...",
         "noComments": "No comments yet.",
-        "you": "You"
+        "you": "You",
+        "errorLoadUsers": "Could not load users",
+        "alreadySentTitle": "Already Sent",
+        "alreadySentText": "You have already recommended this title to all selected users.",
+        "successSent": "Recommendation sent!",
+        "successSentMultiple": "Recommendation sent to {{count}} users!",
+        "partialSent": "Partially Sent",
+        "partialSentText": "{{success}} of {{total}} recommendations were sent successfully.",
+        "errorSend": "Error sending recommendation",
+        "noOtherUsers": "No other users available",
+        "tapToSelect": "Tap to select user(s)...",
+        "usersSelected": "{{count}} user(s) selected",
+        "sendButton": "Send Recommendation",
+        "sendToMultiple": "Send to {{count}} users",
+        "recommend": "Recommend",
+        "searchUser": "Search user",
+        "searchPlaceholder": "Type a username...",
+        "selectUsers": "Select user(s)",
+        "whyRecommend": "Why do you recommend this?"
     },
     "contentGrid": {
         "unauthTitle": "Sign in to see your list"
@@ -83,7 +115,9 @@
         "emailPlaceholder": "you@email.com",
         "passwordMin": "Minimum 8 characters",
         "confirmPassword": "Confirm Password",
-        "confirmPasswordPlaceholder": "Repeat your password"
+        "confirmPasswordPlaceholder": "Repeat your password",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password"
     },
     "profile": {
         "title": "Profile",
@@ -149,23 +183,29 @@
         "title": "Help Center",
         "searchPlaceholder": "Search for your question (e.g. recommend, profile)...",
         "noResults": "We didn't find answers for that search.",
-        "needHelp": "Still need help?",
-        "supportSubtitle": "Send us an email and we will reply as soon as possible.",
-        "contactSupport": "Contact Support",
-        "q1": "What is RawCut?",
-        "a1": "RawCut is your personal app to keep track of the movies and series you have watched, discover new titles, and share recommendations directly with your friends.",
-        "q2": "How do I add a movie to my lists?",
-        "a2": "Search for any movie or series on the Home tab. By selecting it, you will see options to add it to \"Favorites\" or your \"Watchlist\" by tapping the buttons under the poster.",
-        "q3": "How do I recommend a movie to my friends?",
-        "a3": "On the details screen of any title, press the \"Recommend\" button. A screen will open where you can search for your friends by their username, write a message, and send them the recommendation. They will receive it in their \"For you\" tab.",
-        "q4": "Can I watch movies directly in the app?",
-        "a4": "No, RawCut works as a personal diary and recommender. We use the TMDb API to give you all the information and metadata of titles, but we do not provide streaming services.",
-        "q5": "Why don't I see movies in Spanish?",
-        "a5": "If a movie or series does not have an official Spanish translation in the global TMDb database, its original title and synopsis will be shown.",
-        "q6": "How do I change my generic username?",
-        "a6": "Go to the \"Profile\" tab. In the \"Profile Information\" section, press the edit button next to your username to customize it.",
-        "q7": "How do I delete my account?",
-        "a7": "You can permanently delete your account and all its data from the \"Profile\" tab, scrolling down to the \"Account\" section and selecting \"Delete account\"."
+        "faqs": {
+            "q1": "What is RawCut?",
+            "a1": "RawCut is your personal app to keep track of the movies and series you have watched, discover new titles, and share recommendations directly with your friends.",
+            "q2": "How do I add a movie to my lists?",
+            "a2": "Search for any movie or series on the Home tab. By selecting it, you will see options to add it to \"Favorites\" or your \"Watchlist\" by tapping the buttons under the poster.",
+            "q3": "How do I recommend a movie to my friends?",
+            "a3": "On the details screen of any title, press the \"Recommend\" button. A screen will open where you can search for your friends by their username, write a message, and send them the recommendation. They will receive it in their \"For you\" tab.",
+            "q4": "Can I watch movies directly in the app?",
+            "a4": "No, RawCut works as a personal diary and recommender. We use the TMDb API to give you all the information and metadata of titles, but we do not provide streaming services.",
+            "q5": "Why don't I see movies in my language?",
+            "a5": "If a movie or series does not have an official translation in the global TMDb database, its original title and synopsis will be shown.",
+            "q6": "How do I change my generic username?",
+            "a6": "Go to the \"Profile\" tab. In the \"Profile Information\" section, press the edit button next to your username to customize it.",
+            "q7": "How do I delete my account?",
+            "a7": "You can permanently delete your account and all its data from the \"Profile\" tab, scrolling down to the \"Account\" section and selecting \"Delete account\"."
+        },
+        "contact": {
+            "title": "Still need help?",
+            "subtitle": "Send us an email and we will reply as soon as possible.",
+            "button": "Contact Support",
+            "subject": "Help with RawCut",
+            "body": "Hi,\n\nI need help with the following:\n\n"
+        }
     },
     "privacy": {
         "title": "Privacy Policy",
@@ -198,5 +238,34 @@
         "s4Text": "This product uses the TMDb (The Movie Database) API to provide metadata and images but is NOT endorsed, certified, or affiliated with TMDb. All information related to movies and series is the property of TMDb and its respective authors/creators.",
         "s5Title": "5. modification of Terms",
         "s5Text": "We reserve the right to modify or replace these Terms at any time. If we post an update, your continued use of the application will constitute your acceptance of the new terms."
+    },
+    "details": {
+        "notFound": "Movie not found",
+        "tvNotFound": "TV Show not found",
+        "recommend": "Recommend",
+        "overview": "Overview",
+        "noOverview": "No description available",
+        "directing": "Directing",
+        "production": "Production",
+        "creation": "Creation",
+        "creator": "Creator",
+        "cast": "Cast",
+        "related": "Related",
+        "seasons": "Seasons",
+        "next": "NEXT"
+    },
+    "disclaimer": {
+        "badge": "Data source",
+        "text": "Information about movies and series (titles, synopsis, posters, release dates and ratings) is provided by <0>The Movie Database (TMDB)</0>. This application uses the TMDB API but is not endorsed or certified by TMDB.",
+        "ratingTitle": "How is the score calculated?",
+        "ratingTmdb": "The <0>⭐ TMDB</0> score reflects the average rating from The Movie Database users.",
+        "ratingCommunity": "The <0>👥 Community</0> score reflects the average of votes (0-10) from this application's users."
+    },
+    "person": {
+        "notFound": "Person not found",
+        "biography": "Biography",
+        "noBiography": "No biography available for this person.",
+        "cast": "As Actor/Actress",
+        "crew": "In Production / Direction"
     }
 }

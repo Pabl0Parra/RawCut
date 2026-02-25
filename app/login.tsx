@@ -1,4 +1,6 @@
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
+
 import { Keyboard } from "react-native";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +11,7 @@ import { AuthLayout } from "../src/components/AuthLayout";
 import { AuthFormField } from "../src/components/AuthFormField";
 
 export default function LoginScreen() {
+    const { t } = useTranslation();
     const { signIn, isLoading, error, clearError } = useAuthStore();
 
     const {
@@ -30,13 +33,13 @@ export default function LoginScreen() {
 
             try {
                 await signIn(data.identifier, data.password);
-                
-                
-                
+
+
+
             } catch (err) {
-                
-                
-                
+
+
+
                 console.error("[LoginScreen] Sign in failed:", err);
             }
         },
@@ -45,22 +48,22 @@ export default function LoginScreen() {
 
     return (
         <AuthLayout
-            title="Iniciar Sesión"
-            subtitle="Tu guía de cine y series"
+            title={t("auth.loginTitle")}
+            subtitle={t("auth.loginSubtitle")}
             error={error}
             isLoading={isLoading}
             onSubmit={handleSubmit(onSubmit)}
-            submitButtonText="Iniciar Sesión"
-            linkText="¿No tienes cuenta?"
-            linkLabel="Regístrate"
+            submitButtonText={t("auth.loginTitle")}
+            linkText={t("auth.noAccount")}
+            linkLabel={t("common.signUp")}
             linkHref="/register"
             showLogo
         >
             <AuthFormField
                 control={control}
                 name="identifier"
-                label="Email o Usuario"
-                placeholder="tu@email.com o usuario"
+                label={t("auth.identifier")}
+                placeholder={t("auth.identifierPlaceholder")}
                 error={errors.identifier?.message}
                 keyboardType="email-address"
             />
@@ -68,8 +71,8 @@ export default function LoginScreen() {
             <AuthFormField
                 control={control}
                 name="password"
-                label="Contraseña"
-                placeholder="••••••••"
+                label={t("auth.password")}
+                placeholder={t("auth.passwordPlaceholder")}
                 error={errors.password?.message}
                 secureTextEntry
             />

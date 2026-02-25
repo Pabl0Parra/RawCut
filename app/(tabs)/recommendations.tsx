@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -34,6 +35,7 @@ import {
 import { fetchTmdbDataBatch } from "../../src/utils/recommendations.utils";
 
 export default function RecommendationsScreen(): React.JSX.Element {
+    const { t } = useTranslation();
     const { user } = useAuthStore();
     const {
         sent,
@@ -184,13 +186,13 @@ export default function RecommendationsScreen(): React.JSX.Element {
             <View style={styles.emptyContainer}>
                 <Text style={styles.unauthIcon}>🔒</Text>
                 <Text style={styles.unauthText}>
-                    Inicia sesión para ver tus recomendaciones
+                    {t("recommendations.unauthTitle")}
                 </Text>
                 <TouchableOpacity
                     style={styles.loginButton}
                     onPress={handleNavigateToLogin}
                 >
-                    <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+                    <Text style={styles.loginButtonText}>{t("common.signIn")}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -214,13 +216,13 @@ export default function RecommendationsScreen(): React.JSX.Element {
                 />
                 <Text style={styles.emptyText}>
                     {isReceivedTab
-                        ? "No tienes recomendaciones"
-                        : "No has enviado recomendaciones"}
+                        ? t("recommendations.emptyReceivedTitle")
+                        : t("recommendations.emptySentTitle")}
                 </Text>
                 <Text style={styles.emptySubtext}>
                     {isReceivedTab
-                        ? "Cuando alguien te recomiende algo, aparecerá aquí"
-                        : "Explora películas y series para recomendar a tus amigos"}
+                        ? t("recommendations.emptyReceivedSubtitle")
+                        : t("recommendations.emptySentSubtitle")}
                 </Text>
             </View>
         );
@@ -308,8 +310,8 @@ export default function RecommendationsScreen(): React.JSX.Element {
                     { }
                     <View style={styles.tabsContainer}>
                         <View style={styles.tabsWrapper}>
-                            {renderTab("received", "Recibidas", received.length)}
-                            {renderTab("sent", "Enviadas", sent.length)}
+                            {renderTab("received", t("recommendations.received"), received.length)}
+                            {renderTab("sent", t("recommendations.sent"), sent.length)}
                         </View>
                     </View>
 

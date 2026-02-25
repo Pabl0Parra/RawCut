@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
     getRelatedMovies,
     getRelatedTVShows,
@@ -20,6 +21,7 @@ export interface ForYouRecommendation {
 }
 
 export const useForYouContent = (activeTab: ContentTab) => {
+    const { t } = useTranslation();
     const [recommendations, setRecommendations] = useState<ForYouRecommendation[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -55,7 +57,7 @@ export const useForYouContent = (activeTab: ContentTab) => {
                         if (details && related?.results?.length > 0) {
                             return {
                                 id: `rec-movie-${item.tmdb_id}`,
-                                title: `Porque te gustó "${details.title}"`,
+                                title: t("home.becauseYouLiked", { title: details.title }),
                                 items: related.results,
                                 mediaType: "movie" as const
                             };
@@ -68,7 +70,7 @@ export const useForYouContent = (activeTab: ContentTab) => {
                         if (details && related?.results?.length > 0) {
                             return {
                                 id: `rec-tv-${item.tmdb_id}`,
-                                title: `Porque te gustó "${details.name}"`,
+                                title: t("home.becauseYouLiked", { title: details.name }),
                                 items: related.results,
                                 mediaType: "tv" as const
                             };
@@ -95,7 +97,7 @@ export const useForYouContent = (activeTab: ContentTab) => {
                 if (popMovies?.results?.length > 0) {
                     newRecs.push({
                         id: 'pop-movies',
-                        title: 'Películas Populares',
+                        title: t("home.popularMovies"),
                         items: popMovies.results,
                         mediaType: "movie"
                     });
@@ -103,7 +105,7 @@ export const useForYouContent = (activeTab: ContentTab) => {
                 if (popTV?.results?.length > 0) {
                     newRecs.push({
                         id: 'pop-tv',
-                        title: 'Series Populares',
+                        title: t("home.popularTV"),
                         items: popTV.results,
                         mediaType: "tv"
                     });
@@ -116,7 +118,7 @@ export const useForYouContent = (activeTab: ContentTab) => {
         } finally {
             setLoading(false);
         }
-    }, [activeTab, favorites, watchlist]);
+    }, [activeTab, favorites, watchlist, t]);
 
     useEffect(() => {
         if (activeTab === "foryou") {

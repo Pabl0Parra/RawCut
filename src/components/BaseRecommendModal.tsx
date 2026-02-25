@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -77,6 +78,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
     currentUserId,
     enableSearch = false,
 }) => {
+    const { t } = useTranslation();
     const [state, setState] = useState<RecommendationState>(INITIAL_STATE);
 
     const {
@@ -114,7 +116,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         } catch (err) {
             console.error("Error loading users:", err);
             updateState({ isLoadingUsers: false });
-            Alert.alert("Error", "No se pudieron cargar los usuarios");
+            Alert.alert(t("profile.alerts.errorTitle"), t("recommendations.errorLoadUsers"));
         }
     }, [currentUserId]);
 
@@ -183,8 +185,8 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         if (newRecipients.length === 0) {
             updateState({ isSending: false });
             Alert.alert(
-                "Ya enviada",
-                "Ya has recomendado este título a todos los usuarios seleccionados."
+                t("recommendations.alreadySentTitle"),
+                t("recommendations.alreadySentText")
             );
             return;
         }
@@ -213,20 +215,20 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                 ? ` (${skippedCount} ya enviada${skippedCount > 1 ? "s" : ""})`
                 : "";
             Alert.alert(
-                "¡Éxito!",
+                t("profile.alerts.success"),
                 count === 1
-                    ? `¡Recomendación enviada!${skippedNote}`
-                    : `¡Recomendación enviada a ${count} usuarios!${skippedNote}`
+                    ? `${t("recommendations.successSent")}${skippedNote}`
+                    : `${t("recommendations.successSentMultiple", { count })}${skippedNote}`
             );
             onClose();
         } else if (failedCount < newRecipients.length) {
             Alert.alert(
-                "Parcialmente enviado",
-                `${newRecipients.length - failedCount} de ${newRecipients.length} recomendaciones se enviaron correctamente.`
+                t("recommendations.partialSent"),
+                t("recommendations.partialSentText", { success: newRecipients.length - failedCount, total: newRecipients.length })
             );
             onClose();
         } else {
-            Alert.alert("Error", "Error al enviar la recomendación");
+            Alert.alert(t("profile.alerts.errorTitle"), t("recommendations.errorSend"));
         }
     };
 
@@ -288,7 +290,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         return (
             <View style={styles.emptyUsersContainer}>
                 <Text style={styles.emptyUsersText}>
-                    No hay otros usuarios disponibles
+                    {t("recommendations.noOtherUsers")}
                 </Text>
             </View>
         );
@@ -296,16 +298,16 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
     const dropdownLabel =
         selectedUsers.length === 0
-            ? "Toca para seleccionar usuario(s)..."
-            : `${selectedUsers.length} usuario${selectedUsers.length > 1 ? "s" : ""} seleccionado${selectedUsers.length > 1 ? "s" : ""}`;
+            ? t("recommendations.tapToSelect")
+            : t("recommendations.usersSelected", { count: selectedUsers.length });
 
     const canSend = selectedUsers.length > 0 && !isSending;
 
     const sendButtonLabel = isSending
         ? undefined
         : selectedUsers.length <= 1
-            ? "Enviar Recomendación"
-            : `Enviar a ${selectedUsers.length} usuarios`;
+            ? t("recommendations.sendButton")
+            : t("recommendations.sendToMultiple", { count: selectedUsers.length });
 
     return (
         <Modal
@@ -321,7 +323,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                 >
                     { }
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Recomendar</Text>
+                        <Text style={styles.modalTitle}>{t("recommendations.recommend")}</Text>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                             <Ionicons name="close" size={24} color={Colors.white} />
                         </TouchableOpacity>
@@ -349,10 +351,10 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                         { }
                         {enableSearch && (
                             <>
-                                <Text style={styles.inputLabel}>Buscar usuario</Text>
+                                <Text style={styles.inputLabel}>{t("recommendations.searchUser")}</Text>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Escribe un nombre de usuario..."
+                                    placeholder={t("recommendations.searchPlaceholder")}
                                     placeholderTextColor="#71717a"
                                     value={searchQuery}
                                     onChangeText={handleSearchUsers}
@@ -363,7 +365,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
                         { }
                         {!enableSearch && (
-                            <Text style={styles.inputLabel}>Seleccionar usuario(s)</Text>
+                            <Text style={styles.inputLabel}>{t("recommendations.selectUsers")}</Text>
                         )}
 
                         { }
@@ -405,7 +407,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                         <View style={styles.messageContainer}>
                             <TextInput
                                 style={[styles.input, styles.multilineInput]}
-                                placeholder="¿Por qué recomiendas esto?"
+                                placeholder={t("recommendations.whyRecommend")}
                                 placeholderTextColor="#71717a"
                                 value={message}
                                 onChangeText={(text) => updateState({ message: text })}

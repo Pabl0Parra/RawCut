@@ -181,8 +181,7 @@ export const countWatchedEpisodes = <
         (entry) => entry.tmdb_id === showId && entry.season_number > 0
     ).length;
 
-export const processGenreName = (genreName: string): string =>
-    genreName === "Terror" ? "Terror (Horror)" : genreName;
+export const processGenreName = (genreName: string): string => genreName;
 
 export const sortGenresAlphabetically = <T extends { name: string }>(
     genres: T[]

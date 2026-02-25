@@ -1,4 +1,12 @@
 {
+    "movieCard": {
+        "posterAltText": "Póster de {{title}}",
+        "noPosterAltText": "Sin póster para {{title}}",
+        "addFavorite": "Añadir a favoritos",
+        "removeFavorite": "Quitar de favoritos",
+        "addToWatchlist": "Añadir a la lista",
+        "removeFromWatchlist": "Quitar de la lista"
+    },
     "common": {
         "loading": "Cargando...",
         "loadingContent": "Cargando contenido...",
@@ -13,6 +21,9 @@
         "clearFilters": "Limpiar filtros activos",
         "applyFilters": "Aplicar Filtros",
         "sortBy": "Ordenar Por",
+        "sortByPopularity": "Popularidad",
+        "sortByRating": "Mejor Valorados",
+        "sortByRecent": "Más Recientes",
         "releaseYear": "Año de Lanzamiento",
         "genre": "Género",
         "exampleYear": "Ej. 2023",
@@ -33,9 +44,12 @@
         "profile": "Perfil"
     },
     "home": {
-        "continueWatching": "Continuar Viendo",
+        "continueWatching": "Continuar viendo",
         "bannerTitle": "¡Dale estilo a tu cuenta!",
-        "bannerSubtitle": "Cambia tu nombre de usuario genérico en tu perfil."
+        "bannerSubtitle": "Cambia tu nombre de usuario genérico en tu perfil.",
+        "becauseYouLiked": "Porque te gustó \"{{title}}\"",
+        "popularMovies": "Películas Populares",
+        "popularTV": "Series Populares"
     },
     "favorites": {
         "emptyTitle": "No tienes favoritos aún",
@@ -60,7 +74,25 @@
         "comments": "Comentarios",
         "writeComment": "Escribe un comentario...",
         "noComments": "No hay comentarios aún.",
-        "you": "Tú"
+        "you": "Tú",
+        "errorLoadUsers": "No se pudieron cargar los usuarios",
+        "alreadySentTitle": "Ya enviada",
+        "alreadySentText": "Ya has recomendado este título a todos los usuarios seleccionados.",
+        "successSent": "¡Recomendación enviada!",
+        "successSentMultiple": "¡Recomendación enviada a {{count}} usuarios!",
+        "partialSent": "Parcialmente enviado",
+        "partialSentText": "{{success}} de {{total}} recomendaciones se enviaron correctamente.",
+        "errorSend": "Error al enviar la recomendación",
+        "noOtherUsers": "No hay otros usuarios disponibles",
+        "tapToSelect": "Toca para seleccionar usuario(s)...",
+        "usersSelected": "{{count}} usuario(s) seleccionado(s)",
+        "sendButton": "Enviar Recomendación",
+        "sendToMultiple": "Enviar a {{count}} usuarios",
+        "recommend": "Recomendar",
+        "searchUser": "Buscar usuario",
+        "searchPlaceholder": "Escribe un nombre de usuario...",
+        "selectUsers": "Seleccionar usuario(s)",
+        "whyRecommend": "¿Por qué recomiendas esto?"
     },
     "contentGrid": {
         "unauthTitle": "Inicia sesión para ver tu lista"
@@ -73,7 +105,7 @@
         "identifierPlaceholder": "tu@email.com o usuario",
         "password": "Contraseña",
         "passwordPlaceholder": "••••••••",
-        "registerTitle": "CortoCrudo",
+        "registerTitle": "RawCut",
         "registerSubtitle": "Crea tu cuenta",
         "registerButton": "Crear Cuenta",
         "alreadyAccount": "¿Ya tienes cuenta?",
@@ -83,7 +115,9 @@
         "emailPlaceholder": "tu@email.com",
         "passwordMin": "Mínimo 8 caracteres",
         "confirmPassword": "Confirmar Contraseña",
-        "confirmPasswordPlaceholder": "Repite tu contraseña"
+        "confirmPasswordPlaceholder": "Repite tu contraseña",
+        "showPassword": "Mostrar contraseña",
+        "hidePassword": "Ocultar contraseña"
     },
     "profile": {
         "title": "Perfil",
@@ -149,36 +183,42 @@
         "title": "Centro de Ayuda",
         "searchPlaceholder": "Busca tu duda (ej. recomendar, perfil)...",
         "noResults": "No encontramos respuestas para esa búsqueda.",
-        "needHelp": "¿Aún necesitas ayuda?",
-        "supportSubtitle": "Envíanos un correo y te responderemos lo antes posible.",
-        "contactSupport": "Contactar a Soporte",
-        "q1": "¿Qué es CortoCrudo?",
-        "a1": "CortoCrudo es tu aplicación personal para mantener un registro de las películas y series que has visto, descubrir nuevos títulos y compartir recomendaciones directamente con tus amigos.",
-        "q2": "¿Cómo agrego una película a mis listas?",
-        "a2": "Busca cualquier película o serie en la pestaña de Inicio. Al seleccionarla, verás opciones para agregarla a \"Favoritos\" o a tu \"Lista de seguimiento\" (Watchlist) tocando los botones debajo del póster.",
-        "q3": "¿Cómo recomiendo una película a mis amigos?",
-        "a3": "En la pantalla de detalles de cualquier título, presiona el botón \"Recomendar\". Se abrirá una pantalla donde podrás buscar a tus amigos por su nombre de usuario, escribir un mensaje y enviarles la recomendación. Ellos la recibirán en su pestaña \"Para ti\".",
-        "q4": "¿Puedo ver las películas directamente en la app?",
-        "a4": "No, CortoCrudo funciona como un diario y recomendador personal. Utilizamos la API de TMDb para brindarte toda la información y metadatos de los títulos, pero no proveemos servicios de streaming.",
-        "q5": "¿Por qué no veo películas en español?",
-        "a5": "Si una película o serie no tiene una traducción oficial al español en la base de datos global de TMDb, se mostrará su título y sinopsis original.",
-        "q6": "¿Cómo cambio mi nombre de usuario genérico?",
-        "a6": "Ve a la pestaña de \"Perfil\". En la sección \"Información del perfil\", presiona el botón de edición junto a tu nombre de usuario para personalizarlo.",
-        "q7": "¿Cómo elimino mi cuenta?",
-        "a7": "Puedes eliminar tu cuenta y todos sus datos permanentemente desde la pestaña de \"Perfil\", desplazándote hacia abajo hasta la sección \"Cuenta\" y seleccionando \"Eliminar cuenta\"."
+        "faqs": {
+            "q1": "¿Qué es RawCut?",
+            "a1": "RawCut es tu aplicación personal para mantener un registro de las películas y series que has visto, descubrir nuevos títulos y compartir recomendaciones directamente con tus amigos.",
+            "q2": "¿Cómo agrego una película a mis listas?",
+            "a2": "Busca cualquier película o serie en la pestaña de Inicio. Al seleccionarla, verás opciones para agregarla a \"Favoritos\" o a tu \"Lista de seguimiento\" (Watchlist) tocando los botones debajo del póster.",
+            "q3": "¿Cómo recomiendo una película a mis amigos?",
+            "a3": "En la pantalla de detalles de cualquier título, presiona el botón \"Recomendar\". Se abrirá una pantalla donde podrás buscar a tus amigos por su nombre de usuario, escribir un mensaje y enviarles la recomendación. Ellos la recibirán en su pestaña \"Para ti\".",
+            "q4": "¿Puedo ver las películas directamente en la app?",
+            "a4": "No, RawCut funciona como un diario y recomendador personal. Utilizamos la API de TMDb para brindarte toda la información y metadatos de los títulos, pero no proveemos servicios de streaming.",
+            "q5": "¿Por qué no veo películas en español?",
+            "a5": "Si una película o serie no tiene una traducción oficial al español en la base de datos global de TMDb, se mostrará su título y sinopsis original.",
+            "q6": "¿Cómo cambio mi nombre de usuario genérico?",
+            "a6": "Ve a la pestaña de \"Perfil\". En la sección \"Información del perfil\", presiona el botón de edición junto a tu nombre de usuario para personalizarlo.",
+            "q7": "¿Cómo elimino mi cuenta?",
+            "a7": "Puedes eliminar tu cuenta y todos sus datos permanentemente desde la pestaña de \"Perfil\", desplazándote hacia abajo hasta la sección \"Cuenta\" y seleccionando \"Eliminar cuenta\"."
+        },
+        "contact": {
+            "title": "¿Aún necesitas ayuda?",
+            "subtitle": "Envíanos un correo y te responderemos lo antes posible.",
+            "button": "Contactar a Soporte",
+            "subject": "Ayuda con RawCut",
+            "body": "Hola,\n\nNecesito ayuda con lo siguiente:\n\n"
+        }
     },
     "privacy": {
         "title": "Política de Privacidad",
         "lastUpdated": "Última actualización: Febrero 2026",
-        "p1": "En CortoCrudo, valoramos y respetamos su privacidad. Esta Política de Privacidad describe cómo recopilamos, utilizamos y protegemos su información personal cuando utiliza nuestra aplicación móvil.",
+        "p1": "En RawCut, valoramos y respetamos su privacidad. Esta Política de Privacidad describe cómo recopilamos, utilizamos y protegemos su información personal cuando utiliza nuestra aplicación móvil.",
         "s1Title": "1. Información que recopilamos",
         "s1Text": "Recopilamos la información que usted nos proporciona directamente al crear una cuenta, como su dirección de correo electrónico, nombre de usuario (opcional) y contraseña. También recopilamos datos sobre su uso de la aplicación, como las películas y series que agrega a sus listas de favoritos, su progreso de visualización y sus recomendaciones.",
         "s2Title": "2. Uso de la información",
-        "s2Text": "Utilizamos su información personal únicamente para proporcionar y mejorar los servicios de CortoCrudo. Esto incluye autenticar su cuenta, sincronizar sus listas entre dispositivos y habilitar funciones sociales como las recomendaciones entre usuarios.",
+        "s2Text": "Utilizamos su información personal únicamente para proporcionar y mejorar los servicios de RawCut. Esto incluye autenticar su cuenta, sincronizar sus listas entre dispositivos y habilitar funciones sociales como las recomendaciones entre usuarios.",
         "s3Title": "3. Almacenamiento y Protección",
         "s3Text": "Toda la información personal (incluyendo credenciales de cuenta, listas y progreso) se almacena de manera segura utilizando Supabase, una plataforma de base de datos segura de terceros. Sus contraseñas son encriptadas por Supabase y no son accesibles para nosotros.",
         "s4Title": "4. Servicios de Terceros",
-        "s4Text": "CortoCrudo utiliza la interfaz de programación de aplicaciones (API) de TMDb (The Movie Database) para obtener información sobre películas, series e imágenes relacionadas. No compartimos su información personal con TMDb. Su uso de la información provista por TMDb está sujeto a sus propios términos y políticas.",
+        "s4Text": "RawCut utiliza la interfaz de programación de aplicaciones (API) de TMDb (The Movie Database) para obtener información sobre películas, series e imágenes relacionadas. No compartimos su información personal con TMDb. Su uso de la información provista por TMDb está sujeto a sus propios términos y políticas.",
         "s5Title": "5. Derechos del Usuario",
         "s5Text": "Usted tiene el control total sobre sus datos. Puede eliminar su cuenta y toda la información asociada a ella (incluyendo listas de reproducción y recomendaciones) en cualquier momento desde la sección \"Cuenta\" en la pestaña de Perfil.",
         "s6Title": "6. Cambios a esta política",
@@ -187,16 +227,45 @@
     "terms": {
         "title": "Términos de Servicio",
         "lastUpdated": "Última actualización: Febrero 2026",
-        "p1": "Bienvenido a CortoCrudo. Al descargar, acceder o utilizar esta aplicación, usted acepta estar sujeto a los siguientes Términos de Servicio.",
+        "p1": "Bienvenido a RawCut. Al descargar, acceder o utilizar esta aplicación, usted acepta estar sujeto a los siguientes Términos de Servicio.",
         "s1Title": "1. Propósito de la Aplicación",
-        "s1Text": "CortoCrudo es una aplicación diseñada para organizar, rastrear y descubrir contenido de entretenimiento (películas y series de televisión). La aplicación NO proporciona streaming, transmisión o descarga de contenido multimedia protegido por derechos de autor.",
+        "s1Text": "RawCut is an application designed to organize, track, and discover entertainment content (movies and television series). The application DOES NOT provide streaming, broadcasting, or downloading of copyrighted media content.",
         "s2Title": "2. Cuentas de Usuario",
-        "s2Text": "Para utilizar todas las funciones de CortoCrudo, debe crear una cuenta. Usted es responsable de mantener la confidencialidad de sus credenciales de inicio de sesión y de todas las actividades que ocurran bajo su cuenta. CortoCrudo no se hace responsable por ninguna pérdida o daño derivado de su incumplimiento de esta obligación de seguridad.",
+        "s2Text": "Para utilizar todas las funciones de RawCut, debe crear una cuenta. Usted es responsable de mantener la confidencialidad de sus credenciales de inicio de sesión y de todas las actividades que ocurran bajo su cuenta. RawCut no se hace responsable por ninguna pérdida o daño derivado de su incumplimiento de esta obligación de seguridad.",
         "s3Title": "3. Uso Aceptable",
-        "s3Text": "Usted acepta utilizar CortoCrudo solo para fines lícitos y de una manera que no infrinja los derechos de, restrinja o inhiba el uso de la aplicación por parte de terceros. No debe utilizar la aplicación para transmitir contenido malicioso, acosar a otros usuarios o intentar acceder a información de otros usuarios.",
+        "s3Text": "Usted acepta utilizar RawCut solo para fines lícitos y de una manera que no infrinja los derechos de, restrinja o inhiba el uso de la aplicación por parte de terceros. No debe utilizar la aplicación para transmitir contenido malicioso, acosar a otros usuarios o intentar acceder a información de otros usuarios.",
         "s4Title": "4. Descargo de Responsabilidad de TMDb",
         "s4Text": "Este producto utiliza la API de TMDb (The Movie Database) para proporcionar metadatos e imágenes pero NO está respaldado, certificado ni afiliado a TMDb. Toda la información relacionada con películas y series es propiedad de TMDb y de sus respectivos autores/creadores.",
         "s5Title": "5. Modificación de los Términos",
         "s5Text": "Nos reservamos el derecho de modificar o reemplazar estos Términos en cualquier momento. Si publicamos una actualización, el uso continuado de la aplicación constituirá su aceptación de los nuevos términos."
+    },
+    "details": {
+        "notFound": "Película no encontrada",
+        "tvNotFound": "Serie no encontrada",
+        "recommend": "Recomendar",
+        "overview": "Sinopsis",
+        "noOverview": "Sin descripción disponible",
+        "directing": "Dirección",
+        "production": "Producción",
+        "creation": "Creación",
+        "creator": "Creador",
+        "cast": "Reparto",
+        "related": "Relacionadas",
+        "seasons": "Temporadas",
+        "next": "SIGUIENTE"
+    },
+    "disclaimer": {
+        "badge": "Fuente de datos",
+        "text": "La información sobre películas y series (títulos, sinopsis, pósters, fechas de estreno y valoraciones) es proporcionada por <0>The Movie Database (TMDB)</0>. Esta aplicación utiliza la API de TMDB pero no está respaldada ni certificada por TMDB.",
+        "ratingTitle": "¿Cómo se calcula la puntuación?",
+        "ratingTmdb": "La puntuación <0>⭐ TMDB</0> refleja la valoración media de los usuarios de The Movie Database.",
+        "ratingCommunity": "La puntuación <0>👥 Comunidad</0> refleja el promedio de votos (0-10) de los usuarios de esta aplicación."
+    },
+    "person": {
+        "notFound": "Persona no encontrada",
+        "biography": "Biografía",
+        "noBiography": "No hay biografía disponible para esta persona.",
+        "cast": "Como Actor/Actriz",
+        "crew": "En Producción / Dirección"
     }
 }

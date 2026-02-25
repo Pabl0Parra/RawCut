@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../src/constants/Colors';
 
 export default function TermsOfServiceScreen(): React.JSX.Element {
+    const { t } = useTranslation();
     const router = useRouter();
 
     return (
@@ -14,57 +16,40 @@ export default function TermsOfServiceScreen(): React.JSX.Element {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={Colors.white} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Términos de Servicio</Text>
+                <Text style={styles.headerTitle}>{t('terms.title')}</Text>
                 <View style={styles.headerRight} />
             </View>
 
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-                <Text style={styles.lastUpdated}>Última actualización: Febrero 2026</Text>
+                <Text style={styles.lastUpdated}>{t('terms.lastUpdated')}</Text>
 
                 <Text style={styles.paragraph}>
-                    Bienvenido a CortoCrudo. Al descargar, acceder o utilizar esta aplicación,
-                    usted acepta estar sujeto a los siguientes Términos de Servicio.
+                    {t('terms.p1')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>1. Propósito de la Aplicación</Text>
+                <Text style={styles.sectionTitle}>{t('terms.s1Title')}</Text>
                 <Text style={styles.paragraph}>
-                    CortoCrudo es una aplicación diseñada para organizar, rastrear y descubrir
-                    contenido de entretenimiento (películas y series de televisión). La aplicación
-                    NO proporciona streaming, transmisión o descarga de contenido multimedia
-                    protegido por derechos de autor.
+                    {t('terms.s1Text')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>2. Cuentas de Usuario</Text>
+                <Text style={styles.sectionTitle}>{t('terms.s2Title')}</Text>
                 <Text style={styles.paragraph}>
-                    Para utilizar todas las funciones de CortoCrudo, debe crear una cuenta.
-                    Usted es responsable de mantener la confidencialidad de sus credenciales
-                    de inicio de sesión y de todas las actividades que ocurran bajo su cuenta.
-                    CortoCrudo no se hace responsable por ninguna pérdida o daño derivado de
-                    su incumplimiento de esta obligación de seguridad.
+                    {t('terms.s2Text')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>3. Uso Aceptable</Text>
+                <Text style={styles.sectionTitle}>{t('terms.s3Title')}</Text>
                 <Text style={styles.paragraph}>
-                    Usted acepta utilizar CortoCrudo solo para fines lícitos y de una manera que
-                    no infrinja los derechos de, restrinja o inhiba el uso de la aplicación por
-                    parte de terceros. No debe utilizar la aplicación para transmitir contenido
-                    malicioso, acosar a otros usuarios o intentar acceder a información de otros
-                    usuarios.
+                    {t('terms.s3Text')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>4. Descargo de Responsabilidad de TMDb</Text>
+                <Text style={styles.sectionTitle}>{t('terms.s4Title')}</Text>
                 <Text style={styles.paragraph}>
-                    Este producto utiliza la API de TMDb (The Movie Database) para proporcionar
-                    metadatos e imágenes pero NO está respaldado, certificado ni afiliado a TMDb.
-                    Toda la información relacionada con películas y series es propiedad de TMDb
-                    y de sus respectivos autores/creadores.
+                    {t('terms.s4Text')}
                 </Text>
 
-                <Text style={styles.sectionTitle}>5. Modificación de los Términos</Text>
+                <Text style={styles.sectionTitle}>{t('terms.s5Title')}</Text>
                 <Text style={styles.paragraph}>
-                    Nos reservamos el derecho de modificar o reemplazar estos Términos en
-                    cualquier momento. Si publicamos una actualización, el uso continuado de la
-                    aplicación constituirá su aceptación de los nuevos términos.
+                    {t('terms.s5Text')}
                 </Text>
 
             </ScrollView>

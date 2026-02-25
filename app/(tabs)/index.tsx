@@ -26,6 +26,7 @@ import {
     Ionicons,
 } from "@expo/vector-icons";
 import { useFocusEffect, router } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import MovieCard from "../../src/components/MovieCard";
@@ -241,7 +242,7 @@ const MovieCardItem = memo(({
 });
 
 export default function HomeScreen(): JSX.Element {
-
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<ContentTab>("movies");
 
 
@@ -653,7 +654,7 @@ export default function HomeScreen(): JSX.Element {
         return (
             <View style={styles.continueSection}>
                 <View style={styles.continueHeader}>
-                    <Text style={styles.continueTitle}>Continuar Viendo</Text>
+                    <Text style={styles.continueTitle}>{t("home.continueWatching")}</Text>
                     <TouchableOpacity onPress={handleDismissContinue}>
                         <Ionicons name="close-circle" size={24} color={Colors.metalSilver} />
                     </TouchableOpacity>
@@ -676,7 +677,7 @@ export default function HomeScreen(): JSX.Element {
             onPress={() => setSortBy(option.value)}
         >
             <Text style={[styles.optionText, sortBy === option.value && styles.activeOptionText]}>
-                {option.label}
+                {t(option.translationKey)}
             </Text>
         </TouchableOpacity>
     );
@@ -700,7 +701,7 @@ export default function HomeScreen(): JSX.Element {
             return (
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color={Colors.bloodRed} />
-                    <Text style={styles.loadingText}>Preparando recomendaciones...</Text>
+                    <Text style={styles.loadingText}>{t("common.loading")}</Text>
                 </View>
             );
         }
@@ -742,7 +743,7 @@ export default function HomeScreen(): JSX.Element {
             return (
                 <View style={styles.centerContainer}>
                     <ActivityIndicator size="large" color={Colors.bloodRed} />
-                    <Text style={styles.loadingText}>Cargando contenido...</Text>
+                    <Text style={styles.loadingText}>{t("common.loadingContent")}</Text>
                 </View>
             );
         }
@@ -751,7 +752,7 @@ export default function HomeScreen(): JSX.Element {
             return (
                 <View style={styles.centerContainer}>
                     <Text style={styles.emptyIcon}>🎬</Text>
-                    <Text style={styles.emptyText}>No se encontraron resultados</Text>
+                    <Text style={styles.emptyText}>{t("common.noResults")}</Text>
                 </View>
             );
         }
@@ -827,7 +828,7 @@ export default function HomeScreen(): JSX.Element {
                                         activeTab === "foryou" ? styles.activeTabText : styles.inactiveTabText,
                                     ]}
                                 >
-                                    Para ti
+                                    {t("tabs.foryou")}
                                 </Text>
                             </View>
                         </TouchableOpacity>
@@ -848,7 +849,7 @@ export default function HomeScreen(): JSX.Element {
                                         activeTab === "movies" ? styles.activeTabText : styles.inactiveTabText,
                                     ]}
                                 >
-                                    Películas
+                                    {t("tabs.movies")}
                                 </Text>
                             </View>
                         </TouchableOpacity>
@@ -869,7 +870,7 @@ export default function HomeScreen(): JSX.Element {
                                         activeTab === "tv" ? styles.activeTabText : styles.inactiveTabText,
                                     ]}
                                 >
-                                    Series
+                                    {t("tabs.tv")}
                                 </Text>
                             </View>
                         </TouchableOpacity>
@@ -886,10 +887,10 @@ export default function HomeScreen(): JSX.Element {
                             <Ionicons name="sparkles" size={20} color={Colors.white} />
                             <View style={styles.profileBannerTextContainer}>
                                 <Text style={styles.profileBannerTitle}>
-                                    ¡Dale estilo a tu cuenta!
+                                    {t("home.bannerTitle")}
                                 </Text>
                                 <Text style={styles.profileBannerSubtitle}>
-                                    Cambia tu nombre de usuario genérico en tu perfil.
+                                    {t("home.bannerSubtitle")}
                                 </Text>
                             </View>
                             <TouchableOpacity
@@ -911,7 +912,7 @@ export default function HomeScreen(): JSX.Element {
                             <View style={styles.searchWrapper}>
                                 <TextInput
                                     style={styles.searchInput}
-                                    placeholder="Buscar..."
+                                    placeholder={t("common.searchPlaceholder")}
                                     placeholderTextColor={Colors.metalSilver}
                                     value={searchQuery}
                                     onChangeText={setSearchQuery}
@@ -942,7 +943,7 @@ export default function HomeScreen(): JSX.Element {
 
                         {filtersActive && (
                             <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
-                                <Text style={styles.clearFiltersText}>Limpiar filtros activos</Text>
+                                <Text style={styles.clearFiltersText}>{t("common.clearFilters")}</Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -974,22 +975,22 @@ export default function HomeScreen(): JSX.Element {
                                 </View>
                                 <SmokeBackground />
                                 <View style={styles.modalHeader}>
-                                    <Text style={styles.modalTitle}>Filtrar</Text>
+                                    <Text style={styles.modalTitle}>{t("common.filter")}</Text>
                                     <TouchableOpacity onPress={handleCloseFilters}>
                                         <Text style={styles.closeButtonText}>✕</Text>
                                     </TouchableOpacity>
                                 </View>
 
                                 <ScrollView contentContainerStyle={styles.modalContent}>
-                                    <Text style={styles.sectionHeader}>Ordenar Por</Text>
+                                    <Text style={styles.sectionHeader}>{t("common.sortBy")}</Text>
                                     <View style={styles.optionsRow}>
                                         {SORT_OPTIONS.map(renderSortOption)}
                                     </View>
 
-                                    <Text style={styles.sectionHeader}>Año de Lanzamiento</Text>
+                                    <Text style={styles.sectionHeader}>{t("common.releaseYear")}</Text>
                                     <TextInput
                                         style={styles.yearInput}
-                                        placeholder="Ej. 2023"
+                                        placeholder={t("common.exampleYear")}
                                         placeholderTextColor={Colors.textPlaceholder}
                                         keyboardType="number-pad"
                                         value={selectedYear}
@@ -997,7 +998,7 @@ export default function HomeScreen(): JSX.Element {
                                         maxLength={4}
                                     />
 
-                                    <Text style={styles.sectionHeader}>Género</Text>
+                                    <Text style={styles.sectionHeader}>{t("common.genre")}</Text>
                                     <View style={styles.genresRow}>
                                         {genres.map(renderGenreChip)}
                                     </View>
@@ -1005,7 +1006,7 @@ export default function HomeScreen(): JSX.Element {
 
                                 <View style={styles.modalFooter}>
                                     <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
-                                        <Text style={styles.applyButtonText}>Aplicar Filtros</Text>
+                                        <Text style={styles.applyButtonText}>{t("common.applyFilters")}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </Animated.View>
