@@ -44,7 +44,7 @@ export const loadTVShowData = async (
     ]);
 
     return {
-        tvShow: tvShowDetails,
+        tvShow: tvShowDetails as NonNullable<typeof tvShowDetails>,
         relatedShows: relatedResponse.results,
         trailerKey: extractTrailerKey(videosResponse.results),
     };

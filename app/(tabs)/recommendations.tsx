@@ -44,6 +44,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
         markCommentsAsRead,
         deleteComment,
         deleteRecommendation,
+        fetchRecommendations,
     } = useRecommendationStore();
 
     const [state, setState] = useState<RecommendationsScreenState>(INITIAL_RECOMMENDATIONS_STATE);
@@ -143,6 +144,8 @@ export default function RecommendationsScreen(): React.JSX.Element {
     const data = activeTab === "received"
         ? (received as RecommendationWithRelations[])
         : (sent as RecommendationWithRelations[]);
+
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const isReceived = activeTab === "received";
 
@@ -261,6 +264,12 @@ export default function RecommendationsScreen(): React.JSX.Element {
                 data={data}
                 renderItem={renderItem}
                 keyExtractor={keyExtractor}
+                onRefresh={async () => {
+                    setIsRefreshing(true);
+                    await fetchRecommendations({ force: true });
+                    setIsRefreshing(false);
+                }}
+                refreshing={isRefreshing}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
             />

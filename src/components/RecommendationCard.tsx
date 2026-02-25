@@ -110,7 +110,12 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 {
                     text: "Eliminar",
                     style: "destructive",
-                    onPress: () => onDeleteRecommendation(item.id),
+                    onPress: async () => {
+                        const success = await onDeleteRecommendation(item.id);
+                        if (!success) {
+                            Alert.alert("Error", "No se pudo eliminar la recomendación. Inténtalo de nuevo.");
+                        }
+                    },
                 },
             ]
         );
@@ -198,7 +203,12 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                                                 </Text>
                                                 {(isCurrentUser || isReceived) && (
                                                     <TouchableOpacity
-                                                        onPress={() => onDeleteComment(item.id, comment.id)}
+                                                        onPress={async () => {
+                                                            const success = await onDeleteComment(item.id, comment.id);
+                                                            if (!success) {
+                                                                Alert.alert("Error", "No se pudo eliminar el comentario.");
+                                                            }
+                                                        }}
                                                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                                                     >
                                                         <Ionicons name="trash-outline" size={14} color={Colors.metalSilver} />

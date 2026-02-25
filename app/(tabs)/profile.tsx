@@ -14,8 +14,10 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
+import { Modal } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useRouter } from "expo-router";
+import { useRouter, Link } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 import { useContentStore } from "../../src/stores/contentStore";
@@ -23,6 +25,12 @@ import { useAvatarUpload } from "../../src/hooks/useAvatarUpload";
 import { Colors } from "../../src/constants/Colors";
 
 const APP_VERSION = "1.0.0";
+
+const LANGUAGES = [
+    { code: "es", label: "Español" },
+    { code: "en", label: "English" },
+    { code: "ca", label: "Català" },
+];
 
 const LINKS = {
     help: "https://cortoCrudo.app/help",
@@ -66,6 +74,7 @@ function AvatarSection({
     uploadProgress,
     onPress,
 }: Readonly<AvatarSectionProps>): React.JSX.Element {
+    const { t } = useTranslation();
     const initials = getInitials(username, email);
 
     return (
@@ -178,7 +187,10 @@ function SettingsRow({
     return (
         <TouchableOpacity
             style={styles.settingsRow}
-            onPress={onPress}
+            onPress={() => {
+                console.log(`[SettingsRow] Pressed: ${label}`);
+                onPress();
+            }}
             activeOpacity={0.7}
             accessibilityLabel={label}
             accessibilityRole="button"
@@ -300,6 +312,8 @@ export default function ProfileScreen(): React.JSX.Element {
     } = useAvatarUpload();
 
     const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
+    const { t, i18n } = useTranslation();
 
     const isGenericUsername = profile?.username?.startsWith("user_");
 
@@ -318,7 +332,7 @@ export default function ProfileScreen(): React.JSX.Element {
             style?: "cancel" | "destructive";
         }> = [
                 {
-                    text: "Tomar foto",
+                    text: t("profile.avatar.takePhoto"),
                     onPress: () => {
                         (async () => {
                             if (user?.id) {
@@ -331,7 +345,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     },
                 },
                 {
-                    text: "Elegir de galería",
+                    text: t("profile.avatar.chooseGallery"),
                     onPress: () => {
                         (async () => {
                             if (user?.id) {
@@ -348,7 +362,7 @@ export default function ProfileScreen(): React.JSX.Element {
 
         if (profile?.avatar_url) {
             options.push({
-                text: "Eliminar foto",
+                text: t("profile.avatar.deletePhoto"),
                 style: "destructive",
                 onPress: () => {
                     (async () => {
@@ -363,10 +377,10 @@ export default function ProfileScreen(): React.JSX.Element {
             });
         }
 
-        options.push({ text: "Cancelar", style: "cancel" });
+        options.push({ text: t("profile.avatar.cancel"), style: "cancel" });
 
-        Alert.alert("Foto de perfil", "Elige una opción", options);
-    }, [user?.id, profile?.avatar_url, pickAndUploadAvatar, deleteAvatar, fetchProfile]);
+        Alert.alert(t("profile.avatar.title"), t("profile.avatar.subtitle"), options);
+    }, [user?.id, profile?.avatar_url, pickAndUploadAvatar, deleteAvatar, fetchProfile, t]);
 
 
     const handleUpdateUsername = useCallback(
@@ -374,7 +388,7 @@ export default function ProfileScreen(): React.JSX.Element {
             const success = await updateUsername(newUsername);
             if (success) {
                 setIsEditingUsername(false);
-                Alert.alert("Éxito", "Nombre de usuario actualizado");
+                Alert.alert(t("profile.alerts.success"), t("profile.alerts.successUsername"));
             }
         },
         [updateUsername]
@@ -383,24 +397,24 @@ export default function ProfileScreen(): React.JSX.Element {
 
     const handleSignOut = useCallback(() => {
         Alert.alert(
-            "Cerrar sesión",
-            "¿Estás seguro de que quieres cerrar sesión?",
+            t("profile.alerts.signOutTitle"),
+            t("profile.alerts.signOutText"),
             [
-                { text: "Cancelar", style: "cancel" },
-                { text: "Cerrar sesión", style: "destructive", onPress: signOut },
+                { text: t("profile.actions.cancel"), style: "cancel" },
+                { text: t("profile.actions.signOut"), style: "destructive", onPress: signOut },
             ]
         );
-    }, [signOut]);
+    }, [signOut, t]);
 
 
     const handleDeleteAccount = useCallback(() => {
         Alert.alert(
-            "Eliminar cuenta",
-            "Esta acción es irreversible. Se eliminarán todos tus datos, listas y recomendaciones. ¿Estás seguro de que quieres continuar?",
+            t("profile.alerts.deleteAccountTitle"),
+            t("profile.alerts.deleteAccountText"),
             [
-                { text: "Cancelar", style: "cancel" },
+                { text: t("profile.actions.cancel"), style: "cancel" },
                 {
-                    text: "Eliminar cuenta definitivamente",
+                    text: t("profile.alerts.deleteAccountConfirm"),
                     style: "destructive",
                     onPress: () => {
                         (async () => {
@@ -418,13 +432,13 @@ export default function ProfileScreen(): React.JSX.Element {
                                 clearRecommendations();
 
                                 Alert.alert(
-                                    "Cuenta eliminada",
-                                    "Tu cuenta y todos tus datos han sido eliminados correctamente."
+                                    t("profile.alerts.accountDeletedTitle"),
+                                    t("profile.alerts.accountDeletedText")
                                 );
                             } else {
                                 Alert.alert(
-                                    "Error",
-                                    "No se pudo eliminar la cuenta. Por favor, intenta de nuevo o contacta a soporte."
+                                    t("profile.alerts.errorTitle"),
+                                    t("profile.alerts.errorDeleteAccount")
                                 );
                             }
                         })();
@@ -432,12 +446,12 @@ export default function ProfileScreen(): React.JSX.Element {
                 },
             ]
         );
-    }, [user?.id, profile?.avatar_url, deleteAccount, deleteAvatar, clearContent, clearRecommendations]);
+    }, [user?.id, profile?.avatar_url, deleteAccount, deleteAvatar, clearContent, clearRecommendations, t]);
 
 
     const showComingSoon = useCallback((feature: string) => {
-        Alert.alert("Próximamente", `${feature} estará disponible pronto.`);
-    }, []);
+        Alert.alert(t("profile.alerts.comingSoonTitle"), `${feature} ${t("profile.alerts.comingSoonText")}`);
+    }, [t]);
 
 
     useEffect(() => {
@@ -452,7 +466,7 @@ export default function ProfileScreen(): React.JSX.Element {
             <KeyboardAwareScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
+                keyboardShouldPersistTaps="always"
                 showsVerticalScrollIndicator={false}
                 extraScrollHeight={Platform.select({ ios: 20, android: 40 })}
             >
@@ -485,7 +499,7 @@ export default function ProfileScreen(): React.JSX.Element {
                             color={Colors.bloodRed}
                         />
                         <Text style={styles.genericPromptText}>
-                            Aún tienes un nombre genérico. ¡Personaliza tu perfil!
+                            {t("profile.genericUsername")}
                         </Text>
                         <Ionicons name="chevron-forward" size={18} color={Colors.bloodRed} />
                     </TouchableOpacity>
@@ -493,7 +507,7 @@ export default function ProfileScreen(): React.JSX.Element {
 
                 { }
                 <View style={styles.section}>
-                    <SectionHeader title="Información del perfil" />
+                    <SectionHeader title={t("profile.sections.info")} />
 
                     {isEditingUsername ? (
                         <UsernameEditor
@@ -509,7 +523,7 @@ export default function ProfileScreen(): React.JSX.Element {
                     ) : (
                         <InfoRow
                             icon="person-outline"
-                            label="Nombre de usuario"
+                            label={t("profile.fields.username")}
                             value={`@${profile?.username ?? "usuario"}`}
                             isEditable
                             onEdit={() => setIsEditingUsername(true)}
@@ -518,13 +532,13 @@ export default function ProfileScreen(): React.JSX.Element {
 
                     <InfoRow
                         icon="mail-outline"
-                        label="Correo electrónico"
+                        label={t("profile.fields.email")}
                         value={user?.email ?? "—"}
                     />
 
                     <InfoRow
                         icon="calendar-outline"
-                        label="Miembro desde"
+                        label={t("profile.fields.memberSince")}
                         value={
                             profile?.created_at
                                 ? formatMemberSince(profile.created_at)
@@ -535,46 +549,47 @@ export default function ProfileScreen(): React.JSX.Element {
 
                 { }
                 <View style={styles.section}>
-                    <SectionHeader title="Configuración" />
+                    <SectionHeader title={t("profile.sections.settings")} />
 
                     <SettingsRow
                         icon="notifications-outline"
-                        label="Notificaciones"
-                        onPress={() => showComingSoon("Notificaciones")}
+                        label={t("profile.settings.notifications")}
+                        onPress={() => showComingSoon(t("profile.settings.notifications"))}
                     />
 
                     <SettingsRow
                         icon="moon-outline"
-                        label="Tema"
-                        onPress={() => showComingSoon("Selección de tema")}
+                        label={t("profile.settings.theme")}
+                        onPress={() => showComingSoon(t("profile.settings.theme"))}
                     />
 
                     <SettingsRow
                         icon="language-outline"
-                        label="Idioma"
-                        onPress={() => showComingSoon("Selección de idioma")}
+                        label={t("profile.settings.language")}
+                        onPress={() => setIsLanguageModalVisible(true)}
+                        rightElement={<Text style={styles.languageText}>{LANGUAGES.find(l => l.code === i18n.language)?.label || "Español"}</Text>}
                     />
                 </View>
 
                 { }
                 <View style={styles.section}>
-                    <SectionHeader title="Acerca de" />
+                    <SectionHeader title={t("profile.sections.about")} />
 
                     <SettingsRow
                         icon="help-circle-outline"
-                        label="Centro de ayuda"
+                        label={t("profile.about.helpCenter")}
                         onPress={() => router.push("/help")}
                     />
 
                     <SettingsRow
                         icon="shield-checkmark-outline"
-                        label="Política de privacidad"
+                        label={t("profile.about.privacyPolicy")}
                         onPress={() => router.push("/privacy")}
                     />
 
                     <SettingsRow
                         icon="document-text-outline"
-                        label="Términos de servicio"
+                        label={t("profile.about.termsService")}
                         onPress={() => router.push("/terms")}
                     />
 
@@ -584,18 +599,18 @@ export default function ProfileScreen(): React.JSX.Element {
                             size={22}
                             color={Colors.metalSilver}
                         />
-                        <Text style={styles.settingsLabel}>Versión</Text>
+                        <Text style={styles.settingsLabel}>{t("profile.about.version")}</Text>
                         <Text style={styles.versionText}>{APP_VERSION}</Text>
                     </View>
                 </View>
 
                 { }
                 <View style={styles.section}>
-                    <SectionHeader title="Cuenta" />
+                    <SectionHeader title={t("profile.sections.account")} />
 
                     <SettingsRow
                         icon="trash-outline"
-                        label="Eliminar cuenta"
+                        label={t("profile.actions.deleteAccount")}
                         onPress={handleDeleteAccount}
                         destructive
                     />
@@ -608,15 +623,64 @@ export default function ProfileScreen(): React.JSX.Element {
                     activeOpacity={0.8}
                 >
                     <Ionicons name="log-out-outline" size={22} color={Colors.white} />
-                    <Text style={styles.signOutText}>Cerrar Sesión</Text>
+                    <Text style={styles.signOutText}>{t("profile.actions.signOut")}</Text>
                 </TouchableOpacity>
 
                 { }
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>CortoCrudo v{APP_VERSION}</Text>
-                    <Text style={styles.footerAuthor}>Made with ❤️ by Pabl0Parra</Text>
+                    <Text style={styles.footerAuthor}>{t("profile.about.author")}</Text>
                 </View>
             </KeyboardAwareScrollView>
+
+            {/* Modal de Idioma */}
+            <Modal
+                visible={isLanguageModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsLanguageModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setIsLanguageModalVisible(false)}
+                >
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>{t("profile.languageModal.title")}</Text>
+
+                        {LANGUAGES.map((lang) => (
+                            <TouchableOpacity
+                                key={lang.code}
+                                style={[
+                                    styles.languageOption,
+                                    i18n.language === lang.code && styles.languageOptionSelected
+                                ]}
+                                onPress={() => {
+                                    i18n.changeLanguage(lang.code);
+                                    setIsLanguageModalVisible(false);
+                                }}
+                            >
+                                <Text style={[
+                                    styles.languageOptionText,
+                                    i18n.language === lang.code && styles.languageOptionTextSelected
+                                ]}>
+                                    {lang.label}
+                                </Text>
+                                {i18n.language === lang.code && (
+                                    <Ionicons name="checkmark" size={20} color={Colors.bloodRed} />
+                                )}
+                            </TouchableOpacity>
+                        ))}
+
+                        <TouchableOpacity
+                            style={styles.modalCloseButton}
+                            onPress={() => setIsLanguageModalVisible(false)}
+                        >
+                            <Text style={styles.modalCloseText}>{t("profile.languageModal.close")}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </View>
     );
 }
@@ -802,6 +866,11 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         gap: 14,
     } as ViewStyle,
+    languageText: {
+        fontSize: 16,
+        color: Colors.metalSilver,
+        marginRight: 8,
+    } as TextStyle,
     versionText: {
         fontSize: 16,
         color: Colors.metalSilver,
@@ -889,5 +958,63 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 4,
         opacity: 0.4,
+    } as TextStyle,
+
+    // Modal Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: Colors.overlayDark,
+        justifyContent: "flex-end",
+    } as ViewStyle,
+    modalContent: {
+        backgroundColor: Colors.metalGray,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        padding: 24,
+        paddingBottom: Platform.OS === "ios" ? 40 : 24,
+    } as ViewStyle,
+    modalTitle: {
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 20,
+        textAlign: "center",
+    } as TextStyle,
+    languageOption: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        backgroundColor: Colors.metalBlack,
+        borderRadius: 12,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: Colors.glassSilver,
+    } as ViewStyle,
+    languageOptionSelected: {
+        borderColor: Colors.bloodRed,
+        backgroundColor: Colors.glassRedSubtle,
+    } as ViewStyle,
+    languageOptionText: {
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: "500",
+    } as TextStyle,
+    languageOptionTextSelected: {
+        color: Colors.bloodRed,
+        fontWeight: "bold",
+    } as TextStyle,
+    modalCloseButton: {
+        marginTop: 12,
+        paddingVertical: 16,
+        alignItems: "center",
+        borderRadius: 12,
+        backgroundColor: Colors.metalBlack,
+    } as ViewStyle,
+    modalCloseText: {
+        color: Colors.metalSilver,
+        fontSize: 16,
+        fontWeight: "bold",
     } as TextStyle,
 });

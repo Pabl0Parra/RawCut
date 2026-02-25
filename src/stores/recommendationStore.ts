@@ -17,9 +17,10 @@ interface RecommendationState {
     isLoading: boolean;
     error: string | null;
     unreadCount: number;
+    lastFetched: number | null;
 
 
-    fetchRecommendations: () => Promise<void>;
+    fetchRecommendations: (options?: { force?: boolean }) => Promise<void>;
     addComment: (recommendationId: string, text: string) => Promise<boolean>;
     deleteComment: (recommendationId: string, commentId: string) => Promise<boolean>;
     deleteRecommendation: (recommendationId: string) => Promise<boolean>;
@@ -111,10 +112,20 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
     isLoading: false,
     error: null,
     unreadCount: 0,
+    lastFetched: null,
 
-    fetchRecommendations: async () => {
+    fetchRecommendations: async (options = {}) => {
+        const { force = false } = options;
         const user = useAuthStore.getState().user;
         if (!user) return;
+
+        // Simple cache: if fetched less than 30 seconds ago, skip unless forced
+        const now = Date.now();
+        const lastFetched = get().lastFetched;
+        if (!force && lastFetched && now - lastFetched < 30000) {
+            console.log("[RecommendationStore] Skipping fetch (recently updated)");
+            return;
+        }
 
         set({ isLoading: true, error: null });
 
@@ -154,6 +165,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 received,
                 isLoading: false,
                 unreadCount: calculateUnreadCount(sent, received, user.id),
+                lastFetched: Date.now(),
             });
         } catch (err) {
             console.error("Error fetching recommendations:", err);
@@ -197,7 +209,10 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 .delete()
                 .eq("id", commentId);
 
-            if (error) throw error;
+            if (error) {
+                console.error("[RecommendationStore] DB Delete Comment Error:", error);
+                throw error;
+            }
 
             set((state) => ({
                 sent: removeCommentFromRecs(state.sent, recommendationId, commentId),
@@ -218,7 +233,12 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 .delete()
                 .eq("id", recommendationId);
 
-            if (error) throw error;
+            if (error) {
+                console.error("[RecommendationStore] DB Delete Error:", error);
+                throw error;
+            }
+
+            console.log("[RecommendationStore] Successfully deleted from DB:", recommendationId);
 
             set((state) => ({
                 sent: state.sent.filter((r) => r.id !== recommendationId),

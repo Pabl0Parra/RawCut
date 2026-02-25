@@ -1,0 +1,202 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "loadingContent": "Loading content...",
+        "noResults": "No results found",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "save": "Save",
+        "close": "Close",
+        "searchPlaceholder": "Search...",
+        "search": "Search",
+        "filter": "Filter",
+        "clearFilters": "Clear active filters",
+        "applyFilters": "Apply Filters",
+        "sortBy": "Sort By",
+        "releaseYear": "Release Year",
+        "genre": "Genre",
+        "exampleYear": "E.g. 2023",
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "or": "or",
+        "new": "NEW",
+        "watched": "WATCHED"
+    },
+    "tabs": {
+        "home": "Home",
+        "foryou": "For you",
+        "movies": "Movies",
+        "tv": "TV Shows",
+        "favorites": "Favorites",
+        "watchlist": "Watchlist",
+        "recommendations": "Suggested",
+        "profile": "Profile"
+    },
+    "home": {
+        "continueWatching": "Continue Watching",
+        "bannerTitle": "Style your account!",
+        "bannerSubtitle": "Change your generic username in your profile."
+    },
+    "favorites": {
+        "emptyTitle": "You have no favorites yet",
+        "emptySubtitle": "Explore movies and series to add to your favorites"
+    },
+    "watchlist": {
+        "emptyTitle": "Your watchlist is empty",
+        "emptySubtitle": "Add movies and series you want to watch later"
+    },
+    "recommendations": {
+        "received": "Received",
+        "sent": "Sent",
+        "unauthTitle": "Sign in to see your recommendations",
+        "emptyReceivedTitle": "You have no recommendations",
+        "emptyReceivedSubtitle": "When someone recommends something, it will appear here",
+        "emptySentTitle": "You haven't sent any recommendations",
+        "emptySentSubtitle": "Explore movies and series to recommend to your friends",
+        "deleteTitle": "Delete Recommendation",
+        "deleteText": "Are you sure you want to delete this recommendation? This action cannot be undone.",
+        "from": "From: {{user}}",
+        "to": "To: {{user}}",
+        "comments": "Comments",
+        "writeComment": "Write a comment...",
+        "noComments": "No comments yet.",
+        "you": "You"
+    },
+    "contentGrid": {
+        "unauthTitle": "Sign in to see your list"
+    },
+    "auth": {
+        "loginTitle": "Sign In",
+        "loginSubtitle": "Your movie and series guide",
+        "noAccount": "Don't have an account?",
+        "identifier": "Email or Username",
+        "identifierPlaceholder": "you@email.com or username",
+        "password": "Password",
+        "passwordPlaceholder": "••••••••",
+        "registerTitle": "RawCut",
+        "registerSubtitle": "Create your account",
+        "registerButton": "Create Account",
+        "alreadyAccount": "Already have an account?",
+        "username": "Username",
+        "usernamePlaceholder": "user_123",
+        "email": "Email",
+        "emailPlaceholder": "you@email.com",
+        "passwordMin": "Minimum 8 characters",
+        "confirmPassword": "Confirm Password",
+        "confirmPasswordPlaceholder": "Repeat your password"
+    },
+    "profile": {
+        "title": "Profile",
+        "avatar": {
+            "takePhoto": "Take photo",
+            "chooseGallery": "Choose from gallery",
+            "deletePhoto": "Delete photo",
+            "cancel": "Cancel",
+            "title": "Profile photo",
+            "subtitle": "Choose an option"
+        },
+        "genericUsername": "You still have a generic name. Customize your profile!",
+        "sections": {
+            "info": "Profile information",
+            "settings": "Settings",
+            "about": "About",
+            "account": "Account"
+        },
+        "fields": {
+            "username": "Username",
+            "email": "Email address",
+            "memberSince": "Member since"
+        },
+        "settings": {
+            "notifications": "Notifications",
+            "theme": "Theme",
+            "language": "Language"
+        },
+        "about": {
+            "helpCenter": "Help Center",
+            "privacyPolicy": "Privacy Policy",
+            "termsService": "Terms of Service",
+            "version": "Version",
+            "author": "Made with ❤️ by Pabl0Parra"
+        },
+        "actions": {
+            "deleteAccount": "Delete account",
+            "signOut": "Sign Out",
+            "save": "Save",
+            "cancel": "Cancel"
+        },
+        "alerts": {
+            "successUsername": "Username updated",
+            "success": "Success",
+            "comingSoonTitle": "Coming soon",
+            "comingSoonText": "will be available soon.",
+            "signOutTitle": "Sign out",
+            "signOutText": "Are you sure you want to sign out?",
+            "deleteAccountTitle": "Delete account",
+            "deleteAccountText": "This action is irreversible. All your data, lists, and recommendations will be deleted. Are you sure you want to continue?",
+            "deleteAccountConfirm": "Permanently delete account",
+            "accountDeletedTitle": "Account deleted",
+            "accountDeletedText": "Your account and all your data have been successfully deleted.",
+            "errorTitle": "Error",
+            "errorDeleteAccount": "Could not delete account. Please try again or contact support."
+        },
+        "languageModal": {
+            "title": "Select Language",
+            "close": "Close"
+        }
+    },
+    "help": {
+        "title": "Help Center",
+        "searchPlaceholder": "Search for your question (e.g. recommend, profile)...",
+        "noResults": "We didn't find answers for that search.",
+        "needHelp": "Still need help?",
+        "supportSubtitle": "Send us an email and we will reply as soon as possible.",
+        "contactSupport": "Contact Support",
+        "q1": "What is RawCut?",
+        "a1": "RawCut is your personal app to keep track of the movies and series you have watched, discover new titles, and share recommendations directly with your friends.",
+        "q2": "How do I add a movie to my lists?",
+        "a2": "Search for any movie or series on the Home tab. By selecting it, you will see options to add it to \"Favorites\" or your \"Watchlist\" by tapping the buttons under the poster.",
+        "q3": "How do I recommend a movie to my friends?",
+        "a3": "On the details screen of any title, press the \"Recommend\" button. A screen will open where you can search for your friends by their username, write a message, and send them the recommendation. They will receive it in their \"For you\" tab.",
+        "q4": "Can I watch movies directly in the app?",
+        "a4": "No, RawCut works as a personal diary and recommender. We use the TMDb API to give you all the information and metadata of titles, but we do not provide streaming services.",
+        "q5": "Why don't I see movies in Spanish?",
+        "a5": "If a movie or series does not have an official Spanish translation in the global TMDb database, its original title and synopsis will be shown.",
+        "q6": "How do I change my generic username?",
+        "a6": "Go to the \"Profile\" tab. In the \"Profile Information\" section, press the edit button next to your username to customize it.",
+        "q7": "How do I delete my account?",
+        "a7": "You can permanently delete your account and all its data from the \"Profile\" tab, scrolling down to the \"Account\" section and selecting \"Delete account\"."
+    },
+    "privacy": {
+        "title": "Privacy Policy",
+        "lastUpdated": "Last updated: February 2026",
+        "p1": "At RawCut, we value and respect your privacy. This Privacy Policy describes how we collect, use, and protect your personal information when you use our mobile application.",
+        "s1Title": "1. Information we collect",
+        "s1Text": "We collect information you provide directly to us when you create an account, such as your email address, username (optional), and password. We also collect data about your use of the application, such as the movies and series you add to your favorite lists, your viewing progress, and your recommendations.",
+        "s2Title": "2. Use of information",
+        "s2Text": "We use your personal information solely to provide and improve RawCut's services. This includes authenticating your account, syncing your lists across devices, and enabling social features such as user recommendations.",
+        "s3Title": "3. Storage and Protection",
+        "s3Text": "All personal information (including account credentials, lists, and progress) is securely stored using Supabase, a secure third-party database platform. Your passwords are encrypted by Supabase and are not accessible to us.",
+        "s4Title": "4. Third-Party Services",
+        "s4Text": "RawCut uses the TMDb (The Movie Database) Application Programming Interface (API) to obtain information about movies, series, and related images. We do not share your personal information with TMDb. Your use of the information provided by TMDb is subject to their own terms and policies.",
+        "s5Title": "5. User Rights",
+        "s5Text": "You have complete control over your data. You can delete your account and all information associated with it (including playlists and recommendations) at any time from the \"Account\" section in the Profile tab.",
+        "s6Title": "6. Changes to this policy",
+        "s6Text": "We may update this Privacy Policy occasionally to reflect changes in our practices. We will notify you of any material updates within the application."
+    },
+    "terms": {
+        "title": "Terms of Service",
+        "lastUpdated": "Last updated: February 2026",
+        "p1": "Welcome to RawCut. By downloading, accessing, or using this application, you agree to be bound by the following Terms of Service.",
+        "s1Title": "1. Purpose of the Application",
+        "s1Text": "RawCut is an application designed to organize, track, and discover entertainment content (movies and television series). The application DOES NOT provide streaming, broadcasting, or downloading of copyrighted media content.",
+        "s2Title": "2. User Accounts",
+        "s2Text": "To use all features of RawCut, you must create an account. You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account. RawCut is not liable for any loss or damage arising from your failure to comply with this security obligation.",
+        "s3Title": "3. Acceptable Use",
+        "s3Text": "You agree to use RawCut only for lawful purposes and in a way that does not infringe the rights of, restrict, or inhibit the use of the application by any third party. You must not use the application to transmit malicious content, harass other users, or attempt to access other users' information.",
+        "s4Title": "4. TMDb Disclaimer",
+        "s4Text": "This product uses the TMDb (The Movie Database) API to provide metadata and images but is NOT endorsed, certified, or affiliated with TMDb. All information related to movies and series is the property of TMDb and its respective authors/creators.",
+        "s5Title": "5. modification of Terms",
+        "s5Text": "We reserve the right to modify or replace these Terms at any time. If we post an update, your continued use of the application will constitute your acceptance of the new terms."
+    }
+}

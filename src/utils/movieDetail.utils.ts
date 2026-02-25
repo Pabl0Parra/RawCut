@@ -51,7 +51,7 @@ export const loadMovieData = async (
     ]);
 
     return {
-        movie: movieDetails,
+        movie: movieDetails as NonNullable<typeof movieDetails>,
         relatedMovies: relatedResponse.results,
         trailerKey: extractTrailerKey(videosResponse.results),
     };

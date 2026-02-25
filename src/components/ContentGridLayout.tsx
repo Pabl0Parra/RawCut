@@ -86,7 +86,7 @@ export function ContentGridLayout({
     }
 
     const renderItem = ({ item }: { item: EnrichedContentItem }): JSX.Element => {
-        
+
         const cardItem = {
             id: item.tmdb_id,
             title: item.title,
@@ -102,6 +102,7 @@ export function ContentGridLayout({
             vote_count: 0,
             genre_ids: [],
             popularity: 0,
+            original_language: "en",
         };
 
         return (

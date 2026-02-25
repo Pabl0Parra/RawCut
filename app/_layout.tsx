@@ -1,4 +1,5 @@
 
+import "../src/lib/i18n";
 import { Stack, SplashScreen, useRouter, useSegments } from "expo-router";
 import * as Linking from "expo-linking";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -20,7 +21,7 @@ import {
 import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
 import { supabase } from "../src/lib/supabase";
 import { useAuthStore } from "../src/stores/authStore";
-import { usePushNotifications } from "../src/hooks/usePushNotifications";
+
 import { Colors } from "../src/constants/Colors";
 import SmokeBackground from "../src/components/SmokeBackground";
 import { ThemeProvider, DarkTheme } from "@react-navigation/native";
@@ -106,7 +107,7 @@ export default function RootLayout() {
     const segments = useSegments();
     const router = useRouter();
 
-    usePushNotifications();
+
 
     const [isReady, setIsReady] = useState(false);
     const [initError, setInitError] = useState<string | null>(null);

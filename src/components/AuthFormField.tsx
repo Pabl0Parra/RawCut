@@ -91,7 +91,7 @@ export function AuthFormField<T extends FieldValues>({
         []
     );
 
-    
+
     let inputState: InputState = "default";
     if (error) {
         inputState = "error";
@@ -101,7 +101,7 @@ export function AuthFormField<T extends FieldValues>({
 
     const borderColor = getBorderColor(inputState);
 
-    
+
     let autoComplete: any = "off";
     let textContentType: any = "none";
 
@@ -128,7 +128,7 @@ export function AuthFormField<T extends FieldValues>({
                                 { borderColor },
                             ]}
                             placeholder={placeholder}
-                            placeholderTextColor={Colors.placeholderGray}
+                            placeholderTextColor={Colors.textPlaceholder}
                             value={value}
                             onChangeText={onChange}
                             onFocus={handleFocus()}

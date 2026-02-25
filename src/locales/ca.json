@@ -1,0 +1,202 @@
+{
+    "common": {
+        "loading": "Carregant...",
+        "loadingContent": "Carregant contingut...",
+        "noResults": "No s'han trobat resultats",
+        "cancel": "Cancel·lar",
+        "delete": "Eliminar",
+        "save": "Desar",
+        "close": "Tancar",
+        "searchPlaceholder": "Cercar...",
+        "search": "Cercar",
+        "filter": "Filtrar",
+        "clearFilters": "Netejar filtres actius",
+        "applyFilters": "Aplicar Filtres",
+        "sortBy": "Ordenar Per",
+        "releaseYear": "Any d'Estrena",
+        "genre": "Gènere",
+        "exampleYear": "Ex. 2023",
+        "signIn": "Iniciar Sessió",
+        "signUp": "Registra't",
+        "or": "o",
+        "new": "NOU",
+        "watched": "VIST"
+    },
+    "tabs": {
+        "home": "Inici",
+        "foryou": "Per a tu",
+        "movies": "Pel·lícules",
+        "tv": "Sèries",
+        "favorites": "Preferits",
+        "watchlist": "Watchlist",
+        "recommendations": "Suggerides",
+        "profile": "Perfil"
+    },
+    "home": {
+        "continueWatching": "Continuar Veient",
+        "bannerTitle": "Dona-li estil al teu compte!",
+        "bannerSubtitle": "Canvia el teu nom d'usuari genèric al teu perfil."
+    },
+    "favorites": {
+        "emptyTitle": "Encara no tens preferits",
+        "emptySubtitle": "Explora pel·lícules i sèries per afegir als teus preferits"
+    },
+    "watchlist": {
+        "emptyTitle": "La teva llista està buida",
+        "emptySubtitle": "Afegeix pel·lícules i sèries que vulguis veure més tard"
+    },
+    "recommendations": {
+        "received": "Rebudes",
+        "sent": "Enviades",
+        "unauthTitle": "Inicia sessió per veure les teves recomanacions",
+        "emptyReceivedTitle": "No tens recomanacions",
+        "emptyReceivedSubtitle": "Quan algú et recomani alguna cosa, apareixerà aquí",
+        "emptySentTitle": "No has enviat cap recomanació",
+        "emptySentSubtitle": "Explora pel·lícules i sèries per recomanar als teus amics",
+        "deleteTitle": "Eliminar Recomanació",
+        "deleteText": "Estàs segur que vols eliminar aquesta recomanació? Aquesta acció no es pot desfer.",
+        "from": "De: {{user}}",
+        "to": "Per a: {{user}}",
+        "comments": "Comentaris",
+        "writeComment": "Escriu un comentari...",
+        "noComments": "Encara no hi ha comentaris.",
+        "you": "Tu"
+    },
+    "contentGrid": {
+        "unauthTitle": "Inicia sessió per veure la teva llista"
+    },
+    "auth": {
+        "loginTitle": "Iniciar Sessió",
+        "loginSubtitle": "La teva guia de cinema i sèries",
+        "noAccount": "No tens compte?",
+        "identifier": "Email o Usuari",
+        "identifierPlaceholder": "tu@email.com o usuari",
+        "password": "Contrasenya",
+        "passwordPlaceholder": "••••••••",
+        "registerTitle": "CortoCrudo",
+        "registerSubtitle": "Crea el teu compte",
+        "registerButton": "Crear Compte",
+        "alreadyAccount": "Ja tens compte?",
+        "username": "Nom d'Usuari",
+        "usernamePlaceholder": "usuari_123",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "passwordMin": "Mínim 8 caràcters",
+        "confirmPassword": "Confirmar Contrasenya",
+        "confirmPasswordPlaceholder": "Repeteix la teva contrasenya"
+    },
+    "profile": {
+        "title": "Perfil",
+        "avatar": {
+            "takePhoto": "Fer foto",
+            "chooseGallery": "Tancar de la galeria",
+            "deletePhoto": "Eliminar foto",
+            "cancel": "Cancel·lar",
+            "title": "Foto de perfil",
+            "subtitle": "Tria una opció"
+        },
+        "genericUsername": "Encara tens un nom genèric. Personalitza el teu perfil!",
+        "sections": {
+            "info": "Informació del perfil",
+            "settings": "Configuració",
+            "about": "Quant a",
+            "account": "Compte"
+        },
+        "fields": {
+            "username": "Nom d'usuari",
+            "email": "Correu electrònic",
+            "memberSince": "Membre des de"
+        },
+        "settings": {
+            "notifications": "Notificacions",
+            "theme": "Tema",
+            "language": "Idioma"
+        },
+        "about": {
+            "helpCenter": "Centre d'ajuda",
+            "privacyPolicy": "Política de privadesa",
+            "termsService": "Termes de servei",
+            "version": "Versió",
+            "author": "Made with ❤️ by Pabl0Parra"
+        },
+        "actions": {
+            "deleteAccount": "Eliminar compte",
+            "signOut": "Tancar Sessió",
+            "save": "Desar",
+            "cancel": "Cancel·lar"
+        },
+        "alerts": {
+            "successUsername": "Nom d'usuari actualitzat",
+            "success": "Èxit",
+            "comingSoonTitle": "Aviat",
+            "comingSoonText": "estarà disponible aviat.",
+            "signOutTitle": "Tancar sessió",
+            "signOutText": "Estàs segur que vols tancar sessió?",
+            "deleteAccountTitle": "Eliminar compte",
+            "deleteAccountText": "Aquesta acció és irreversible. S'eliminaran totes les teves dades, llistes i recomanacions. Estàs segur que vols continuar?",
+            "deleteAccountConfirm": "Eliminar compte definitivament",
+            "accountDeletedTitle": "Compte eliminat",
+            "accountDeletedText": "El teu compte i totes les teves dades s'han eliminat correctament.",
+            "errorTitle": "Error",
+            "errorDeleteAccount": "No s'ha pogut eliminar el compte. Si us plau, torna-ho a provar o contacta amb suport."
+        },
+        "languageModal": {
+            "title": "Seleccionar Idioma",
+            "close": "Tancar"
+        }
+    },
+    "help": {
+        "title": "Centre d'Ajuda",
+        "searchPlaceholder": "Cerca el teu dubte (ex. recomanar, perfil)...",
+        "noResults": "No hem trobat respostes per a aquesta cerca.",
+        "needHelp": "Encara necessites ajuda?",
+        "supportSubtitle": "Envia'ns un correu i et respondrem al més aviat possible.",
+        "contactSupport": "Contactar a Suport",
+        "q1": "Què és CortoCrudo?",
+        "a1": "CortoCrudo és la teva aplicació personal per portar un registre de les pel·lícules i sèries que has vist, descobrir nous títols i compartir recomanacions directament amb els teus amics.",
+        "q2": "Com afegeixo una pel·lícula a les meves llistes?",
+        "a2": "Cerca qualsevol pel·lícula o sèrie a la pestanya d'Inici. En seleccionar-la, veuràs opcions per afegir-la a \"Preferits\" o a la teva \"Llista de seguiment\" (Watchlist) tocant els botons sota el pòster.",
+        "q3": "Com recomano una pel·lícula als meus amics?",
+        "a3": "A la pantalla de detalls de qualsevol títol, prem el botó \"Recomanar\". S'obrirà una pantalla on podràs cercar els teus amics pel seu nom d'usuari, escriure un missatge i enviar-los la recomanació. Ells la rebran a la seva pestanya \"Per a tu\".",
+        "q4": "Puc veure les pel·lícules directament a l'app?",
+        "a4": "No, CortoCrudo funciona com un diari i recomanador personal. Utilitzem l'API de TMDb per donar-te tota la informació i metadades dels títols, però no proveïm serveis d'streaming.",
+        "q5": "Per què no veig pel·lícules en català o espanyol?",
+        "a5": "Si una pel·lícula o sèrie no té una traducció oficial a la base de dades global de TMDb, es mostrarà el seu títol i sinopsi original.",
+        "q6": "Com canvio el meu nom d'usuari genèric?",
+        "a6": "Vés a la pestanya de \"Perfil\". A la secció \"Informació del perfil\", prem el botó d'edició al costat del teu nom d'usuari per personalitzar-lo.",
+        "q7": "Com elimino el meu compte?",
+        "a7": "Pots eliminar el teu compte i totes les seves dades permanentment des de la pestanya de \"Perfil\", desplaçant-te cap avall fins a la secció \"Compte\" i seleccionant \"Eliminar compte\"."
+    },
+    "privacy": {
+        "title": "Política de Privadesa",
+        "lastUpdated": "Última actualització: Febrer 2026",
+        "p1": "A CortoCrudo, valorem i respectem la seva privadesa. Aquesta Política de Privadesa descriu com recopilem, utilitzem i protegim la seva informació personal quan utilitza la nostra aplicació mòbil.",
+        "s1Title": "1. Informació que recopilem",
+        "s1Text": "Recopilem la informació que vostè ens proporciona directament en crear un compte, com la seva adreça de correu electrònic, nom d'usuari (opcional) i contrasenya. També recopilem dades sobre el seu ús de l'aplicació, com les pel·lícules i sèries que afegeix a les seves llistes de preferits, el seu progrés de visualització i les seves recomanacions.",
+        "s2Title": "2. Ús de la informació",
+        "s2Text": "Utilitzem la seva informació personal únicament per proporcionar i millorar els serveis de CortoCrudo. Això inclou autenticar el seu compte, sincronitzar les seves llistes entre dispositius i habilitar funcions socials com les recomanacions entre usuaris.",
+        "s3Title": "3. Emmagatzematge i Protecció",
+        "s3Text": "Tota la informació personal (incloent credencials de compte, llistes i progrés) s'emmagatzema de manera segura utilitzant Supabase, una plataforma de base de dades segura de tercers. Les seves contrasenyes són encriptades per Supabase i no són accessibles per a nosaltres.",
+        "s4Title": "4. Serveis de Tercers",
+        "s4Text": "CortoCrudo utilitza la interfície de programació d'aplicacions (API) de TMDb (The Movie Database) per obtenir informació sobre pel·lícules, sèries i imatges relacionades. No compartim la seva informació personal amb TMDb. El seu ús de la informació proveïda per TMDb està subjecte a els seus propis termes i polítiques.",
+        "s5Title": "5. Drets de l'Usuari",
+        "s5Text": "Vostè té el control total sobre les seves dades. Pot eliminar el seu compte i tota la informació associada a ell (incloent llistes de reproducció i recomanacions) en qualsevol moment des de la secció \"Compte\" a la pestanya de Perfil.",
+        "s6Title": "6. Canvis a aquesta política",
+        "s6Text": "Podem actualitzar aquesta Política de Privadesa ocasionalment per reflectir canvis en les nostres pràctiques. Li notificarem qualsevol actualització important dins de l'aplicació."
+    },
+    "terms": {
+        "title": "Termes de Servei",
+        "lastUpdated": "Última actualització: Febrer 2026",
+        "p1": "Benvingut a CortoCrudo. En descarregar, accedir o utilitzar aquesta aplicació, vostè accepta estar subjecte als següents Termes de Servei.",
+        "s1Title": "1. Propòsit de l'Aplicació",
+        "s1Text": "CortoCrudo és una aplicació dissenyada per organitzar, rastrejar i descobrir contingut d'entreteniment (pel·lícules i sèries de televisió). L'aplicació NO proporciona streaming, transmissió o descàrrega de contingut multimèdia protegit per drets d'autor.",
+        "s2Title": "2. Comptes d'Usuari",
+        "s2Text": "Per utilitzar totes les funcions de CortoCrudo, ha de crear un compte. Vostè és responsable de mantenir la confidencialitat de les seves credencials d'inici de sessió i de totes les activitats que ocorrin sota el seu compte. CortoCrudo no es fa responsable per cap pèrdua o dany derivat del seu incompliment d'aquesta obligació de seguretat.",
+        "s3Title": "3. Ús Acceptable",
+        "s3Text": "Vostè accepta utilitzar CortoCrudo només per a fins lícits i d'una manera que no infringeixi els drets de, restringeixi o inhibeixi l'ús de l'aplicació per part de tercers. No ha d'utilitzar l'aplicació per transmetre contingut maliciós, assetjar altres usuaris o intentar accedir a informació d'altres usuaris.",
+        "s4Title": "4. Descàrrec de Responsabilitat de TMDb",
+        "s4Text": "Aquest producte utilitza l'API de TMDb (The Movie Database) per proporcionar metadades i imatges però NO està recolzat, certificat ni afiliat a TMDb. Tota la informació relacionada amb pel·lícules i sèries és propietat de TMDb i dels seus respectius autors/creadors.",
+        "s5Title": "5. Modificació dels Termes",
+        "s5Text": "Ens reservem el dret de modificar o reemplaçar aquests Termes en qualsevol moment. Si publiquem una actualització, l'ús continuat de l'aplicació constituirà la seva acceptació dels nous termes."
+    }
+}
