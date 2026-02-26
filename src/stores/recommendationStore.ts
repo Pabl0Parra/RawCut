@@ -140,6 +140,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
           rating:ratings(*)
         `)
                 .eq("sender_id", user.id)
+                .eq("sender_deleted", false)
                 .order("created_at", { ascending: false });
 
 
@@ -152,6 +153,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
           rating:ratings(*)
         `)
                 .eq("receiver_id", user.id)
+                .eq("receiver_deleted", false)
                 .order("created_at", { ascending: false });
 
             if (sentError) throw sentError;
@@ -203,15 +205,25 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
     },
 
     deleteComment: async (recommendationId: string, commentId: string) => {
+        const user = useAuthStore.getState().user;
+        console.log(`[RecommendationStore] Attempting to delete comment: ${commentId} for rec: ${recommendationId}. User: ${user?.id}`);
+
         try {
-            const { error } = await supabase
+            const { error, count, data } = await supabase
                 .from("recommendation_comments")
-                .delete()
-                .eq("id", commentId);
+                .delete({ count: 'exact' })
+                .eq("id", commentId)
+                .select();
 
             if (error) {
                 console.error("[RecommendationStore] DB Delete Comment Error:", error);
                 throw error;
+            }
+
+            console.log(`[RecommendationStore] Comment Delete Response - Affected rows: ${count}, Data:`, data);
+
+            if (count === 0) {
+                console.warn("[RecommendationStore] Delete Comment called but 0 rows affected. RLS or ID mismatch?");
             }
 
             set((state) => ({
@@ -221,33 +233,50 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
 
             return true;
         } catch (err) {
-            console.error("Error deleting comment:", err);
+            console.error("[RecommendationStore] Caught error deleting comment:", err);
             return false;
         }
     },
 
     deleteRecommendation: async (recommendationId: string) => {
+        const user = useAuthStore.getState().user;
+        if (!user) return false;
+
+        console.log(`[RecommendationStore] Soft-deleting recommendation ${recommendationId} for user ${user.id}`);
+
         try {
-            const { error } = await supabase
-                .from("recommendations")
-                .delete()
-                .eq("id", recommendationId);
+            // Use RPC (SECURITY DEFINER) to bypass the RLS WITH CHECK issue
+            // that occurs when updating a row whose visibility is controlled by the same columns
+            const { data, error } = await supabase
+                .rpc("soft_delete_recommendation", { p_recommendation_id: recommendationId });
 
             if (error) {
-                console.error("[RecommendationStore] DB Delete Error:", error);
+                console.error("[RecommendationStore] DB Soft-Delete Error:", error);
                 throw error;
             }
 
-            console.log("[RecommendationStore] Successfully deleted from DB:", recommendationId);
+            if (!data) {
+                console.warn("[RecommendationStore] Soft-delete returned false (not authorized or not found)");
+                return false;
+            }
 
-            set((state) => ({
-                sent: state.sent.filter((r) => r.id !== recommendationId),
-                received: state.received.filter((r) => r.id !== recommendationId),
-            }));
+            console.log("[RecommendationStore] Successfully soft-deleted from DB:", recommendationId);
+
+            // Remove from local state and recalculate badge so nav updates immediately
+            // even if the item was deleted without ever being opened (is_read still false)
+            set((state) => {
+                const newSent = state.sent.filter((r) => r.id !== recommendationId);
+                const newReceived = state.received.filter((r) => r.id !== recommendationId);
+                return {
+                    sent: newSent,
+                    received: newReceived,
+                    unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
+                };
+            });
 
             return true;
         } catch (err) {
-            console.error("Error deleting recommendation:", err);
+            console.error("[RecommendationStore] Caught error soft-deleting recommendation:", err);
             return false;
         }
     },

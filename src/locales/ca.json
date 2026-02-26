@@ -252,6 +252,9 @@
         "cast": "Repartiment",
         "related": "Relacionades",
         "seasons": "Temporades",
+        "episodes": "Episodis",
+        "season": "Temporada",
+        "aired": "Emès",
         "next": "SEGÜENT"
     },
     "disclaimer": {

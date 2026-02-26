@@ -62,7 +62,11 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
         message,
         created_at,
         comments,
+        is_read,
     } = item;
+
+    // Unread = received card that hasn't been opened yet
+    const isUnread = isReceived && !is_read;
 
     const posterUrl = getImageUrl(tmdbData.poster, "w200");
 
@@ -155,11 +159,18 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         </Text>
                     </View>
 
-                    <Text style={styles.userText}>
-                        {isReceived
-                            ? t("recommendations.from", { user: sender?.username || t("profile.title") })
-                            : t("recommendations.to", { user: receiver?.username || t("profile.title") })}
-                    </Text>
+                    <View style={styles.userRow}>
+                        <Text style={styles.userText}>
+                            {isReceived
+                                ? t("recommendations.from", { user: sender?.username || t("profile.title") })
+                                : t("recommendations.to", { user: receiver?.username || t("profile.title") })}
+                        </Text>
+                        {isUnread && (
+                            <View style={styles.newBadge}>
+                                <Text style={styles.newBadgeText}>NEW</Text>
+                            </View>
+                        )}
+                    </View>
 
                     {message && (
                         <Text style={styles.note} numberOfLines={isExpanded ? undefined : 2}>
@@ -304,11 +315,28 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
         fontSize: 10,
     } as TextStyle,
+    userRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        marginBottom: 6,
+    } as ViewStyle,
     userText: {
         color: Colors.bloodRed,
         fontSize: 12,
         fontWeight: "600",
-        marginBottom: 6,
+    } as TextStyle,
+    newBadge: {
+        backgroundColor: Colors.bloodRed,
+        borderRadius: 99,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+    } as ViewStyle,
+    newBadgeText: {
+        color: Colors.white,
+        fontSize: 9,
+        fontWeight: "800",
+        letterSpacing: 0.8,
     } as TextStyle,
     note: {
         color: "#e4e4e7",

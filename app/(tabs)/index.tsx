@@ -17,8 +17,8 @@ import {
     StyleSheet,
     Modal,
     ScrollView,
+    Dimensions,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import {
     MaterialCommunityIcons,
     Feather,
@@ -73,9 +73,10 @@ import {
 import { ContinueWatchingCard } from "../../src/components/ContinueWatchingCard";
 import { seasonsToProgressInfo } from "../../src/utils/tvDetail.utils";
 import SmokeBackground from "../../src/components/SmokeBackground";
-import { useForYouContent, type ForYouRecommendation } from "../../src/hooks/useForYouContent";
+import { useForYouContent } from "../../src/hooks/useForYouContent";
 
 const MAX_CONTINUE_WATCHING_ITEMS = 10;
+const { height } = Dimensions.get("window");
 
 interface UseContentLoadingParams {
     activeTab: ContentTab;
@@ -976,8 +977,12 @@ export default function HomeScreen(): JSX.Element {
                                 <SmokeBackground />
                                 <View style={styles.modalHeader}>
                                     <Text style={styles.modalTitle}>{t("common.filter")}</Text>
-                                    <TouchableOpacity onPress={handleCloseFilters}>
-                                        <Text style={styles.closeButtonText}>✕</Text>
+                                    <TouchableOpacity
+                                        onPress={handleCloseFilters}
+                                        style={styles.closeButtonContainer}
+                                        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                                    >
+                                        <Ionicons name="close" size={24} color={Colors.bloodRed} />
                                     </TouchableOpacity>
                                 </View>
 
@@ -1153,31 +1158,38 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
     },
     filterPanel: {
-        flex: 1,
         backgroundColor: Colors.panelBackground,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
         borderTopWidth: 1,
-        borderTopColor: Colors.tmdbBlue,
+        borderTopColor: Colors.panelBorder,
         borderLeftWidth: 1,
-        borderLeftColor: Colors.glassBlue,
+        borderLeftColor: Colors.panelBorder,
         borderRightWidth: 1,
-        borderRightColor: Colors.glassBlue,
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.glassBlue,
+        borderRightColor: Colors.panelBorder,
         overflow: "hidden",
+        elevation: 20,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.5,
+        shadowRadius: 10,
+        maxHeight: height * 0.9,
+        marginTop: 60,
+        padding: 16,
+        paddingTop: 8,
     },
     modalHandleContainer: {
         width: "100%",
-        height: 24,
+        height: 20,
         alignItems: "center",
         justifyContent: "center",
+        marginTop: 8,
         zIndex: 100,
     },
     modalHandle: {
         width: 40,
         height: 4,
-        backgroundColor: Colors.glassWhiteMedium,
+        backgroundColor: "#ffffff22",
         borderRadius: 2,
     },
     modalHeader: {
@@ -1185,7 +1197,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 24,
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
     },
     modalTitle: {
         color: Colors.textPrimary,
@@ -1193,18 +1205,23 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontFamily: "BebasNeue_400Regular",
     },
+    closeButtonContainer: {
+        padding: 4,
+    },
     closeButtonText: {
         color: Colors.bloodRed,
         fontSize: 20,
     },
     modalContent: {
-        paddingBottom: 40,
+        paddingHorizontal: 16,
+        paddingBottom: 24,
     },
     sectionHeader: {
         color: Colors.metalSilver,
         fontSize: 14,
         textTransform: "uppercase",
         letterSpacing: 1,
+        fontFamily: "BebasNeue_400Regular",
         marginBottom: 12,
         marginTop: 16,
     },
@@ -1216,17 +1233,18 @@ const styles = StyleSheet.create({
     optionChip: {
         paddingHorizontal: 16,
         paddingVertical: 8,
-        borderRadius: 9999,
+        borderRadius: 8,
         backgroundColor: Colors.metalGray,
         borderWidth: 1,
-        borderColor: Colors.metalSilver,
+        borderColor: Colors.panelBorder,
     },
     activeOptionChip: {
         backgroundColor: Colors.bloodRed,
         borderColor: Colors.bloodRed,
     },
     optionText: {
-        color: Colors.textPrimary,
+        color: Colors.textMuted,
+        fontSize: 14,
     },
     activeOptionText: {
         color: Colors.white,
@@ -1252,14 +1270,14 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         backgroundColor: Colors.metalGray,
         borderWidth: 1,
-        borderColor: Colors.metalSilver,
+        borderColor: Colors.panelBorder,
     },
     activeGenreChip: {
         backgroundColor: Colors.bloodRed,
         borderColor: Colors.bloodRed,
     },
     genreChipText: {
-        color: Colors.textPrimary,
+        color: Colors.textMuted,
         fontSize: 12,
     },
     activeGenreText: {
@@ -1267,20 +1285,28 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     modalFooter: {
+        paddingHorizontal: 24,
         paddingTop: 16,
         paddingBottom: 48,
     },
     applyButton: {
         backgroundColor: Colors.bloodRed,
-        paddingVertical: 16,
-        borderRadius: 8,
+        paddingVertical: 18,
+        borderRadius: 12,
         alignItems: "center",
+        shadowColor: Colors.bloodRed,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
     },
     applyButtonText: {
         color: Colors.white,
         fontWeight: "bold",
-        fontSize: 16,
+        fontSize: 17,
+        fontFamily: "BebasNeue_400Regular",
         textTransform: "uppercase",
+        letterSpacing: 1.5,
     },
     profileBanner: {
         marginHorizontal: 16,

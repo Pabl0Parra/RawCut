@@ -252,6 +252,9 @@
         "cast": "Reparto",
         "related": "Relacionadas",
         "seasons": "Temporadas",
+        "episodes": "Episodios",
+        "season": "Temporada",
+        "aired": "Emitido",
         "next": "SIGUIENTE"
     },
     "disclaimer": {

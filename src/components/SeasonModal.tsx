@@ -10,7 +10,8 @@ import {
     type ViewStyle,
     type TextStyle,
 } from "react-native";
-
+import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Colors } from "../constants/Colors";
 import EpisodeListItem from "./EpisodeListItem";
 import type { SeasonModalProps } from "../types/tvDetail.types";
@@ -27,9 +28,11 @@ export const SeasonModal: React.FC<SeasonModalProps> = ({
     onSelectEpisode,
     isEpisodeWatched,
 }) => {
+    const { t } = useTranslation();
+
     const modalTitle = seasonNumber === null
-        ? "Episodios"
-        : `Temporada ${seasonNumber}`;
+        ? t("details.episodes")
+        : `${t("details.season")} ${seasonNumber}`;
 
     const handleToggleEpisode = async (episodeNumber: number): Promise<void> => {
         await onToggleEpisode(episodeNumber);
@@ -81,10 +84,16 @@ export const SeasonModal: React.FC<SeasonModalProps> = ({
             onRequestClose={onClose}
         >
             <View style={styles.container}>
+                <View style={styles.modalHandleContainer}>
+                    <View style={styles.modalHandle} />
+                </View>
                 <View style={styles.header}>
                     <Text style={styles.title}>{modalTitle}</Text>
-                    <TouchableOpacity onPress={onClose}>
-                        <Text style={styles.closeButton}>✕</Text>
+                    <TouchableOpacity
+                        onPress={onClose}
+                        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                    >
+                        <Ionicons name="close" size={24} color={Colors.bloodRed} />
                     </TouchableOpacity>
                 </View>
 
@@ -97,8 +106,22 @@ export const SeasonModal: React.FC<SeasonModalProps> = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
+        backgroundColor: Colors.panelBackground,
         padding: 16,
+        paddingTop: 8,
+    } as ViewStyle,
+    modalHandleContainer: {
+        width: "100%",
+        height: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 8,
+    } as ViewStyle,
+    modalHandle: {
+        width: 40,
+        height: 4,
+        backgroundColor: "#ffffff22",
+        borderRadius: 2,
     } as ViewStyle,
     header: {
         flexDirection: "row",

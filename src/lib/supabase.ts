@@ -42,6 +42,8 @@ export interface Recommendation {
     message: string | null;
     is_read: boolean;
     created_at: string;
+    sender_deleted: boolean;
+    receiver_deleted: boolean;
 }
 
 export interface RecommendationComment {

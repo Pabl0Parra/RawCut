@@ -252,6 +252,9 @@
         "cast": "Cast",
         "related": "Related",
         "seasons": "Seasons",
+        "episodes": "Episodes",
+        "season": "Season",
+        "aired": "Aired",
         "next": "NEXT"
     },
     "disclaimer": {

@@ -627,9 +627,14 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     sendButton: {
         backgroundColor: Colors.bloodRed,
-        paddingVertical: 16,
-        borderRadius: 4,
-    } as ViewStyle,
+        paddingVertical: 18,
+        borderRadius: 12,
+        shadowColor: Colors.bloodRed,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
     disabledButton: {
         opacity: 0.5,
     } as ViewStyle,
@@ -638,6 +643,9 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center",
         textTransform: "uppercase",
+        fontSize: 17,
+        fontFamily: "BebasNeue_400Regular",
+        letterSpacing: 1.5,
     } as TextStyle,
 });
 

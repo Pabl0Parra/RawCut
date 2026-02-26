@@ -10,7 +10,9 @@ import {
     type TextStyle,
     type ImageStyle,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 
 import { Colors } from "../constants/Colors";
 import type { EpisodeModalProps } from "../types/tvDetail.types";
@@ -21,6 +23,7 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
     onClose,
     episode,
 }) => {
+    const { t } = useTranslation();
     if (!episode) {
         return null;
     }
@@ -54,12 +57,18 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
             onRequestClose={onClose}
         >
             <View style={styles.container}>
+                <View style={styles.modalHandleContainer}>
+                    <View style={styles.modalHandle} />
+                </View>
                 <View style={styles.header}>
                     <Text style={styles.title} numberOfLines={2}>
                         {modalTitle}
                     </Text>
-                    <TouchableOpacity onPress={onClose}>
-                        <Text style={styles.closeButton}>✕</Text>
+                    <TouchableOpacity
+                        onPress={onClose}
+                        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                    >
+                        <Ionicons name="close" size={24} color={Colors.bloodRed} />
                     </TouchableOpacity>
                 </View>
 
@@ -67,15 +76,15 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
                     {renderStill()}
 
                     <Text style={styles.meta}>
-                        Emitido: {episode.air_date}
+                        {t("details.aired")}: {episode.air_date}
                     </Text>
                     <Text style={styles.rating}>
                         ⭐ {formatRating(episode.vote_average)}/10
                     </Text>
 
-                    <Text style={styles.sectionTitle}>Sinopsis</Text>
+                    <Text style={styles.sectionTitle}>{t("details.overview")}</Text>
                     <Text style={styles.overview}>
-                        {episode.overview || "Sin descripción disponible para este episodio."}
+                        {episode.overview || t("details.noOverview")}
                     </Text>
                 </ScrollView>
             </View>
@@ -86,8 +95,22 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.metalBlack,
+        backgroundColor: Colors.panelBackground,
         padding: 16,
+        paddingTop: 8,
+    } as ViewStyle,
+    modalHandleContainer: {
+        width: "100%",
+        height: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 8,
+    } as ViewStyle,
+    modalHandle: {
+        width: 40,
+        height: 4,
+        backgroundColor: "#ffffff22",
+        borderRadius: 2,
     } as ViewStyle,
     header: {
         flexDirection: "row",

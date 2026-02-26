@@ -105,6 +105,7 @@ CREATE POLICY "View own recommendations" ON recommendations
 CREATE POLICY "Create recommendations" ON recommendations
   FOR INSERT WITH CHECK (auth.uid() = sender_id);
 
+CREATE POLICY "Mark recommendations as read" ON recommendations
   FOR UPDATE USING (auth.uid() = receiver_id)
   WITH CHECK (auth.uid() = receiver_id);
 
