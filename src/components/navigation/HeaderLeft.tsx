@@ -17,7 +17,7 @@ export const HeaderLeft = ({ onPress }: HeaderLeftProps) => (
     >
         <Image
             source={require('../../../assets/icons/metal-hand.png')}
-            style={{ width: 28, height: 28, tintColor: "#fff" }}
+            style={{ width: 28, height: 28, tintColor: "#ffffff" }}
             resizeMode="contain"
         />
     </TouchableOpacity>

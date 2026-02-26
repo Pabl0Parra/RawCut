@@ -200,7 +200,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
 
     const renderLoadingState = (): React.JSX.Element => (
         <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color="#dc2626" />
+            <ActivityIndicator size="large" color={Colors.bloodRed} />
         </View>
     );
 
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     } as TextStyle,
     activeTabText: {
-        color: Colors.metalBlack,
+        color: Colors.white,
     } as TextStyle,
     inactiveTabText: {
         color: Colors.metalSilver,
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     } as TextStyle,
     unauthText: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 18,
         textAlign: "center",
         marginBottom: 8,

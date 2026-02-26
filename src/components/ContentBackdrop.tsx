@@ -2,6 +2,7 @@ import React from "react";
 import { View, TouchableOpacity, Text, Dimensions, StyleSheet, type ViewStyle, type TextStyle } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "../constants/Colors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BACKDROP_ASPECT_RATIO = 0.56;
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
         position: "relative",
     } as ViewStyle,
     backdropPlaceholder: {
-        backgroundColor: "#27272a",
+        backgroundColor: Colors.metalGray,
     } as ViewStyle,
     playButtonOverlay: {
         position: "absolute",

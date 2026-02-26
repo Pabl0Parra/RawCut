@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     } as any,
     emptyTitle: {
-        color: "#f4f4f5",
+        color: Colors.textPrimary,
         fontSize: 18,
         textAlign: "center",
         marginBottom: 8,

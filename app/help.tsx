@@ -135,7 +135,7 @@ export default function HelpCenterScreen(): React.JSX.Element {
                 <TextInput
                     style={styles.searchInput}
                     placeholder={t('help.searchPlaceholder')}
-                    placeholderTextColor="#71717a"
+                    placeholderTextColor={Colors.textPlaceholder}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     autoCapitalize="none"
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.2)',
     } as ViewStyle,
     faqAnswer: {
-        color: '#d4d4d8',
+        color: Colors.textPrimary,
         fontSize: 14,
         lineHeight: 22,
         marginTop: 12,

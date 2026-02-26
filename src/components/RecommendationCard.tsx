@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     } as ViewStyle,
     title: {
-        color: "#fff",
+        color: Colors.white,
         fontSize: 16,
         fontWeight: "bold",
         flex: 1,
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.8,
     } as TextStyle,
     note: {
-        color: "#e4e4e7",
+        color: Colors.textPrimary,
         fontSize: 14,
         fontStyle: "italic",
         marginBottom: 8,
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     } as TextStyle,
     commentText: {
-        color: "#fff",
+        color: Colors.white,
         fontSize: 13,
     } as TextStyle,
     noCommentsText: {
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 12,
         paddingVertical: 8,
-        color: "#fff",
+        color: Colors.white,
         fontSize: 14,
     } as TextStyle,
     sendButton: {

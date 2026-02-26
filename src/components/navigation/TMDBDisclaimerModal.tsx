@@ -130,9 +130,9 @@ const styles = StyleSheet.create({
         padding: 24,
     } as ViewStyle,
     card: {
-        backgroundColor: "#141414ff",
+        backgroundColor: Colors.panelBackground,
         borderWidth: 1,
-        borderColor: "#1e2330",
+        borderColor: Colors.panelBorder,
         borderRadius: 16,
         padding: 20,
         paddingTop: 8,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     modalHandle: {
         width: 40,
         height: 4,
-        backgroundColor: "#ffffff22",
+        backgroundColor: Colors.glassWhiteSubtle,
         borderRadius: 2,
     } as ViewStyle,
     closeButton: {
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     tmdbLogoText: {
         fontSize: 14,
         fontWeight: "bold",
-        color: "#0d0f14",
+        color: Colors.metalBlack,
         letterSpacing: 0.5,
         fontFamily: Fonts.bebas,
     } as TextStyle,
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     } as TextStyle,
     disclaimerText: {
         fontSize: 13,
-        color: "#8892a4",
+        color: Colors.textMuted,
         lineHeight: 20,
         marginBottom: 16,
         fontFamily: Fonts.inter,
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     } as TextStyle,
     ratingText: {
         fontSize: 12,
-        color: "#8892a4",
+        color: Colors.textMuted,
         lineHeight: 19,
         fontFamily: Fonts.inter,
     } as TextStyle,

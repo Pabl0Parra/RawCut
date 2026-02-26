@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     emptyTitle: {
-        color: "#f4f4f5", 
+        color: Colors.textPrimary,
         fontSize: 18,
         textAlign: "center",
         marginBottom: 8,
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         borderRadius: 8,
         overflow: "hidden",
-        borderColor: Colors.metalSilver,
+        borderColor: Colors.panelBorder,
         borderWidth: 1,
     },
     cardImage: {
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     cardTitle: {
-        color: "#f4f4f5", 
+        color: Colors.textPrimary,
         fontWeight: "bold",
         fontSize: 16,
     },
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     cardRating: {
-        color: "#eab308", 
+        color: Colors.tmdbYellow,
         fontSize: 14,
         marginTop: 4,
     },

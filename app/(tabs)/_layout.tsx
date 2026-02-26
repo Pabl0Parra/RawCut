@@ -73,7 +73,7 @@ export default function TabLayout() {
                     },
                     headerTintColor: Colors.white,
                     headerTitleStyle: HEADER_TITLE_STYLE,
-                    headerTitle: "RAW CUT",
+                    headerTitle: "CortoCrudo",
                     headerTitleAlign: "center",
                     headerLeft: renderHeaderLeft,
                     headerRight: renderHeaderRight,
@@ -94,7 +94,7 @@ export default function TabLayout() {
                     name="favorites"
                     options={{
                         title: t("tabs.favorites"),
-                        headerTitle: `RAW CUT - ${t("tabs.favorites").toUpperCase()}`,
+                        headerTitle: `CortoCrudo - ${t("tabs.favorites").toUpperCase()}`,
                         tabBarIcon: FavoritesIcon,
                     }}
                 />
@@ -102,7 +102,7 @@ export default function TabLayout() {
                     name="watchlist"
                     options={{
                         title: t("tabs.watchlist"),
-                        headerTitle: `RAW CUT - ${t("tabs.watchlist").toUpperCase()}`,
+                        headerTitle: `CortoCrudo - ${t("tabs.watchlist").toUpperCase()}`,
                         tabBarIcon: WatchlistIcon,
                     }}
                 />
@@ -110,7 +110,7 @@ export default function TabLayout() {
                     name="recommendations"
                     options={{
                         title: t("tabs.recommendations"),
-                        headerTitle: `RAW CUT - ${t("tabs.recommendations").toUpperCase()}`,
+                        headerTitle: `CortoCrudo - ${t("tabs.recommendations").toUpperCase()}`,
                         tabBarIcon: RecommendationsIcon,
                         tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
                     }}
@@ -119,7 +119,7 @@ export default function TabLayout() {
                     name="profile"
                     options={{
                         title: t("tabs.profile"),
-                        headerTitle: `RAW CUT - ${t("tabs.profile").toUpperCase()}`,
+                        headerTitle: `CortoCrudo - ${t("tabs.profile").toUpperCase()}`,
                         tabBarIcon: ProfileIcon,
                         href: null,
                     }}
@@ -146,7 +146,7 @@ export default function TabLayout() {
                         },
                         headerTintColor: Colors.white,
                         headerTitleStyle: HEADER_TITLE_STYLE,
-                        headerTitle: "RAW CUT",
+                        headerTitle: "CortoCrudo",
                         headerTitleAlign: "center",
                         headerLeft: renderHeaderLeft,
                         headerRight: renderHeaderRight,

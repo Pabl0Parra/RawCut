@@ -137,7 +137,7 @@ export const detailScreenStyles = StyleSheet.create({
     } as ViewStyle,
     backButtonText: {
         fontSize: 28,
-        color: "#fff",
+        color: Colors.white,
         fontWeight: "900",
         top: -5,
     } as TextStyle,

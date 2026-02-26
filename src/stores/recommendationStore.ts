@@ -480,6 +480,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
     },
 
     clearRecommendations: () => {
-        set({ sent: [], received: [], isLoading: false, error: null, unreadCount: 0 });
+        set({ sent: [], received: [], isLoading: false, error: null, unreadCount: 0, lastFetched: null });
     },
 }));

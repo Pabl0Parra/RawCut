@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     paragraph: {
-        color: '#d4d4d8',
+        color: Colors.textPrimary,
         fontSize: 15,
         lineHeight: 24,
         marginBottom: 8,
