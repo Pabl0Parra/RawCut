@@ -229,10 +229,21 @@ export const getPersonCredits = async (id: number): Promise<PersonCredits> => {
     return credits;
 };
 
-export const getImageUrl = (path: string | null, size: "w200" | "w300" | "w500" | "original" = "w500"): string | null => {
+export const getImageUrl = (path: string | null | undefined, size: "w200" | "w300" | "w500" | "original" = "w500"): string | null => {
     if (!path) return null;
-    return `https://image.tmdb.org/t/p/${size}${path}`;
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `https://image.tmdb.org/t/p/${size}${cleanPath}`;
 };
+
+export function isValidTmdbId(id: any): boolean {
+    if (id === null || id === undefined) return false;
+    const num = Number(id);
+    return Number.isInteger(num) && num > 0;
+}
+
+export function getTmdbBaseUrl(): string {
+    return TMDB_BASE_URL;
+}
 
 export interface Genre {
     id: number;
