@@ -270,5 +270,32 @@
         "noBiography": "No hi ha biografia disponible per a aquesta persona.",
         "cast": "Com a Actor/Actriu",
         "crew": "En Producció / Direcció"
+    },
+    "social": {
+        "follow": "Seguir",
+        "following": "Seguint",
+        "pending": "Pendent",
+        "unfollow": "Deixar de seguir",
+        "followers": "seguidors",
+        "followingCount": "seguint",
+        "findFriends": "Amics",
+        "findFriendsHeader": "Buscar Amics",
+        "pendingRequests": "Sol·licituds pendents",
+        "noFollowing": "Encara no segueixes ningú",
+        "noFollowingSubtitle": "Busca amics per compartir recomanacions.",
+        "noFollowers": "Ningú et segueix encara",
+        "searchPlaceholder": "Cerca per nom d'usuari...",
+        "accept": "Acceptar",
+        "decline": "Rebutjar",
+        "emptyModal": "Encara no tens amics 👋",
+        "emptyModalSubtitle": "Segueix algú per poder recomanar-li contingut.",
+        "emptyModalCta": "Buscar amics",
+        "unfollowConfirmTitle": "Deixar de seguir?",
+        "unfollowConfirmText": "No podràs recomanar-li contingut fins que torneu a connectar.",
+        "currentlyFollowing": "Seguint",
+        "errorFollow": "Error en seguir l'usuari",
+        "errorUnfollow": "Error en deixar de seguir",
+        "errorAccept": "Error en acceptar la sol·licitud",
+        "errorDecline": "Error en rebutjar la sol·licitud"
     }
 }

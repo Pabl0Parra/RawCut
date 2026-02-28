@@ -270,5 +270,32 @@
         "noBiography": "No biography available for this person.",
         "cast": "As Actor/Actress",
         "crew": "In Production / Direction"
+    },
+    "social": {
+        "follow": "Follow",
+        "following": "Following",
+        "pending": "Pending",
+        "unfollow": "Unfollow",
+        "followers": "followers",
+        "followingCount": "following",
+        "findFriends": "Friends",
+        "findFriendsHeader": "Find Friends",
+        "pendingRequests": "Pending requests",
+        "noFollowing": "You're not following anyone yet",
+        "noFollowingSubtitle": "Find friends to start sharing recommendations.",
+        "noFollowers": "No one is following you yet",
+        "searchPlaceholder": "Search by username...",
+        "accept": "Accept",
+        "decline": "Decline",
+        "emptyModal": "No friends yet 👋",
+        "emptyModalSubtitle": "Follow someone to start recommending content.",
+        "emptyModalCta": "Find friends",
+        "unfollowConfirmTitle": "Unfollow?",
+        "unfollowConfirmText": "You won't be able to recommend content to them until you reconnect.",
+        "currentlyFollowing": "Following",
+        "errorFollow": "Error following user",
+        "errorUnfollow": "Error unfollowing user",
+        "errorAccept": "Error accepting request",
+        "errorDecline": "Error declining request"
     }
 }

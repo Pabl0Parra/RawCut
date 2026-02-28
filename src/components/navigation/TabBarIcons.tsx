@@ -27,3 +27,7 @@ export const RecommendationsIcon = ({ color, focused }: TabBarIconProps) => (
 export const ProfileIcon = ({ color, focused }: TabBarIconProps) => (
     <MaterialCommunityIcons name={focused ? "shield-sword" : "shield-sword-outline"} size={ICON_SIZE} color={color} />
 );
+
+export const FriendsIcon = ({ color, focused }: TabBarIconProps) => (
+    <Ionicons name={focused ? "people" : "people-outline"} size={ICON_SIZE} color={color} />
+);

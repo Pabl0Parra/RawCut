@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 import { useContentStore } from "../../src/stores/contentStore";
+import { useSocialStore } from "../../src/stores/socialStore";
 import { useAvatarUpload } from "../../src/hooks/useAvatarUpload";
 import { Colors } from "../../src/constants/Colors";
 
@@ -121,6 +122,33 @@ interface SectionHeaderProps {
 function SectionHeader({ title }: Readonly<SectionHeaderProps>): React.JSX.Element {
     return <Text style={styles.sectionTitle}>{title}</Text>;
 }
+
+function SocialStatsRow(): React.JSX.Element {
+    const { t } = useTranslation();
+    const following = useSocialStore((s) => s.following);
+    const followers = useSocialStore((s) => s.followers);
+    const pendingIncoming = useSocialStore((s) => s.pendingIncoming);
+
+    return (
+        <View style={styles.socialStats}>
+            <View style={styles.socialStatItem}>
+                <Text style={styles.socialStatNumber}>{following.length}</Text>
+                <Text style={styles.socialStatLabel}>{t("social.followingCount")}</Text>
+            </View>
+            <View style={styles.socialStatDivider} />
+            <View style={styles.socialStatItem}>
+                <Text style={styles.socialStatNumber}>
+                    {followers.length}
+                    {pendingIncoming.length > 0 && (
+                        <Text style={styles.socialStatPending}> +{pendingIncoming.length}</Text>
+                    )}
+                </Text>
+                <Text style={styles.socialStatLabel}>{t("social.followers")}</Text>
+            </View>
+        </View>
+    );
+}
+
 
 interface InfoRowProps {
     readonly icon: keyof typeof Ionicons.glyphMap;
@@ -474,6 +502,7 @@ export default function ProfileScreen(): React.JSX.Element {
                         @{profile?.username ?? "usuario"}
                     </Text>
                     <Text style={styles.emailText}>{user?.email}</Text>
+                    <SocialStatsRow />
                 </View>
 
                 {isGenericUsername && !isEditingUsername && (
@@ -756,6 +785,37 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Colors.metalSilver,
     } as TextStyle,
+    socialStats: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 12,
+        gap: 20,
+    } as ViewStyle,
+    socialStatItem: {
+        alignItems: "center",
+    } as ViewStyle,
+    socialStatNumber: {
+        color: Colors.white,
+        fontFamily: "Inter_700Bold",
+        fontSize: 18,
+    } as TextStyle,
+    socialStatPending: {
+        color: Colors.bloodRed,
+        fontSize: 14,
+    } as TextStyle,
+    socialStatLabel: {
+        color: Colors.metalSilver,
+        fontFamily: "Inter_400Regular",
+        fontSize: 12,
+        textTransform: "lowercase",
+    } as TextStyle,
+    socialStatDivider: {
+        width: 1,
+        height: 28,
+        backgroundColor: Colors.metalSilver,
+        opacity: 0.3,
+    } as ViewStyle,
+
 
 
     genericPrompt: {

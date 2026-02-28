@@ -153,6 +153,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { useRecommendationStore } = require("./recommendationStore");
         useContentStore.getState().clearContent();
         useRecommendationStore.getState().clearRecommendations();
+        const { useSocialStore } = require('./socialStore');
+        useSocialStore.getState().clearSocial();
     },
 
     fetchProfile: async () => {

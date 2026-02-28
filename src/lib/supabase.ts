@@ -121,3 +121,11 @@ export interface ContentVote {
     vote: number;
     created_at: string;
 }
+
+export interface Follow {
+    id: string;
+    follower_id: string;
+    following_id: string;
+    status: "pending" | "accepted";
+    created_at: string;
+}

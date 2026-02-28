@@ -19,15 +19,16 @@ import {
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 
 import { Colors } from "../constants/Colors";
 import type { Profile } from "../lib/supabase";
 import { supabase } from "../lib/supabase";
 import {
-    loadAllUsers,
     searchUsers,
     sendRecommendation,
 } from "../utils/movieDetail.utils";
+import { useSocialStore } from "../stores/socialStore";
 import type {
     SendRecommendationParams,
     MediaType,
@@ -92,6 +93,8 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         showUserList,
     } = state;
 
+    const following = useSocialStore((s) => s.following);
+
     useEffect(() => {
         isMountedRef.current = true;
         return () => {
@@ -102,31 +105,15 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
     useEffect(() => {
         if (visible) {
             setState(INITIAL_STATE);
-            handleLoadAllUsers();
+            // Populate user list from accepted follows (no network call needed)
+            updateState({ users: following, isLoadingUsers: false });
         }
-    }, [visible]);
+    }, [visible, following]);
 
     const updateState = (updates: Partial<RecommendationState>): void => {
         if (!isMountedRef.current) return;
         setState((prev) => ({ ...prev, ...updates }));
     };
-
-    const handleLoadAllUsers = useCallback(async (): Promise<void> => {
-        if (!currentUserId) return;
-
-        updateState({ isLoadingUsers: true });
-
-        try {
-            const loadedUsers = await loadAllUsers(currentUserId);
-
-            const filtered = loadedUsers.filter((u) => u.user_id !== currentUserId);
-            updateState({ users: filtered, isLoadingUsers: false });
-        } catch (err) {
-            console.error("Error loading users:", err);
-            updateState({ isLoadingUsers: false });
-            Alert.alert(t("profile.alerts.errorTitle"), t("recommendations.errorLoadUsers"));
-        }
-    }, [currentUserId]);
 
     const handleSearchUsers = useCallback(
         async (query: string): Promise<void> => {
@@ -135,21 +122,28 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
             updateState({ searchQuery: query });
 
             if (query.length <= 2) {
-                handleLoadAllUsers();
+                // Reset to following list
+                updateState({ users: following, isLoadingUsers: false });
                 return;
             }
 
             updateState({ isLoadingUsers: true });
 
             try {
-                const searchResults = await searchUsers(query, currentUserId);
-                updateState({ users: searchResults, isLoadingUsers: false });
+                // Filter search within following list (client-side for speed)
+                const lower = query.toLowerCase();
+                const filtered = following.filter(
+                    (u) =>
+                        u.username.toLowerCase().includes(lower) ||
+                        (u.display_name ?? "").toLowerCase().includes(lower)
+                );
+                updateState({ users: filtered, isLoadingUsers: false });
             } catch (err) {
                 console.error("Error searching users:", err);
                 updateState({ isLoadingUsers: false });
             }
         },
-        [currentUserId, handleLoadAllUsers]
+        [currentUserId, following]
     );
 
 
@@ -296,11 +290,25 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
             );
         }
 
+        // Empty: user has no accepted follows → show CTA
         return (
             <View style={styles.emptyUsersContainer}>
                 <Text style={styles.emptyUsersText}>
-                    {t("recommendations.noOtherUsers")}
+                    {t("social.emptyModal")}
                 </Text>
+                <Text style={[styles.emptyUsersText, { fontSize: 13, marginTop: 4 }]}>
+                    {t("social.emptyModalSubtitle")}
+                </Text>
+                <TouchableOpacity
+                    style={styles.findFriendsBtn}
+                    onPress={() => {
+                        onClose();
+                        router.push("/find-friends" as any);
+                    }}
+                    activeOpacity={0.8}
+                >
+                    <Text style={styles.findFriendsBtnText}>{t("social.emptyModalCta")}</Text>
+                </TouchableOpacity>
             </View>
         );
     };
@@ -594,6 +602,19 @@ const styles = StyleSheet.create({
     emptyUsersText: {
         color: Colors.metalSilver,
         textAlign: "center",
+    } as TextStyle,
+    findFriendsBtn: {
+        marginTop: 12,
+        backgroundColor: Colors.bloodRed,
+        borderRadius: 8,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    } as ViewStyle,
+    findFriendsBtnText: {
+        color: Colors.white,
+        fontFamily: "BebasNeue_400Regular",
+        fontSize: 15,
+        letterSpacing: 1,
     } as TextStyle,
 
     chipsContainer: {

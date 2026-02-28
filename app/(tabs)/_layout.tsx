@@ -7,6 +7,7 @@ import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
+import { useSocialStore } from "../../src/stores/socialStore";
 
 import { HeaderLeft } from "../../src/components/navigation/HeaderLeft";
 import { HeaderRight } from "../../src/components/navigation/HeaderRight";
@@ -18,6 +19,7 @@ import {
     WatchlistIcon,
     RecommendationsIcon,
     ProfileIcon,
+    FriendsIcon,
 } from "../../src/components/navigation/TabBarIcons";
 
 const renderTabBar = (props: BottomTabBarProps) => (
@@ -51,10 +53,12 @@ export default function TabLayout() {
             useRecommendationStore.getState();
         const { fetchUserContent, fetchTVProgress } =
             useContentStore.getState();
+        const { fetchFollowData } = useSocialStore.getState();
 
         fetchRecommendations();
         fetchUserContent();
         fetchTVProgress();
+        fetchFollowData();
 
         const unsubscribe = subscribeToRealtime();
 
@@ -113,6 +117,14 @@ export default function TabLayout() {
                         headerTitle: `CortoCrudo - ${t("tabs.recommendations").toUpperCase()}`,
                         tabBarIcon: RecommendationsIcon,
                         tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+                    }}
+                />
+                <Tabs.Screen
+                    name="find-friends"
+                    options={{
+                        title: t("social.findFriends"),
+                        headerTitle: `CortoCrudo - ${t("social.findFriendsHeader").toUpperCase()}`,
+                        tabBarIcon: FriendsIcon,
                     }}
                 />
                 <Tabs.Screen
