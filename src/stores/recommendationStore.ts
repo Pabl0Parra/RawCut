@@ -19,7 +19,6 @@ interface RecommendationState {
     unreadCount: number;
     lastFetched: number | null;
 
-
     fetchRecommendations: (options?: { force?: boolean }) => Promise<void>;
     addComment: (recommendationId: string, text: string) => Promise<boolean>;
     deleteComment: (recommendationId: string, commentId: string) => Promise<boolean>;
@@ -119,7 +118,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         const user = useAuthStore.getState().user;
         if (!user) return;
 
-        // Simple cache: if fetched less than 30 seconds ago, skip unless forced
         const now = Date.now();
         const lastFetched = get().lastFetched;
         if (!force && lastFetched && now - lastFetched < 30000) {
@@ -130,7 +128,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         set({ isLoading: true, error: null });
 
         try {
-
             const { data: sentData, error: sentError } = await supabase
                 .from("recommendations")
                 .select(`
@@ -142,7 +139,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 .eq("sender_id", user.id)
                 .eq("sender_deleted", false)
                 .order("created_at", { ascending: false });
-
 
             const { data: receivedData, error: receivedError } = await supabase
                 .from("recommendations")
@@ -245,8 +241,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         console.log(`[RecommendationStore] Soft-deleting recommendation ${recommendationId} for user ${user.id}`);
 
         try {
-            // Use RPC (SECURITY DEFINER) to bypass the RLS WITH CHECK issue
-            // that occurs when updating a row whose visibility is controlled by the same columns
             const { data, error } = await supabase
                 .rpc("soft_delete_recommendation", { p_recommendation_id: recommendationId });
 
@@ -262,8 +256,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
 
             console.log("[RecommendationStore] Successfully soft-deleted from DB:", recommendationId);
 
-            // Remove from local state and recalculate badge so nav updates immediately
-            // even if the item was deleted without ever being opened (is_read still false)
             set((state) => {
                 const newSent = state.sent.filter((r) => r.id !== recommendationId);
                 const newReceived = state.received.filter((r) => r.id !== recommendationId);
@@ -296,7 +288,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 .single();
 
             if (error) throw error;
-
 
             await supabase
                 .from("recommendations")
@@ -337,7 +328,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 const newReceived = state.received.map(r => ({ ...r, is_read: true }));
                 return {
                     received: newReceived,
-
                     unreadCount: calculateUnreadCount(state.sent, newReceived, user.id),
                 };
             });
@@ -349,7 +339,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
     markAsRead: async (recommendationId: string) => {
         const user = useAuthStore.getState().user;
         if (!user) return;
-
 
         const rec = get().received.find(r => r.id === recommendationId);
         if (!rec || rec.is_read) return;
@@ -393,7 +382,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
             set((state) => {
                 const newSent = markRecCommentsRead(state.sent, recommendationId, user.id);
                 const newReceived = markRecCommentsRead(state.received, recommendationId, user.id);
-
                 return {
                     sent: newSent,
                     received: newReceived,
@@ -409,6 +397,34 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         const user = useAuthStore.getState().user;
         if (!user) return () => { };
 
+        const handleNewComment = (payload: any) => {
+            const newComment = payload.new as RecommendationComment;
+            if (newComment.user_id === user.id) return;
+            set((state) => {
+                const newSent = addCommentToRecs(state.sent, newComment.recommendation_id, newComment);
+                const newReceived = addCommentToRecs(state.received, newComment.recommendation_id, newComment);
+                return {
+                    sent: newSent,
+                    received: newReceived,
+                    unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
+                };
+            });
+        };
+
+        const handleRecommendationDeleted = (payload: any) => {
+            const deletedId = payload.old?.id as string | undefined;
+            if (!deletedId) return;
+            set((state) => {
+                const newReceived = state.received.filter((r) => r.id !== deletedId);
+                const newSent = state.sent.filter((r) => r.id !== deletedId);
+                return {
+                    sent: newSent,
+                    received: newReceived,
+                    unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
+                };
+            });
+        };
+
         const commentsChannel = supabase
             .channel("comments-changes")
             .on(
@@ -418,20 +434,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                     schema: "public",
                     table: "recommendation_comments",
                 },
-                (payload) => {
-                    const newComment = payload.new as RecommendationComment;
-                    if (newComment.user_id !== user.id) {
-                        set((state) => {
-                            const newSent = addCommentToRecs(state.sent, newComment.recommendation_id, newComment);
-                            const newReceived = addCommentToRecs(state.received, newComment.recommendation_id, newComment);
-                            return {
-                                sent: newSent,
-                                received: newReceived,
-                                unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
-                            };
-                        });
-                    }
-                }
+                handleNewComment
             )
             .subscribe();
 
@@ -456,20 +459,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                     schema: "public",
                     table: "recommendations",
                 },
-                (payload) => {
-                    const deletedId = payload.old?.id as string | undefined;
-                    if (!deletedId) return;
-
-                    set((state) => {
-                        const newReceived = state.received.filter((r) => r.id !== deletedId);
-                        const newSent = state.sent.filter((r) => r.id !== deletedId);
-                        return {
-                            sent: newSent,
-                            received: newReceived,
-                            unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
-                        };
-                    });
-                }
+                handleRecommendationDeleted
             )
             .subscribe();
 
