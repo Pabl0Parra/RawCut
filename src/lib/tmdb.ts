@@ -104,6 +104,7 @@ const fetchTMDb = async <T>(
     signal?: AbortSignal,
 ): Promise<T> => {
     const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
+    url.searchParams.append("api_key", TMDB_API_KEY);
 
     const currentLang = i18next.language;
     const langMap: Record<string, string> = { ca: "ca-ES", en: "en-US" };
@@ -114,10 +115,7 @@ const fetchTMDb = async <T>(
         url.searchParams.append(key, value);
     });
 
-    const response = await fetch(url.toString(), {
-        headers: { Authorization: `Bearer ${TMDB_API_KEY}` },
-        signal,
-    });
+    const response = await fetch(url.toString(), { signal });
 
     if (!response.ok) {
         if (response.status === 404) {
