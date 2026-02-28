@@ -21,11 +21,7 @@ import { Colors } from '../src/constants/Colors';
 import { screenStyles } from '../src/styles/screenStyles';
 import ScreenHeader from '../src/components/ScreenHeader';
 
-if (Platform.OS === 'android') {
-    if (UIManager.setLayoutAnimationEnabledExperimental) {
-        UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-}
+
 
 interface FAQItem {
     id: string;
@@ -117,7 +113,6 @@ export default function HelpCenterScreen(): React.JSX.Element {
             if (supported) {
                 Linking.openURL(mailtoUrl);
             } else {
-                console.warn("No mail client available on device");
             }
         });
     };
