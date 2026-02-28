@@ -1,5 +1,21 @@
 # CortoCrudo
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Pabl0Parra_RawCut&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Pabl0Parra_RawCut)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Pabl0Parra_RawCut&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Pabl0Parra_RawCut)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Pabl0Parra_RawCut&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Pabl0Parra_RawCut)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Pabl0Parra_RawCut&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Pabl0Parra_RawCut)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61DAFB?logo=react&logoColor=white)
+![Expo](https://img.shields.io/badge/Expo-54.0.33-000020?logo=expo&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-3178C6?logo=typescript&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase&logoColor=white)
+![TMDb](https://img.shields.io/badge/TMDb-API%20v3-01B4E4?logo=themoviedatabase&logoColor=white)
+![Zustand](https://img.shields.io/badge/Zustand-4.4.0-orange)
+![NativeWind](https://img.shields.io/badge/NativeWind-Tailwind%20CSS-38BDF8?logo=tailwindcss&logoColor=white)
+![Jest](https://img.shields.io/badge/tested%20with-Jest%2029-C21325?logo=jest&logoColor=white)
+![Node](https://img.shields.io/badge/Node.js-18%2B-339933?logo=nodedotjs&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 CortoCrudo is a comprehensive movie and television recommendation platform developed with React Native and Expo. It integrates social features, allowing users to discover content, manage personal lists, and share recommendations within a community.
 
 ## Table of Contents
