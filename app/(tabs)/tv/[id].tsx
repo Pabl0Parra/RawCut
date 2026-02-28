@@ -3,22 +3,14 @@ import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
-    ScrollView,
-    TouchableOpacity,
-    ActivityIndicator,
     FlatList,
     StyleSheet,
     type ViewStyle,
     type TextStyle,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import {
-    type Season,
-    type Episode,
-} from "../../../src/lib/tmdb";
+import { type Season, type Episode } from "../../../src/lib/tmdb";
 import { useContentStore } from "../../../src/stores/contentStore";
 import { useAuthStore } from "../../../src/stores/authStore";
 import { Colors } from "../../../src/constants/Colors";
@@ -39,15 +31,12 @@ import { detailScreenStyles } from "../../../src/styles/detailScreenStyles";
 import { CastMemberList } from "../../../src/components/CastMemberList";
 import { CrewMemberList } from "../../../src/components/CrewMemberList";
 import { ContentHorizontalList } from "../../../src/components/ContentHorizontalList";
+import { DetailScreenShell } from "../../../src/components/DetailScreenShell";
+import { CommunityRatingBadge } from "../../../src/components/CommunityRatingBadge";
+import { RecommendButton } from "../../../src/components/RecommendButton";
 
-import type {
-    TVDetailScreenState,
-    NextEpisodeInfo,
-} from "../../../src/types/tvDetail.types";
-import {
-    INITIAL_TV_DETAIL_STATE,
-    TV_MEDIA_TYPE,
-} from "../../../src/types/tvDetail.types";
+import type { TVDetailScreenState, NextEpisodeInfo } from "../../../src/types/tvDetail.types";
+import { INITIAL_TV_DETAIL_STATE, TV_MEDIA_TYPE } from "../../../src/types/tvDetail.types";
 import {
     loadTVShowData,
     loadSeasonEpisodes,
@@ -64,40 +53,17 @@ export default function TVDetailScreen(): React.JSX.Element {
     const { t } = useTranslation();
     const { id } = useLocalSearchParams<{ id: string }>();
     const [state, setState] = useState<TVDetailScreenState>(INITIAL_TV_DETAIL_STATE);
+    const [showVotePicker, setShowVotePicker] = useState(false);
 
     const {
-        tvShow,
-        relatedShows,
-        trailerKey,
-        isLoading,
-        showRecommendModal,
-        showTrailerModal,
-        showSeasonModal,
-        showEpisodeModal,
-        selectedSeasonNumber,
-        seasonEpisodes,
-        isLoadingSeason,
-        selectedEpisode,
+        tvShow, relatedShows, trailerKey, isLoading,
+        showRecommendModal, showTrailerModal, showSeasonModal, showEpisodeModal,
+        selectedSeasonNumber, seasonEpisodes, isLoadingSeason, selectedEpisode,
     } = state;
 
     const { user } = useAuthStore();
-    const {
-        fetchTVProgress,
-        isEpisodeWatched,
-        isSeasonWatched,
-        getNextEpisodeToWatch,
-        toggleEpisodeWatched,
-    } = useContentStore();
-    const {
-        isFavorite,
-        isInWatchlist,
-        isWatched,
-        handleToggleFavorite,
-        handleToggleWatchlist,
-        handleToggleWatched,
-    } = useContentActions();
-
-    const [showVotePicker, setShowVotePicker] = useState(false);
+    const { fetchTVProgress, isEpisodeWatched, isSeasonWatched, getNextEpisodeToWatch, toggleEpisodeWatched } = useContentStore();
+    const { isFavorite, isInWatchlist, isWatched, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched } = useContentActions();
     const fetchVotes = useVoteStore((s) => s.fetchVotes);
     const submitVote = useVoteStore((s) => s.submitVote);
 
@@ -110,7 +76,6 @@ export default function TVDetailScreen(): React.JSX.Element {
 
     const loadTVShow = useCallback(async (tvId: number): Promise<void> => {
         updateState({ isLoading: true });
-
         try {
             const result = await loadTVShowData(tvId);
             updateState({
@@ -130,69 +95,25 @@ export default function TVDetailScreen(): React.JSX.Element {
         if (tvId !== null) {
             loadTVShow(tvId);
             fetchVotes([tvId], "tv");
-            if (user) {
-                fetchTVProgress();
-            }
+            if (user) fetchTVProgress();
         }
     }, [id, user, loadTVShow, fetchTVProgress, fetchVotes]);
 
-    const handleWatchTrailer = (): void => {
-        if (trailerKey) {
-            updateState({ showTrailerModal: true });
-        }
-    };
-
-    const handleOpenRecommendModal = (): void => {
-        updateState({ showRecommendModal: true });
-    };
-
-    const handleCloseRecommendModal = (): void => {
-        updateState({ showRecommendModal: false });
-    };
-
-    const handleCloseTrailerModal = (): void => {
-        updateState({ showTrailerModal: false });
-    };
-
     const handleOpenSeasonModal = async (seasonNumber: number): Promise<void> => {
         if (!tvShow) return;
-
-        updateState({
-            selectedSeasonNumber: seasonNumber,
-            showSeasonModal: true,
-            isLoadingSeason: true,
-        });
-
+        updateState({ selectedSeasonNumber: seasonNumber, showSeasonModal: true, isLoadingSeason: true });
         try {
             const episodes = await loadSeasonEpisodes(tvShow.id, seasonNumber);
-            updateState({
-                seasonEpisodes: episodes,
-                isLoadingSeason: false,
-            });
+            updateState({ seasonEpisodes: episodes, isLoadingSeason: false });
         } catch (err) {
             console.error("Error loading season details:", err);
             updateState({ isLoadingSeason: false });
         }
     };
 
-    const handleCloseSeasonModal = (): void => {
-        updateState({ showSeasonModal: false });
-    };
-
     const handleToggleEpisode = async (episodeNumber: number): Promise<void> => {
         if (!tvShow || selectedSeasonNumber === null) return;
         await toggleEpisodeWatched(tvShow.id, selectedSeasonNumber, episodeNumber);
-    };
-
-    const handleSelectEpisode = (episode: Episode): void => {
-        updateState({
-            selectedEpisode: episode,
-            showEpisodeModal: true,
-        });
-    };
-
-    const handleCloseEpisodeModal = (): void => {
-        updateState({ showEpisodeModal: false });
     };
 
     const handleVote = async (vote: number): Promise<void> => {
@@ -205,10 +126,7 @@ export default function TVDetailScreen(): React.JSX.Element {
     };
 
     const handleOpenVotePicker = (): void => {
-        if (!user) {
-            router.push("/login");
-            return;
-        }
+        if (!user) { router.push("/login"); return; }
         setShowVotePicker(true);
     };
 
@@ -222,53 +140,14 @@ export default function TVDetailScreen(): React.JSX.Element {
         return getNextEpisodeToWatch(tvShow.id, seasonsToProgressInfo(tvShow.seasons));
     };
 
-    const renderLoadingState = (): React.JSX.Element => (
-        <SafeAreaView style={detailScreenStyles.safeArea}>
-            <View style={detailScreenStyles.centerContainer}>
-                <ActivityIndicator size="large" color={Colors.bloodRed} />
-            </View>
-        </SafeAreaView>
-    );
-
-    const renderErrorState = (): React.JSX.Element => (
-        <SafeAreaView style={detailScreenStyles.safeArea}>
-            <View style={detailScreenStyles.centerContainer}>
-                <Text style={detailScreenStyles.errorText}>{t('details.tvNotFound')}</Text>
-            </View>
-        </SafeAreaView>
-    );
-
     const renderNextEpisodeBadge = (): React.JSX.Element | null => {
         const nextEpisode = getNextEpisode();
         if (!nextEpisode) return null;
-
         return (
             <View style={styles.nextBadgeContainer}>
-                <Text style={styles.nextBadgeLabel}>{t('details.next')}</Text>
-                <Text style={styles.nextBadgeValue}>
-                    S{nextEpisode.season} E{nextEpisode.episode}
-                </Text>
+                <Text style={styles.nextBadgeLabel}>{t("details.next")}</Text>
+                <Text style={styles.nextBadgeValue}>S{nextEpisode.season} E{nextEpisode.episode}</Text>
             </View>
-        );
-    };
-
-    const renderRecommendButton = (): React.JSX.Element | null => {
-        if (!user) return null;
-
-        return (
-            <TouchableOpacity
-                style={detailScreenStyles.recommendButton}
-                onPress={handleOpenRecommendModal}
-            >
-                <View style={detailScreenStyles.recommendButtonContent}>
-                    <MaterialCommunityIcons
-                        name="email-outline"
-                        size={24}
-                        color={Colors.white}
-                    />
-                    <Text style={detailScreenStyles.recommendButtonText}>{t('details.recommend')}</Text>
-                </View>
-            </TouchableOpacity>
         );
     };
 
@@ -283,10 +162,9 @@ export default function TVDetailScreen(): React.JSX.Element {
 
     const renderSeasonsSection = (): React.JSX.Element | null => {
         if (!tvShow?.seasons || tvShow.seasons.length === 0) return null;
-
         return (
             <View style={detailScreenStyles.sectionContainer}>
-                <Text style={detailScreenStyles.sectionTitle}>{t('details.seasons')}</Text>
+                <Text style={detailScreenStyles.sectionTitle}>{t("details.seasons")}</Text>
                 <FlatList
                     data={tvShow.seasons}
                     keyExtractor={(item, index) => `season-${item.id}-${index}`}
@@ -299,82 +177,68 @@ export default function TVDetailScreen(): React.JSX.Element {
         );
     };
 
-    if (isLoading) {
-        return renderLoadingState();
-    }
-
-    if (!tvShow) {
-        return renderErrorState();
-    }
-
-    const posterUrl = getPosterUrl(tvShow.poster_path, "w300");
+    const posterUrl = tvShow ? getPosterUrl(tvShow.poster_path, "w300") : null;
 
     return (
-        <SafeAreaView style={detailScreenStyles.safeArea} edges={["left", "right"]}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <TouchableOpacity
-                    style={detailScreenStyles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <Text style={detailScreenStyles.backButtonText}>←</Text>
-                </TouchableOpacity>
-
+        <>
+            <DetailScreenShell
+                isLoading={isLoading}
+                isEmpty={!tvShow}
+                errorText={t("details.tvNotFound")}
+            >
                 {renderNextEpisodeBadge()}
 
                 <ContentBackdrop
-                    backdropUrl={getBackdropUrl(tvShow.backdrop_path ?? null)}
+                    backdropUrl={getBackdropUrl(tvShow?.backdrop_path ?? null)}
                     trailerKey={trailerKey}
-                    onPlayTrailer={handleWatchTrailer}
+                    onPlayTrailer={() => trailerKey && updateState({ showTrailerModal: true })}
                 />
 
                 <View style={detailScreenStyles.contentContainer}>
                     <View style={detailScreenStyles.headerRow}>
                         <ContentPoster
-                            posterUrl={getPosterUrl(tvShow.poster_path ?? null, "w300")}
+                            posterUrl={getPosterUrl(tvShow?.poster_path ?? null, "w300")}
                             placeholderIcon="📺"
                         />
                         <View style={detailScreenStyles.infoContainer}>
-                            <Text style={detailScreenStyles.title}>{tvShow.name}</Text>
+                            <Text style={detailScreenStyles.title}>{tvShow?.name}</Text>
                             <Text style={detailScreenStyles.yearText}>
-                                {extractYear(tvShow.first_air_date)}
+                                {tvShow && extractYear(tvShow.first_air_date)}
                             </Text>
-                            <View style={localStyles.ratingsRow}>
+                            <View style={styles.ratingsRow}>
                                 <Text style={detailScreenStyles.ratingText}>
-                                    ⭐ {formatRating(tvShow.vote_average)}/10
+                                    ⭐ {tvShow && formatRating(tvShow.vote_average)}/10
                                 </Text>
-                                <TouchableOpacity
+                                <CommunityRatingBadge
+                                    rating={communityRating}
                                     onPress={handleOpenVotePicker}
-                                    activeOpacity={0.7}
-                                    style={localStyles.communityBadge}
-                                >
-                                    <Text style={localStyles.communityRatingText}>
-                                        👥 {communityRating === undefined ? "—" : communityRating.toFixed(1)}/10
-                                    </Text>
-                                </TouchableOpacity>
+                                />
                             </View>
                         </View>
                     </View>
 
-                    <GenreList genres={tvShow.genres || []} />
+                    <GenreList genres={tvShow?.genres || []} />
 
-                    <ContentActionBar
-                        contentId={tvShow.id}
-                        mediaType={TV_MEDIA_TYPE}
-                        isFavorite={isFavorite(tvShow.id, TV_MEDIA_TYPE)}
-                        isInWatchlist={isInWatchlist(tvShow.id, TV_MEDIA_TYPE)}
-                        isWatched={isWatched(tvShow.id, TV_MEDIA_TYPE)}
-                        onToggleFavorite={() => handleToggleFavorite(tvShow.id, TV_MEDIA_TYPE)}
-                        onToggleWatchlist={() => handleToggleWatchlist(tvShow.id, TV_MEDIA_TYPE)}
-                        onToggleWatched={() => handleToggleWatched(tvShow.id, TV_MEDIA_TYPE)}
-                        currentUserId={user?.id}
-                    />
+                    {tvShow && (
+                        <ContentActionBar
+                            contentId={tvShow.id}
+                            mediaType={TV_MEDIA_TYPE}
+                            isFavorite={isFavorite(tvShow.id, TV_MEDIA_TYPE)}
+                            isInWatchlist={isInWatchlist(tvShow.id, TV_MEDIA_TYPE)}
+                            isWatched={isWatched(tvShow.id, TV_MEDIA_TYPE)}
+                            onToggleFavorite={() => handleToggleFavorite(tvShow.id, TV_MEDIA_TYPE)}
+                            onToggleWatchlist={() => handleToggleWatchlist(tvShow.id, TV_MEDIA_TYPE)}
+                            onToggleWatched={() => handleToggleWatched(tvShow.id, TV_MEDIA_TYPE)}
+                            currentUserId={user?.id}
+                        />
+                    )}
 
-                    {renderRecommendButton()}
+                    {user && <RecommendButton onPress={() => updateState({ showRecommendModal: true })} />}
 
                     <View style={detailScreenStyles.descriptionContainer}>
-                        <Text style={detailScreenStyles.descriptionTitle}>{t('details.overview')}</Text>
+                        <Text style={detailScreenStyles.descriptionTitle}>{t("details.overview")}</Text>
                         <Text style={detailScreenStyles.descriptionText}>
-                            {tvShow.overview || t('details.noOverview')}
+                            {tvShow?.overview || t("details.noOverview")}
                         </Text>
                     </View>
 
@@ -385,16 +249,16 @@ export default function TVDetailScreen(): React.JSX.Element {
                                     crew={tvShow.created_by.map(c => ({
                                         id: c.id,
                                         name: c.name,
-                                        job: t('details.creator'),
-                                        profile_path: c.profile_path
+                                        job: t("details.creator"),
+                                        profile_path: c.profile_path,
                                     }))}
-                                    title={t('details.creation')}
+                                    title={t("details.creation")}
                                 />
                             )}
                             {tvShow.credits?.crew && (
                                 <CrewMemberList
                                     crew={getProducers(tvShow.credits.crew).slice(0, 5)}
-                                    title={t('details.production')}
+                                    title={t("details.production")}
                                 />
                             )}
                         </>
@@ -402,51 +266,55 @@ export default function TVDetailScreen(): React.JSX.Element {
 
                     {renderSeasonsSection()}
 
-                    <CastMemberList cast={tvShow.credits?.cast || []} title={t('details.cast')} />
+                    <CastMemberList cast={tvShow?.credits?.cast || []} title={t("details.cast")} />
 
                     <ContentHorizontalList
                         data={relatedShows}
-                        title={t('details.related')}
+                        title={t("details.related")}
                         mediaType="tv"
                     />
 
                     <View style={detailScreenStyles.bottomSpacer} />
                 </View>
-            </ScrollView>
+            </DetailScreenShell>
 
-            <ContentRecommendModal
-                visible={showRecommendModal}
-                onClose={handleCloseRecommendModal}
-                contentId={tvShow.id}
-                contentTitle={tvShow.name}
-                contentYear={extractYear(tvShow.first_air_date)}
-                posterUrl={posterUrl}
-                mediaType={TV_MEDIA_TYPE}
-                currentUserId={user?.id}
-            />
+            {tvShow && (
+                <ContentRecommendModal
+                    visible={showRecommendModal}
+                    onClose={() => updateState({ showRecommendModal: false })}
+                    contentId={tvShow.id}
+                    contentTitle={tvShow.name}
+                    contentYear={extractYear(tvShow.first_air_date)}
+                    posterUrl={posterUrl}
+                    mediaType={TV_MEDIA_TYPE}
+                    currentUserId={user?.id}
+                />
+            )}
 
-            <SeasonModal
-                visible={showSeasonModal}
-                onClose={handleCloseSeasonModal}
-                seasonNumber={selectedSeasonNumber}
-                episodes={seasonEpisodes}
-                isLoading={isLoadingSeason}
-                tvShowId={tvShow.id}
-                onToggleEpisode={handleToggleEpisode}
-                onSelectEpisode={handleSelectEpisode}
-                isEpisodeWatched={checkEpisodeWatched}
-            />
+            {tvShow && (
+                <SeasonModal
+                    visible={showSeasonModal}
+                    onClose={() => updateState({ showSeasonModal: false })}
+                    seasonNumber={selectedSeasonNumber}
+                    episodes={seasonEpisodes}
+                    isLoading={isLoadingSeason}
+                    tvShowId={tvShow.id}
+                    onToggleEpisode={handleToggleEpisode}
+                    onSelectEpisode={(episode: Episode) => updateState({ selectedEpisode: episode, showEpisodeModal: true })}
+                    isEpisodeWatched={checkEpisodeWatched}
+                />
+            )}
 
             <EpisodeModal
                 visible={showEpisodeModal}
-                onClose={handleCloseEpisodeModal}
+                onClose={() => updateState({ showEpisodeModal: false })}
                 episode={selectedEpisode}
             />
 
             <TrailerModal
                 visible={showTrailerModal}
                 videoKey={trailerKey}
-                onClose={handleCloseTrailerModal}
+                onClose={() => updateState({ showTrailerModal: false })}
             />
 
             {showVotePicker && (
@@ -456,33 +324,17 @@ export default function TVDetailScreen(): React.JSX.Element {
                     onClose={() => setShowVotePicker(false)}
                 />
             )}
-        </SafeAreaView >
+        </>
     );
 }
 
-const localStyles = StyleSheet.create({
+const styles = StyleSheet.create({
     ratingsRow: {
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
         marginTop: 6,
     },
-    communityBadge: {
-        backgroundColor: Colors.glassPurple,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: Colors.glassPurpleBorder,
-    },
-    communityRatingText: {
-        color: Colors.communityPurple,
-        fontSize: 14,
-        fontWeight: "bold",
-    },
-});
-
-const styles = StyleSheet.create({
     nextBadgeContainer: {
         position: "absolute",
         top: 16,
@@ -506,23 +358,5 @@ const styles = StyleSheet.create({
         color: Colors.white,
         fontSize: 16,
         fontFamily: "BebasNeue_400Regular",
-    } as TextStyle,
-    genresContainer: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 8,
-        marginTop: 16,
-    } as ViewStyle,
-    genreBadge: {
-        backgroundColor: Colors.metalGray,
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 9999,
-        borderWidth: 1,
-        borderColor: Colors.metalSilver,
-    } as ViewStyle,
-    genreText: {
-        color: "#f4f4f5",
-        fontSize: 12,
     } as TextStyle,
 });
