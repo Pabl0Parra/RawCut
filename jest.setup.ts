@@ -44,9 +44,9 @@ jest.mock('react-i18next', () => ({
     Trans: ({ children }: any) => children,
 }));
 
-if (typeof window !== 'object') {
-    (global as any).window = global;
-    (global as any).window.navigator = {};
+if (typeof globalThis.window !== 'object') {
+    (globalThis as any).window = globalThis;
+    (globalThis as any).window.navigator = {};
 }
 
 jest.mock('@supabase/supabase-js', () => ({
