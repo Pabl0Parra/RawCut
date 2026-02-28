@@ -114,7 +114,7 @@ export function ContentListLayout({
         <FlatList
             data={data}
             renderItem={renderItem}
-            keyExtractor={(item, index) => `${item.id}-${index}`}
+            keyExtractor={(item) => `${item.media_type}-${item.tmdb_id}`}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
         />
