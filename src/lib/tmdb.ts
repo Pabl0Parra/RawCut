@@ -101,10 +101,10 @@ export interface TMDbResponse<T> {
 const fetchTMDb = async <T>(endpoint: string, params: Record<string, string> = {}): Promise<T> => {
     const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
     url.searchParams.append("api_key", TMDB_API_KEY);
-    
-    // Map i18next language to TMDB language
+
     const currentLang = i18next.language;
-    const lang = currentLang === "ca" ? "ca-ES" : currentLang === "en" ? "en-US" : "es-ES";
+    const langMap: Record<string, string> = { ca: "ca-ES", en: "en-US" };
+    const lang = langMap[currentLang] ?? "es-ES";
     url.searchParams.append("language", lang);
 
     Object.entries(params).forEach(([key, value]) => {
@@ -123,11 +123,11 @@ const fetchTMDb = async <T>(endpoint: string, params: Record<string, string> = {
     return response.json();
 };
 
-const EXCLUDED_LANGUAGES = ["ja", "zh", "ko", "ar"];
+const EXCLUDED_LANGUAGES = new Set(["ja", "zh", "ko", "ar", "hi"]);
 
 const filterByLanguage = <T extends { original_language: string }>(items: T[]): T[] => {
     if (!items) return [];
-    return items.filter(item => !EXCLUDED_LANGUAGES.includes(item.original_language));
+    return items.filter(item => !EXCLUDED_LANGUAGES.has(item.original_language));
 };
 
 export const getPopularMovies = async (page: number = 1): Promise<TMDbResponse<Movie>> => {
@@ -152,13 +152,13 @@ export const searchTVShows = async (query: string, page: number = 1): Promise<TM
 
 export const getMovieDetails = async (id: number): Promise<(Movie & { genres: { id: number; name: string }[] }) | null> => {
     const details = await fetchTMDb<Movie & { genres: { id: number; name: string }[] }>(`/movie/${id}`, { append_to_response: "credits" });
-    if (details && EXCLUDED_LANGUAGES.includes(details.original_language)) return null;
+    if (details && EXCLUDED_LANGUAGES.has(details.original_language)) return null;
     return details;
 };
 
 export const getTVShowDetails = async (id: number): Promise<(TVShow & { genres: { id: number; name: string }[] }) | null> => {
     const details = await fetchTMDb<TVShow & { genres: { id: number; name: string }[] }>(`/tv/${id}`, { append_to_response: "credits" });
-    if (details && EXCLUDED_LANGUAGES.includes(details.original_language)) return null;
+    if (details && EXCLUDED_LANGUAGES.has(details.original_language)) return null;
     return details;
 };
 
@@ -168,18 +168,16 @@ export const getTVSeasonDetails = async (tvId: number, seasonNumber: number): Pr
 
 export const getRelatedMovies = async (id: number): Promise<TMDbResponse<Movie>> => {
     const response = await fetchTMDb<TMDbResponse<Movie>>(`/movie/${id}/similar`);
-    if (response && response.results) {
-        return { ...response, results: filterByLanguage(response.results) };
-    }
-    return response;
+    return response?.results
+        ? { ...response, results: filterByLanguage(response.results) }
+        : response;
 };
 
 export const getRelatedTVShows = async (id: number): Promise<TMDbResponse<TVShow>> => {
     const response = await fetchTMDb<TMDbResponse<TVShow>>(`/tv/${id}/similar`);
-    if (response && response.results) {
-        return { ...response, results: filterByLanguage(response.results) };
-    }
-    return response;
+    return response?.results
+        ? { ...response, results: filterByLanguage(response.results) }
+        : response;
 };
 
 export interface Video {
@@ -252,8 +250,8 @@ export interface Genre {
 
 export interface DiscoverParams {
     with_genres?: string;
-    primary_release_year?: string; 
-    first_air_date_year?: string; 
+    primary_release_year?: string;
+    first_air_date_year?: string;
     sort_by?: string;
     page?: number;
 }
@@ -270,7 +268,7 @@ export const discoverMovies = async (params: DiscoverParams): Promise<TMDbRespon
     const queryParams: Record<string, string> = {
         page: (params.page || 1).toString(),
         sort_by: params.sort_by || "popularity.desc",
-        "primary_release_date.lte": new Date().toISOString().split('T')[0], 
+        "primary_release_date.lte": new Date().toISOString().split('T')[0],
     };
 
     if (params.with_genres) queryParams.with_genres = params.with_genres;
@@ -284,7 +282,7 @@ export const discoverTVShows = async (params: DiscoverParams): Promise<TMDbRespo
     const queryParams: Record<string, string> = {
         page: (params.page || 1).toString(),
         sort_by: params.sort_by || "popularity.desc",
-        "first_air_date.lte": new Date().toISOString().split('T')[0], 
+        "first_air_date.lte": new Date().toISOString().split('T')[0],
     };
 
     if (params.with_genres) queryParams.with_genres = params.with_genres;
