@@ -569,9 +569,9 @@ export default function HomeScreen(): JSX.Element {
 
 
     const renderItem = useCallback(
-        ({ item }: { item: Movie | TVShow }): JSX.Element => (
+        (renderProps: { item: Movie | TVShow }): JSX.Element => (
             <MovieCardItem
-                item={item}
+                item={renderProps.item}
                 mediaType={mediaType}
                 handleToggleFavorite={handleToggleFavorite}
                 handleToggleWatchlist={handleToggleWatchlist}
