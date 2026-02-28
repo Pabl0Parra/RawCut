@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
     View,
@@ -80,6 +80,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 }) => {
     const { t } = useTranslation();
     const [state, setState] = useState<RecommendationState>(INITIAL_STATE);
+    const isMountedRef = useRef(true);
 
     const {
         message,
@@ -91,6 +92,12 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
         showUserList,
     } = state;
 
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
 
     useEffect(() => {
         if (visible) {
@@ -100,6 +107,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
     }, [visible]);
 
     const updateState = (updates: Partial<RecommendationState>): void => {
+        if (!isMountedRef.current) return;
         setState((prev) => ({ ...prev, ...updates }));
     };
 
