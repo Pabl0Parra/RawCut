@@ -75,6 +75,9 @@ const updateRecRating = (
     );
 };
 
+const markComment = (c: RecommendationComment, userId: string): RecommendationComment =>
+    c.user_id === userId ? c : { ...c, is_read: true };
+
 const markRecCommentsRead = (
     recs: EnrichedRecommendation[],
     recommendationId: string,
@@ -82,12 +85,7 @@ const markRecCommentsRead = (
 ): EnrichedRecommendation[] => {
     return recs.map((rec) =>
         rec.id === recommendationId
-            ? {
-                ...rec,
-                comments: rec.comments.map((c) =>
-                    c.user_id === userId ? c : { ...c, is_read: true }
-                ),
-            }
+            ? { ...rec, comments: rec.comments.map((c) => markComment(c, userId)) }
             : rec
     );
 };
