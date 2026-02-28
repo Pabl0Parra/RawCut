@@ -51,6 +51,16 @@ const addCommentToRecs = (
     );
 };
 
+const applyDeletion = (state: RecommendationState, deletedId: string, userId: string) => {
+    const newReceived = state.received.filter((r) => r.id !== deletedId);
+    const newSent = state.sent.filter((r) => r.id !== deletedId);
+    return {
+        sent: newSent,
+        received: newReceived,
+        unreadCount: calculateUnreadCount(newSent, newReceived, userId),
+    };
+};
+
 const removeCommentFromRecs = (
     recs: EnrichedRecommendation[],
     recommendationId: string,
@@ -90,16 +100,22 @@ const markRecCommentsRead = (
     );
 };
 
+const countUnreadComments = (
+    recs: EnrichedRecommendation[],
+    userId: string
+): number => {
+    return recs.reduce((total, rec) => {
+        return total + rec.comments.filter(c => c.user_id !== userId && !c.is_read).length;
+    }, 0);
+};
+
 const calculateUnreadCount = (
     sent: EnrichedRecommendation[],
     received: EnrichedRecommendation[],
     userId: string
 ): number => {
     const receivedUnreadRecs = received.filter(r => !r.is_read).length;
-    let unreadCommentsCount = 0;
-    [...sent, ...received].forEach(rec => {
-        unreadCommentsCount += rec.comments.filter(c => c.user_id !== userId && !c.is_read).length;
-    });
+    const unreadCommentsCount = countUnreadComments([...sent, ...received], userId);
     return receivedUnreadRecs + unreadCommentsCount;
 };
 
@@ -410,18 +426,10 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         };
 
         const handleRecommendationDeleted = (payload: any) => {
-            const deletedId = payload.old?.id as string | undefined;
-            if (!deletedId) return;
-            set((state) => {
-                const newReceived = state.received.filter((r) => r.id !== deletedId);
-                const newSent = state.sent.filter((r) => r.id !== deletedId);
-                return {
-                    sent: newSent,
-                    received: newReceived,
-                    unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
-                };
-            });
-        };
+    const deletedId = payload.old?.id as string | undefined;
+    if (!deletedId) return;
+    set((state) => applyDeletion(state, deletedId, user.id));
+};
 
         const commentsChannel = supabase
             .channel("comments-changes")
