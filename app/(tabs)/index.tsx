@@ -141,7 +141,7 @@ const useContentLoading = (
             const effectiveTab = overrides?.activeTab ?? activeTab;
 
             const effectiveFiltersActive = overrides ? true : filtersActive;
-            const shouldUseDiscoverApi = effectiveFiltersActive && !searchQuery;
+            const shouldUseDiscoverApi = (effectiveFiltersActive || effectiveSortBy !== "popularity.desc") && !searchQuery;
 
             if (shouldSkipContentLoad(reset, hasMoreRef.current, loadingRef.current)) {
                 return;

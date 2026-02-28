@@ -127,11 +127,11 @@ const fetchTMDb = async <T>(
     return response.json();
 };
 
-const EXCLUDED_LANGUAGES = new Set(["ja", "zh", "ko", "ar", "hi", "ru", "el", "th", "he", "tr", "te", "ta", "ml", "kn", "mr", "bn", "pa", "gu", "ur", "id"]);
+const INCLUDED_LANGUAGES = new Set(["en", "es", "ca"]);
 
 const filterByLanguage = <T extends { original_language: string }>(items: T[]): T[] => {
     if (!items) return [];
-    return items.filter(item => !EXCLUDED_LANGUAGES.has(item.original_language));
+    return items.filter(item => INCLUDED_LANGUAGES.has(item.original_language));
 };
 
 export const getPopularMovies = async (page: number = 1): Promise<TMDbResponse<Movie>> => {
@@ -156,13 +156,13 @@ export const searchTVShows = async (query: string, page: number = 1): Promise<TM
 
 export const getMovieDetails = async (id: number): Promise<(Movie & { genres: { id: number; name: string }[] }) | null> => {
     const details = await fetchTMDb<Movie & { genres: { id: number; name: string }[] }>(`/movie/${id}`, { append_to_response: "credits" });
-    if (details && EXCLUDED_LANGUAGES.has(details.original_language)) return null;
+    if (details && !INCLUDED_LANGUAGES.has(details.original_language)) return null;
     return details;
 };
 
 export const getTVShowDetails = async (id: number): Promise<(TVShow & { genres: { id: number; name: string }[] }) | null> => {
     const details = await fetchTMDb<TVShow & { genres: { id: number; name: string }[] }>(`/tv/${id}`, { append_to_response: "credits" });
-    if (details && EXCLUDED_LANGUAGES.has(details.original_language)) return null;
+    if (details && !INCLUDED_LANGUAGES.has(details.original_language)) return null;
     return details;
 };
 
