@@ -21,7 +21,7 @@ interface PersonListProps {
 export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix }) => {
     if (!items || items.length === 0) return null;
 
-    const renderItem = ({ item, index }: { item: PersonListItem; index: number }) => {
+    const renderItem = ({ item }: { item: PersonListItem }) => {
         const profileUrl = getImageUrl(item.profile_path, "w200");
 
         return (
@@ -56,7 +56,7 @@ export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix 
             <Text style={detailScreenStyles.sectionTitle}>{title}</Text>
             <FlatList
                 data={items}
-                keyExtractor={(item, index) => `${keyPrefix}-${item.id}-${index}`}
+                keyExtractor={(item) => `${keyPrefix}-${item.id}`}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={detailScreenStyles.horizontalList}

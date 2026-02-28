@@ -67,7 +67,7 @@ export const ContentHorizontalList: React.FC<ContentHorizontalListProps> = ({
             <Text style={detailScreenStyles.sectionTitle}>{title}</Text>
             <FlatList
                 data={data}
-                keyExtractor={(item, index) => `${mediaType}-${item.id}-${index}`}
+                keyExtractor={(item) => `${mediaType}-${item.id}`}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={detailScreenStyles.horizontalList}
