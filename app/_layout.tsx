@@ -109,7 +109,6 @@ export default function RootLayout() {
     const [isReady, setIsReady] = useState(false);
     const [initError, setInitError] = useState<string | null>(null);
     const [isOffline, setIsOffline] = useState(false);
-
     const mountedRef = useRef(true);
 
     const user = useAuthStore((s) => s.user);
@@ -124,18 +123,12 @@ export default function RootLayout() {
 
     useEffect(() => {
         mountedRef.current = true;
-        console.log("[RootLayout] Setting up auth listeners…");
 
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(
             async (event: AuthChangeEvent, session: Session | null) => {
                 if (!mountedRef.current) return;
-
-                console.log("[RootLayout] Auth state changed:", {
-                    event,
-                    hasSession: !!session,
-                });
 
                 useAuthStore.getState().setSession(session);
 
@@ -174,8 +167,6 @@ export default function RootLayout() {
         };
 
         const initSession = async (): Promise<void> => {
-            console.log("[RootLayout] Initializing session…");
-
             try {
                 const { data: { session }, error } = await withTimeout(
                     supabase.auth.getSession(),
@@ -186,7 +177,6 @@ export default function RootLayout() {
                 if (!mountedRef.current) return;
                 if (error) { handleSessionError(error); return; }
 
-                console.log("[RootLayout] Session initialized:", { hasSession: !!session });
                 await handleSessionSuccess(session);
             } catch (err) {
                 if (!mountedRef.current) return;
@@ -204,9 +194,6 @@ export default function RootLayout() {
                 }
             } finally {
                 if (mountedRef.current) {
-                    console.log(
-                        "[RootLayout] Session init complete → isReady = true",
-                    );
                     setIsReady(true);
                 }
             }
@@ -216,7 +203,6 @@ export default function RootLayout() {
 
         const handleDeepLink = async (url: string | null): Promise<void> => {
             if (!url) return;
-            console.log("[RootLayout] Handling deep link:", url);
 
             const { queryParams } = Linking.parse(url);
 
@@ -254,7 +240,6 @@ export default function RootLayout() {
 
     useEffect(() => {
         if (fontsLoaded || fontError) {
-            console.log("[RootLayout] Fonts loaded, hiding native splash");
             SplashScreen.hideAsync();
         }
     }, [fontsLoaded, fontError]);
@@ -262,21 +247,14 @@ export default function RootLayout() {
     useEffect(() => {
         if (!isReady) return;
 
-        console.log("[RootLayout] Auth routing check:", {
-            user: !!user,
-            segments,
-        });
-
         const currentRoot = segments[0];
         const inAuthGroup = currentRoot === "(tabs)";
         const inPublicRoute =
             currentRoot === "login" || currentRoot === "register";
 
         if (!user && inAuthGroup) {
-            console.log("[RootLayout] Unauthenticated → /login");
             router.replace("/login");
         } else if (user && (inPublicRoute || currentRoot === undefined)) {
-            console.log("[RootLayout] Authenticated → /(tabs)");
             router.replace("/(tabs)");
         }
     }, [user, segments, isReady]);

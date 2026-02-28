@@ -135,7 +135,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         const now = Date.now();
         const lastFetched = get().lastFetched;
         if (!force && lastFetched && now - lastFetched < 30000) {
-            console.log("[RecommendationStore] Skipping fetch (recently updated)");
             return;
         }
 
@@ -216,7 +215,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
 
     deleteComment: async (recommendationId: string, commentId: string) => {
         const user = useAuthStore.getState().user;
-        console.log(`[RecommendationStore] Attempting to delete comment: ${commentId} for rec: ${recommendationId}. User: ${user?.id}`);
 
         try {
             const { error, count, data } = await supabase
@@ -226,14 +224,10 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 .select();
 
             if (error) {
-                console.error("[RecommendationStore] DB Delete Comment Error:", error);
                 throw error;
             }
 
-            console.log(`[RecommendationStore] Comment Delete Response - Affected rows: ${count}, Data:`, data);
-
             if (count === 0) {
-                console.warn("[RecommendationStore] Delete Comment called but 0 rows affected. RLS or ID mismatch?");
             }
 
             set((state) => ({
@@ -252,23 +246,17 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         const user = useAuthStore.getState().user;
         if (!user) return false;
 
-        console.log(`[RecommendationStore] Soft-deleting recommendation ${recommendationId} for user ${user.id}`);
-
         try {
             const { data, error } = await supabase
                 .rpc("soft_delete_recommendation", { p_recommendation_id: recommendationId });
 
             if (error) {
-                console.error("[RecommendationStore] DB Soft-Delete Error:", error);
                 throw error;
             }
 
             if (!data) {
-                console.warn("[RecommendationStore] Soft-delete returned false (not authorized or not found)");
                 return false;
             }
-
-            console.log("[RecommendationStore] Successfully soft-deleted from DB:", recommendationId);
 
             set((state) => {
                 const newSent = state.sent.filter((r) => r.id !== recommendationId);

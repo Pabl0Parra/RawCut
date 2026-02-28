@@ -7,7 +7,7 @@ interface VideoSplashProps {
     onFinish: () => void;
 }
 
-const SPLASH_TIMEOUT_MS = 8000; 
+const SPLASH_TIMEOUT_MS = 8000;
 
 export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
     const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -16,16 +16,12 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
     const hasFinished = useRef(false);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    
     onFinishRef.current = onFinish;
 
     const finishSplash = () => {
         if (hasFinished.current) return;
         hasFinished.current = true;
 
-        console.log('[VideoSplash] Finishing splash screen');
-
-        
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
@@ -41,39 +37,30 @@ export default function VideoSplash({ onFinish }: Readonly<VideoSplashProps>) {
     };
 
     const player = useVideoPlayer(require('../../assets/video/intro.mp4'), (p) => {
-        console.log('[VideoSplash] Video player initialized');
         p.loop = false;
         p.muted = false;
         p.play();
     });
 
     useEffect(() => {
-        console.log('[VideoSplash] Component mounted');
-
         if (hasSetupListener.current) return;
         hasSetupListener.current = true;
 
-        
         timeoutRef.current = setTimeout(() => {
-            console.warn('[VideoSplash] Timeout reached, forcing splash to finish');
             finishSplash();
         }, SPLASH_TIMEOUT_MS);
 
         const subscription = player.addListener('playToEnd', () => {
-            console.log('[VideoSplash] Video playback ended');
             finishSplash();
         });
 
-        
         const errorSubscription = player.addListener('statusChange', (status) => {
             if (status.error) {
-                console.error('[VideoSplash] Video error:', status.error);
                 finishSplash();
             }
         });
 
         return () => {
-            console.log('[VideoSplash] Component unmounting');
             subscription.remove();
             errorSubscription.remove();
             if (timeoutRef.current) {

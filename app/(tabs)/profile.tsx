@@ -95,7 +95,6 @@ function AvatarSection({
                     </View>
                 )}
 
-                { }
                 {isUploading && (
                     <View style={styles.avatarOverlay}>
                         <ActivityIndicator size="large" color={Colors.white} />
@@ -106,7 +105,6 @@ function AvatarSection({
                 )}
             </View>
 
-            { }
             {!isUploading && (
                 <View style={styles.cameraBadge}>
                     <Ionicons name="camera" size={16} color={Colors.white} />
@@ -181,7 +179,6 @@ function SettingsRow({
         <TouchableOpacity
             style={styles.settingsRow}
             onPress={() => {
-                console.log(`[SettingsRow] Pressed: ${label}`);
                 onPress();
             }}
             activeOpacity={0.7}
@@ -479,7 +476,6 @@ export default function ProfileScreen(): React.JSX.Element {
                     <Text style={styles.emailText}>{user?.email}</Text>
                 </View>
 
-                { }
                 {isGenericUsername && !isEditingUsername && (
                     <TouchableOpacity
                         style={styles.genericPrompt}
@@ -498,7 +494,6 @@ export default function ProfileScreen(): React.JSX.Element {
                     </TouchableOpacity>
                 )}
 
-                { }
                 <View style={styles.section}>
                     <SectionHeader title={t("profile.sections.info")} />
 
@@ -597,7 +592,6 @@ export default function ProfileScreen(): React.JSX.Element {
                     </View>
                 </View>
 
-                { }
                 <View style={styles.section}>
                     <SectionHeader title={t("profile.sections.account")} />
 
@@ -609,7 +603,6 @@ export default function ProfileScreen(): React.JSX.Element {
                     />
                 </View>
 
-                { }
                 <TouchableOpacity
                     style={styles.signOutButton}
                     onPress={handleSignOut}
@@ -619,7 +612,6 @@ export default function ProfileScreen(): React.JSX.Element {
                     <Text style={styles.signOutText}>{t("profile.actions.signOut")}</Text>
                 </TouchableOpacity>
 
-                { }
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>CortoCrudo v{APP_VERSION}</Text>
                     <Text style={styles.footerAuthor}>{t("profile.about.author")}</Text>

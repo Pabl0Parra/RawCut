@@ -53,7 +53,7 @@ export const HeaderRight = () => {
                         style={styles.avatarImage}
                         contentFit="cover"
                         transition={200}
-                        onError={() => console.log("Header Image Load Error")}
+                        onError={() => { }}
                     />
                 ) : (
                     <View style={styles.headerAvatarPlaceholder}>
@@ -145,12 +145,6 @@ const styles = StyleSheet.create({
         minWidth: 200,
         borderWidth: 1,
         borderColor: Colors.metalSilver,
-        
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        
         elevation: 10,
     },
     userInfo: {

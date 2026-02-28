@@ -29,7 +29,6 @@ const languageDetectorPlugin = {
         return callback('es'); // Default fallback
       }
     } catch (error) {
-      console.log('Error reading language', error);
       callback('es');
     }
   },
@@ -37,7 +36,6 @@ const languageDetectorPlugin = {
     try {
       await AsyncStorage.setItem(STORE_LANGUAGE_KEY, language);
     } catch (error) {
-      console.log('Error saving language', error);
     }
   }
 };
