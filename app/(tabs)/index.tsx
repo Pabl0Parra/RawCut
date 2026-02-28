@@ -135,9 +135,7 @@ const useContentLoading = (
             const currentPage = reset ? 1 : pageRef.current;
 
             const effectiveSortBy = overrides?.sortBy ?? sortBy;
-            const effectiveGenre = overrides?.selectedGenre !== undefined
-                ? overrides.selectedGenre
-                : selectedGenre;
+            const effectiveGenre = overrides?.selectedGenre ?? selectedGenre;
             const effectiveYear = overrides?.selectedYear ?? selectedYear;
             const effectiveTab = overrides?.activeTab ?? activeTab;
 
@@ -271,7 +269,6 @@ export default function HomeScreen(): JSX.Element {
     const {
         recommendations,
         loadingForYou,
-        fetchForYouContent,
     } = useForYouContent(activeTab);
 
     const {
@@ -596,7 +593,8 @@ export default function HomeScreen(): JSX.Element {
     }, [loading, data.length]);
 
     const renderContinueWatchingItem = useCallback(
-        ({ item }: { item: ContinueWatchingItem }): JSX.Element => {
+        (renderProps: { item: ContinueWatchingItem }): JSX.Element => {
+            const { item } = renderProps;
             const nextEpisode = getNextEpisodeToWatch(
                 item.show.id,
                 seasonsToProgressInfo(item.show.seasons),
@@ -950,7 +948,7 @@ export default function HomeScreen(): JSX.Element {
                     </View>
                 )}
 
-                {activeTab !== "foryou" ? renderMainContent() : renderForYouContent()}
+                {activeTab === "foryou" ? renderForYouContent() : renderMainContent()}
 
                 { }
                 <Modal

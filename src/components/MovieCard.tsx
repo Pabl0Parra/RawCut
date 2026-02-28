@@ -18,15 +18,9 @@ import { VotePicker } from "./VotePicker";
 import { getImageUrl, type Movie, type TVShow } from "../lib/tmdb";
 import { Colors } from "../constants/Colors";
 
-/**
- * Media type for content operations
- */
 type MediaType = "movie" | "tv";
 
-/**
- * Props for MovieCard component
- * Marked as readonly to prevent mutation
- */
+
 interface MovieCardProps {
     readonly item: Movie | TVShow;
     readonly mediaType: MediaType;
