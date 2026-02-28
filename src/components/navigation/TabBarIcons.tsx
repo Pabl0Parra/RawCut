@@ -6,7 +6,7 @@ interface TabBarIconProps {
     focused: boolean;
 }
 
-const ICON_SIZE = 24;
+const ICON_SIZE = 22;
 
 export const HomeIcon = ({ color, focused }: TabBarIconProps) => (
     <MaterialIcons name="castle" size={ICON_SIZE} color={color} />

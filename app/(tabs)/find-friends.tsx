@@ -177,7 +177,11 @@ export default function FindFriendsScreen() {
         if (following.length === 0) {
             return (
                 <View style={styles.centered}>
-                    <Text style={styles.emptyEmoji}>👀</Text>
+                    <Image
+                        source={require("../../assets/icons/spy.png")}
+                        style={styles.emptyIcon as any}
+                        contentFit="contain"
+                    />
                     <Text style={styles.emptyTitle}>{t("social.noFollowing")}</Text>
                     <Text style={styles.emptySubtitle}>{t("social.noFollowingSubtitle")}</Text>
                 </View>
@@ -419,12 +423,17 @@ const styles = StyleSheet.create({
         fontFamily: "Inter_400Regular",
         fontSize: 14,
         textAlign: "center",
-        opacity: 0.7,
         marginTop: 12,
     } as TextStyle,
     emptyEmoji: {
         fontSize: 48,
     } as TextStyle,
+    emptyIcon: {
+        width: 80,
+        height: 80,
+        opacity: 0.8,
+        marginBottom: 8,
+    } as ViewStyle,
     emptyTitle: {
         color: Colors.white,
         fontFamily: "Inter_600SemiBold",

@@ -25,6 +25,7 @@ const TIMING_CONFIG = { duration: ANIMATION_DURATION } as const;
 
 interface TabLayout {
     readonly x: number;
+    readonly width: number;
     readonly index: number;
 }
 
@@ -47,8 +48,7 @@ function layoutReducer(state: TabLayout[], action: LayoutAction): TabLayout[] {
     if (action.type === 'ADD_LAYOUT') {
         const existingIndex = state.findIndex(item => item.index === action.payload.index);
         if (existingIndex !== -1) {
-            
-            if (state[existingIndex].x === action.payload.x) {
+            if (state[existingIndex].x === action.payload.x && state[existingIndex].width === action.payload.width) {
                 return state;
             }
             const newState = [...state];
@@ -69,26 +69,23 @@ const TabBarItem = memo(function TabBarItem({
     onLongPress,
     badge,
 }: TabBarItemProps) {
-    
+
     const animatedCircleStyle = useAnimatedStyle(() => ({
         transform: [
             { scale: withSpring(active ? 1 : 0, TIMING_CONFIG) },
         ],
     }), [active]);
 
-    
     const animatedIconStyle = useAnimatedStyle(() => ({
         opacity: withSpring(active ? 1 : 0.5, TIMING_CONFIG),
     }), [active]);
 
-    
     const animatedContainerStyle = useAnimatedStyle(() => ({
         transform: [
             { translateY: withSpring(active ? -12 : 0, TIMING_CONFIG) },
         ],
     }), [active]);
 
-    
     const renderedIcon = useMemo(() =>
         icon({
             color: active ? Colors.bloodRed : Colors.metalSilver,
@@ -108,9 +105,8 @@ const TabBarItem = memo(function TabBarItem({
             accessibilityLabel={label}
         >
             <Animated.View style={[styles.tabItemInner, animatedContainerStyle]}>
-                {}
                 <Animated.View style={[styles.circleBackground, animatedCircleStyle]}>
-                    <Svg width={48} height={48} viewBox="0 0 48 48">
+                    <Svg width={42} height={42} viewBox="0 0 48 48">
                         <Path
                             fill="#FFFFFF"
                             d="M24 0C10.745 0 0 10.745 0 24s10.745 24 24 24 24-10.745 24-24S37.255 0 24 0z"
@@ -118,12 +114,10 @@ const TabBarItem = memo(function TabBarItem({
                     </Svg>
                 </Animated.View>
 
-                {}
                 <Animated.View style={[styles.iconContainer, animatedIconStyle]}>
                     {renderedIcon}
                 </Animated.View>
 
-                {}
                 {badge !== undefined && (
                     <View style={styles.badge}>
                         <Text style={styles.badgeText}>{badge}</Text>
@@ -131,7 +125,6 @@ const TabBarItem = memo(function TabBarItem({
                 )}
             </Animated.View>
 
-            {}
             <Animated.Text
                 style={[
                     styles.label,
@@ -155,10 +148,8 @@ export default function AnimatedTabBar({
     const insets = useSafeAreaInsets();
     const [layouts, dispatch] = useReducer(layoutReducer, []);
 
-    
     const xOffset = useSharedValue(0);
 
-    
     const visibleRoutes = useMemo(() =>
         state.routes.filter(route => {
             const { options } = descriptors[route.key];
@@ -167,7 +158,6 @@ export default function AnimatedTabBar({
         [state.routes, descriptors]
     );
 
-    
     const activeVisibleIndex = useMemo(() =>
         visibleRoutes.findIndex(
             route => route.key === state.routes[state.index]?.key
@@ -175,20 +165,17 @@ export default function AnimatedTabBar({
         [visibleRoutes, state.routes, state.index]
     );
 
-    
     const handleLayout = useCallback((event: LayoutChangeEvent, index: number) => {
         dispatch({
             type: 'ADD_LAYOUT',
-            payload: { x: event.nativeEvent.layout.x, index },
+            payload: { x: event.nativeEvent.layout.x, width: event.nativeEvent.layout.width, index },
         });
     }, []);
 
-    
-    
     useAnimatedReaction(
         () => {
             const activeLayout = layouts.find(layout => layout.index === activeVisibleIndex);
-            return activeLayout ? activeLayout.x - 25 : null;
+            return activeLayout ? (activeLayout.x + activeLayout.width / 2) - 55 : null;
         },
         (newOffset, previousOffset) => {
             if (newOffset !== null && newOffset !== previousOffset) {
@@ -198,21 +185,17 @@ export default function AnimatedTabBar({
         [activeVisibleIndex, layouts]
     );
 
-    
     const animatedBackgroundStyle = useAnimatedStyle(() => ({
         transform: [{ translateX: withSpring(xOffset.value, TIMING_CONFIG) }],
     }), []);
 
-    
     const safeBottomPadding = Math.max(insets.bottom, TAB_BAR_PADDING_BOTTOM);
 
-    
     const containerStyle = useMemo(() =>
         [styles.container, { paddingBottom: safeBottomPadding }],
         [safeBottomPadding]
     );
 
-    
     const createPressHandler = useCallback((routeKey: string, routeName: string, isFocused: boolean) => () => {
         const event = navigation.emit({
             type: 'tabPress',
@@ -232,7 +215,6 @@ export default function AnimatedTabBar({
         });
     }, [navigation]);
 
-    
     const tabsData = useMemo(() =>
         visibleRoutes.map((route, index) => {
             const { options } = descriptors[route.key];
@@ -256,7 +238,6 @@ export default function AnimatedTabBar({
 
     return (
         <View style={containerStyle}>
-            {}
             <Animated.View style={[styles.curvedBackground, animatedBackgroundStyle]}>
                 <Svg width={110} height={60} viewBox="0 0 110 60">
                     <Path
@@ -266,7 +247,6 @@ export default function AnimatedTabBar({
                 </Svg>
             </Animated.View>
 
-            {}
             <View style={styles.tabsContainer}>
                 {tabsData.map((tab) => {
                     if (!tab.icon) return null;
@@ -301,25 +281,26 @@ const styles = StyleSheet.create({
     },
     tabsContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
+        justifyContent: 'space-between',
         paddingBottom: ICON_BOTTOM_PADDING,
+        paddingHorizontal: 8,
     },
     tabItem: {
+        flex: 1,
         alignItems: 'center',
         justifyContent: 'flex-start',
         paddingTop: 2,
-        minWidth: 60,
     },
     tabItemInner: {
-        width: 50,
-        height: 35,
+        width: 44,
+        height: 32,
         alignItems: 'center',
         justifyContent: 'center',
     },
     circleBackground: {
         position: 'absolute',
-        width: 48,
-        height: 48,
+        width: 42,
+        height: 42,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -328,10 +309,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     label: {
-        fontSize: 10,
+        fontSize: 9,
         fontFamily: 'Inter_500Medium',
-        marginTop: -4,
+        marginTop: -2,
         paddingBottom: 12,
+        textAlign: 'center',
     },
     badge: {
         position: 'absolute',
@@ -339,8 +321,8 @@ const styles = StyleSheet.create({
         right: 6,
         backgroundColor: Colors.white,
         borderRadius: 10,
-        minWidth: 16,
-        height: 16,
+        minWidth: 14,
+        height: 14,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 4,
@@ -350,8 +332,8 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         color: Colors.bloodRed,
-        fontSize: 10,
+        fontSize: 9,
         fontWeight: 'bold',
-        lineHeight: 12,
+        lineHeight: 11,
     },
 });
