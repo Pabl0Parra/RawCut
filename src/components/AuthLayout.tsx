@@ -77,7 +77,7 @@ function useKeyboardAnimation() {
             ]).start();
         };
 
-        
+
         const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
         const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
@@ -123,7 +123,7 @@ function AnimatedLogo({ scale, opacity }: Readonly<AnimatedLogoProps>): React.JS
                 CortoCrudo
             </Text>
             <Image
-                source={require("../../assets/2.png")}
+                source={require("../../assets/corto-crudo-logo.png")}
                 style={styles.logoImage}
                 resizeMode="contain"
             />
@@ -233,29 +233,29 @@ export function AuthLayout({
                         keyboardOpeningTime={SCROLL_CONFIG.keyboardOpeningTime}
                         bounces={false}
                     >
-                        {}
+                        { }
                         {showLogo && (
                             <AnimatedLogo scale={logoScale} opacity={logoOpacity} />
                         )}
 
-                        {}
+                        { }
                         {!showLogo && <StaticLogo title={title} subtitle={subtitle} />}
 
                         <View style={styles.formContainer}>
-                            {}
+                            { }
                             {!!error && <ErrorMessage message={error} />}
 
-                            {}
+                            { }
                             {children}
 
-                            {}
+                            { }
                             <SubmitButton
                                 onPress={onSubmit}
                                 isLoading={isLoading}
                                 text={submitButtonText}
                             />
 
-                            {}
+                            { }
                             <AuthLink text={linkText} label={linkLabel} href={linkHref} />
                         </View>
                     </KeyboardAwareScrollView>
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     } as ViewStyle,
     animatedLogoContainer: {
-        
+
         overflow: "visible",
     } as ViewStyle,
     logoText: {
