@@ -127,8 +127,8 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     };
 
     const dateObj = new Date(created_at);
-    const locale = i18n.language === 'ca' ? 'ca-ES' : i18n.language === 'en' ? 'en-US' : 'es-ES';
-    const formattedDate = dateObj.toLocaleDateString(locale, {
+    const langMap: Record<string, string> = { ca: 'ca-ES', en: 'en-US' };
+    const locale = langMap[i18n.language] ?? 'es-ES'; const formattedDate = dateObj.toLocaleDateString(locale, {
         day: 'numeric', month: 'short'
     });
 
