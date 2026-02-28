@@ -36,7 +36,8 @@
           "cameraPermission": "CortoCrudo necesita acceso a la cámara para tomar una foto de perfil."
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
