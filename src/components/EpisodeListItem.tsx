@@ -17,8 +17,6 @@ import { getStillUrl, formatRating } from "../utils/tvDetail.utils";
 
 export const EpisodeListItem: React.FC<EpisodeListItemProps> = ({
     episode,
-    tvShowId,
-    seasonNumber,
     isWatched,
     onToggleWatched,
     onPress,

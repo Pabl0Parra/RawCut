@@ -17,7 +17,6 @@ import { getPosterUrl } from "../utils/tvDetail.utils";
 
 export const SeasonCard: React.FC<SeasonCardProps> = ({
     season,
-    tvShowId,
     isWatched,
     onPress,
 }) => {
