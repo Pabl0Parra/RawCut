@@ -82,8 +82,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     };
 
     const hasUnreadReply = !isReceived &&
-        comments != null &&
-        comments.some(c => c.user_id !== currentUserId && !c.is_read);
+        comments?.some(c => c.user_id !== currentUserId && !c.is_read);
 
     const handleSubmitComment = async () => {
         if (!commentText.trim()) return;
@@ -128,7 +127,8 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     };
 
     const dateObj = new Date(created_at);
-    const formattedDate = dateObj.toLocaleDateString(i18n.language === 'ca' ? 'ca-ES' : i18n.language === 'en' ? 'en-US' : 'es-ES', {
+    const locale = i18n.language === 'ca' ? 'ca-ES' : i18n.language === 'en' ? 'en-US' : 'es-ES';
+    const formattedDate = dateObj.toLocaleDateString(locale, {
         day: 'numeric', month: 'short'
     });
 
