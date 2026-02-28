@@ -11,7 +11,7 @@ interface LegalScreenProps {
     sectionCount: number;
 }
 
-export default function LegalScreen({ namespace, sectionCount }: LegalScreenProps): React.JSX.Element {
+export default function LegalScreen({ namespace, sectionCount }: Readonly<LegalScreenProps>): React.JSX.Element {
     const { t } = useTranslation();
     const router = useRouter();
 
