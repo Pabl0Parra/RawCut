@@ -68,7 +68,6 @@ function AvatarSection({
     uploadProgress,
     onPress,
 }: Readonly<AvatarSectionProps>): React.JSX.Element {
-    const { t } = useTranslation();
     const initials = getInitials(username, email);
 
     return (

@@ -1,6 +1,6 @@
 # CortoCrudo
 
-CortoCrudo is a comprehensive movie and television recommendation platform developed with React Native and Expo. It integrates social features with a gamified experience, allowing users to discover content, manage personal lists, and share recommendations within a community.
+CortoCrudo is a comprehensive movie and television recommendation platform developed with React Native and Expo. It integrates social features, allowing users to discover content, manage personal lists, and share recommendations within a community.
 
 ## Table of Contents
 
@@ -16,7 +16,6 @@ CortoCrudo is a comprehensive movie and television recommendation platform devel
   - [Environment Configuration](#environment-configuration)
   - [Database Setup](#database-setup)
 - [Project Structure](#project-structure)
-- [Gamification System](#gamification-system)
 - [License](#license)
 
 </details>
@@ -32,7 +31,6 @@ The application serves as a centralized hub for media enthusiasts to track their
 - Social Recommendations: Send direct recommendations to other users with personalized messages.
 - Real-time Interaction: Engage in threaded discussions on recommendations with live updates.
 - Rating System: Rate received recommendations on a five-star scale.
-- Gamification: Earn reward points based on the quality of recommendations provided to others.
 - Professional UI: High-contrast theme optimized for readability and user engagement.
 
 ## Technical Architecture
@@ -108,14 +106,6 @@ Use the Expo Go app to scan the generated QR code or use the following commands:
 - `src/constants/`: Shared constants and theme definitions.
 - `supabase/`: SQL schema and database migration files.
 - `assets/`: Static assets including images and custom fonts.
-
-## Gamification System
-
-CortoCrudo rewards users for providing valuable recommendations to their peers. Points are awarded based on the rating received:
-- 4-star rating: The sender receives +1 point.
-- 5-star rating: The sender receives +2 points.
-
-Milestone achievements are recognized at specific point thresholds (10, 25, and 50 points), which are displayed on the user's public profile.
 
 ## License
 
