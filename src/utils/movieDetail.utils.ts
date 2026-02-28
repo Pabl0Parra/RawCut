@@ -50,8 +50,12 @@ export const loadMovieData = async (
         getMovieVideos(movieId),
     ]);
 
+    if (!movieDetails) {
+        throw new Error(`Movie with id ${movieId} not found`);
+    }
+
     return {
-        movie: movieDetails as NonNullable<typeof movieDetails>,
+        movie: movieDetails,
         relatedMovies: relatedResponse.results,
         trailerKey: extractTrailerKey(videosResponse.results),
     };

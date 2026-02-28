@@ -43,8 +43,11 @@ export const loadTVShowData = async (
         getTVVideos(tvId),
     ]);
 
+    if (!tvShowDetails) {
+        throw new Error(`TV show with id ${tvId} not found`);
+    }
     return {
-        tvShow: tvShowDetails as NonNullable<typeof tvShowDetails>,
+        tvShow: tvShowDetails,
         relatedShows: relatedResponse.results,
         trailerKey: extractTrailerKey(videosResponse.results),
     };
