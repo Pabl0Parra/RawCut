@@ -2,10 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { View, Text, StyleSheet } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-
 import { getImageUrl, type Movie } from "../../../src/lib/tmdb";
 import { useAuthStore } from "../../../src/stores/authStore";
-import { Colors } from "../../../src/constants/Colors";
 import TrailerModal from "../../../src/components/TrailerModal";
 import RecommendModal from "../../../src/components/RecommendModal";
 import { ContentBackdrop } from "../../../src/components/ContentBackdrop";

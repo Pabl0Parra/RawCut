@@ -1,12 +1,9 @@
 import React, { JSX } from "react";
 import {
-    View,
     FlatList,
     StyleSheet,
     type ViewStyle,
 } from "react-native";
-import { Image } from "expo-image";
-import { Colors } from "../constants/Colors";
 import MovieCard from "./MovieCard";
 import { UnauthenticatedState, LoadingState, EmptyState } from "./ContentLayoutStates";
 import type { EnrichedContentItem } from "../hooks/useEnrichedContent";
