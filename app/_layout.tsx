@@ -25,6 +25,7 @@ import { Colors } from "../src/constants/Colors";
 import SmokeBackground from "../src/components/SmokeBackground";
 import { ThemeProvider, DarkTheme } from "@react-navigation/native";
 import { ErrorBoundary } from "../src/components/ErrorBoundary";
+import AnimatedSplash from "../src/components/AnimatedSplash";
 
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
@@ -336,21 +337,7 @@ export default function RootLayout() {
                         )}
 
                         {!isReady && (
-                            <View
-                                style={[
-                                    StyleSheet.absoluteFill,
-                                    styles.loadingOverlay,
-                                ]}
-                                pointerEvents="auto"
-                            >
-                                <ActivityIndicator
-                                    size="large"
-                                    color={Colors.bloodRed}
-                                />
-                                <Text style={styles.loadingText}>
-                                    Preparando la aplicación…
-                                </Text>
-                            </View>
+                            <AnimatedSplash />
                         )}
 
                         {initError && (
