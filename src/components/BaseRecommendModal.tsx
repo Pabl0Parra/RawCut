@@ -211,8 +211,9 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
         if (failedCount === 0) {
             const count = newRecipients.length;
+            const skippedSuffix = skippedCount > 1 ? "s" : "";
             const skippedNote = skippedCount > 0
-                ? ` (${skippedCount} ya enviada${skippedCount > 1 ? "s" : ""})`
+                ? ` (${skippedCount} ya enviada${skippedSuffix})`
                 : "";
             Alert.alert(
                 t("profile.alerts.success"),
@@ -303,11 +304,11 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
     const canSend = selectedUsers.length > 0 && !isSending;
 
-    const sendButtonLabel = isSending
-        ? undefined
-        : selectedUsers.length <= 1
-            ? t("recommendations.sendButton")
-            : t("recommendations.sendToMultiple", { count: selectedUsers.length });
+    const sendLabel = selectedUsers.length <= 1
+        ? t("recommendations.sendButton")
+        : t("recommendations.sendToMultiple", { count: selectedUsers.length });
+
+    const sendButtonLabel = isSending ? undefined : sendLabel;
 
     return (
         <Modal
