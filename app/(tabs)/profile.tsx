@@ -16,7 +16,7 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { Modal } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useRouter, Link } from "expo-router";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
@@ -31,12 +31,6 @@ const LANGUAGES = [
     { code: "en", label: "English" },
     { code: "ca", label: "Català" },
 ];
-
-const LINKS = {
-    help: "https://cortoCrudo.app/help",
-    privacy: "https://cortoCrudo.app/privacy",
-    terms: "https://cortoCrudo.app/terms",
-} as const;
 
 function formatMemberSince(dateString: string): string {
     const date = new Date(dateString);

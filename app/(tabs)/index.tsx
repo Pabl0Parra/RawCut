@@ -564,10 +564,6 @@ export default function HomeScreen(): JSX.Element {
         [],
     );
 
-
-
-
-
     const renderItem = useCallback(
         (renderProps: { item: Movie | TVShow }): JSX.Element => (
             <MovieCardItem

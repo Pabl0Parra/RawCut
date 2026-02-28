@@ -7,8 +7,6 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     StyleSheet,
-    type ViewStyle,
-    type TextStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -236,7 +234,7 @@ export default function MovieDetailScreen(): React.JSX.Element {
                                     style={localStyles.communityBadge}
                                 >
                                     <Text style={localStyles.communityRatingText}>
-                                        👥 {communityRating !== undefined ? communityRating.toFixed(1) : "—"}/10
+                                        👥 {communityRating === undefined ? "—" : communityRating.toFixed(1)}/10
                                     </Text>
                                 </TouchableOpacity>
                             </View>

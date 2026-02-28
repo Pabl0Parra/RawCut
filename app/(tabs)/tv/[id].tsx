@@ -348,7 +348,7 @@ export default function TVDetailScreen(): React.JSX.Element {
                                     style={localStyles.communityBadge}
                                 >
                                     <Text style={localStyles.communityRatingText}>
-                                        👥 {communityRating !== undefined ? communityRating.toFixed(1) : "—"}/10
+                                        👥 {communityRating === undefined ? "—" : communityRating.toFixed(1)}/10
                                     </Text>
                                 </TouchableOpacity>
                             </View>

@@ -5,7 +5,6 @@ import {
     Text,
     TouchableOpacity,
     StyleSheet,
-    Modal,
     type ViewStyle,
     type TextStyle,
     type ImageStyle,
@@ -20,15 +19,14 @@ import { Colors } from "../constants/Colors";
 
 type MediaType = "movie" | "tv";
 
-
 interface MovieCardProps {
     readonly item: Movie | TVShow;
     readonly mediaType: MediaType;
     readonly isFavorite?: boolean;
     readonly inWatchlist?: boolean;
     readonly isWatched?: boolean;
-    readonly communityRating?: number;  // aggregated 0–10
-    readonly userVote?: number;          // this user's vote 0–10
+    readonly communityRating?: number;
+    readonly userVote?: number;
     readonly onToggleFavorite?: () => void;
     readonly onToggleWatchlist?: () => void;
     readonly onToggleWatched?: () => void;
@@ -37,51 +35,27 @@ interface MovieCardProps {
     readonly fullWidth?: boolean;
 }
 
-// ─── Vote Picker ──────────────────────────────────────────────────────────────
-
-// ─── Vote Picker ──────────────────────────────────────────────────────────────
-// Replaced by shared component from ./VotePicker.tsx
-
-
-/**
- * Type guard to check if item is a Movie
- */
 const isMovie = (item: Movie | TVShow): item is Movie => {
     return "title" in item;
 };
 
-/**
- * Gets the display title for the content
- */
 const getTitle = (item: Movie | TVShow): string => {
     return isMovie(item) ? item.title : item.name;
 };
 
-/**
- * Gets the release/air date for the content
- */
 const getReleaseDate = (item: Movie | TVShow): string | undefined => {
     return isMovie(item) ? item.release_date : item.first_air_date;
 };
 
-/**
- * Extracts year from date string
- */
 const extractYear = (date: string | undefined): string => {
     if (!date) return "";
     return date.split("-")[0];
 };
 
-/**
- * Formats rating to single decimal
- */
 const formatRating = (rating: number): string => {
     return rating.toFixed(1);
 };
 
-/**
- * Props for ActionButton component
- */
 interface ActionButtonProps {
     isActive: boolean;
     activeIcon: keyof typeof Ionicons.glyphMap;
@@ -89,12 +63,9 @@ interface ActionButtonProps {
     activeLabel: string;
     inactiveLabel: string;
     onPress?: () => void;
-    iconFamily?: "Ionicons"; // Extend if other icon families are used
+    iconFamily?: "Ionicons";
 }
 
-/**
- * Reusable action button for quick actions
- */
 export const ActionButton: React.FC<ActionButtonProps> = ({
     isActive,
     activeIcon,
@@ -108,7 +79,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     const color = isActive ? Colors.bloodRed : Colors.metalSilver;
 
     if (!onPress) {
-        return null; // Don't render if no action is provided
+        return null;
     }
 
     return (
@@ -125,10 +96,6 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     );
 };
 
-/**
- * Card component for displaying movie/TV show in a grid.
- * Memoized to prevent re-renders unless essential props change.
- */
 const MovieCard = memo(function MovieCard({
     item,
     mediaType,
@@ -247,12 +214,10 @@ const MovieCard = memo(function MovieCard({
         const releaseDate = new Date(dateString);
         const today = new Date();
 
-        // Don't show for future releases
         if (releaseDate > today) return false;
 
         const diffTime = Math.abs(today.getTime() - releaseDate.getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        // Extend to 14 days
         return diffDays <= 14;
     };
 
@@ -302,9 +267,9 @@ const MovieCard = memo(function MovieCard({
                             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                         >
                             <Text style={styles.communityRating}>
-                                👥 {communityRating !== undefined
-                                    ? communityRating.toFixed(1)
-                                    : "—"}
+                                👥 {communityRating === undefined
+                                    ? "—"
+                                    : communityRating.toFixed(1)}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -450,6 +415,3 @@ const styles = StyleSheet.create({
         fontSize: 10,
     } as TextStyle,
 });
-
-// ─── VotePicker styles ────────────────────────────────────────────────────────
-// styles (vp) moved to VotePicker.tsx

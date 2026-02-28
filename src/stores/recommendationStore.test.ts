@@ -89,10 +89,7 @@ describe('recommendationStore', () => {
              // The store uses calculateUnreadCount internally during updates. To test it:
              // 1 unread received message + 1 unread comment on sent + 1 unread comment on received = 3
              // Let's call an action that forces recalculation manually in the store
-             
-             // The unread count recalculates correctly
-             const recalculated = useRecommendationStore.getState().sent; // trigger state fetch
-             
+            
              // To accurately test internal logic, we trigger a fetch that returns the mock payload
              (supabase.from as jest.Mock).mockReturnValue({
                 select: jest.fn().mockReturnThis(),
