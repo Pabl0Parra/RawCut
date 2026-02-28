@@ -18,6 +18,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../src/constants/Colors';
+import { screenStyles } from '../src/styles/screenStyles';
+import ScreenHeader from '../src/components/ScreenHeader';
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -121,8 +123,9 @@ export default function HelpCenterScreen(): React.JSX.Element {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.header}>
+        <SafeAreaView style={screenStyles.safeArea}>
+            <ScreenHeader title={t('help.title')} />
+            <View style={styles.searchContainer}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={Colors.white} />
                 </TouchableOpacity>
