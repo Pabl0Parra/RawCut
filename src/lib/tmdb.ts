@@ -127,7 +127,7 @@ const fetchTMDb = async <T>(
     return response.json();
 };
 
-const EXCLUDED_LANGUAGES = new Set(["ja", "zh", "ko", "ar", "hi"]);
+const EXCLUDED_LANGUAGES = new Set(["ja", "zh", "ko", "ar", "hi", "ru", "el", "th", "he", "tr", "te", "ta", "ml", "kn", "mr", "bn", "pa", "gu", "ur", "id"]);
 
 const filterByLanguage = <T extends { original_language: string }>(items: T[]): T[] => {
     if (!items) return [];
