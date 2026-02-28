@@ -1,21 +1,15 @@
 import React, { JSX } from "react";
 import {
     View,
-    Text,
     FlatList,
-    ActivityIndicator,
-    TouchableOpacity,
     StyleSheet,
     type ViewStyle,
-    type TextStyle,
 } from "react-native";
-import { router } from "expo-router";
-
+import { Image } from "expo-image";
 import { Colors } from "../constants/Colors";
 import MovieCard from "./MovieCard";
+import { UnauthenticatedState, LoadingState, EmptyState } from "./ContentLayoutStates";
 import type { EnrichedContentItem } from "../hooks/useEnrichedContent";
-
-import { Image } from "expo-image";
 
 interface ContentGridLayoutProps {
     readonly data: EnrichedContentItem[];
@@ -50,43 +44,29 @@ export function ContentGridLayout({
 }: Readonly<ContentGridLayoutProps>): JSX.Element {
     if (!isAuthenticated) {
         return (
-            <View style={styles.emptyContainer}>
-                <Text style={styles.largeIcon}>🔒</Text>
-                <Text style={styles.emptyTitle}>Inicia sesión para ver tu lista</Text>
-                <TouchableOpacity
-                    style={styles.loginButton}
-                    onPress={() => router.push("/login")}
-                >
-                    <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
-                </TouchableOpacity>
-            </View>
+            <UnauthenticatedState
+                message="Inicia sesión para ver tu lista"
+                buttonLabel="Iniciar Sesión"
+            />
         );
     }
 
     if (isLoading && data.length === 0) {
-        return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={Colors.bloodRed} />
-            </View>
-        );
+        return <LoadingState />;
     }
 
     if (data.length === 0) {
         return (
-            <View style={styles.emptyContainer}>
-                {emptyAsset ? (
-                    <Image source={emptyAsset} style={styles.emptyImage} contentFit="contain" />
-                ) : (
-                    <Text style={styles.largeIcon}>{emptyIcon}</Text>
-                )}
-                <Text style={styles.emptyTitle}>{emptyTitle}</Text>
-                <Text style={styles.emptySubtitle}>{emptySubtitle}</Text>
-            </View>
+            <EmptyState
+                title={emptyTitle}
+                subtitle={emptySubtitle}
+                icon={emptyIcon}
+                asset={emptyAsset}
+            />
         );
     }
 
     const renderItem = ({ item }: { item: EnrichedContentItem }): JSX.Element => {
-
         const cardItem = {
             id: item.tmdb_id,
             title: item.title,
@@ -145,50 +125,6 @@ export function ContentGridLayout({
 }
 
 const styles = StyleSheet.create({
-    centerContainer: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    } as ViewStyle,
-    emptyContainer: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: 16,
-    } as ViewStyle,
-    largeIcon: {
-        fontSize: 60,
-        marginBottom: 16,
-    } as TextStyle,
-    emptyImage: {
-        width: 240,
-        height: 240,
-        marginBottom: 24,
-    } as any,
-    emptyTitle: {
-        color: Colors.textPrimary,
-        fontSize: 18,
-        textAlign: "center",
-        marginBottom: 8,
-    } as TextStyle,
-    emptySubtitle: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        textAlign: "center",
-        marginTop: 8,
-    } as TextStyle,
-    loginButton: {
-        backgroundColor: Colors.bloodRed,
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        borderRadius: 4,
-        marginTop: 16,
-    } as ViewStyle,
-    loginButtonText: {
-        color: Colors.metalBlack,
-        fontWeight: "bold",
-        textTransform: "uppercase",
-    } as TextStyle,
     columnWrapper: {
         paddingHorizontal: 8,
         gap: 12,

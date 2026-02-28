@@ -3,7 +3,6 @@ import {
     View,
     Text,
     FlatList,
-    ActivityIndicator,
     TouchableOpacity,
     StyleSheet,
 } from "react-native";
@@ -12,6 +11,7 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../constants/Colors";
 import { getImageUrl } from "../lib/tmdb";
+import { UnauthenticatedState, LoadingState, EmptyState } from "./ContentLayoutStates";
 import type { EnrichedContentItem } from "../hooks/useEnrichedContent";
 
 interface ContentListLayoutProps {
@@ -35,34 +35,24 @@ export function ContentListLayout({
 }: Readonly<ContentListLayoutProps>) {
     if (!isAuthenticated) {
         return (
-            <View style={styles.emptyContainer}>
-                <Text style={styles.largeIcon}>🔒</Text>
-                <Text style={styles.emptyTitle}>Inicia sesión para ver tu lista</Text>
-                <TouchableOpacity
-                    style={styles.loginButton}
-                    onPress={() => router.push("/login")}
-                >
-                    <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
-                </TouchableOpacity>
-            </View>
+            <UnauthenticatedState
+                message="Inicia sesión para ver tu lista"
+                buttonLabel="Iniciar Sesión"
+            />
         );
     }
 
     if (isLoading && data.length === 0) {
-        return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={Colors.bloodRed} />
-            </View>
-        );
+        return <LoadingState />;
     }
 
     if (data.length === 0) {
         return (
-            <View style={styles.emptyContainer}>
-                <Text style={styles.largeIcon}>{emptyIcon}</Text>
-                <Text style={styles.emptyTitle}>{emptyTitle}</Text>
-                <Text style={styles.emptySubtitle}>{emptySubtitle}</Text>
-            </View>
+            <EmptyState
+                title={emptyTitle}
+                subtitle={emptySubtitle}
+                icon={emptyIcon}
+            />
         );
     }
 
@@ -132,45 +122,6 @@ export function ContentListLayout({
 }
 
 const styles = StyleSheet.create({
-    centerContainer: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    emptyContainer: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: 16,
-    },
-    largeIcon: {
-        fontSize: 60,
-        marginBottom: 16,
-    },
-    emptyTitle: {
-        color: Colors.textPrimary,
-        fontSize: 18,
-        textAlign: "center",
-        marginBottom: 8,
-    },
-    emptySubtitle: {
-        color: Colors.metalSilver,
-        fontSize: 14,
-        textAlign: "center",
-        marginTop: 8,
-    },
-    loginButton: {
-        backgroundColor: Colors.bloodRed,
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        borderRadius: 4,
-        marginTop: 16,
-    },
-    loginButtonText: {
-        color: Colors.metalBlack,
-        fontWeight: "bold",
-        textTransform: "uppercase",
-    },
     listContent: {
         paddingVertical: 16,
     },
