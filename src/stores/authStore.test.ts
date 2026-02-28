@@ -2,6 +2,13 @@ import { useAuthStore } from './authStore';
 import { supabase } from '../lib/supabase';
 import { resetAllStores } from '../../__mocks__/zustand';
 
+jest.mock('./contentStore', () => ({
+    useContentStore: { getState: () => ({ clearContent: jest.fn() }) },
+}));
+jest.mock('./recommendationStore', () => ({
+    useRecommendationStore: { getState: () => ({ clearRecommendations: jest.fn() }) },
+}));
+
 describe('authStore', () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -87,14 +94,6 @@ describe('authStore', () => {
                 session: { access_token: '123' } as any,
                 profile: { username: 'test' } as any,
             });
-
-            // Mock stores required by signOut 
-            jest.mock('./contentStore', () => ({
-                useContentStore: { getState: () => ({ clearContent: jest.fn() }) }
-            }), { virtual: true });
-            jest.mock('./recommendationStore', () => ({
-                useRecommendationStore: { getState: () => ({ clearRecommendations: jest.fn() }) }
-            }), { virtual: true });
 
             await useAuthStore.getState().signOut();
 
