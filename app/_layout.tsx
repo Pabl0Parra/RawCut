@@ -1,4 +1,3 @@
-
 import "../src/lib/i18n";
 import { Stack, SplashScreen, useRouter, useSegments } from "expo-router";
 import * as Linking from "expo-linking";
@@ -107,18 +106,11 @@ export default function RootLayout() {
     const segments = useSegments();
     const router = useRouter();
 
-
-
     const [isReady, setIsReady] = useState(false);
     const [initError, setInitError] = useState<string | null>(null);
     const [isOffline, setIsOffline] = useState(false);
 
-
-
-
     const mountedRef = useRef(true);
-
-
 
     const user = useAuthStore((s) => s.user);
 
@@ -130,14 +122,9 @@ export default function RootLayout() {
         BebasNeue_400Regular,
     });
 
-
-
-
     useEffect(() => {
         mountedRef.current = true;
         console.log("[RootLayout] Setting up auth listeners…");
-
-
 
         const {
             data: { subscription },
@@ -165,16 +152,8 @@ export default function RootLayout() {
             },
         );
 
-
-
-
-        const handleSessionError = (
-            error: { message: string },
-        ): void => {
+        const handleSessionError = (error: { message: string }): void => {
             if (isInvalidTokenError(error)) {
-
-
-
                 console.warn(
                     "[RootLayout] Invalid/Expired session detected, clearing local state…",
                 );
@@ -185,43 +164,34 @@ export default function RootLayout() {
             }
         };
 
+        const handleSessionSuccess = async (session: Session | null): Promise<void> => {
+            useAuthStore.getState().setSession(session);
+            if (!session?.user) return;
+            const networkFailed = await fetchProfileSafely();
+            if (networkFailed && mountedRef.current) {
+                setIsOffline(true);
+            }
+        };
+
         const initSession = async (): Promise<void> => {
             console.log("[RootLayout] Initializing session…");
 
             try {
-                const {
-                    data: { session },
-                    error,
-                } = await withTimeout(
+                const { data: { session }, error } = await withTimeout(
                     supabase.auth.getSession(),
                     SESSION_INIT_TIMEOUT_MS,
                     "Session initialization timed out",
                 );
 
                 if (!mountedRef.current) return;
+                if (error) { handleSessionError(error); return; }
 
-                if (error) {
-                    handleSessionError(error);
-                    return;
-                }
-
-                console.log("[RootLayout] Session initialized:", {
-                    hasSession: !!session,
-                });
-                useAuthStore.getState().setSession(session);
-
-                if (session?.user) {
-                    const networkFailed = await fetchProfileSafely();
-                    if (networkFailed && mountedRef.current) {
-                        setIsOffline(true);
-                    }
-                }
+                console.log("[RootLayout] Session initialized:", { hasSession: !!session });
+                await handleSessionSuccess(session);
             } catch (err) {
                 if (!mountedRef.current) return;
 
                 if (isTimeoutError(err) || isNetworkError(err)) {
-
-
                     console.warn(
                         "[RootLayout] Session init failed due to network/timeout, proceeding offline",
                     );
@@ -243,7 +213,6 @@ export default function RootLayout() {
         };
 
         initSession();
-
 
         const handleDeepLink = async (url: string | null): Promise<void> => {
             if (!url) return;
@@ -283,10 +252,6 @@ export default function RootLayout() {
         };
     }, []);
 
-
-
-
-
     useEffect(() => {
         if (fontsLoaded || fontError) {
             console.log("[RootLayout] Fonts loaded, hiding native splash");
@@ -294,16 +259,8 @@ export default function RootLayout() {
         }
     }, [fontsLoaded, fontError]);
 
-
-
-
-
-
-
     useEffect(() => {
-        if (!isReady) {
-            return;
-        }
+        if (!isReady) return;
 
         console.log("[RootLayout] Auth routing check:", {
             user: !!user,
@@ -323,8 +280,6 @@ export default function RootLayout() {
             router.replace("/(tabs)");
         }
     }, [user, segments, isReady]);
-
-
 
     const handleRetryInit = useCallback(() => {
         setInitError(null);
@@ -360,25 +315,9 @@ export default function RootLayout() {
             });
     }, []);
 
-
-
-
     if (!fontsLoaded && !fontError) {
         return null;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     const appReady = isReady && !initError;
     const showOfflineBanner = isOffline;
@@ -410,7 +349,6 @@ export default function RootLayout() {
                             />
                         </Stack>
 
-                        { }
                         {showOfflineBanner && (
                             <View style={styles.offlineBanner} pointerEvents="box-none">
                                 <Text style={styles.offlineBannerText}>
@@ -419,7 +357,6 @@ export default function RootLayout() {
                             </View>
                         )}
 
-                        { }
                         {!isReady && (
                             <View
                                 style={[
@@ -438,7 +375,6 @@ export default function RootLayout() {
                             </View>
                         )}
 
-                        { }
                         {initError && (
                             <View
                                 style={[
@@ -468,7 +404,6 @@ export default function RootLayout() {
                                 </TouchableOpacity>
                             </View>
                         )}
-
                     </View>
                 </ThemeProvider>
             </ErrorBoundary>
