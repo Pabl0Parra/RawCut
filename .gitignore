@@ -40,4 +40,6 @@ yarn-error.*
 /ios
 /android
 
-/coverage/*
+/coverage
+
+*.txt

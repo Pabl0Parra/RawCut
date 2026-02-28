@@ -96,7 +96,13 @@ jest.mock('react-native-gesture-handler', () => {
         GestureHandlerRootView: ({ children }: any) => React.createElement(View, null, children),
         GestureDetector: ({ children }: any) => React.createElement(View, null, children),
         Gesture: {
-            Pan: () => ({ onUpdate: jest.fn().mockReturnThis(), onEnd: jest.fn().mockReturnThis(), runOnJS: jest.fn().mockReturnThis() }),
+            Pan: () => ({
+                onUpdate: jest.fn().mockReturnThis(),
+                onEnd: jest.fn().mockReturnThis(),
+                runOnJS: jest.fn().mockReturnThis(),
+                activeOffsetX: jest.fn().mockReturnThis(),
+                failOffsetY: jest.fn().mockReturnThis(),
+            }),
             Tap: () => ({ onEnd: jest.fn().mockReturnThis() }),
             Simultaneous: jest.fn(),
         },

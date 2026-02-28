@@ -70,7 +70,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
     useFocusEffect(
         useCallback(() => {
             if (!user) return;
-            useRecommendationStore.getState().fetchRecommendations();
+            useRecommendationStore.getState().fetchRecommendations().catch(console.error);
         }, [user])
     );
 
