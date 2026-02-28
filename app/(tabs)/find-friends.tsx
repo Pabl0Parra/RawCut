@@ -150,7 +150,11 @@ export default function FindFriendsScreen() {
         if (query.length < 2) {
             return (
                 <View style={styles.centered}>
-                    <Ionicons name="search" size={48} color={Colors.metalSilver} style={{ opacity: 0.4 }} />
+                    <Image
+                        source={require("../../assets/icons/spy.png")}
+                        style={styles.emptyIcon as any}
+                        contentFit="contain"
+                    />
                     <Text style={styles.hintText}>{t("social.searchPlaceholder")}</Text>
                 </View>
             );
@@ -178,7 +182,7 @@ export default function FindFriendsScreen() {
             return (
                 <View style={styles.centered}>
                     <Image
-                        source={require("../../assets/icons/spy.png")}
+                        source={require("../../assets/icons/follow.png")}
                         style={styles.emptyIcon as any}
                         contentFit="contain"
                     />
@@ -236,7 +240,11 @@ export default function FindFriendsScreen() {
         if (followers.length === 0) {
             return (
                 <View style={styles.centered}>
-                    <Text style={styles.emptyEmoji}>🌑</Text>
+                    <Image
+                        source={require("../../assets/icons/run.png")}
+                        style={styles.emptyIconLarge as any}
+                        contentFit="contain"
+                    />
                     <Text style={styles.emptyTitle}>{t("social.noFollowers")}</Text>
                 </View>
             );
@@ -429,8 +437,14 @@ const styles = StyleSheet.create({
         fontSize: 48,
     } as TextStyle,
     emptyIcon: {
-        width: 80,
-        height: 80,
+        width: 200,
+        height: 200,
+        opacity: 0.8,
+        marginBottom: 8,
+    } as ViewStyle,
+    emptyIconLarge: {
+        width: 250,
+        height: 250,
         opacity: 0.8,
         marginBottom: 8,
     } as ViewStyle,

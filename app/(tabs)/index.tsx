@@ -19,6 +19,7 @@ import {
     ScrollView,
     Dimensions,
 } from "react-native";
+import { Image } from "expo-image";
 import {
     MaterialCommunityIcons,
     Feather,
@@ -746,7 +747,11 @@ export default function HomeScreen(): JSX.Element {
         if (data.length === 0) {
             return (
                 <View style={styles.centerContainer}>
-                    <Text style={styles.emptyIcon}>🎬</Text>
+                    <Image
+                        source={require("../../assets/icons/not-found.png")}
+                        style={styles.emptyIcon as any}
+                        contentFit="contain"
+                    />
                     <Text style={styles.emptyText}>{t("common.noResults")}</Text>
                 </View>
             );
@@ -1128,7 +1133,9 @@ const styles = StyleSheet.create({
         marginTop: 16,
     },
     emptyIcon: {
-        fontSize: 60,
+        width: 300,
+        height: 300,
+        opacity: 0.8,
         marginBottom: 16,
     },
     emptyText: {
