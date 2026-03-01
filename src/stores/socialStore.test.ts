@@ -73,6 +73,7 @@ describe("socialStore", () => {
             expect(state.pendingIncoming).toEqual([]);
             expect(state.pendingOutgoingIds).toBeInstanceOf(Set);
             expect(state.pendingOutgoingIds.size).toBe(0);
+            expect(state.justReceivedRequestId).toBeNull();
             expect(state.isLoading).toBe(false);
             expect(state.error).toBeNull();
         });

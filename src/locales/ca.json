@@ -296,6 +296,9 @@
         "errorFollow": "Error en seguir l'usuari",
         "errorUnfollow": "Error en deixar de seguir",
         "errorAccept": "Error en acceptar la sol·licitud",
-        "errorDecline": "Error en rebutjar la sol·licitud"
+        "errorDecline": "Error en rebutjar la sol·licitud",
+        "summonedTitle": "T'han convocat!",
+        "summonedDescription": "Una nova connexió espera la teva aprovació a la pestanya d'amics.",
+        "viewRequest": "Veure Sol·licitud"
     }
 }

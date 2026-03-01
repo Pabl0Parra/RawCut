@@ -21,6 +21,7 @@ import {
     ProfileIcon,
     FriendsIcon,
 } from "../../src/components/navigation/TabBarIcons";
+import { FriendRequestModal } from "../../src/components/navigation/FriendRequestModal";
 
 const renderTabBar = (props: BottomTabBarProps) => (
     <AnimatedTabBar {...props} />
@@ -37,6 +38,7 @@ export default function TabLayout() {
     const { t } = useTranslation();
     const user = useAuthStore((s) => s.user);
     const unreadCount = useRecommendationStore((s) => s.unreadCount);
+    const { pendingIncoming, justReceivedRequestId, setJustReceivedRequestId } = useSocialStore();
     const [showDisclaimer, setShowDisclaimer] = useState(false);
 
     const openDisclaimer = useCallback(() => setShowDisclaimer(true), []);
@@ -53,7 +55,7 @@ export default function TabLayout() {
             useRecommendationStore.getState();
         const { fetchUserContent, fetchTVProgress } =
             useContentStore.getState();
-        const { fetchFollowData } = useSocialStore.getState();
+        const { fetchFollowData, subscribeToRealtime: subscribeSocial } = useSocialStore.getState();
 
         fetchRecommendations();
         fetchUserContent();
@@ -61,9 +63,11 @@ export default function TabLayout() {
         fetchFollowData();
 
         const unsubscribe = subscribeToRealtime();
+        const unsubscribeSocial = subscribeSocial();
 
         return () => {
             unsubscribe();
+            unsubscribeSocial();
         };
     }, [user]);
 
@@ -125,6 +129,7 @@ export default function TabLayout() {
                         title: t("social.findFriends"),
                         headerTitle: `CortoCrudo - ${t("social.findFriendsHeader").toUpperCase()}`,
                         tabBarIcon: FriendsIcon,
+                        tabBarBadge: pendingIncoming.length > 0 ? pendingIncoming.length : undefined,
                     }}
                 />
                 <Tabs.Screen
@@ -172,6 +177,11 @@ export default function TabLayout() {
             <TMDBDisclaimerModal
                 visible={showDisclaimer}
                 onClose={closeDisclaimer}
+            />
+
+            <FriendRequestModal
+                visible={!!justReceivedRequestId}
+                onClose={() => setJustReceivedRequestId(null)}
             />
         </>
     );

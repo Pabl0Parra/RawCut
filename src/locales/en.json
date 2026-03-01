@@ -296,6 +296,9 @@
         "errorFollow": "Error following user",
         "errorUnfollow": "Error unfollowing user",
         "errorAccept": "Error accepting request",
-        "errorDecline": "Error declining request"
+        "errorDecline": "Error declining request",
+        "summonedTitle": "You've been summoned!",
+        "summonedDescription": "A new connection awaits your approval in the friends tab.",
+        "viewRequest": "View Request"
     }
 }

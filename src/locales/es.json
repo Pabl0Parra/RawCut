@@ -296,6 +296,9 @@
         "errorFollow": "Error al seguir al usuario",
         "errorUnfollow": "Error al dejar de seguir",
         "errorAccept": "Error al aceptar solicitud",
-        "errorDecline": "Error al rechazar solicitud"
+        "errorDecline": "Error al rechazar solicitud",
+        "summonedTitle": "¡Te han convocado!",
+        "summonedDescription": "Una nueva conexión espera tu aprobación en la pestaña de amigos.",
+        "viewRequest": "Ver Solicitud"
     }
 }

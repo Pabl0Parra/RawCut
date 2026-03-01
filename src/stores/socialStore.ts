@@ -11,6 +11,7 @@ interface SocialState {
     followers: Profile[];          // Accepted followers (people following me)
     pendingIncoming: FollowWithProfile[]; // Requests waiting for MY approval
     pendingOutgoingIds: Set<string>;     // User IDs I sent requests to (not yet accepted)
+    justReceivedRequestId: string | null; // ID of a newly received request for modal trigger
     isLoading: boolean;
     error: string | null;
     lastFetched: number | null;
@@ -22,6 +23,8 @@ interface SocialState {
     acceptRequest: (followId: string, followerUserId: string) => Promise<boolean>;
     declineRequest: (followId: string) => Promise<boolean>;
     getFollowStatus: (targetUserId: string) => "none" | "pending" | "accepted";
+    setJustReceivedRequestId: (id: string | null) => void;
+    subscribeToRealtime: () => () => void;
     clearSocial: () => void;
 }
 
@@ -32,6 +35,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
     followers: [],
     pendingIncoming: [],
     pendingOutgoingIds: new Set(),
+    justReceivedRequestId: null,
     isLoading: false,
     error: null,
     lastFetched: null,
@@ -230,12 +234,47 @@ export const useSocialStore = create<SocialState>((set, get) => ({
         return "none";
     },
 
+    setJustReceivedRequestId: (id: string | null) => {
+        set({ justReceivedRequestId: id });
+    },
+
+    subscribeToRealtime: () => {
+        const user = useAuthStore.getState().user;
+        if (!user) return () => { };
+
+        const subscription = supabase
+            .channel("social-changes")
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "follows",
+                    filter: `following_id=eq.${user.id}`,
+                },
+                (payload) => {
+                    const newRequest = payload.new as Follow;
+                    if (newRequest.status === "pending") {
+                        set({ justReceivedRequestId: newRequest.id });
+                        // Also fetch data to update the badge count
+                        get().fetchFollowData({ force: true });
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(subscription);
+        };
+    },
+
     clearSocial: () => {
         set({
             following: [],
             followers: [],
             pendingIncoming: [],
             pendingOutgoingIds: new Set(),
+            justReceivedRequestId: null,
             isLoading: false,
             error: null,
             lastFetched: null,
