@@ -3,7 +3,6 @@ import {
     getPopularTVShows,
     discoverMovies,
     discoverTVShows,
-    getTVShowDetails,
     type Movie,
     type TVShow,
 } from "../lib/tmdb";
@@ -12,8 +11,6 @@ import type {
     DiscoverParamsConfig,
     ContentFetchResult,
     ContentTab,
-    ContinueWatchingItem,
-    EpisodeProgress,
 } from "../types/homeScreen.types";
 
 export const buildDiscoverParams = (config: DiscoverParamsConfig): DiscoverParams => {
@@ -46,7 +43,7 @@ export const buildDiscoverParams = (config: DiscoverParamsConfig): DiscoverParam
 };
 
 export const hasActiveFilters = (
-    selectedGenre: number | null,
+    selectedGenre: number | string | null,
     selectedYear: string,
     sortBy: string,
     defaultSortValue: string = "popularity.desc"

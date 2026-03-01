@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { Image } from 'expo-image';
 import { Ionicons } from "@expo/vector-icons";
-import ScreenTitle from "../../src/components/navigation/ScreenTitle";
 import { useFocusEffect, router } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 

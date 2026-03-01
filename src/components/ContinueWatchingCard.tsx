@@ -12,7 +12,6 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Fonts } from '../constants/Colors';
 import { getImageUrl } from '../lib/tmdb';
-import type { ContinueWatchingItem } from '../types/homeScreen.types';
 
 interface ContinueWatchingCardProps {
     item: any; // Using any for now to support both home and watchlist types

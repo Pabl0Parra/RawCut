@@ -6,6 +6,9 @@ import Animated, {
     withSpring,
     runOnJS,
     withTiming,
+    FadeInDown,
+    FadeOutUp,
+    LinearTransition,
 } from "react-native-reanimated";
 import {
     View,
@@ -23,11 +26,9 @@ import {
 import { Image } from "expo-image";
 import {
     MaterialCommunityIcons,
-    Feather,
-    Entypo,
     Ionicons,
 } from "@expo/vector-icons";
-import { useFocusEffect, router } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
@@ -46,9 +47,7 @@ import { useAuthStore } from "../../src/stores/authStore";
 import { Colors, Fonts } from "../../src/constants/Colors";
 
 import type {
-    ContentTab,
     MediaType,
-    ContinueWatchingItem,
     SortOption,
 } from "../../src/types/homeScreen.types";
 import {
@@ -60,7 +59,6 @@ import {
     hasActiveFilters,
     processGenreName,
     sortGenresAlphabetically,
-    isNotNull,
 } from "../../src/utils/contentLoader.utils";
 import SmokeBackground from "../../src/components/SmokeBackground";
 import { useForYouContent } from "../../src/hooks/useForYouContent";
@@ -146,10 +144,11 @@ export default function HomeScreen(): JSX.Element {
 
 
     const [showFilterModal, setShowFilterModal] = useState(false);
-    const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
+    const [selectedGenre, setSelectedGenre] = useState<number | string | null>(null);
     const [selectedYear, setSelectedYear] = useState("");
     const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_VALUE);
     const [filtersActive, setFiltersActive] = useState(false);
+    const flatListRef = React.useRef<FlatList>(null);
 
 
 
@@ -324,7 +323,13 @@ export default function HomeScreen(): JSX.Element {
         setShowFilterModal(false);
     }, [selectedGenre, selectedYear, sortBy]);
 
-    const handleViewAll = useCallback((genreId: number | null) => {
+    useEffect(() => {
+        if (filtersActive) {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }
+    }, [filtersActive, selectedGenre, selectedYear, sortBy]);
+
+    const handleViewAll = useCallback((genreId: number | string | null) => {
         setSelectedGenre(genreId);
         setSelectedYear("");
         setSortBy(DEFAULT_SORT_VALUE);
@@ -535,6 +540,7 @@ export default function HomeScreen(): JSX.Element {
         <View style={styles.safeArea}>
             <GestureDetector gesture={swipeGesture}>
                 <FlatList
+                    ref={flatListRef}
                     data={data}
                     renderItem={renderItem}
                     keyExtractor={(item) => `${mediaType}-${item.id}`}
@@ -1029,8 +1035,8 @@ interface DiscoverHeaderProps {
     newReleases: (Movie | TVShow)[];
     actionContent: (Movie | TVShow)[];
     horrorContent: (Movie | TVShow)[];
-    handleViewAll: (genreId: number | null) => void;
-    setSelectedGenre: (g: number | null) => void;
+    handleViewAll: (genreId: number | string | null) => void;
+    setSelectedGenre: (g: number | string | null) => void;
     setSelectedYear: (y: string) => void;
     setSortBy: (s: string) => void;
     setFiltersActive: (a: boolean) => void;
@@ -1164,8 +1170,13 @@ const DiscoverHeader = memo(({
                     />
                     <Text style={styles.emptyText}>{t("common.noResults")}</Text>
                 </View>
-            ) : !isInSearchMode && (
-                <>
+            ) : !isInSearchMode && !filtersActive ? (
+                <Animated.View
+                    entering={FadeInDown.duration(400)}
+                    exiting={FadeOutUp.duration(300)}
+                    layout={LinearTransition}
+                    style={{ width: "100%" }}
+                >
                     <HeroCarousel
                         data={newReleases}
                         mediaType={activeTab}
@@ -1221,7 +1232,7 @@ const DiscoverHeader = memo(({
                             icon="flash"
                             data={actionContent}
                             mediaType={activeTab}
-                            onViewAll={() => handleViewAll(activeTab === "movie" ? 28 : 10759)}
+                            onViewAll={() => handleViewAll(activeTab === "movie" ? "28" : "10759")}
                             renderItem={({ item }) => (
                                 <View style={styles.recommendationGridItem}>
                                     <MovieCardItem
@@ -1244,7 +1255,7 @@ const DiscoverHeader = memo(({
                             icon="skull"
                             data={horrorContent}
                             mediaType={activeTab}
-                            onViewAll={() => handleViewAll(activeTab === "movie" ? 27 : 10765)}
+                            onViewAll={() => handleViewAll(activeTab === "movie" ? "27,53" : "9648,10765")}
                             renderItem={({ item }) => (
                                 <View style={styles.recommendationGridItem}>
                                     <MovieCardItem
@@ -1293,8 +1304,8 @@ const DiscoverHeader = memo(({
                         <Ionicons name="apps-outline" size={20} color={Colors.vibrantRed} />
                         <Text style={styles.browseAllTitle}>{t("common.browseAll")}</Text>
                     </View>
-                </>
-            )}
+                </Animated.View>
+            ) : null}
         </View>
     );
 });

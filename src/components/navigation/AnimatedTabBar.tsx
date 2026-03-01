@@ -1,18 +1,15 @@
-import React, { useReducer, useCallback, useMemo, memo } from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import {
     View,
     Text,
     Pressable,
     StyleSheet,
-    LayoutChangeEvent,
 } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
     useAnimatedStyle,
     withSpring,
-    useSharedValue,
-    useAnimatedReaction,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { Colors } from '../../constants/Colors';

@@ -7,16 +7,15 @@ export interface FollowWithProfile extends Follow {
 }
 
 interface SocialState {
-    following: Profile[];          // Accepted follows (people I follow)
-    followers: Profile[];          // Accepted followers (people following me)
-    pendingIncoming: FollowWithProfile[]; // Requests waiting for MY approval
-    pendingOutgoingIds: Set<string>;     // User IDs I sent requests to (not yet accepted)
-    justReceivedRequestId: string | null; // ID of a newly received request for modal trigger
+    following: Profile[];           
+    followers: Profile[];          
+    pendingIncoming: FollowWithProfile[]; 
+    pendingOutgoingIds: Set<string>;     
+    justReceivedRequestId: string | null; 
     isLoading: boolean;
     error: string | null;
     lastFetched: number | null;
 
-    // Actions
     fetchFollowData: (options?: { force?: boolean }) => Promise<void>;
     follow: (targetUserId: string) => Promise<boolean>;
     unfollow: (targetUserId: string) => Promise<boolean>;
@@ -28,7 +27,7 @@ interface SocialState {
     clearSocial: () => void;
 }
 
-const CACHE_TTL_MS = 60_000; // 1 minute
+const CACHE_TTL_MS = 60_000; 
 
 export const useSocialStore = create<SocialState>((set, get) => ({
     following: [],
@@ -53,7 +52,6 @@ export const useSocialStore = create<SocialState>((set, get) => ({
         set({ isLoading: true, error: null });
 
         try {
-            // Fetch all follow rows where I'm involved
             const { data, error } = await supabase
                 .from("follows")
                 .select(`
@@ -184,7 +182,6 @@ export const useSocialStore = create<SocialState>((set, get) => ({
 
             if (error) throw error;
 
-            // Optimistic update: move from pendingIncoming → followers
             set((state) => {
                 const accepted = state.pendingIncoming.find((f) => f.id === followId);
                 const newFollowers = accepted?.profile

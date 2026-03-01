@@ -6,7 +6,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
     View,
     StyleSheet,
-    ActivityIndicator,
     Text,
     TouchableOpacity,
 } from "react-native";

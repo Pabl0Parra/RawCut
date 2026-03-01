@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { getMovieDetails, getTVShowDetails, getTVSeasonDetails, Movie, TVShow, Episode } from "../lib/tmdb";
-import { useContentStore, TVProgress } from "../stores/contentStore";
+import { useContentStore } from "../stores/contentStore";
 
 export interface WatchlistTVItem extends TVShow {
     internal_id: string; // Internal UUID from user_content

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Platform, View, Text } from "react-native";
+import { View } from "react-native";
 import { Image } from "expo-image";
 import { Tabs } from "expo-router";
 import { useTranslation } from "react-i18next";

@@ -16,7 +16,7 @@ export interface ContentFetchResult<T> {
 export interface DiscoverParamsConfig {
     currentPage: number;
     sortBy: string;
-    selectedGenre: number | null;
+    selectedGenre: number | string | null;
     selectedYear: string;
     activeTab: ContentTab;
 }

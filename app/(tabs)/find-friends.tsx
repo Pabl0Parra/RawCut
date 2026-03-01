@@ -15,17 +15,14 @@ import {
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
-    scrollTo,
     useAnimatedRef,
     useAnimatedScrollHandler,
-    withSpring,
 } from "react-native-reanimated";
 import { Image } from "expo-image";
 import ScreenTitle from "../../src/components/navigation/ScreenTitle";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Colors } from "../../src/constants/Colors";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -41,7 +38,6 @@ function getAvatarUri(profile: Profile): string {
     return AVATAR_BASE + encodeURIComponent(profile.username ?? "U");
 }
 
-// ─── User Row ───────────────────────────────────────────────────────────────
 const UserRow = React.memo(({ profile }: { profile: Profile }) => (
     <View style={styles.userRow}>
         <Image
@@ -58,7 +54,6 @@ const UserRow = React.memo(({ profile }: { profile: Profile }) => (
     </View>
 ));
 
-// ─── Pending Request Row ─────────────────────────────────────────────────────
 const PendingRow = React.memo(
     ({
         profile,
@@ -97,7 +92,6 @@ const PendingRow = React.memo(
     }
 );
 
-// ─── Main Screen ─────────────────────────────────────────────────────────────
 export default function FindFriendsScreen() {
     const { t } = useTranslation();
     const user = useAuthStore((s) => s.user);
@@ -122,7 +116,7 @@ export default function FindFriendsScreen() {
     const indicatorStyle = useAnimatedStyle(() => {
         const tabWidth = SCREEN_WIDTH / 3;
         return {
-            width: tabWidth - 32, // Adjusting for padding
+            width: tabWidth - 32,
             transform: [{ translateX: (scrollX.value / SCREEN_WIDTH) * tabWidth + 16 }],
         };
     });
@@ -132,7 +126,6 @@ export default function FindFriendsScreen() {
         scrollRef.current?.scrollTo({ x: index * SCREEN_WIDTH, animated: true });
     };
 
-    // Refresh on focus
     useFocusEffect(
         useCallback(() => {
             if (!user) return;
@@ -140,7 +133,6 @@ export default function FindFriendsScreen() {
         }, [user, fetchFollowData])
     );
 
-    // Debounced search
     useEffect(() => {
         if (query.length < 2) {
             setSearchResults([]);
@@ -316,7 +308,6 @@ export default function FindFriendsScreen() {
                 />
             </View>
 
-            {/* Tabs */}
             <View style={styles.tabs}>
                 {(["search", "following", "followers"] as const).map((tab, index) => (
                     <TouchableOpacity
@@ -336,7 +327,6 @@ export default function FindFriendsScreen() {
                 <Animated.View style={[styles.tabIndicator, indicatorStyle]} />
             </View>
 
-            {/* Content */}
             <Animated.ScrollView
                 ref={scrollRef}
                 horizontal

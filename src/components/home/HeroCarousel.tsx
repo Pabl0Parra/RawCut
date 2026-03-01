@@ -13,7 +13,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
-    withSpring,
     type SharedValue,
 } from "react-native-reanimated";
 import { router } from "expo-router";

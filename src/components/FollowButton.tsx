@@ -11,7 +11,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { useSocialStore } from "../stores/socialStore";
 import { Colors } from "../constants/Colors";
-import { router } from "expo-router";
 
 interface FollowButtonProps {
     targetUserId: string;

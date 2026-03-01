@@ -1,10 +1,9 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { Colors, Fonts } from "../../constants/Colors";
 import ModalShell from "../ModalShell";
-import { useSocialStore } from "../../stores/socialStore";
 import { Ionicons } from "@expo/vector-icons";
 
 interface FriendRequestModalProps {

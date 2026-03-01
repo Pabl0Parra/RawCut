@@ -10,7 +10,6 @@ import {
     Linking,
     Platform,
     LayoutAnimation,
-    UIManager,
     type ViewStyle,
     type TextStyle,
 } from 'react-native';
