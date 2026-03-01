@@ -134,15 +134,37 @@ const filterByLanguage = <T extends { original_language: string }>(items: T[]): 
     return items.filter(item => INCLUDED_LANGUAGES.has(item.original_language));
 };
 
-export const getPopularMovies = async (page: number = 1): Promise<TMDbResponse<Movie>> => {
-    const response = await fetchTMDb<TMDbResponse<Movie>>("/movie/popular", { page: page.toString() });
-    return { ...response, results: filterByLanguage(response.results) };
+export const getPopularMovies = async (page = 1): Promise<TMDbResponse<Movie>> => {
+  const today = new Date().toISOString().split('T')[0];
+  const threeMonthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+    .toISOString().split('T')[0];
+
+  const response = await fetchTMDb<TMDbResponse<Movie>>("/discover/movie", {
+    page: page.toString(),
+    sort_by: "popularity.desc",
+    "primary_release_date.gte": threeMonthsAgo,
+    "primary_release_date.lte": today,
+    "vote_count.gte": "50",
+    include_adult: "false",
+  });
+  return { ...response, results: filterByLanguage(response.results) };
 };
 
-export const getPopularTVShows = async (page: number = 1): Promise<TMDbResponse<TVShow>> => {
-    const response = await fetchTMDb<TMDbResponse<TVShow>>("/tv/popular", { page: page.toString() });
-    return { ...response, results: filterByLanguage(response.results) };
-};
+export const getPopularTVShows = async (page = 1): Promise<TMDbResponse<TVShow>> => {
+  const today = new Date().toISOString().split('T')[0];
+  const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000)
+    .toISOString().split('T')[0];
+
+  const response = await fetchTMDb<TMDbResponse<TVShow>>("/discover/tv", {
+    page: page.toString(),
+    sort_by: "popularity.desc",
+    "first_air_date.gte": sixMonthsAgo,   
+    "first_air_date.lte": today,
+    "vote_count.gte": "20",               
+    include_null_first_air_dates: "false",
+  });
+  return { ...response, results: filterByLanguage(response.results) };
+}
 
 export const searchMovies = async (query: string, page: number = 1): Promise<TMDbResponse<Movie>> => {
     const response = await fetchTMDb<TMDbResponse<Movie>>("/search/movie", { query, page: page.toString() });

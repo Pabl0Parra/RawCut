@@ -26,6 +26,10 @@ import SmokeBackground from "../src/components/SmokeBackground";
 import { ThemeProvider, DarkTheme } from "@react-navigation/native";
 import { ErrorBoundary } from "../src/components/ErrorBoundary";
 import AnimatedSplash from "../src/components/AnimatedSplash";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "../src/lib/queryClient";
+import { getPopularMovies, getPopularTVShows, getMovieGenres, getTVGenres } from "../src/lib/tmdb";
+import { movieKeys, tvKeys } from "../src/hooks/useHomeContent";
 
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
@@ -200,6 +204,29 @@ export default function RootLayout() {
             }
         };
 
+        // Prefetch popular content and genres while session initialises
+        // so the home screen is instant once the user lands on it.
+        void Promise.allSettled([
+            queryClient.prefetchInfiniteQuery({
+                queryKey: movieKeys.popular(),
+                queryFn: ({ pageParam }) => getPopularMovies(pageParam as number),
+                initialPageParam: 1,
+            }),
+            queryClient.prefetchInfiniteQuery({
+                queryKey: tvKeys.popular(),
+                queryFn: ({ pageParam }) => getPopularTVShows(pageParam as number),
+                initialPageParam: 1,
+            }),
+            queryClient.prefetchQuery({
+                queryKey: movieKeys.genres(),
+                queryFn: () => getMovieGenres().then((d) => d.genres),
+            }),
+            queryClient.prefetchQuery({
+                queryKey: tvKeys.genres(),
+                queryFn: () => getTVGenres().then((d) => d.genres),
+            }),
+        ]);
+
         initSession();
 
         const handleDeepLink = async (url: string | null): Promise<void> => {
@@ -302,77 +329,79 @@ export default function RootLayout() {
     const showOfflineBanner = isOffline;
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <ErrorBoundary>
-                <ThemeProvider value={TransparentTheme}>
-                    <View style={styles.container}>
-                        {appReady && <SmokeBackground />}
+        <QueryClientProvider client={queryClient}>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <ErrorBoundary>
+                    <ThemeProvider value={TransparentTheme}>
+                        <View style={styles.container}>
+                            {appReady && <SmokeBackground />}
 
-                        <Stack
-                            screenOptions={{
-                                headerShown: false,
-                                contentStyle: { backgroundColor: "transparent" },
-                            }}
-                        >
-                            <Stack.Screen
-                                name="(tabs)"
-                                options={{ headerShown: false }}
-                            />
-                            <Stack.Screen
-                                name="login"
-                                options={{ headerShown: false }}
-                            />
-                            <Stack.Screen
-                                name="register"
-                                options={{ headerShown: false }}
-                            />
-                        </Stack>
-
-                        {showOfflineBanner && (
-                            <View style={styles.offlineBanner} pointerEvents="box-none">
-                                <Text style={styles.offlineBannerText}>
-                                    📡 Sin conexión — algunas funciones no estarán disponibles
-                                </Text>
-                            </View>
-                        )}
-
-                        {!isReady && (
-                            <AnimatedSplash />
-                        )}
-
-                        {initError && (
-                            <View
-                                style={[
-                                    StyleSheet.absoluteFill,
-                                    styles.errorOverlay,
-                                ]}
-                                pointerEvents="auto"
+                            <Stack
+                                screenOptions={{
+                                    headerShown: false,
+                                    contentStyle: { backgroundColor: "transparent" },
+                                }}
                             >
-                                <Text style={styles.errorTitle}>
-                                    Error de Inicialización
-                                </Text>
-                                <Text style={styles.errorMessage}>
-                                    {initError}
-                                </Text>
-                                <Text style={styles.errorHint}>
-                                    Por favor, verifica tu conexión e intenta de
-                                    nuevo.
-                                </Text>
-                                <TouchableOpacity
-                                    style={styles.retryButton}
-                                    onPress={handleRetryInit}
-                                    activeOpacity={0.7}
-                                >
-                                    <Text style={styles.retryButtonText}>
-                                        Reintentar
+                                <Stack.Screen
+                                    name="(tabs)"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="login"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="register"
+                                    options={{ headerShown: false }}
+                                />
+                            </Stack>
+
+                            {showOfflineBanner && (
+                                <View style={styles.offlineBanner} pointerEvents="box-none">
+                                    <Text style={styles.offlineBannerText}>
+                                        📡 Sin conexión — algunas funciones no estarán disponibles
                                     </Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                    </View>
-                </ThemeProvider>
-            </ErrorBoundary>
-        </GestureHandlerRootView>
+                                </View>
+                            )}
+
+                            {!isReady && (
+                                <AnimatedSplash />
+                            )}
+
+                            {initError && (
+                                <View
+                                    style={[
+                                        StyleSheet.absoluteFill,
+                                        styles.errorOverlay,
+                                    ]}
+                                    pointerEvents="auto"
+                                >
+                                    <Text style={styles.errorTitle}>
+                                        Error de Inicialización
+                                    </Text>
+                                    <Text style={styles.errorMessage}>
+                                        {initError}
+                                    </Text>
+                                    <Text style={styles.errorHint}>
+                                        Por favor, verifica tu conexión e intenta de
+                                        nuevo.
+                                    </Text>
+                                    <TouchableOpacity
+                                        style={styles.retryButton}
+                                        onPress={handleRetryInit}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Text style={styles.retryButtonText}>
+                                            Reintentar
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </View>
+                    </ThemeProvider>
+                </ErrorBoundary>
+            </GestureHandlerRootView>
+        </QueryClientProvider>
     );
 }
 

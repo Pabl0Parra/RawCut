@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef, JSX, memo } from "react";
+import React, { useState, useEffect, useCallback, JSX, memo } from "react";
+
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -34,12 +35,11 @@ import MovieCard from "../../src/components/MovieCard";
 import {
     searchMovies,
     searchTVShows,
-    getMovieGenres,
-    getTVGenres,
     type Movie,
     type TVShow,
     type Genre,
 } from "../../src/lib/tmdb";
+
 import { useContentStore } from "../../src/stores/contentStore";
 import { useVoteStore } from "../../src/stores/voteStore";
 import { useAuthStore } from "../../src/stores/authStore";
@@ -58,11 +58,6 @@ import {
 import {
     buildDiscoverParams,
     hasActiveFilters,
-    fetchMovieContent,
-    fetchTVContent,
-    calculatePaginationState,
-    mergeContentResults,
-    shouldSkipContentLoad,
     processContinueWatchingShow,
     filterActualEpisodeProgress,
     extractUniqueShowIds,
@@ -76,124 +71,18 @@ import { seasonsToProgressInfo } from "../../src/utils/tvDetail.utils";
 import SmokeBackground from "../../src/components/SmokeBackground";
 import { useForYouContent } from "../../src/hooks/useForYouContent";
 
+import {
+    usePopularMovies,
+    usePopularTVShows,
+    useDiscoverMovies,
+    useDiscoverTVShows,
+    useMovieGenres,
+    useTVGenres,
+    flattenPages,
+} from "../../src/hooks/useHomeContent";
+
 const MAX_CONTINUE_WATCHING_ITEMS = 10;
 const { height } = Dimensions.get("window");
-
-interface UseContentLoadingParams {
-    activeTab: ContentTab;
-    filtersActive: boolean;
-    searchQuery: string;
-    sortBy: string;
-    selectedGenre: number | null;
-    selectedYear: string;
-}
-
-type LoadContentOverrides = Partial<
-    Pick<UseContentLoadingParams, "sortBy" | "selectedGenre" | "selectedYear" | "activeTab">
->;
-
-interface UseContentLoadingReturn {
-    loadContent: (reset?: boolean, overrides?: LoadContentOverrides) => Promise<void>;
-    loading: boolean;
-    movies: Movie[];
-    tvShows: TVShow[];
-    setMovies: React.Dispatch<React.SetStateAction<Movie[]>>;
-    setTVShows: React.Dispatch<React.SetStateAction<TVShow[]>>;
-    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-    resetPagination: () => void;
-}
-
-const useContentLoading = (
-    params: UseContentLoadingParams,
-): UseContentLoadingReturn => {
-    const [movies, setMovies] = useState<Movie[]>([]);
-    const [tvShows, setTVShows] = useState<TVShow[]>([]);
-
-    const [localLoading, setLocalLoading] = useState(true);
-
-
-
-    const pageRef = useRef(1);
-    const hasMoreRef = useRef(true);
-    const loadingRef = useRef(false);
-
-    const {
-        activeTab,
-        filtersActive,
-        searchQuery,
-        sortBy,
-        selectedGenre,
-        selectedYear,
-    } = params;
-
-    const resetPagination = useCallback((): void => {
-        pageRef.current = 1;
-        hasMoreRef.current = true;
-    }, []);
-
-    const loadContent = useCallback(
-        async (reset: boolean = false, overrides?: LoadContentOverrides): Promise<void> => {
-            const currentPage = reset ? 1 : pageRef.current;
-
-            const effectiveSortBy = overrides?.sortBy ?? sortBy;
-            const effectiveGenre = overrides?.selectedGenre ?? selectedGenre;
-            const effectiveYear = overrides?.selectedYear ?? selectedYear;
-            const effectiveTab = overrides?.activeTab ?? activeTab;
-
-            const effectiveFiltersActive = overrides ? true : filtersActive;
-            const shouldUseDiscoverApi = (effectiveFiltersActive || effectiveSortBy !== "popularity.desc") && !searchQuery;
-
-            if (shouldSkipContentLoad(reset, hasMoreRef.current, loadingRef.current)) {
-                return;
-            }
-
-            loadingRef.current = true;
-            setLocalLoading(true);
-
-            try {
-                const discoverParams = buildDiscoverParams({
-                    currentPage,
-                    sortBy: effectiveSortBy,
-                    selectedGenre: effectiveGenre,
-                    selectedYear: effectiveYear,
-                    activeTab: effectiveTab,
-                });
-
-                const isMovies = effectiveTab === "movies";
-                const { results, totalPages } = isMovies
-                    ? await fetchMovieContent(currentPage, shouldUseDiscoverApi, discoverParams)
-                    : await fetchTVContent(currentPage, shouldUseDiscoverApi, discoverParams);
-
-                if (isMovies) {
-                    setMovies((prev: Movie[]) => mergeContentResults(prev, results as Movie[], reset));
-                } else {
-                    setTVShows((prev: TVShow[]) => mergeContentResults(prev, results as TVShow[], reset));
-                }
-
-                const pagination = calculatePaginationState(currentPage, totalPages, reset);
-                hasMoreRef.current = pagination.hasMore;
-                pageRef.current = pagination.nextPage;
-            } catch (err) {
-                console.error("[useContentLoading] Error loading content:", err);
-            } finally {
-                loadingRef.current = false;
-                setLocalLoading(false);
-            }
-        },
-        [activeTab, filtersActive, searchQuery, sortBy, selectedGenre, selectedYear],
-    );
-
-    return {
-        loadContent,
-        loading: localLoading,
-        movies,
-        tvShows,
-        setMovies,
-        setTVShows,
-        setLoading: setLocalLoading,
-        resetPagination,
-    };
-};
 
 interface MovieCardItemProps {
     item: Movie | TVShow;
@@ -256,7 +145,6 @@ export default function HomeScreen(): JSX.Element {
 
 
     const [showFilterModal, setShowFilterModal] = useState(false);
-    const [genres, setGenres] = useState<Genre[]>([]);
     const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
     const [selectedYear, setSelectedYear] = useState("");
     const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_VALUE);
@@ -272,23 +160,53 @@ export default function HomeScreen(): JSX.Element {
         loadingForYou,
     } = useForYouContent(activeTab);
 
-    const {
-        loadContent,
-        loading,
-        movies,
-        tvShows,
-        setMovies,
-        setTVShows,
-        setLoading,
-        resetPagination,
-    } = useContentLoading({
-        activeTab,
-        filtersActive,
-        searchQuery,
+    // ─── Build discover params when filters are active ───────────────────────
+    const discoverParams = buildDiscoverParams({
+        currentPage: 1,
         sortBy,
         selectedGenre,
         selectedYear,
+        activeTab: activeTab === "foryou" ? "movies" : activeTab,
     });
+    const useDiscover = filtersActive || sortBy !== DEFAULT_SORT_VALUE;
+
+    // ─── Browse content via TanStack Query ───────────────────────────────────
+    const popularMoviesQuery = usePopularMovies();
+    const popularTVQuery = usePopularTVShows();
+    const discoverMoviesQuery = useDiscoverMovies(discoverParams, useDiscover && activeTab === "movies");
+    const discoverTVQuery = useDiscoverTVShows(discoverParams, useDiscover && activeTab === "tv");
+
+    // ─── Genre queries (auto-cached, no effect needed) ────────────────────────
+    const movieGenresQuery = useMovieGenres();
+    const tvGenresQuery = useTVGenres();
+    // Derive processed genres from whichever query matches the active tab
+    const rawGenres = activeTab === "tv" ? (tvGenresQuery.data ?? []) : (movieGenresQuery.data ?? []);
+    const genres = sortGenresAlphabetically(
+        rawGenres.map((g) => ({ ...g, name: processGenreName(g.name) }))
+    );
+
+    // ─── Derive data arrays ───────────────────────────────────────────────────
+    const moviesFromQuery = useDiscover
+        ? flattenPages(discoverMoviesQuery.data)
+        : flattenPages(popularMoviesQuery.data);
+    const tvShowsFromQuery = useDiscover
+        ? flattenPages(discoverTVQuery.data)
+        : flattenPages(popularTVQuery.data);
+
+    // Local state for search overrides (search results aren't cached)
+    const [searchMovies_, setSearchMovies] = useState<Movie[]>([]);
+    const [searchTVShows_, setSearchTVShows] = useState<TVShow[]>([]);
+    const isInSearchMode = isSearching || (searchQuery.trim().length > 0 && (searchMovies_.length > 0 || searchTVShows_.length > 0));
+
+    const movies: Movie[] = isInSearchMode ? searchMovies_ : moviesFromQuery;
+    const tvShows: TVShow[] = isInSearchMode ? searchTVShows_ : tvShowsFromQuery;
+
+    // ─── Active query for current tab ────────────────────────────────────────
+    const activeQuery = activeTab === "movies"
+        ? (useDiscover ? discoverMoviesQuery : popularMoviesQuery)
+        : (useDiscover ? discoverTVQuery : popularTVQuery);
+    const loading = activeQuery.isLoading;
+    const isFetchingNextPage = activeQuery.isFetchingNextPage;
 
 
     const translateY = useSharedValue(0);
@@ -332,15 +250,6 @@ export default function HomeScreen(): JSX.Element {
 
 
 
-
-
-
-    useEffect(() => {
-        loadContent();
-        loadGenres(activeTab);
-    }, []);
-
-
     useEffect(() => {
         if (data.length === 0) return;
         const ids = data.map((item) => item.id);
@@ -373,35 +282,11 @@ export default function HomeScreen(): JSX.Element {
 
 
     useEffect(() => {
-        resetPagination();
         setSearchQuery("");
+        setSearchMovies([]);
+        setSearchTVShows([]);
         resetFilters(false);
-        loadContent(true);
-        loadGenres(activeTab);
     }, [activeTab]);
-
-
-
-
-
-    const loadGenres = useCallback(async (tab: ContentTab): Promise<void> => {
-        try {
-            const genreData = tab === "movies"
-                ? await getMovieGenres()
-                : await getTVGenres();
-
-            const processedGenres = sortGenresAlphabetically(
-                genreData.genres.map((genre) => ({
-                    ...genre,
-                    name: processGenreName(genre.name),
-                })),
-            );
-
-            setGenres(processedGenres);
-        } catch (err) {
-            console.error("[HomeScreen] Error loading genres:", err);
-        }
-    }, []);
 
     const loadContinueWatching = useCallback(async (): Promise<void> => {
         setLoadingContinue(true);
@@ -442,11 +327,7 @@ export default function HomeScreen(): JSX.Element {
         setSelectedYear("");
         setSortBy(DEFAULT_SORT_VALUE);
         setFiltersActive(false);
-
-        if (reload) {
-            loadContent(true);
-        }
-    }, [loadContent]);
+    }, []);
 
     const applyFilters = useCallback((): void => {
         const activeFiltersExist = hasActiveFilters(
@@ -458,54 +339,47 @@ export default function HomeScreen(): JSX.Element {
 
         setFiltersActive(activeFiltersExist);
         setShowFilterModal(false);
-        resetPagination();
-
-        loadContent(true, {
-            selectedGenre,
-            selectedYear,
-            sortBy,
-            activeTab,
-        });
-    }, [selectedGenre, selectedYear, sortBy, activeTab, loadContent, resetPagination]);
+    }, [selectedGenre, selectedYear, sortBy]);
 
     const handleSearch = useCallback(async (): Promise<void> => {
         if (!searchQuery.trim()) {
-            loadContent(true);
+            setSearchMovies([]);
+            setSearchTVShows([]);
+            setIsSearching(false);
             return;
         }
 
         setIsSearching(true);
-        setLoading(true);
 
         try {
             if (activeTab === "movies") {
                 const response = await searchMovies(searchQuery);
-                setMovies(response.results);
+                setSearchMovies(response.results);
             } else {
                 const response = await searchTVShows(searchQuery);
-                setTVShows(response.results);
+                setSearchTVShows(response.results);
             }
-            resetPagination();
         } catch (err) {
             console.error("[HomeScreen] Error searching:", err);
         } finally {
-            setLoading(false);
             setIsSearching(false);
         }
-    }, [searchQuery, activeTab, loadContent, setLoading, setMovies, setTVShows, resetPagination]);
+    }, [searchQuery, activeTab]);
 
     const handleRefresh = useCallback(async (): Promise<void> => {
         setRefreshing(true);
-        resetPagination();
         setSearchQuery("");
-        await loadContent(true);
+        setSearchMovies([]);
+        setSearchTVShows([]);
+        await activeQuery.refetch();
         setRefreshing(false);
-    }, [loadContent, resetPagination]);
+    }, [activeQuery]);
 
     const handleClearSearch = useCallback((): void => {
         setSearchQuery("");
-        loadContent(true);
-    }, [loadContent]);
+        setSearchMovies([]);
+        setSearchTVShows([]);
+    }, []);
 
     const handleToggleFavorite = useCallback(
         async (tmdbId: number, type: MediaType): Promise<void> => {
@@ -580,7 +454,7 @@ export default function HomeScreen(): JSX.Element {
     );
 
     const renderFooter = useCallback((): JSX.Element | null => {
-        if (!loading || data.length === 0) return null;
+        if (!isFetchingNextPage) return null;
 
         return (
             <View style={styles.footerContainer}>
@@ -609,10 +483,10 @@ export default function HomeScreen(): JSX.Element {
     );
 
     const handleEndReached = useCallback((): void => {
-        if (!isSearching) {
-            loadContent();
+        if (!isSearching && activeQuery.hasNextPage && !isFetchingNextPage) {
+            void activeQuery.fetchNextPage();
         }
-    }, [isSearching, loadContent]);
+    }, [isSearching, activeQuery, isFetchingNextPage]);
 
     const handleDismissBanner = useCallback((): void => {
         setShowProfileBanner(false);
