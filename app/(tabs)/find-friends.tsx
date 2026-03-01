@@ -176,7 +176,7 @@ export default function FindFriendsScreen() {
     );
 
     const renderSearchContent = () => {
-        if (isSearching) {
+        if (isSearching && searchResults.length === 0) {
             return <ActivityIndicator style={styles.centered} color={Colors.bloodRed} />;
         }
         if (query.length < 2) {
@@ -296,7 +296,13 @@ export default function FindFriendsScreen() {
         <View style={styles.container}>
             {/* Search Bar */}
             <View style={styles.searchBar}>
-                <Ionicons name="search" size={18} color={Colors.metalSilver} style={styles.searchIcon} />
+                <View style={styles.searchIconContainer}>
+                    {isSearching ? (
+                        <ActivityIndicator size="small" color={Colors.bloodRed} />
+                    ) : (
+                        <Ionicons name="search" size={18} color={Colors.metalSilver} />
+                    )}
+                </View>
                 <TextInput
                     style={styles.searchInput}
                     placeholder={t("social.searchPlaceholder")}
@@ -379,9 +385,12 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "rgba(255,255,255,0.08)",
     } as ViewStyle,
-    searchIcon: {
+    searchIconContainer: {
+        width: 20,
         marginRight: 8,
-    },
+        alignItems: "center",
+        justifyContent: "center",
+    } as ViewStyle,
     searchInput: {
         flex: 1,
         color: Colors.white,
