@@ -78,8 +78,12 @@ import {
     useDiscoverTVShows,
     useMovieGenres,
     useTVGenres,
+    useCuratedTVShows,
+    useClassicMovies,
+    useCuratedMovies,
     flattenPages,
 } from "../../src/hooks/useHomeContent";
+
 
 const MAX_CONTINUE_WATCHING_ITEMS = 10;
 const { height } = Dimensions.get("window");
@@ -133,6 +137,7 @@ const MovieCardItem = memo(({
 export default function HomeScreen(): JSX.Element {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<ContentTab>("movies");
+    const [selectedCategory, setSelectedCategory] = useState<"custom" | "curated" | "classic">("custom");
 
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -208,8 +213,16 @@ export default function HomeScreen(): JSX.Element {
     const loading = activeQuery.isLoading;
     const isFetchingNextPage = activeQuery.isFetchingNextPage;
 
+    // ─── ForYou subcategory queries ───────────────────────────────────────
+    const curatedTVQuery = useCuratedTVShows();
+    const curatedMovieQuery = useCuratedMovies();
+    const classicQuery = useClassicMovies();
+    const curatedShows = flattenPages(curatedTVQuery.data);
+    const curatedMovies = flattenPages(curatedMovieQuery.data);
+    const classicMovies_ = flattenPages(classicQuery.data);
 
     const translateY = useSharedValue(0);
+
 
     const animatedModalStyle = useAnimatedStyle(() => ({
         transform: [{ translateY: translateY.value }],
@@ -567,32 +580,145 @@ export default function HomeScreen(): JSX.Element {
     const renderForYouContent = (): JSX.Element | null => {
         if (activeTab !== "foryou") return null;
 
-        if (loadingForYou && recommendations.length === 0 && !loadingContinue) {
-            return (
-                <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color={Colors.bloodRed} />
-                    <Text style={styles.loadingText}>{t("common.loading")}</Text>
-                </View>
-            );
-        }
+        const CATEGORIES = [
+            { key: "custom" as const, label: t("home.forYouCategory.custom") },
+            { key: "curated" as const, label: t("home.forYouCategory.curated") },
+            { key: "classic" as const, label: t("home.forYouCategory.classic") },
+        ];
+
+        // ── Loading state per category ──────────────────────────────────────
+        const isLoadingCurrent =
+            (selectedCategory === "custom" && loadingForYou && recommendations.length === 0) ||
+            (selectedCategory === "curated" && (curatedTVQuery.isLoading || curatedMovieQuery.isLoading)) ||
+            (selectedCategory === "classic" && classicQuery.isLoading);
 
         return (
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
+                stickyHeaderIndices={[0]}
             >
-                {renderContinueWatching()}
-                {recommendations.map((rec) => (
-                    <View key={rec.id} style={styles.continueSection}>
+                {/* ── Category pill selector ── */}
+                <View style={styles.categoryFilterWrapper}>
+                    <View style={styles.categoryFilterContainer}>
+                        {CATEGORIES.map((cat) => (
+                            <TouchableOpacity
+                                key={cat.key}
+                                style={[
+                                    styles.categoryTab,
+                                    selectedCategory === cat.key && styles.activeCategoryTab,
+                                ]}
+                                onPress={() => setSelectedCategory(cat.key)}
+                                activeOpacity={0.75}
+                            >
+                                <Text
+                                    style={[
+                                        styles.categoryTabText,
+                                        selectedCategory === cat.key && styles.activeCategoryTabText,
+                                    ]}
+                                >
+                                    {cat.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
+                {/* ── Loading spinner ── */}
+                {isLoadingCurrent && (
+                    <View style={styles.centerContainer}>
+                        <ActivityIndicator size="large" color={Colors.bloodRed} />
+                    </View>
+                )}
+
+                {/* ── Custom: personalised recommendations ── */}
+                {!isLoadingCurrent && selectedCategory === "custom" && (
+                    <>
+                        {renderContinueWatching()}
+                        {recommendations.map((rec) => (
+                            <View key={rec.id} style={styles.continueSection}>
+                                <View style={styles.continueHeader}>
+                                    <Text style={styles.continueTitle}>{rec.title}</Text>
+                                </View>
+                                <View style={styles.recommendationGrid}>
+                                    {rec.items.slice(0, 6).map(item => (
+                                        <View key={`${rec.id}-${item.id}`} style={styles.recommendationGridItem}>
+                                            <MovieCardItem
+                                                item={item}
+                                                mediaType={rec.mediaType}
+                                                handleToggleFavorite={handleToggleFavorite}
+                                                handleToggleWatchlist={handleToggleWatchlist}
+                                                handleToggleWatched={handleToggleWatched}
+                                                handleVote={handleVote}
+                                                fullWidth={true}
+                                            />
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        ))}
+                    </>
+                )}
+
+                {/* ── Curated: best-rated TV shows & Movies ── */}
+                {!isLoadingCurrent && selectedCategory === "curated" && (
+                    <>
+                        <View style={styles.continueSection}>
+                            <View style={styles.continueHeader}>
+                                <Text style={styles.continueTitle}>{t("home.curatedTVTitle")}</Text>
+                            </View>
+                            <View style={styles.recommendationGrid}>
+                                {curatedShows.slice(0, 50).map(item => (
+                                    <View key={`curated-tv-${item.id}`} style={styles.recommendationGridItem}>
+                                        <MovieCardItem
+                                            item={item}
+                                            mediaType="tv"
+                                            handleToggleFavorite={handleToggleFavorite}
+                                            handleToggleWatchlist={handleToggleWatchlist}
+                                            handleToggleWatched={handleToggleWatched}
+                                            handleVote={handleVote}
+                                            fullWidth={true}
+                                        />
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+
+                        <View style={styles.continueSection}>
+                            <View style={styles.continueHeader}>
+                                <Text style={styles.continueTitle}>{t("home.curatedMoviesTitle")}</Text>
+                            </View>
+                            <View style={styles.recommendationGrid}>
+                                {curatedMovies.slice(0, 50).map(item => (
+                                    <View key={`curated-movie-${item.id}`} style={styles.recommendationGridItem}>
+                                        <MovieCardItem
+                                            item={item}
+                                            mediaType="movie"
+                                            handleToggleFavorite={handleToggleFavorite}
+                                            handleToggleWatchlist={handleToggleWatchlist}
+                                            handleToggleWatched={handleToggleWatched}
+                                            handleVote={handleVote}
+                                            fullWidth={true}
+                                        />
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    </>
+                )}
+
+                {/* ── Classic: pre-2000 rated movies ── */}
+                {!isLoadingCurrent && selectedCategory === "classic" && (
+                    <View style={styles.continueSection}>
                         <View style={styles.continueHeader}>
-                            <Text style={styles.continueTitle}>{rec.title}</Text>
+                            <Text style={styles.continueTitle}>{t("home.classicTitle")}</Text>
                         </View>
                         <View style={styles.recommendationGrid}>
-                            {rec.items.slice(0, 6).map(item => (
-                                <View key={`${rec.id}-${item.id}`} style={styles.recommendationGridItem}>
+                            {classicMovies_.slice(0, 50).map(item => (
+                                <View key={`classic-${item.id}`} style={styles.recommendationGridItem}>
                                     <MovieCardItem
                                         item={item}
-                                        mediaType={rec.mediaType}
+                                        mediaType="movie"
                                         handleToggleFavorite={handleToggleFavorite}
                                         handleToggleWatchlist={handleToggleWatchlist}
                                         handleToggleWatched={handleToggleWatched}
@@ -603,7 +729,7 @@ export default function HomeScreen(): JSX.Element {
                             ))}
                         </View>
                     </View>
-                ))}
+                )}
             </ScrollView>
         );
     };
@@ -1248,5 +1374,32 @@ const styles = StyleSheet.create({
     },
     recommendationGridItem: {
         flexBasis: '30%',
+    },
+    categoryFilterWrapper: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: Colors.metalBlack,
+    },
+    categoryFilterContainer: {
+        flexDirection: "row",
+        backgroundColor: Colors.metalGray,
+        borderRadius: 9999,
+    },
+    categoryTab: {
+        flex: 1,
+        paddingVertical: 8,
+        borderRadius: 9999,
+        alignItems: "center",
+    },
+    activeCategoryTab: {
+        backgroundColor: Colors.bloodRed,
+    },
+    categoryTabText: {
+        fontWeight: "bold",
+        fontSize: 13,
+        color: Colors.metalSilver,
+    },
+    activeCategoryTabText: {
+        color: Colors.white,
     },
 });

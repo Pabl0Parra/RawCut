@@ -12,6 +12,9 @@ import {
     discoverTVShows,
     getMovieGenres,
     getTVGenres,
+    getCuratedTVShows,
+    getClassicMovies,
+    getCuratedMovies,
     type Movie,
     type TVShow,
     type Genre,
@@ -25,6 +28,8 @@ export const movieKeys = {
     all: ["movies"] as const,
     popular: (page?: number) => ["movies", "popular", page ?? "infinite"] as const,
     discover: (params: DiscoverParams) => ["movies", "discover", params] as const,
+    classics: () => ["movies", "classics"] as const,
+    curated: () => ["movies", "curated"] as const,
     genres: () => ["genres", "movies"] as const,
 };
 
@@ -32,6 +37,7 @@ export const tvKeys = {
     all: ["tv"] as const,
     popular: (page?: number) => ["tv", "popular", page ?? "infinite"] as const,
     discover: (params: DiscoverParams) => ["tv", "discover", params] as const,
+    curated: () => ["tv", "curated"] as const,
     genres: () => ["genres", "tv"] as const,
 };
 
@@ -111,6 +117,47 @@ export const useTVGenres = (): UseQueryResult<Genre[], Error> =>
             return data.genres;
         },
         staleTime: 60 * 60 * 1000,
+    });
+
+// ─── ForYou: Curated & Classic Hooks ─────────────────────────────────────────
+
+export const useCuratedTVShows = (): UseInfiniteQueryResult<
+    InfiniteData<TMDbResponse<TVShow>>,
+    Error
+> =>
+    useInfiniteQuery({
+        queryKey: tvKeys.curated(),
+        queryFn: ({ pageParam }) => getCuratedTVShows(pageParam as number),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) =>
+            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        staleTime: 10 * 60 * 1000, // top-rated changes slowly
+    });
+
+export const useClassicMovies = (): UseInfiniteQueryResult<
+    InfiniteData<TMDbResponse<Movie>>,
+    Error
+> =>
+    useInfiniteQuery({
+        queryKey: movieKeys.classics(),
+        queryFn: ({ pageParam }) => getClassicMovies(pageParam as number),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) =>
+            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        staleTime: 30 * 60 * 1000, // classics never change
+    });
+
+export const useCuratedMovies = (): UseInfiniteQueryResult<
+    InfiniteData<TMDbResponse<Movie>>,
+    Error
+> =>
+    useInfiniteQuery({
+        queryKey: movieKeys.curated(),
+        queryFn: ({ pageParam }) => getCuratedMovies(pageParam as number),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) =>
+            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        staleTime: 10 * 60 * 1000,
     });
 
 // ─── Utility: flatten infinite pages into flat array ─────────────────────────

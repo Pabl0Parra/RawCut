@@ -49,7 +49,17 @@
         "bannerSubtitle": "Change your generic username in your profile.",
         "becauseYouLiked": "Because you liked \"{{title}}\"",
         "popularMovies": "Popular Movies",
-        "popularTV": "Popular TV Shows"
+        "popularTV": "Popular TV Shows",
+        "forYouCategory": {
+            "custom": "Custom",
+            "curated": "Curated",
+            "classic": "Classic"
+        },
+        "curatedTVTitle": "Best Rated TV Shows",
+        "curatedMoviesTitle": "Best Rated Movies",
+        "classicTitle": "Classic Movies",
+        "loadingCurated": "Loading curated picks...",
+        "loadingClassic": "Loading classics..."
     },
     "favorites": {
         "emptyTitle": "You have no favorites yet",

@@ -49,7 +49,17 @@
         "bannerSubtitle": "Canvia el teu nom d'usuari genèric al teu perfil.",
         "becauseYouLiked": "Perquè t'ha agradat \"{{title}}\"",
         "popularMovies": "Pel·lícules Populars",
-        "popularTV": "Sèries Populars"
+        "popularTV": "Sèries Populars",
+        "forYouCategory": {
+            "custom": "Personalitzat",
+            "curated": "Destacat",
+            "classic": "Clàssic"
+        },
+        "curatedTVTitle": "Millors Sèries de Tots els Temps",
+        "curatedMoviesTitle": "Millors Pel·lícules de Tots els Temps",
+        "classicTitle": "Pel·lícules Clàssiques",
+        "loadingCurated": "Carregant selecció destacada...",
+        "loadingClassic": "Carregant clàssics..."
     },
     "favorites": {
         "emptyTitle": "Encara no tens preferits",

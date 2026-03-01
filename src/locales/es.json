@@ -49,7 +49,17 @@
         "bannerSubtitle": "Cambia tu nombre de usuario genérico en tu perfil.",
         "becauseYouLiked": "Porque te gustó \"{{title}}\"",
         "popularMovies": "Películas Populares",
-        "popularTV": "Series Populares"
+        "popularTV": "Series Populares",
+        "forYouCategory": {
+            "custom": "Personalizado",
+            "curated": "Destacado",
+            "classic": "Clásico"
+        },
+        "curatedTVTitle": "Mejores Series de Todos los Tiempos",
+        "curatedMoviesTitle": "Mejores Películas de Todos los Tiempos",
+        "classicTitle": "Películas Clásicas",
+        "loadingCurated": "Cargando selección destacada...",
+        "loadingClassic": "Cargando clásicos..."
     },
     "favorites": {
         "emptyTitle": "No tienes favoritos aún",

@@ -166,6 +166,40 @@ export const getPopularTVShows = async (page = 1): Promise<TMDbResponse<TVShow>>
   return { ...response, results: filterByLanguage(response.results) };
 }
 
+export const getCuratedTVShows = async (page = 1): Promise<TMDbResponse<TVShow>> => {
+  const response = await fetchTMDb<TMDbResponse<TVShow>>("/discover/tv", {
+    page: page.toString(),
+    sort_by: "vote_average.desc",
+    "vote_count.gte": "200",
+    include_null_first_air_dates: "false",
+    include_adult: "false",
+  });
+  return { ...response, results: filterByLanguage(response.results) };
+};
+
+export const getCuratedMovies = async (page = 1): Promise<TMDbResponse<Movie>> => {
+  const response = await fetchTMDb<TMDbResponse<Movie>>("/discover/movie", {
+    page: page.toString(),
+    sort_by: "vote_average.desc",
+    "vote_count.gte": "500",
+    "vote_average.gte": "7.5",
+    include_adult: "false",
+  });
+  return { ...response, results: filterByLanguage(response.results) };
+};
+
+export const getClassicMovies = async (page = 1): Promise<TMDbResponse<Movie>> => {
+  const response = await fetchTMDb<TMDbResponse<Movie>>("/discover/movie", {
+    page: page.toString(),
+    sort_by: "vote_average.desc",
+    "primary_release_date.lte": "2000-01-01",
+    "vote_count.gte": "500",
+    "vote_average.gte": "7",
+    include_adult: "false",
+  });
+  return { ...response, results: filterByLanguage(response.results) };
+};
+
 export const searchMovies = async (query: string, page: number = 1): Promise<TMDbResponse<Movie>> => {
     const response = await fetchTMDb<TMDbResponse<Movie>>("/search/movie", { query, page: page.toString() });
     return { ...response, results: filterByLanguage(response.results) };
