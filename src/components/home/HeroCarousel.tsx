@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, memo } from "react";
 import {
     View,
     Text,
@@ -14,6 +14,7 @@ import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
+    type SharedValue,
 } from "react-native-reanimated";
 import { router } from "expo-router";
 import { Colors, Fonts } from "../../constants/Colors";
@@ -28,8 +29,24 @@ interface HeroCarouselProps {
     mediaType: MediaType;
 }
 
+const PaginationDot = memo(({ index, activeIndex }: { index: number; activeIndex: SharedValue<number> }) => {
+    const dotStyle = useAnimatedStyle(() => {
+        const isActive = activeIndex.value === index;
+        return {
+            width: isActive ? 12 : 6,
+            backgroundColor: isActive ? Colors.vibrantRed : "rgba(255, 255, 255, 0.6)",
+            opacity: isActive ? 1 : 0.5,
+        };
+    });
+
+    return (
+        <Animated.View
+            style={[styles.dot, dotStyle]}
+        />
+    );
+});
+
 export const HeroCarousel = ({ data, mediaType }: HeroCarouselProps) => {
-    const scrollX = useSharedValue(0);
     const activeIndex = useSharedValue(0);
 
     const viewabilityConfig = useRef({
@@ -96,23 +113,13 @@ export const HeroCarousel = ({ data, mediaType }: HeroCarouselProps) => {
                 keyExtractor={(item) => `hero-${item.id}`}
             />
             <View style={styles.pagination}>
-                {heroData.map((_, index) => {
-                    const dotStyle = useAnimatedStyle(() => {
-                        const isActive = activeIndex.value === index;
-                        return {
-                            width: isActive ? 12 : 6,
-                            backgroundColor: isActive ? Colors.vibrantRed : Colors.whiteOpacity60,
-                            opacity: isActive ? 1 : 0.5,
-                        };
-                    });
-
-                    return (
-                        <Animated.View
-                            key={`dot-${index}`}
-                            style={[styles.dot, dotStyle]}
-                        />
-                    );
-                })}
+                {heroData.map((_, index) => (
+                    <PaginationDot
+                        key={`dot-${index}`}
+                        index={index}
+                        activeIndex={activeIndex}
+                    />
+                ))}
             </View>
         </View>
     );

@@ -200,6 +200,36 @@ export const getClassicMovies = async (page = 1): Promise<TMDbResponse<Movie>> =
   return { ...response, results: filterByLanguage(response.results) };
 };
 
+export const getNewReleases = async (type: "movie" | "tv", page = 1): Promise<TMDbResponse<any>> => {
+  const today = new Date().toISOString().split('T')[0];
+  const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+    .toISOString().split('T')[0];
+
+  const endpoint = type === "movie" ? "/discover/movie" : "/discover/tv";
+  const dateKey = type === "movie" ? "primary_release_date" : "first_air_date";
+
+  const response = await fetchTMDb<TMDbResponse<any>>(endpoint, {
+    page: page.toString(),
+    sort_by: "popularity.desc",
+    [`${dateKey}.gte`]: twoWeeksAgo,
+    [`${dateKey}.lte`]: today,
+    "vote_average.gte": "6",
+    include_adult: "false",
+  });
+  return { ...response, results: filterByLanguage(response.results) };
+};
+
+export const getByGenre = async (type: "movie" | "tv", genreIds: string, page = 1): Promise<TMDbResponse<any>> => {
+  const endpoint = type === "movie" ? "/discover/movie" : "/discover/tv";
+  const response = await fetchTMDb<TMDbResponse<any>>(endpoint, {
+    page: page.toString(),
+    sort_by: "popularity.desc",
+    with_genres: genreIds,
+    include_adult: "false",
+  });
+  return { ...response, results: filterByLanguage(response.results) };
+};
+
 export const searchMovies = async (query: string, page: number = 1): Promise<TMDbResponse<Movie>> => {
     const response = await fetchTMDb<TMDbResponse<Movie>>("/search/movie", { query, page: page.toString() });
     return { ...response, results: filterByLanguage(response.results) };

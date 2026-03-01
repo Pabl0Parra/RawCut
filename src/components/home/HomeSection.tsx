@@ -18,7 +18,7 @@ interface HomeSectionProps {
     data: (Movie | TVShow)[];
     mediaType: MediaType;
     onViewAll?: () => void;
-    renderItem: ({ item, index }: { item: Movie | TVShow; index: number }) => JSX.Element;
+    renderItem: ({ item, index }: { item: Movie | TVShow; index: number }) => React.JSX.Element;
 }
 
 export const HomeSection = ({
@@ -85,12 +85,16 @@ const styles = StyleSheet.create({
     viewAll: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 2,
+        gap: 4,
+        paddingVertical: 4,
+        paddingLeft: 12,
     },
     viewAllText: {
-        fontSize: 12,
-        fontFamily: Fonts.interMedium,
+        fontSize: 14,
+        fontFamily: Fonts.bebas,
         color: Colors.metalSilver,
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
     },
     listContent: {
         paddingHorizontal: 16,

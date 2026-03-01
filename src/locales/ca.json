@@ -33,7 +33,9 @@
         "signUp": "Registra't",
         "or": "o",
         "new": "NOU",
-        "watched": "VIST"
+        "watched": "VIST",
+        "action": "Acció",
+        "horror": "Terror/Horror"
     },
     "tabs": {
         "home": "Inici",

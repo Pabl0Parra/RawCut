@@ -33,7 +33,9 @@
         "signUp": "Regístrate",
         "or": "o",
         "new": "NUEVO",
-        "watched": "VISTO"
+        "watched": "VISTO",
+        "action": "Acción",
+        "horror": "Terror/Suspense"
     },
     "tabs": {
         "home": "Inicio",

@@ -15,6 +15,8 @@ import {
     getCuratedTVShows,
     getClassicMovies,
     getCuratedMovies,
+    getNewReleases,
+    getByGenre,
     type Movie,
     type TVShow,
     type Genre,
@@ -158,6 +160,34 @@ export const useCuratedMovies = (): UseInfiniteQueryResult<
         getNextPageParam: (lastPage) =>
             lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
         staleTime: 10 * 60 * 1000,
+    });
+
+// ─── New Content Hooks ────────────────────────────────────────────────────────
+
+export const useNewReleasesContent = (type: "movie" | "tv"): UseInfiniteQueryResult<
+    InfiniteData<TMDbResponse<any>>,
+    Error
+> =>
+    useInfiniteQuery({
+        queryKey: [type === "movie" ? "movies" : "tv", "new_releases"],
+        queryFn: ({ pageParam }) => getNewReleases(type, pageParam as number),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) =>
+            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        staleTime: 15 * 60 * 1000,
+    });
+
+export const useGenreContent = (type: "movie" | "tv", genreIds: string, genreKey: string): UseInfiniteQueryResult<
+    InfiniteData<TMDbResponse<any>>,
+    Error
+> =>
+    useInfiniteQuery({
+        queryKey: [type === "movie" ? "movies" : "tv", "genre", genreKey],
+        queryFn: ({ pageParam }) => getByGenre(type, genreIds, pageParam as number),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) =>
+            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        staleTime: 20 * 60 * 1000,
     });
 
 // ─── Utility: flatten infinite pages into flat array ─────────────────────────

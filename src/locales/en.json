@@ -33,7 +33,9 @@
         "signUp": "Sign Up",
         "or": "or",
         "new": "NEW",
-        "watched": "WATCHED"
+        "watched": "WATCHED",
+        "action": "Action",
+        "horror": "Terror/Horror"
     },
     "tabs": {
         "home": "Home",
