@@ -23,7 +23,6 @@ import type {
 import { Colors } from "../constants/Colors";
 import { getImageUrl } from "../lib/tmdb";
 
-// StarRating component removed as requested.
 
 interface RecommendationCardProps {
     item: RecommendationWithRelations;
@@ -178,9 +177,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                         </Text>
                     )}
 
-                    <View style={styles.statusRow}>
-                        {/* Rating badge removed as requested */}
-                    </View>
                 </View>
 
                 <TouchableOpacity
@@ -197,7 +193,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
             {isExpanded && (
                 <View style={styles.expandedContent}>
-                    {/* Your Rating section removed as requested */}
 
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{t("recommendations.comments")}</Text>
@@ -267,7 +262,6 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
 };
 
 const styles = StyleSheet.create({
-    // starContainer and star styles removed
     card: {
         backgroundColor: "rgba(30, 30, 30, 0.9)",
         borderRadius: 12,
@@ -350,7 +344,6 @@ const styles = StyleSheet.create({
         gap: 8,
         marginTop: "auto",
     } as ViewStyle,
-    // ratingBadge and ratingText styles removed
     actionButtonContainer: {
         marginLeft: 8,
         alignSelf: "flex-start",

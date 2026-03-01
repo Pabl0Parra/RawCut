@@ -59,13 +59,15 @@ CREATE TABLE IF NOT EXISTS recommendation_comments (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Ratings
-CREATE TABLE IF NOT EXISTS ratings (
+-- Community Votes (Ratings for movies/tv shows)
+CREATE TABLE IF NOT EXISTS content_votes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  recommendation_id UUID REFERENCES recommendations(id) ON DELETE CASCADE,
-  rating INT CHECK (rating >= 1 AND rating <= 5),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  tmdb_id INT NOT NULL,
+  media_type VARCHAR(10) NOT NULL CHECK (media_type IN ('movie', 'tv')),
+  vote INT NOT NULL CHECK (vote >= 1 AND vote <= 10),
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(recommendation_id)
+  UNIQUE(user_id, tmdb_id, media_type)
 );
 
 -- Enable Row Level Security
@@ -73,7 +75,7 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recommendations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recommendation_comments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE ratings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE content_votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tv_progress ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
@@ -131,31 +133,19 @@ CREATE POLICY "Comment on recommendations" ON recommendation_comments
 CREATE POLICY "Delete own comments" ON recommendation_comments
   FOR DELETE USING (auth.uid() = user_id);
 
--- Ratings: Receiver creates/updates, both can read
-CREATE POLICY "Rate recommendations" ON ratings
-  FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM recommendations
-      WHERE id = recommendation_id AND receiver_id = auth.uid()
-    )
-  );
+-- Content Votes: Anyone can view (for aggregation), users manage own
+CREATE POLICY "Anyone can view content votes" ON content_votes
+  FOR SELECT USING (true);
 
-CREATE POLICY "Update ratings" ON ratings
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM recommendations
-      WHERE id = recommendation_id AND receiver_id = auth.uid()
-    )
-  );
+CREATE POLICY "Users can insert their own votes" ON content_votes
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "View ratings" ON ratings
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM recommendations r
-      WHERE r.id = recommendation_id
-        AND auth.uid() IN (r.sender_id, r.receiver_id)
-    )
-  );
+CREATE POLICY "Users can update their own votes" ON content_votes
+  FOR UPDATE USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own votes" ON content_votes
+  FOR DELETE USING (auth.uid() = user_id);
 
 -- TV Progress: Users CRUD own
 CREATE POLICY "Users can view their own tv progress" ON tv_progress
@@ -167,49 +157,6 @@ CREATE POLICY "Users can insert their own tv progress" ON tv_progress
 CREATE POLICY "Users can delete their own tv progress" ON tv_progress
   FOR DELETE USING (auth.uid() = user_id);
 
--- Trigger function to update sender points on rating
-CREATE OR REPLACE FUNCTION update_sender_points()
-RETURNS TRIGGER AS $$
-DECLARE
-  sender UUID;
-  old_points INT := 0;
-  new_points INT := 0;
-  diff INT := 0;
-BEGIN
-  -- Get the sender of the recommendation
-  SELECT sender_id INTO sender
-  FROM recommendations
-  WHERE id = NEW.recommendation_id;
-
-  -- Calculate new points: +1 for 4 stars, +2 for 5 stars
-  IF NEW.rating >= 4 THEN new_points := 1; END IF;
-  IF NEW.rating = 5 THEN new_points := 2; END IF;
-
-  -- If update, calculate old points to get the diff
-  IF (TG_OP = 'UPDATE') THEN
-    IF OLD.rating >= 4 THEN old_points := 1; END IF;
-    IF OLD.rating = 5 THEN old_points := 2; END IF;
-  END IF;
-
-  diff := new_points - old_points;
-
-  -- Update sender's points
-  IF diff <> 0 THEN
-    UPDATE profiles
-    SET points = points + diff
-    WHERE user_id = sender;
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Create trigger for points update
-DROP TRIGGER IF EXISTS on_rating_changes ON ratings;
-CREATE TRIGGER on_rating_changes
-  AFTER INSERT OR UPDATE ON ratings
-  FOR EACH ROW
-  EXECUTE FUNCTION update_sender_points();
 
 -- Optional: Auto-create profile on user signup
 CREATE OR REPLACE FUNCTION handle_new_user()
@@ -243,7 +190,7 @@ CREATE TRIGGER on_auth_user_created
 -- Enable realtime for tables
 ALTER PUBLICATION supabase_realtime ADD TABLE recommendation_comments;
 ALTER PUBLICATION supabase_realtime ADD TABLE recommendations;
-ALTER PUBLICATION supabase_realtime ADD TABLE ratings;
+ALTER PUBLICATION supabase_realtime ADD TABLE content_votes;
 
 -- RPC Function to recover/create missing profile (SECURITY DEFINER bypasses RLS)
 CREATE OR REPLACE FUNCTION recover_user_profile(

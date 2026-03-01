@@ -106,12 +106,6 @@ export interface RecommendationComment {
     created_at: string;
 }
 
-export interface Rating {
-    id: string;
-    recommendation_id: string;
-    rating: number;
-    created_at: string;
-}
 
 export interface ContentVote {
     id: string;

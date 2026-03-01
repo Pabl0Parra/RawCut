@@ -1,12 +1,11 @@
 import { create } from "zustand";
-import { supabase, Recommendation, RecommendationComment, Rating, Profile } from "../lib/supabase";
+import { supabase, Recommendation, RecommendationComment, Profile } from "../lib/supabase";
 import { useAuthStore } from "./authStore";
 
 interface EnrichedRecommendation extends Recommendation {
     sender?: Profile;
     receiver?: Profile;
     comments: RecommendationComment[];
-    rating?: Rating;
     tmdb_title?: string;
     tmdb_poster?: string;
 }
@@ -23,7 +22,6 @@ interface RecommendationState {
     addComment: (recommendationId: string, text: string) => Promise<boolean>;
     deleteComment: (recommendationId: string, commentId: string) => Promise<boolean>;
     deleteRecommendation: (recommendationId: string) => Promise<boolean>;
-    addRating: (recommendationId: string, rating: number) => Promise<boolean>;
     markAllAsRead: () => Promise<void>;
     markAsRead: (recommendationId: string) => Promise<void>;
     markCommentsAsRead: (recommendationId: string) => Promise<void>;
@@ -35,7 +33,6 @@ const processRecommendations = (data: any[]): EnrichedRecommendation[] => {
     return data.map((rec) => ({
         ...rec,
         comments: rec.comments || [],
-        rating: Array.isArray(rec.rating) ? rec.rating[0] : rec.rating,
     }));
 };
 
@@ -73,17 +70,6 @@ const removeCommentFromRecs = (
     );
 };
 
-const updateRecRating = (
-    recs: EnrichedRecommendation[],
-    recommendationId: string,
-    rating: Rating
-): EnrichedRecommendation[] => {
-    return recs.map((rec) =>
-        rec.id === recommendationId
-            ? { ...rec, rating, is_read: true }
-            : rec
-    );
-};
 
 const markComment = (c: RecommendationComment, userId: string): RecommendationComment =>
     c.user_id === userId ? c : { ...c, is_read: true };
@@ -146,8 +132,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 .select(`
           *,
           receiver:profiles!recommendations_receiver_id_fkey(user_id, username, avatar_url, points),
-          comments:recommendation_comments(*),
-          rating:ratings(*)
+          comments:recommendation_comments(*)
         `)
                 .eq("sender_id", user.id)
                 .eq("sender_deleted", false)
@@ -158,8 +143,7 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
                 .select(`
           *,
           sender:profiles!recommendations_sender_id_fkey(user_id, username, avatar_url, points),
-          comments:recommendation_comments(*),
-          rating:ratings(*)
+          comments:recommendation_comments(*)
         `)
                 .eq("receiver_id", user.id)
                 .eq("receiver_deleted", false)
@@ -275,43 +259,6 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
         }
     },
 
-    addRating: async (recommendationId: string, rating: number) => {
-        const user = useAuthStore.getState().user;
-        if (!user) return false;
-
-        try {
-            const { data, error } = await supabase
-                .from("ratings")
-                .upsert({
-                    recommendation_id: recommendationId,
-                    rating,
-                }, { onConflict: 'recommendation_id' })
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            await supabase
-                .from("recommendations")
-                .update({ is_read: true })
-                .eq("id", recommendationId);
-
-            set((state) => {
-                const newSent = updateRecRating(state.sent, recommendationId, data);
-                const newReceived = updateRecRating(state.received, recommendationId, data);
-                return {
-                    sent: newSent,
-                    received: newReceived,
-                    unreadCount: calculateUnreadCount(newSent, newReceived, user.id),
-                };
-            });
-
-            return true;
-        } catch (err) {
-            console.error("Error adding rating:", err);
-            return false;
-        }
-    },
 
     markAllAsRead: async () => {
         const user = useAuthStore.getState().user;
