@@ -8,14 +8,12 @@ export interface CommunityScore {
 }
 
 interface VoteState {
-    
     userVotes: Record<string, number>;
-    
     communityScores: Record<string, CommunityScore>;
 
-    
     submitVote: (tmdbId: number, mediaType: "movie" | "tv", vote: number) => Promise<void>;
     fetchVotes: (tmdbIds: number[], mediaType: "movie" | "tv") => Promise<void>;
+    fetchAllUserVotes: () => Promise<void>;
     getUserVote: (tmdbId: number, mediaType: "movie" | "tv") => number | undefined;
     getCommunityScore: (tmdbId: number, mediaType: "movie" | "tv") => CommunityScore | undefined;
 }
@@ -104,6 +102,23 @@ export const useVoteStore = create<VoteState>((set, get) => ({
             const voteMap: Record<string, number> = {};
             for (const row of myVotes) {
                 voteMap[key(row.tmdb_id, mediaType)] = row.vote;
+            }
+            set((s) => ({ userVotes: { ...s.userVotes, ...voteMap } }));
+        }
+    },
+    fetchAllUserVotes: async () => {
+        const user = useAuthStore.getState().user;
+        if (!user) return;
+
+        const { data, error } = await supabase
+            .from("content_votes")
+            .select("tmdb_id, media_type, vote")
+            .eq("user_id", user.id);
+
+        if (!error && data) {
+            const voteMap: Record<string, number> = {};
+            for (const row of data) {
+                voteMap[key(row.tmdb_id, row.media_type as "movie" | "tv")] = row.vote;
             }
             set((s) => ({ userVotes: { ...s.userVotes, ...voteMap } }));
         }

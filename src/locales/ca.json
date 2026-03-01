@@ -35,7 +35,8 @@
         "new": "NOU",
         "watched": "VIST",
         "action": "Acció",
-        "horror": "Terror/Horror"
+        "horror": "Terror/Horror",
+        "statistics": "Estadístiques"
     },
     "tabs": {
         "home": "Inici",
@@ -72,7 +73,10 @@
     },
     "watchlist": {
         "emptyTitle": "La teva llista està buida",
-        "emptySubtitle": "Afegeix pel·lícules i sèries que vulguis veure més tard"
+        "emptySubtitle": "Afegeix pel·lícules i sèries que vulguis veure més tard",
+        "statsSummary": "Has completat el visionat de {{count}} sèries.",
+        "upcomingReleases": "Pròximes Estrenes",
+        "viewDetailedStats": "Veure estadístiques detallades"
     },
     "recommendations": {
         "received": "Rebudes",
@@ -206,7 +210,7 @@
             "q3": "Com recomano una pel·lícula als meus amics?",
             "a3": "A la pantalla de detalls de qualsevol títol, prem el botó \"Recomanar\". S'obrirà una pantalla on podràs cercar els teus amics pel seu nom d'usuari, escriure un missatge i enviar-los la recomanació. Ells la rebran a la seva pestanya \"Per a tu\".",
             "q4": "Puc veure les pel·lícules directament a l'app?",
-            "a4": "No, RawCut funciona com un diari i recomanador personal. Utilitzem l'API de TMDb per donar-te tota la informació i metadades dels títols, però no proveïm serveis d'streaming.",
+            "a4": "No, RawCut funciona com un diari i recomanador personal. Utilitzem l'API de TMDb per donar-te tota la informació i metadades dels títols, peró no proveïm serveis d'streaming.",
             "q5": "Per què no veig pel·lícules en el meu idioma?",
             "a5": "Si una pel·lícula o sèrie no té una traducció oficial a la base de dades global de TMDb, es mostrarà el seu títol i sinopsi original.",
             "q6": "Com canvio el meu nom d'usuari genèric?",
@@ -231,7 +235,7 @@
         "s2Title": "2. Ús de la informació",
         "s2Text": "Utilitzem la seva informació personal únicament per proporcionar i millorar els serveis de RawCut. Això inclou autenticar el seu compte, sincronitzar les seves llistes entre dispositius i habilitar funcions socials com les recomanacions entre usuaris.",
         "s3Title": "3. Emmagatzematge i Protecció",
-        "s3Text": "Tota la information personal (incloent credencials de compte, llistes i progrés) s'emmagatzema de manera segura utilitzant Supabase, una plataforma de base de dades segura de tercers. Les seves contrasenyes són encriptades per Supabase i no són accessibles per a nosaltres.",
+        "s3Text": "Tota la information personal (incloent credencials de compte, lllistes i progrés) s'emmagatzema de manera segura utilitzant Supabase, una plataforma de base de dades segura de tercers. Les seves contrasenyes són encriptades per Supabase i no són accessibles per a nosaltres.",
         "s4Title": "4. Serveis de Tercers",
         "s4Text": "RawCut utilitza la interfície de programació d'aplicacions (API) de TMDb (The Movie Database) per obtenir informació sobre pel·lícules, sèries i imatges relacionades. No compartim la seva informació personal amb TMDb. El seu ús de la informació proveïda per TMDb està subjecte a els seus propis termes i polítiques.",
         "s5Title": "5. Drets de l'Usuari",
@@ -315,5 +319,32 @@
         "summonedTitle": "T'han convocat!",
         "summonedDescription": "Una nova connexió espera la teva aprovació a la pestanya d'amics.",
         "viewRequest": "Veure Sol·licitud"
+    },
+    "stats": {
+        "title": "Estadístiques",
+        "loading": "Calculant el teu viatge cinematogràfic...",
+        "moviesWatched": "Pel·lícules Vistes",
+        "showsWatched": "Sèries Vistes",
+        "moviesAdded": "Pel·lícules Afegides",
+        "showsAdded": "Sèries Afegides",
+        "likedMovies": "Pel·lícules que t'Agraden",
+        "likedShows": "Sèries que t'Agraden",
+        "highestRatedMovie": "Pel·lícula Millor Valorada",
+        "highestRatedShow": "Sèrie Millor Valorada",
+        "timeMovies": "Temps Veient Pel·lícules",
+        "timeShows": "Temps Veient Sèries",
+        "episodesWatched": "Episodis Vistos",
+        "seasonsWatched": "Temporades Vistes",
+        "completionRate": "Taxa de Finalització",
+        "partiallySeen": "Sèries Vistes Parcialment",
+        "topGenres": "Gèneres de Pel·lícula Top",
+        "timeFormat": {
+            "day": "{{count}} dia",
+            "day_plural": "{{count}} dies",
+            "hour": "{{count}} hora",
+            "hour_plural": "{{count}} hores",
+            "minute": "{{count}} minut",
+            "minute_plural": "{{count}} minuts"
+        }
     }
 }

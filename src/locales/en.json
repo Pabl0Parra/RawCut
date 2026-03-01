@@ -35,7 +35,8 @@
         "new": "NEW",
         "watched": "WATCHED",
         "action": "Action",
-        "horror": "Terror/Horror"
+        "horror": "Terror/Horror",
+        "statistics": "Statistics"
     },
     "tabs": {
         "home": "Home",
@@ -72,7 +73,10 @@
     },
     "watchlist": {
         "emptyTitle": "Your watchlist is empty",
-        "emptySubtitle": "Add movies and series you want to watch later"
+        "emptySubtitle": "Add movies and series you want to watch later",
+        "statsSummary": "You have completed watching {{count}} series.",
+        "upcomingReleases": "Upcoming Releases",
+        "viewDetailedStats": "View detailed statistics"
     },
     "recommendations": {
         "received": "Received",
@@ -315,5 +319,32 @@
         "summonedTitle": "You've been summoned!",
         "summonedDescription": "A new connection awaits your approval in the friends tab.",
         "viewRequest": "View Request"
+    },
+    "stats": {
+        "title": "Statistics",
+        "loading": "Calculating your cinema journey...",
+        "moviesWatched": "Movies Watched",
+        "showsWatched": "Shows Watched",
+        "moviesAdded": "Movies Added",
+        "showsAdded": "Shows Added",
+        "likedMovies": "Liked Movies",
+        "likedShows": "Liked Shows",
+        "highestRatedMovie": "Highest Rated Movie",
+        "highestRatedShow": "Highest Rated Show",
+        "timeMovies": "Time Spent Watching Movies",
+        "timeShows": "Time Spent Watching Shows",
+        "episodesWatched": "Episodes Watched",
+        "seasonsWatched": "Seasons Watched",
+        "completionRate": "Show Completion Rate",
+        "partiallySeen": "Shows Seen Partially",
+        "topGenres": "Top Movie Genres",
+        "timeFormat": {
+            "day": "{{count}} day",
+            "day_plural": "{{count}} days",
+            "hour": "{{count}} hour",
+            "hour_plural": "{{count}} hours",
+            "minute": "{{count}} minute",
+            "minute_plural": "{{count}} minutes"
+        }
     }
 }

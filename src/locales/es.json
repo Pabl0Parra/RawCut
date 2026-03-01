@@ -35,7 +35,8 @@
         "new": "NUEVO",
         "watched": "VISTO",
         "action": "Acción",
-        "horror": "Terror/Suspense"
+        "horror": "Terror/Suspense",
+        "statistics": "Estadísticas"
     },
     "tabs": {
         "home": "Inicio",
@@ -72,7 +73,10 @@
     },
     "watchlist": {
         "emptyTitle": "Tu lista está vacía",
-        "emptySubtitle": "Añade películas y series que quieras ver más tarde"
+        "emptySubtitle": "Añade películas y series que quieras ver más tarde",
+        "statsSummary": "Has completado el visionado de {{count}} series.",
+        "upcomingReleases": "Próximos Estrenos",
+        "viewDetailedStats": "Ver estadísticas detalladas"
     },
     "recommendations": {
         "received": "Recibidas",
@@ -315,5 +319,32 @@
         "summonedTitle": "¡Te han convocado!",
         "summonedDescription": "Una nueva conexión espera tu aprobación en la pestaña de amigos.",
         "viewRequest": "Ver Solicitud"
+    },
+    "stats": {
+        "title": "Estadísticas",
+        "loading": "Calculando tu viaje cinematográfico...",
+        "moviesWatched": "Películas Vistas",
+        "showsWatched": "Series Vistas",
+        "moviesAdded": "Películas Añadidas",
+        "showsAdded": "Series Añadidas",
+        "likedMovies": "Películas que te Gustan",
+        "likedShows": "Series que te Gustan",
+        "highestRatedMovie": "Película Mejor Valorada",
+        "highestRatedShow": "Serie Mejor Valorada",
+        "timeMovies": "Tiempo Viendo Películas",
+        "timeShows": "Tiempo Viendo Series",
+        "episodesWatched": "Episodios Vistos",
+        "seasonsWatched": "Temporadas Vistas",
+        "completionRate": "Tasa de Finalización",
+        "partiallySeen": "Series Vistas Parcialmente",
+        "topGenres": "Géneros de Película Top",
+        "timeFormat": {
+            "day": "{{count}} día",
+            "day_plural": "{{count}} días",
+            "hour": "{{count}} hora",
+            "hour_plural": "{{count}} horas",
+            "minute": "{{count}} minuto",
+            "minute_plural": "{{count}} minutos"
+        }
     }
 }

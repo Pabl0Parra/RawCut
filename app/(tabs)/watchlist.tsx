@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { View, StyleSheet, ScrollView, Text, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ScrollView, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect, router } from "expo-router";
@@ -134,7 +134,7 @@ export default function WatchlistScreen() {
                                     <View style={styles.section}>
                                         <View style={styles.sectionHeader}>
                                             <Ionicons name="calendar-outline" size={22} color={Colors.vibrantRed} />
-                                            <Text style={styles.sectionTitle}>Próximos Estrenos</Text>
+                                            <Text style={styles.sectionTitle}>{t("watchlist.upcomingReleases")}</Text>
                                         </View>
                                         {upcoming.map((item) => {
                                             const airDate = new Date(item.next_episode_to_air?.air_date || "");
@@ -156,13 +156,17 @@ export default function WatchlistScreen() {
                                 <View style={styles.section}>
                                     <View style={styles.sectionHeader}>
                                         <Ionicons name="stats-chart-outline" size={20} color={Colors.white} />
-                                        <Text style={styles.sectionTitle}>Estadísticas</Text>
+                                        <Text style={styles.sectionTitle}>{t("common.statistics")}</Text>
                                     </View>
-                                    <View style={styles.statsCard}>
-                                        <Text style={styles.statsText}>
-                                            Tienes {continueWatching.length + upcoming.length} series activas en seguimiento.
-                                        </Text>
-                                    </View>
+                                    <TouchableOpacity
+                                        style={styles.statsCard}
+                                        onPress={() => router.push("/stats")}
+                                    >
+                                        <View style={styles.statsCardContent}>
+                                            <Text style={styles.statsLink}>{t("watchlist.viewDetailedStats")}</Text>
+                                            <Ionicons name="chevron-forward" size={16} color={Colors.metalSilver} />
+                                        </View>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </GestureDetector>
@@ -284,5 +288,18 @@ const styles = StyleSheet.create({
         color: Colors.white,
         fontSize: 14,
         lineHeight: 20,
+        flex: 1,
+    },
+    statsCardContent: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
+    statsLink: {
+        color: Colors.white,
+        fontSize: 14,
+        fontWeight: "600",
+        fontFamily: Fonts.bebas,
+        letterSpacing: 1,
     }
 });
