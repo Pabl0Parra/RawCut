@@ -122,11 +122,17 @@ export const calculatePaginationState = (
     nextPage: isReset ? 2 : currentPage + 1,
 });
 
-export const mergeContentResults = <T>(
+export const mergeContentResults = <T extends { id: number }>(
     existingContent: T[],
     newResults: T[],
     isReset: boolean
-): T[] => (isReset ? newResults : [...existingContent, ...newResults]);
+): T[] => {
+    if (isReset) return newResults;
+    
+    const existingIds = new Set(existingContent.map(item => item.id));
+    const deduped = newResults.filter(item => !existingIds.has(item.id));
+    return [...existingContent, ...deduped];
+};
 
 export const shouldSkipContentLoad = (
     isReset: boolean,

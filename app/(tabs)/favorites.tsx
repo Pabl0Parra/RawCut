@@ -12,6 +12,8 @@ export default function FavoritesScreen() {
     const { t } = useTranslation();
     const user = useAuthStore((s) => s.user);
     const favorites = useContentStore((s) => s.favorites);
+    const watchlist = useContentStore((s) => s.watchlist);
+    const tvProgress = useContentStore((s) => s.tvProgress);
     const isFavorite = useContentStore((s) => s.isFavorite);
     const isInWatchlist = useContentStore((s) => s.isInWatchlist);
     const isWatched = useContentStore((s) => s.isWatched);

@@ -23,48 +23,21 @@ const ANIMATION_DURATION = 400;
 
 const TIMING_CONFIG = { duration: ANIMATION_DURATION } as const;
 
-interface TabLayout {
-    readonly x: number;
-    readonly width: number;
-    readonly index: number;
-}
-
-type LayoutAction = {
-    readonly type: 'ADD_LAYOUT';
-    readonly payload: TabLayout;
-};
-
 interface TabBarItemProps {
     readonly active: boolean;
     readonly icon: (props: { color: string; focused: boolean }) => React.ReactNode;
     readonly label: string;
-    readonly onLayout: (e: LayoutChangeEvent) => void;
     readonly onPress: () => void;
     readonly onLongPress: () => void;
     readonly badge?: string | number;
 }
 
-function layoutReducer(state: TabLayout[], action: LayoutAction): TabLayout[] {
-    if (action.type === 'ADD_LAYOUT') {
-        const existingIndex = state.findIndex(item => item.index === action.payload.index);
-        if (existingIndex !== -1) {
-            if (state[existingIndex].x === action.payload.x && state[existingIndex].width === action.payload.width) {
-                return state;
-            }
-            const newState = [...state];
-            newState[existingIndex] = action.payload;
-            return newState;
-        }
-        return [...state, action.payload];
-    }
-    return state;
-}
+
 
 const TabBarItem = memo(function TabBarItem({
     active,
     icon,
     label,
-    onLayout,
     onPress,
     onLongPress,
     badge,
@@ -98,7 +71,6 @@ const TabBarItem = memo(function TabBarItem({
         <Pressable
             onPress={onPress}
             onLongPress={onLongPress}
-            onLayout={onLayout}
             style={styles.tabItem}
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
@@ -146,9 +118,6 @@ export default function AnimatedTabBar({
     navigation,
 }: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
-    const [layouts, dispatch] = useReducer(layoutReducer, []);
-
-    const xOffset = useSharedValue(0);
 
     const visibleRoutes = useMemo(() =>
         state.routes.filter(route => {
@@ -165,29 +134,7 @@ export default function AnimatedTabBar({
         [visibleRoutes, state.routes, state.index]
     );
 
-    const handleLayout = useCallback((event: LayoutChangeEvent, index: number) => {
-        dispatch({
-            type: 'ADD_LAYOUT',
-            payload: { x: event.nativeEvent.layout.x, width: event.nativeEvent.layout.width, index },
-        });
-    }, []);
 
-    useAnimatedReaction(
-        () => {
-            const activeLayout = layouts.find(layout => layout.index === activeVisibleIndex);
-            return activeLayout ? (activeLayout.x + activeLayout.width / 2) - 55 : null;
-        },
-        (newOffset, previousOffset) => {
-            if (newOffset !== null && newOffset !== previousOffset) {
-                xOffset.value = newOffset;
-            }
-        },
-        [activeVisibleIndex, layouts]
-    );
-
-    const animatedBackgroundStyle = useAnimatedStyle(() => ({
-        transform: [{ translateX: withSpring(xOffset.value, TIMING_CONFIG) }],
-    }), []);
 
     const safeBottomPadding = Math.max(insets.bottom, TAB_BAR_PADDING_BOTTOM);
 
@@ -238,15 +185,6 @@ export default function AnimatedTabBar({
 
     return (
         <View style={containerStyle}>
-            <Animated.View style={[styles.curvedBackground, animatedBackgroundStyle]}>
-                <Svg width={110} height={60} viewBox="0 0 110 60">
-                    <Path
-                        fill={Colors.black}
-                        d="M20 0H0c11.046 0 20 9.49 20 21.2v5.3c0 20.49 15.67 37.1 35 37.1s35-16.61 35-37.1v-5.3c0-11.708 8.954-21.2 20-21.2H20z"
-                    />
-                </Svg>
-            </Animated.View>
-
             <View style={styles.tabsContainer}>
                 {tabsData.map((tab) => {
                     if (!tab.icon) return null;
@@ -257,7 +195,6 @@ export default function AnimatedTabBar({
                             active={tab.isFocused}
                             icon={tab.icon}
                             label={tab.label}
-                            onLayout={(e) => handleLayout(e, tab.index)}
                             onPress={createPressHandler(tab.key, tab.routeName, tab.isFocused)}
                             onLongPress={createLongPressHandler(tab.key)}
                             badge={tab.badge}
@@ -275,10 +212,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: 'rgba(255, 255, 255, 0.1)',
     },
-    curvedBackground: {
-        position: 'absolute',
-        top: -1,
-    },
+
     tabsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',

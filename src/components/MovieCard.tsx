@@ -86,11 +86,11 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         <TouchableOpacity
             style={styles.quickActionButton}
             onPress={onPress}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            activeOpacity={0.6}
             accessibilityLabel={isActive ? activeLabel : inactiveLabel}
         >
             {iconFamily === "Ionicons" && (
-                <Ionicons name={iconName} size={16} color={color} />
+                <Ionicons name={iconName} size={18} color={color} />
             )}
         </TouchableOpacity>
     );
@@ -165,45 +165,34 @@ const MovieCard = memo(function MovieCard({
         return (
             <View style={styles.quickActions}>
                 {onToggleFavorite && (
-                    <TouchableOpacity
-                        style={styles.quickActionButton}
+                    <ActionButton
+                        isActive={isFavorite}
+                        activeIcon="skull"
+                        inactiveIcon="skull-outline"
+                        activeLabel={t("movieCard.removeFavorite")}
+                        inactiveLabel={t("movieCard.addFavorite")}
                         onPress={onToggleFavorite}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        accessibilityLabel={isFavorite ? t("movieCard.removeFavorite") : t("movieCard.addFavorite")}
-                    >
-                        <Ionicons
-                            name={isFavorite ? "skull" : "skull-outline"}
-                            size={16}
-                            color={isFavorite ? Colors.bloodRed : Colors.metalSilver}
-                        />
-                    </TouchableOpacity>
+                    />
                 )}
                 {onToggleWatchlist && (
-                    <TouchableOpacity
-                        style={styles.quickActionButton}
+                    <ActionButton
+                        isActive={inWatchlist}
+                        activeIcon="bookmark"
+                        inactiveIcon="bookmark-outline"
+                        activeLabel={t("movieCard.removeFromWatchlist")}
+                        inactiveLabel={t("movieCard.addToWatchlist")}
                         onPress={onToggleWatchlist}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        accessibilityLabel={inWatchlist ? t("movieCard.removeFromWatchlist") : t("movieCard.addToWatchlist")}
-                    >
-                        <Ionicons
-                            name={inWatchlist ? "bookmark" : "bookmark-outline"}
-                            size={16}
-                            color={inWatchlist ? Colors.bloodRed : Colors.metalSilver}
-                        />
-                    </TouchableOpacity>
+                    />
                 )}
                 {onToggleWatched && (
-                    <TouchableOpacity
-                        style={styles.quickActionButton}
+                    <ActionButton
+                        isActive={isWatched}
+                        activeIcon="eye"
+                        inactiveIcon="eye-outline"
+                        activeLabel={t("common.watched")}
+                        inactiveLabel={t("common.notWatched")}
                         onPress={onToggleWatched}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                        <Ionicons
-                            name={isWatched ? "eye" : "eye-outline"}
-                            size={16}
-                            color={isWatched ? Colors.bloodRed : Colors.metalSilver}
-                        />
-                    </TouchableOpacity>
+                    />
                 )}
             </View>
         );
@@ -240,7 +229,13 @@ const MovieCard = memo(function MovieCard({
                 <TouchableOpacity
                     onPress={handlePress}
                     activeOpacity={0.8}
-                    style={StyleSheet.absoluteFill}
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 44, // Height of quickActions
+                    }}
                 >
                     {renderPoster()}
                 </TouchableOpacity>
@@ -290,7 +285,6 @@ const MovieCard = memo(function MovieCard({
         prevProps.isFavorite === nextProps.isFavorite &&
         prevProps.inWatchlist === nextProps.inWatchlist &&
         prevProps.isWatched === nextProps.isWatched &&
-        prevProps.mediaType === nextProps.mediaType &&
         prevProps.communityRating === nextProps.communityRating &&
         prevProps.userVote === nextProps.userVote
     );
@@ -375,13 +369,17 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         flexDirection: "row",
-        justifyContent: "space-around",
-        backgroundColor: Colors.overlayDark,
-        paddingVertical: 6,
-        zIndex: 20,
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
+        height: 44,
+        zIndex: 100,
     } as ViewStyle,
     quickActionButton: {
-        padding: 4,
+        flex: 1,
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
     } as ViewStyle,
     infoContainer: {
         marginTop: 8,

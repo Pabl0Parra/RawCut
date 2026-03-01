@@ -22,45 +22,36 @@ const mockAuthStore = useAuthStore.getState as jest.Mock;
 
 describe("socialStore", () => {
     const mockUser = { id: "user123" };
-    
+
     // Helper to mock Supabase query chains
     const createMockQueryChain = (resolvedValue: any, isError = false) => {
         const mockReturn = isError
             ? { data: null, error: new Error("Supabase Error") }
             : { data: resolvedValue, error: null };
-            
-        const executeChain = {
-            then: jest.fn((resolve) => resolve(mockReturn)),
-        };
-        
+
         const chain: Record<string, any> = {
-            select: jest.fn().mockReturnValue(executeChain),
-            eq: jest.fn().mockReturnValue(executeChain),
-            or: jest.fn().mockReturnValue(executeChain),
-            insert: jest.fn().mockReturnValue(executeChain),
-            update: jest.fn().mockReturnValue(executeChain),
-            delete: jest.fn().mockReturnValue(executeChain),
+            // select().or() — fetchFollowData
+            select: jest.fn().mockReturnValue({
+                or: jest.fn().mockResolvedValue(mockReturn),
+            }),
+
+            // insert() — follow
+            insert: jest.fn().mockResolvedValue(mockReturn),
+
+            // delete().eq().eq() — unfollow, declineRequest
+            delete: jest.fn().mockReturnValue({
+                eq: jest.fn().mockReturnValue({
+                    eq: jest.fn().mockResolvedValue(mockReturn),
+                }),
+            }),
+
+            // update().eq().eq() — acceptRequest
+            update: jest.fn().mockReturnValue({
+                eq: jest.fn().mockReturnValue({
+                    eq: jest.fn().mockResolvedValue(mockReturn),
+                }),
+            }),
         };
-
-        // Fix chaining for update, delete, and select
-        // delete().eq().eq()
-        chain.delete.mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue(executeChain)
-            })
-        });
-
-        // update().eq().eq()
-        chain.update.mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue(executeChain)
-            })
-        });
-
-        // select().or()
-        chain.select.mockReturnValue({
-            or: jest.fn().mockReturnValue(executeChain)
-        });
 
         mockSupabase.from.mockReturnValue(chain);
         return chain;
@@ -68,7 +59,6 @@ describe("socialStore", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        // Reset store state
         act(() => {
             useSocialStore.getState().clearSocial();
         });
@@ -91,7 +81,7 @@ describe("socialStore", () => {
     describe("fetchFollowData", () => {
         it("returns early if no user is authenticated", async () => {
             mockAuthStore.mockReturnValue({ user: null });
-            
+
             await act(async () => {
                 await useSocialStore.getState().fetchFollowData();
             });
@@ -100,17 +90,17 @@ describe("socialStore", () => {
         });
 
         it("fetches following, followers, and pending requests successfully", async () => {
-            const mockFollowing = { id: "f1", follower_id: "user123", following_id: "u2", status: "accepted", follower: { user_id: "user123" }, following: { user_id: "u2" } };
-            const mockFollowers = { id: "f2", follower_id: "u3", following_id: "user123", status: "accepted", follower: { user_id: "u3" }, following: { user_id: "user123" } };
-            const mockIncoming = { id: "f3", follower_id: "u4", following_id: "user123", status: "pending", follower: { user_id: "u4" }, following: { user_id: "user123" } };
-            const mockOutgoing = { id: "f4", follower_id: "user123", following_id: "u5", status: "pending", follower: { user_id: "user123" }, following: { user_id: "u5" } };
+            const allRows = [
+                // user123 follows u2 (accepted) → following
+                { id: "f1", follower_id: "user123", following_id: "u2", status: "accepted", created_at: "", follower: { user_id: "user123" }, following: { user_id: "u2" } },
+                // u3 follows user123 (accepted) → followers
+                { id: "f2", follower_id: "u3", following_id: "user123", status: "accepted", created_at: "", follower: { user_id: "u3" }, following: { user_id: "user123" } },
+                // u4 requests to follow user123 (pending) → pendingIncoming
+                { id: "f3", follower_id: "u4", following_id: "user123", status: "pending", created_at: "", follower: { user_id: "u4" }, following: { user_id: "user123" } },
+                // user123 requested to follow u5 (pending) → pendingOutgoingIds
+                { id: "f4", follower_id: "user123", following_id: "u5", status: "pending", created_at: "", follower: { user_id: "user123" }, following: { user_id: "u5" } },
+            ];
 
-
-            // user123 is the current user. They follow u2, they are followed by u3.
-            // u4 requests to follow user123. user123 requested to follow u5.
-            const allRows = [mockFollowing, mockFollowers, mockIncoming, mockOutgoing];
-
-            // In socialStore, the user is compared against follower_id and following_id to determine role.
             createMockQueryChain(allRows);
 
             await act(async () => {
@@ -118,10 +108,6 @@ describe("socialStore", () => {
             });
 
             const state = useSocialStore.getState();
-            // Since mockFollowing has follower_id="u1" and we are "user123", wait!
-            // I need to make sure iAmFollower/iAmFollowing matches exactly.
-            // mockFollowing: iAmFollower = true -> follower_id="user123"
-            // Let's rely on the store's logic directly. The store expects 1 following, 1 follower, 1 incoming, 1 outgoing.
             expect(state.following).toHaveLength(1);
             expect(state.followers).toHaveLength(1);
             expect(state.pendingIncoming).toHaveLength(1);
@@ -132,7 +118,7 @@ describe("socialStore", () => {
 
     describe("follow action", () => {
         it("optimistically adds to pendingOutgoingIds and calls Supabase", async () => {
-            createMockQueryChain(null); // Success insert
+            createMockQueryChain(null);
 
             let success = false;
             await act(async () => {
@@ -146,7 +132,7 @@ describe("socialStore", () => {
         });
 
         it("does not update store on failure", async () => {
-            createMockQueryChain(null, true); // Simulate error
+            createMockQueryChain(null, true);
 
             let success = true;
             await act(async () => {
@@ -161,14 +147,13 @@ describe("socialStore", () => {
 
     describe("unfollow action", () => {
         it("optimistically removes from following list and calls delete", async () => {
-            // Setup initial state
             act(() => {
                 useSocialStore.setState({
-                    following: [{ user_id: "target123", username: "target" }] as any
+                    following: [{ user_id: "target123", username: "target" }] as any,
                 });
             });
 
-            createMockQueryChain(null); // Success delete
+            createMockQueryChain(null);
 
             let success = false;
             await act(async () => {
@@ -187,7 +172,7 @@ describe("socialStore", () => {
                 useSocialStore.setState({ following: [...mockFollowing] });
             });
 
-            createMockQueryChain(null, true); // Simulate error
+            createMockQueryChain(null, true);
 
             let success = true;
             await act(async () => {
@@ -208,7 +193,7 @@ describe("socialStore", () => {
                 useSocialStore.setState({ pendingIncoming: [mockPending] });
             });
 
-            createMockQueryChain(null); // Success update
+            createMockQueryChain(null);
 
             let success = false;
             await act(async () => {
@@ -231,7 +216,7 @@ describe("socialStore", () => {
                 useSocialStore.setState({ pendingIncoming: [mockPending] });
             });
 
-            createMockQueryChain(null); // Success delete
+            createMockQueryChain(null);
 
             let success = false;
             await act(async () => {

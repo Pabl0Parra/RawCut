@@ -19,6 +19,7 @@ interface ContentGridLayoutProps {
     readonly onToggleFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => void;
     readonly onToggleWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => void;
     readonly onToggleWatched?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+    readonly onRecommend?: (tmdbId: number, mediaType: "movie" | "tv") => void;
     readonly isFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
     readonly isInWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
     readonly isWatched?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
@@ -35,6 +36,7 @@ export function ContentGridLayout({
     onToggleFavorite,
     onToggleWatchlist,
     onToggleWatched,
+    onRecommend,
     isFavorite,
     isInWatchlist,
     isWatched,
@@ -102,6 +104,11 @@ export function ContentGridLayout({
                 onToggleWatched={
                     onToggleWatched
                         ? () => onToggleWatched(item.tmdb_id, item.media_type)
+                        : undefined
+                }
+                onRecommend={
+                    onRecommend
+                        ? () => onRecommend(item.tmdb_id, item.media_type)
                         : undefined
                 }
             />

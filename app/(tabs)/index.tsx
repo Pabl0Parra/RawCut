@@ -715,7 +715,7 @@ export default function HomeScreen(): JSX.Element {
                         </View>
                         <View style={styles.recommendationGrid}>
                             {rec.items.slice(0, 6).map(item => (
-                                <View key={item.id} style={styles.recommendationGridItem}>
+                                <View key={`${rec.id}-${item.id}`} style={styles.recommendationGridItem}>
                                     <MovieCardItem
                                         item={item}
                                         mediaType={rec.mediaType}
@@ -761,7 +761,7 @@ export default function HomeScreen(): JSX.Element {
             <FlatList
                 data={data}
                 renderItem={renderItem}
-                keyExtractor={(item) => String(item.id)}
+                keyExtractor={(item) => `${mediaType}-${item.id}`}
                 numColumns={3}
                 columnWrapperStyle={styles.columnWrapper}
                 contentContainerStyle={styles.listContent}

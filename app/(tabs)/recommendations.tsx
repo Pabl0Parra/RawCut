@@ -210,7 +210,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
         return (
             <View style={styles.emptyContainer}>
                 <Image
-                    source={require("../../assets/mailbox.png")}
+                    source={require("../../assets/icons/mail-fire.png")}
                     style={{ width: 240, height: 240, marginBottom: 50 }}
                     contentFit="contain"
                 />

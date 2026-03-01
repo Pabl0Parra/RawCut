@@ -8,9 +8,18 @@ import {
     ActivityIndicator,
     StyleSheet,
     Alert,
+    Dimensions,
     type ViewStyle,
     type TextStyle,
 } from "react-native";
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    scrollTo,
+    useAnimatedRef,
+    useAnimatedScrollHandler,
+    withSpring,
+} from "react-native-reanimated";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -103,6 +112,29 @@ export default function FindFriendsScreen() {
     const [searchResults, setSearchResults] = useState<Profile[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [activeTab, setActiveTab] = useState<"search" | "following" | "followers">("search");
+
+    const scrollX = useSharedValue(0);
+    const scrollRef = useAnimatedRef<Animated.ScrollView>();
+    const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+    const onScroll = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollX.value = event.contentOffset.x;
+        },
+    });
+
+    const indicatorStyle = useAnimatedStyle(() => {
+        const tabWidth = SCREEN_WIDTH / 3;
+        return {
+            width: tabWidth - 32, // Adjusting for padding
+            transform: [{ translateX: (scrollX.value / SCREEN_WIDTH) * tabWidth + 16 }],
+        };
+    });
+
+    const handleTabPress = (index: number, tabName: "search" | "following" | "followers") => {
+        setActiveTab(tabName);
+        scrollRef.current?.scrollTo({ x: index * SCREEN_WIDTH, animated: true });
+    };
 
     // Refresh on focus
     useFocusEffect(
@@ -283,11 +315,11 @@ export default function FindFriendsScreen() {
 
             {/* Tabs */}
             <View style={styles.tabs}>
-                {(["search", "following", "followers"] as const).map((tab) => (
+                {(["search", "following", "followers"] as const).map((tab, index) => (
                     <TouchableOpacity
                         key={tab}
-                        style={[styles.tab, activeTab === tab && styles.tabActive]}
-                        onPress={() => setActiveTab(tab)}
+                        style={styles.tab}
+                        onPress={() => handleTabPress(index, tab)}
                     >
                         <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
                             {tab === "search"
@@ -298,14 +330,34 @@ export default function FindFriendsScreen() {
                         </Text>
                     </TouchableOpacity>
                 ))}
+                <Animated.View style={[styles.tabIndicator, indicatorStyle]} />
             </View>
 
             {/* Content */}
-            <View style={styles.content}>
-                {activeTab === "search" && renderSearchContent()}
-                {activeTab === "following" && renderFollowingContent()}
-                {activeTab === "followers" && renderFollowersContent()}
-            </View>
+            <Animated.ScrollView
+                ref={scrollRef}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
+                style={styles.content}
+                onMomentumScrollEnd={(e) => {
+                    const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+                    const tabs: Array<"search" | "following" | "followers"> = ["search", "following", "followers"];
+                    setActiveTab(tabs[index]);
+                }}
+            >
+                <View style={{ width: SCREEN_WIDTH }}>
+                    {renderSearchContent()}
+                </View>
+                <View style={{ width: SCREEN_WIDTH }}>
+                    {renderFollowingContent()}
+                </View>
+                <View style={{ width: SCREEN_WIDTH }}>
+                    {renderFollowersContent()}
+                </View>
+            </Animated.ScrollView>
         </View>
     );
 }
@@ -362,6 +414,12 @@ const styles = StyleSheet.create({
         color: Colors.white,
         fontFamily: "Inter_600SemiBold",
     } as TextStyle,
+    tabIndicator: {
+        position: "absolute",
+        bottom: 0,
+        height: 2,
+        backgroundColor: Colors.bloodRed,
+    } as ViewStyle,
     content: {
         flex: 1,
     } as ViewStyle,

@@ -11,7 +11,9 @@ export default function WatchlistScreen() {
     const { t } = useTranslation();
     const { user } = useAuthStore();
     const {
+        favorites,
         watchlist,
+        tvProgress,
         fetchUserContent,
         addToFavorites,
         removeFromFavorites,
