@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { Platform } from "react-native";
+import { Platform, View, Text } from "react-native";
+import { Image } from "expo-image";
 import { Tabs } from "expo-router";
 import { useTranslation } from "react-i18next";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
@@ -31,7 +32,23 @@ const renderHeaderRight = () => <HeaderRight />;
 const HEADER_TITLE_STYLE = {
     fontFamily: "BebasNeue_400Regular",
     fontSize: 26,
-    marginTop: Platform.OS === "ios" ? 4 : 0,
+    color: Colors.white,
+} as const;
+
+const HeaderLogo = () => (
+    <Image
+        source={require("../../assets/icons/cortocrudotextlogo.png")}
+        style={{ width: 260, height: 56, marginTop: 6 }}
+        contentFit="contain"
+    />
+);
+
+const CustomHeaderTitle = () => {
+    return (
+        <View style={{ height: 50, justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
+            <HeaderLogo />
+        </View>
+    );
 };
 
 export default function TabLayout() {
@@ -80,8 +97,7 @@ export default function TabLayout() {
                         backgroundColor: Colors.metalBlack,
                     },
                     headerTintColor: Colors.white,
-                    headerTitleStyle: HEADER_TITLE_STYLE,
-                    headerTitle: "CortoCrudo",
+                    headerTitle: () => <CustomHeaderTitle />,
                     headerTitleAlign: "center",
                     headerLeft: renderHeaderLeft,
                     headerRight: renderHeaderRight,
@@ -102,7 +118,6 @@ export default function TabLayout() {
                     name="favorites"
                     options={{
                         title: t("tabs.favorites"),
-                        headerTitle: `CortoCrudo - ${t("tabs.favorites").toUpperCase()}`,
                         tabBarIcon: FavoritesIcon,
                     }}
                 />
@@ -110,7 +125,6 @@ export default function TabLayout() {
                     name="watchlist"
                     options={{
                         title: t("tabs.watchlist"),
-                        headerTitle: `CortoCrudo - ${t("tabs.watchlist").toUpperCase()}`,
                         tabBarIcon: WatchlistIcon,
                     }}
                 />
@@ -118,7 +132,6 @@ export default function TabLayout() {
                     name="recommendations"
                     options={{
                         title: t("tabs.recommendations"),
-                        headerTitle: `CortoCrudo - ${t("tabs.recommendations").toUpperCase()}`,
                         tabBarIcon: RecommendationsIcon,
                         tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
                     }}
@@ -127,7 +140,6 @@ export default function TabLayout() {
                     name="find-friends"
                     options={{
                         title: t("social.findFriends"),
-                        headerTitle: `CortoCrudo - ${t("social.findFriendsHeader").toUpperCase()}`,
                         tabBarIcon: FriendsIcon,
                         tabBarBadge: pendingIncoming.length > 0 ? pendingIncoming.length : undefined,
                     }}
@@ -136,7 +148,6 @@ export default function TabLayout() {
                     name="profile"
                     options={{
                         title: t("tabs.profile"),
-                        headerTitle: `CortoCrudo - ${t("tabs.profile").toUpperCase()}`,
                         tabBarIcon: ProfileIcon,
                         href: null,
                     }}
@@ -162,8 +173,7 @@ export default function TabLayout() {
                             backgroundColor: Colors.metalBlack,
                         },
                         headerTintColor: Colors.white,
-                        headerTitleStyle: HEADER_TITLE_STYLE,
-                        headerTitle: "CortoCrudo",
+                        headerTitle: () => <CustomHeaderTitle />,
                         headerTitleAlign: "center",
                         headerLeft: renderHeaderLeft,
                         headerRight: renderHeaderRight,

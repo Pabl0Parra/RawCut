@@ -6,6 +6,7 @@ import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useEnrichedContent } from "../../src/hooks/useEnrichedContent";
 import { ContentGridLayout } from "../../src/components/ContentGridLayout";
+import ScreenTitle from "../../src/components/navigation/ScreenTitle";
 import type { MediaType } from "../../src/types/homeScreen.types";
 
 export default function FavoritesScreen() {
@@ -72,6 +73,7 @@ export default function FavoritesScreen() {
 
     return (
         <View style={styles.safeArea}>
+            <ScreenTitle title={t("tabs.favorites").toUpperCase()} />
             <ContentGridLayout
                 data={enrichedItems}
                 isLoading={isLoading}

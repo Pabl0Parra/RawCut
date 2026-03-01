@@ -103,7 +103,7 @@ export function ContentListLayout({
                         }}
                         style={styles.removeButton}
                     >
-                        <Ionicons name="trash-outline" size={24} color={Colors.bloodRed} />
+                        <Ionicons name="trash-outline" size={24} color={Colors.vibrantRed} />
                     </TouchableOpacity>
                 </View>
             </TouchableOpacity>

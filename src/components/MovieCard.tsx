@@ -76,7 +76,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
     iconFamily = "Ionicons",
 }) => {
     const iconName = isActive ? activeIcon : inactiveIcon;
-    const color = isActive ? Colors.bloodRed : Colors.metalSilver;
+    const color = isActive ? Colors.cinematicGold : Colors.metalSilver;
 
     if (!onPress) {
         return null;
@@ -369,9 +369,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         flexDirection: "row",
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
-        borderTopLeftRadius: 8,
-        borderTopRightRadius: 8,
+        backgroundColor: "transparent",
         height: 44,
         zIndex: 100,
     } as ViewStyle,

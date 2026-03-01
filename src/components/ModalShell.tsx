@@ -45,7 +45,7 @@ export function ModalShell({
                         onPress={onClose}
                         hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                     >
-                        <Ionicons name="close" size={24} color={Colors.bloodRed} />
+                        <Ionicons name="close" size={24} color={Colors.vibrantRed} />
                     </TouchableOpacity>
                 </View>
                 {children}

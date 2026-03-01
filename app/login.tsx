@@ -58,6 +58,7 @@ export default function LoginScreen() {
             linkLabel={t("common.signUp")}
             linkHref="/register"
             showLogo
+            largeLogo
         >
             <AuthFormField
                 control={control}

@@ -170,7 +170,7 @@ export default function HelpCenterScreen(): React.JSX.Element {
                                         <Ionicons
                                             name={isExpanded ? "chevron-up" : "chevron-down"}
                                             size={20}
-                                            color={isExpanded ? Colors.bloodRed : Colors.metalSilver}
+                                            color={isExpanded ? Colors.vibrantRed : Colors.metalSilver}
                                         />
                                     </TouchableOpacity>
 
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
         paddingRight: 16,
     } as TextStyle,
     faqQuestionExpanded: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
     } as TextStyle,
     faqAnswerContainer: {
         padding: 16,
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     supportButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 24,

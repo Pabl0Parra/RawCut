@@ -71,7 +71,7 @@ export default function PersonDetailScreen(): JSX.Element {
         return (
             <SafeAreaView style={detailScreenStyles.safeArea}>
                 <View style={detailScreenStyles.centerContainer}>
-                    <ActivityIndicator size="large" color={Colors.bloodRed} />
+                    <ActivityIndicator size="large" color={Colors.vibrantRed} />
                 </View>
             </SafeAreaView>
         );
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
         height: 150,
         borderRadius: 75,
         borderWidth: 3,
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
         marginBottom: 16,
     } as any,
     profilePlaceholder: {
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginBottom: 16,
         borderWidth: 3,
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
     } as ViewStyle,
     placeholderIcon: {
         fontSize: 60,

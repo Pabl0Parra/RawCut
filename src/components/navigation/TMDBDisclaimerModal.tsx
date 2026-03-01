@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
         padding: 4,
     } as ViewStyle,
     closeIcon: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontSize: 18,
         fontWeight: "bold",
     } as TextStyle,

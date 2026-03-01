@@ -57,7 +57,7 @@ export const SeasonModal: React.FC<SeasonModalProps> = ({
         if (isLoading) {
             return (
                 <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color={Colors.bloodRed} />
+                    <ActivityIndicator size="large" color={Colors.vibrantRed} />
                 </View>
             );
         }

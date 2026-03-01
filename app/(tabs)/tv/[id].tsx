@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderWidth: 1,
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.cinematicGold,
         alignItems: "center",
     } as ViewStyle,
     nextBadgeLabel: {

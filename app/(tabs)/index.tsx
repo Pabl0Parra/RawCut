@@ -471,7 +471,7 @@ export default function HomeScreen(): JSX.Element {
 
         return (
             <View style={styles.footerContainer}>
-                <ActivityIndicator size="small" color={Colors.bloodRed} />
+                <ActivityIndicator size="small" color={Colors.cinematicGold} />
             </View>
         );
     }, [loading, data.length]);
@@ -527,7 +527,7 @@ export default function HomeScreen(): JSX.Element {
         if (loadingContinue) {
             return (
                 <View style={[styles.continueSection, styles.continueSectionLoading]}>
-                    <ActivityIndicator size="small" color={Colors.bloodRed} />
+                    <ActivityIndicator size="small" color={Colors.vibrantRed} />
                 </View>
             );
         }
@@ -627,7 +627,7 @@ export default function HomeScreen(): JSX.Element {
                 {/* ── Loading spinner ── */}
                 {isLoadingCurrent && (
                     <View style={styles.centerContainer}>
-                        <ActivityIndicator size="large" color={Colors.bloodRed} />
+                        <ActivityIndicator size="large" color={Colors.vibrantRed} />
                     </View>
                 )}
 
@@ -738,7 +738,7 @@ export default function HomeScreen(): JSX.Element {
         if (loading && data.length === 0) {
             return (
                 <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color={Colors.bloodRed} />
+                    <ActivityIndicator size="large" color={Colors.vibrantRed} />
                     <Text style={styles.loadingText}>{t("common.loadingContent")}</Text>
                 </View>
             );
@@ -778,8 +778,8 @@ export default function HomeScreen(): JSX.Element {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={handleRefresh}
-                        tintColor={Colors.bloodRed}
-                        colors={[Colors.bloodRed]}
+                        tintColor={Colors.vibrantRed}
+                        colors={[Colors.vibrantRed]}
                     />
                 }
             />
@@ -981,7 +981,7 @@ export default function HomeScreen(): JSX.Element {
                                         style={styles.closeButtonContainer}
                                         hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                                     >
-                                        <Ionicons name="close" size={24} color={Colors.bloodRed} />
+                                        <Ionicons name="close" size={24} color={Colors.cinematicGold} />
                                     </TouchableOpacity>
                                 </View>
 
@@ -1040,8 +1040,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     activeFilterButton: {
-        backgroundColor: Colors.bloodRed,
-        borderColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
+        borderColor: Colors.vibrantRed,
     },
     clearFiltersText: {
         color: Colors.metalSilver,
@@ -1108,7 +1108,7 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
     },
     activeTab: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
     },
     inactiveTab: {
         backgroundColor: "transparent",
@@ -1210,7 +1210,7 @@ const styles = StyleSheet.create({
         padding: 4,
     },
     closeButtonText: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontSize: 20,
     },
     modalContent: {
@@ -1240,8 +1240,8 @@ const styles = StyleSheet.create({
         borderColor: Colors.panelBorder,
     },
     activeOptionChip: {
-        backgroundColor: Colors.bloodRed,
-        borderColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
+        borderColor: Colors.vibrantRed,
     },
     optionText: {
         color: Colors.textMuted,
@@ -1274,8 +1274,8 @@ const styles = StyleSheet.create({
         borderColor: Colors.panelBorder,
     },
     activeGenreChip: {
-        backgroundColor: Colors.bloodRed,
-        borderColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
+        borderColor: Colors.vibrantRed,
     },
     genreChipText: {
         color: Colors.textMuted,
@@ -1291,11 +1291,11 @@ const styles = StyleSheet.create({
         paddingBottom: 48,
     },
     applyButton: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         paddingVertical: 18,
         borderRadius: 12,
         alignItems: "center",
-        shadowColor: Colors.bloodRed,
+        shadowColor: Colors.vibrantRed,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
@@ -1312,7 +1312,7 @@ const styles = StyleSheet.create({
     profileBanner: {
         marginHorizontal: 16,
         marginBottom: 16,
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         borderRadius: 8,
         padding: 12,
         elevation: 4,
@@ -1332,7 +1332,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     profileBannerSubtitle: {
-        color: Colors.whiteOpacity90,
+        color: "rgba(255, 255, 255, 0.8)",
         fontSize: 12,
     },
     continueSection: {
@@ -1379,6 +1379,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: Colors.metalBlack,
+        marginTop: 12,
     },
     categoryFilterContainer: {
         flexDirection: "row",
@@ -1392,7 +1393,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     activeCategoryTab: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
     },
     categoryTabText: {
         fontWeight: "bold",

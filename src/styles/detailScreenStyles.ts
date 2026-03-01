@@ -142,7 +142,7 @@ export const detailScreenStyles = StyleSheet.create({
         top: -5,
     } as TextStyle,
     recommendButton: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         paddingVertical: 8,
         paddingHorizontal: 24,
         borderRadius: 8,

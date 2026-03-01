@@ -13,6 +13,7 @@ import {
     type ImageStyle,
 } from "react-native";
 import { Image } from "expo-image";
+import ScreenTitle from "../../src/components/navigation/ScreenTitle";
 import { Ionicons } from "@expo/vector-icons";
 import { Modal } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -181,7 +182,7 @@ function InfoRow({
                     accessibilityLabel={`Editar ${label}`}
                     accessibilityRole="button"
                 >
-                    <Ionicons name="create-outline" size={20} color={Colors.bloodRed} />
+                    <Ionicons name="create-outline" size={20} color={Colors.vibrantRed} />
                 </TouchableOpacity>
             )}
         </View>
@@ -217,7 +218,7 @@ function SettingsRow({
                 <Ionicons
                     name={icon}
                     size={22}
-                    color={destructive ? Colors.bloodRed : Colors.metalSilver}
+                    color={destructive ? Colors.errorRed : Colors.metalSilver}
                 />
                 <Text
                     style={[
@@ -294,7 +295,7 @@ function UsernameEditor({
                         disabled={isLoading}
                         accessibilityLabel="Cancelar"
                     >
-                        <Ionicons name="close" size={22} color={Colors.white} />
+                        <Ionicons name="close" size={22} color={Colors.black} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -481,6 +482,7 @@ export default function ProfileScreen(): React.JSX.Element {
 
     return (
         <View style={styles.container}>
+            <ScreenTitle title={t("tabs.profile").toUpperCase()} />
             <KeyboardAwareScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
@@ -514,12 +516,12 @@ export default function ProfileScreen(): React.JSX.Element {
                         <Ionicons
                             name="information-circle"
                             size={20}
-                            color={Colors.bloodRed}
+                            color={Colors.white}
                         />
                         <Text style={styles.genericPromptText}>
                             {t("profile.genericUsername")}
                         </Text>
-                        <Ionicons name="chevron-forward" size={18} color={Colors.bloodRed} />
+                        <Ionicons name="chevron-forward" size={18} color={Colors.white} />
                     </TouchableOpacity>
                 )}
 
@@ -681,7 +683,7 @@ export default function ProfileScreen(): React.JSX.Element {
                                     {lang.label}
                                 </Text>
                                 {i18n.language === lang.code && (
-                                    <Ionicons name="checkmark" size={20} color={Colors.bloodRed} />
+                                    <Ionicons name="checkmark" size={20} color={Colors.vibrantRed} />
                                 )}
                             </TouchableOpacity>
                         ))}
@@ -764,7 +766,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         bottom: 4,
         right: 4,
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         width: 32,
         height: 32,
         borderRadius: 16,
@@ -800,7 +802,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
     } as TextStyle,
     socialStatPending: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontSize: 14,
     } as TextStyle,
     socialStatLabel: {
@@ -831,7 +833,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     genericPromptText: {
         flex: 1,
-        color: Colors.bloodRed,
+        color: Colors.white,
         fontSize: 14,
         fontWeight: "500",
     } as TextStyle,
@@ -903,7 +905,7 @@ const styles = StyleSheet.create({
         color: Colors.white,
     } as TextStyle,
     settingsLabelDestructive: {
-        color: Colors.bloodRed,
+        color: Colors.errorRed,
     } as TextStyle,
     versionRow: {
         flexDirection: "row",
@@ -935,7 +937,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.metalBlack,
         borderWidth: 1,
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
         borderRadius: 10,
         color: Colors.white,
         paddingHorizontal: 14,
@@ -955,7 +957,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     } as ViewStyle,
     editorButtonCancel: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         width: 44,
         height: 44,
         borderRadius: 22,
@@ -963,7 +965,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     } as ViewStyle,
     editorError: {
-        color: Colors.bloodRed,
+        color: Colors.errorRed,
         fontSize: 13,
         marginTop: 10,
     } as TextStyle,
@@ -975,7 +977,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         backgroundColor: "transparent",
         borderWidth: 1.5,
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
         paddingVertical: 16,
         borderRadius: 12,
         gap: 10,
@@ -1038,7 +1040,7 @@ const styles = StyleSheet.create({
         borderColor: Colors.glassSilver,
     } as ViewStyle,
     languageOptionSelected: {
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
         backgroundColor: Colors.glassRedSubtle,
     } as ViewStyle,
     languageOptionText: {
@@ -1047,7 +1049,7 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     } as TextStyle,
     languageOptionTextSelected: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontWeight: "bold",
     } as TextStyle,
     modalCloseButton: {

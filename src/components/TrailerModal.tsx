@@ -45,7 +45,7 @@ export default function TrailerModal({ visible, videoKey, onClose }: Readonly<Tr
                     <View style={styles.playerContainer}>
                         {loading && (
                             <View style={styles.loaderContainer}>
-                                <ActivityIndicator size="large" color={Colors.bloodRed} />
+                                <ActivityIndicator size="large" color={Colors.vibrantRed} />
                             </View>
                         )}
                         <YoutubePlayer
@@ -77,12 +77,12 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: Colors.metalSilver,
-        
+
         shadowColor: Colors.black,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
-        
+
         elevation: 10,
     },
     header: {

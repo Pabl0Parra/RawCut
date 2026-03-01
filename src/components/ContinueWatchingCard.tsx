@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     progressBarFill: {
         height: '100%',
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
     } as ViewStyle,
     infoContainer: {
         marginTop: 10,

@@ -35,7 +35,7 @@ export function UnauthenticatedState({ message, buttonLabel }: UnauthenticatedSt
 export function LoadingState(): React.JSX.Element {
     return (
         <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={Colors.bloodRed} />
+            <ActivityIndicator size="large" color={Colors.vibrantRed} />
         </View>
     );
 }
@@ -95,14 +95,14 @@ export const contentLayoutStyles = StyleSheet.create({
         marginTop: 8,
     } as TextStyle,
     loginButton: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 4,
         marginTop: 16,
     } as ViewStyle,
     loginButtonText: {
-        color: Colors.metalBlack,
+        color: Colors.white,
         fontWeight: "bold",
         textTransform: "uppercase",
     } as TextStyle,

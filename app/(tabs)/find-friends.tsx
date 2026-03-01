@@ -21,6 +21,7 @@ import Animated, {
     withSpring,
 } from "react-native-reanimated";
 import { Image } from "expo-image";
+import ScreenTitle from "../../src/components/navigation/ScreenTitle";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "expo-router";
@@ -49,12 +50,7 @@ const UserRow = React.memo(({ profile }: { profile: Profile }) => (
             contentFit="cover"
         />
         <View style={styles.userInfo}>
-            {!!profile.display_name && (
-                <Text style={styles.displayName} numberOfLines={1}>
-                    {profile.display_name}
-                </Text>
-            )}
-            <Text style={styles.username} numberOfLines={1}>
+            <Text style={styles.displayName} numberOfLines={1}>
                 @{profile.username}
             </Text>
         </View>
@@ -177,7 +173,7 @@ export default function FindFriendsScreen() {
 
     const renderSearchContent = () => {
         if (isSearching && searchResults.length === 0) {
-            return <ActivityIndicator style={styles.centered} color={Colors.bloodRed} />;
+            return <ActivityIndicator style={styles.centered} color={Colors.vibrantRed} />;
         }
         if (query.length < 2) {
             return (
@@ -294,11 +290,12 @@ export default function FindFriendsScreen() {
 
     return (
         <View style={styles.container}>
+            <ScreenTitle title={t("social.findFriendsHeader").toUpperCase()} />
             {/* Search Bar */}
             <View style={styles.searchBar}>
                 <View style={styles.searchIconContainer}>
                     {isSearching ? (
-                        <ActivityIndicator size="small" color={Colors.bloodRed} />
+                        <ActivityIndicator size="small" color={Colors.vibrantRed} />
                     ) : (
                         <Ionicons name="search" size={18} color={Colors.metalSilver} />
                     )}
@@ -411,7 +408,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     tabActive: {
         borderBottomWidth: 2,
-        borderBottomColor: Colors.bloodRed,
+        borderBottomColor: Colors.vibrantRed,
     } as ViewStyle,
     tabText: {
         color: Colors.metalSilver,
@@ -427,7 +424,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         bottom: 0,
         height: 2,
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
     } as ViewStyle,
     content: {
         flex: 1,
@@ -470,7 +467,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     } as ViewStyle,
     acceptBtn: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         borderRadius: 8,
         paddingHorizontal: 12,
         paddingVertical: 6,

@@ -28,7 +28,7 @@ export function DetailScreenShell({
         return (
             <SafeAreaView style={detailScreenStyles.safeArea}>
                 <View style={detailScreenStyles.centerContainer}>
-                    <ActivityIndicator size="large" color={Colors.bloodRed} />
+                    <ActivityIndicator size="large" color={Colors.vibrantRed} />
                 </View>
             </SafeAreaView>
         );

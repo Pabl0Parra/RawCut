@@ -15,12 +15,14 @@ export const Colors = {
     panelBackground: "#141414", 
 
     
-    bloodRed: "#ef4444",        
-    vibrantRed: "#fc3e20",      
+    cinematicGold: "#fbbf24",        
+    vibrantRed: "#fc5f5fff",      
     tmdbYellow: "#facc15",      
     tmdbBlue: "#22d3ee",        
     communityPurple: "#c084fc", 
-    successGreen: "#4ade80",    
+    successGreen: "#4ade80",
+    errorRed: "#ef4444",    
+
 
     
     overlayDarker: "rgba(0, 0, 0, 0.92)",  

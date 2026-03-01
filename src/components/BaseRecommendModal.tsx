@@ -242,7 +242,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
             return (
                 <ActivityIndicator
                     size="small"
-                    color={Colors.bloodRed}
+                    color={Colors.vibrantRed}
                     style={styles.loadingIndicator}
                 />
             );
@@ -279,7 +279,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                                         <Ionicons
                                             name="checkmark-circle"
                                             size={20}
-                                            color={Colors.bloodRed}
+                                            color={Colors.vibrantRed}
                                         />
                                     )}
                                 </View>
@@ -445,7 +445,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                                 disabled={!canSend}
                             >
                                 {isSending ? (
-                                    <ActivityIndicator color="#0a0a0a" />
+                                    <ActivityIndicator color={Colors.white} />
                                 ) : (
                                     <Text style={styles.sendButtonText}>{sendButtonLabel}</Text>
                                 )}
@@ -486,11 +486,11 @@ const styles = StyleSheet.create({
     } as TextStyle,
     closeButton: {
         padding: 4,
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         borderRadius: 20,
     } as ViewStyle,
     closeButtonText: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontSize: 18,
     } as TextStyle,
     previewContainer: {
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         maxHeight: 200,
         borderWidth: 1,
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
         overflow: "hidden",
     } as ViewStyle,
     searchResultItem: {
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     searchResultSelected: {
         backgroundColor: "rgba(220, 38, 38, 0.2)",
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
     } as ViewStyle,
     searchResultText: {
         color: "#f4f4f5",
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     } as TextStyle,
     findFriendsBtn: {
         marginTop: 12,
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         borderRadius: 8,
         paddingHorizontal: 20,
         paddingVertical: 10,
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "rgba(220, 38, 38, 0.15)",
         borderWidth: 1,
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
         borderRadius: 9999,
         paddingHorizontal: 12,
         paddingVertical: 6,
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
         fontSize: 13,
     } as TextStyle,
     chipRemove: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontSize: 12,
         fontWeight: "bold",
     } as TextStyle,
@@ -656,10 +656,10 @@ const styles = StyleSheet.create({
         paddingTop: 10,
     } as ViewStyle,
     sendButton: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         paddingVertical: 18,
         borderRadius: 12,
-        shadowColor: Colors.bloodRed,
+        shadowColor: Colors.vibrantRed,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,

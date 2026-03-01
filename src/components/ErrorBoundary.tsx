@@ -50,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
             return (
                 <View style={styles.container}>
                     <View style={styles.content}>
-                        <Ionicons name="warning" size={64} color={Colors.bloodRed} />
+                        <Ionicons name="warning" size={64} color={Colors.errorRed} />
                         <Text style={styles.title}>¡Algo salió mal!</Text>
                         <Text style={styles.message}>
                             La aplicación encontró un error inesperado.
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 12,
         fontFamily: 'Inter_400Regular',
-        color: Colors.bloodRed,
+        color: Colors.errorRed,
         marginBottom: 8,
     },
     errorStack: {
@@ -131,12 +131,12 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     button: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         paddingHorizontal: 32,
         paddingVertical: 12,
         borderRadius: 8,
         elevation: 3,
-        shadowColor: Colors.bloodRed,
+        shadowColor: Colors.vibrantRed,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 4,

@@ -93,8 +93,8 @@ export const HeaderRight = () => {
                         <View style={styles.separator} />
 
                         <TouchableOpacity style={styles.menuItem} onPress={handleSignOut}>
-                            <Ionicons name="log-out-outline" size={20} color={Colors.bloodRed} />
-                            <Text style={[styles.menuItemText, { color: Colors.bloodRed }]}>Cerrar Sesión</Text>
+                            <Ionicons name="log-out-outline" size={20} color={Colors.vibrantRed} />
+                            <Text style={[styles.menuItemText, { color: Colors.vibrantRed }]}>Cerrar Sesión</Text>
                         </TouchableOpacity>
                     </View>
                 </Pressable>

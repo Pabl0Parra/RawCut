@@ -34,7 +34,7 @@ export const FriendRequestModal: React.FC<FriendRequestModalProps> = ({
                 <View style={styles.iconContainer}>
                     <View style={styles.outerRing}>
                         <View style={styles.innerRing}>
-                            <Ionicons name="people-circle" size={80} color={Colors.bloodRed} />
+                            <Ionicons name="people-circle" size={80} color={Colors.vibrantRed} />
                         </View>
                     </View>
                 </View>

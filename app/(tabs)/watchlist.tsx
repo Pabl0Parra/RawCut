@@ -6,6 +6,7 @@ import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useEnrichedContent } from "../../src/hooks/useEnrichedContent";
 import { ContentGridLayout } from "../../src/components/ContentGridLayout";
+import ScreenTitle from "../../src/components/navigation/ScreenTitle";
 
 export default function WatchlistScreen() {
     const { t } = useTranslation();
@@ -57,6 +58,7 @@ export default function WatchlistScreen() {
 
     return (
         <View style={styles.safeArea}>
+            <ScreenTitle title={t("tabs.watchlist").toUpperCase()} />
             <ContentGridLayout
                 data={enrichedItems}
                 isLoading={isLoading}

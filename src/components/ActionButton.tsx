@@ -25,7 +25,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
 }) => {
     const iconName = isActive ? activeIcon : inactiveIcon;
     const label = isActive ? activeLabel : inactiveLabel;
-    const iconColor = isActive ? Colors.white : Colors.textPrimary;
+    const iconColor = isActive ? Colors.cinematicGold : Colors.textPrimary;
 
     const renderIcon = (): React.JSX.Element => {
         if (iconFamily === "MaterialCommunityIcons") {
@@ -77,12 +77,10 @@ const styles = StyleSheet.create({
         marginHorizontal: 4,
     } as ViewStyle,
     activeButton: {
-        backgroundColor: Colors.vibrantRed,
+        backgroundColor: "transparent",
     } as ViewStyle,
     inactiveButton: {
-        backgroundColor: Colors.metalGray,
-        borderWidth: 1,
-        borderColor: Colors.metalSilver,
+        backgroundColor: "transparent",
     } as ViewStyle,
     buttonContent: {
         flexDirection: "row",
@@ -91,7 +89,7 @@ const styles = StyleSheet.create({
         gap: 4,
     } as ViewStyle,
     activeButtonText: {
-        color: Colors.white,
+        color: Colors.cinematicGold,
         fontWeight: "bold",
         fontSize: 12,
     } as TextStyle,

@@ -22,15 +22,15 @@ import { Colors } from "../constants/Colors";
 const ANIMATION_CONFIG = {
     duration: 300,
     useNativeDriver: true,
-    logoScaleKeyboardOpen: 0.6,
+    logoScaleKeyboardOpen: 0.85,
     logoScaleKeyboardClosed: 1,
-    logoOpacityKeyboardOpen: 0.85,
+    logoOpacityKeyboardOpen: 1,
     logoOpacityKeyboardClosed: 1,
 } as const;
 
 const SCROLL_CONFIG = {
-    extraScrollHeight: Platform.select({ ios: 40, android: 20 }) ?? 30,
-    extraHeight: Platform.select({ ios: 120, android: 100 }) ?? 110,
+    extraScrollHeight: Platform.select({ ios: 10, android: 5 }) ?? 10,
+    extraHeight: Platform.select({ ios: 50, android: 40 }) ?? 45,
     enableOnAndroid: true,
     enableAutomaticScroll: true,
     keyboardOpeningTime: 250,
@@ -48,6 +48,7 @@ export interface AuthLayoutProps {
     readonly linkLabel: string;
     readonly linkHref: LinkProps["href"];
     readonly showLogo?: boolean;
+    readonly largeLogo?: boolean;
 }
 
 function useKeyboardAnimation() {
@@ -105,9 +106,10 @@ function dismissKeyboard(): void {
 interface AnimatedLogoProps {
     readonly scale: Animated.Value;
     readonly opacity: Animated.Value;
+    readonly largeLogo?: boolean;
 }
 
-function AnimatedLogo({ scale, opacity }: Readonly<AnimatedLogoProps>): React.JSX.Element {
+function AnimatedLogo({ scale, opacity, largeLogo }: Readonly<AnimatedLogoProps>): React.JSX.Element {
     return (
         <Animated.View
             style={[
@@ -119,12 +121,14 @@ function AnimatedLogo({ scale, opacity }: Readonly<AnimatedLogoProps>): React.JS
                 },
             ]}
         >
-            <Text style={[styles.logoText, { fontFamily: "BebasNeue_400Regular" }]}>
-                CortoCrudo
-            </Text>
+            <Image
+                source={require("../../assets/icons/cortocrudotextlogo.png")}
+                style={[styles.logoTextImage, largeLogo && styles.logoTextImageLarge]}
+                resizeMode="contain"
+            />
             <Image
                 source={require("../../assets/corto-crudo-logo.png")}
-                style={styles.logoImage}
+                style={[styles.logoImage, largeLogo && styles.logoImageLarge]}
                 resizeMode="contain"
             />
             <Text style={styles.logoSubtitle}>Tu guía de cine y series</Text>
@@ -135,14 +139,17 @@ function AnimatedLogo({ scale, opacity }: Readonly<AnimatedLogoProps>): React.JS
 interface StaticLogoProps {
     readonly title: string;
     readonly subtitle: string;
+    readonly largeLogo?: boolean;
 }
 
-function StaticLogo({ title, subtitle }: Readonly<StaticLogoProps>): React.JSX.Element {
+function StaticLogo({ title, subtitle, largeLogo }: Readonly<StaticLogoProps>): React.JSX.Element {
     return (
         <View style={styles.logoContainer}>
-            <Text style={[styles.logoText, { fontFamily: "BebasNeue_400Regular" }]}>
-                {title}
-            </Text>
+            <Image
+                source={require("../../assets/icons/cortocrudotextlogo.png")}
+                style={[styles.logoTextImage, largeLogo && styles.logoTextImageLarge]}
+                resizeMode="contain"
+            />
             <Text style={styles.logoSubtitle}>{subtitle}</Text>
         </View>
     );
@@ -175,7 +182,7 @@ function SubmitButton({ onPress, isLoading, text }: Readonly<SubmitButtonProps>)
             activeOpacity={0.8}
         >
             {isLoading ? (
-                <ActivityIndicator color={Colors.metalBlack} />
+                <ActivityIndicator color={Colors.white} />
             ) : (
                 <Text style={styles.buttonText}>{text}</Text>
             )}
@@ -214,6 +221,7 @@ export function AuthLayout({
     linkLabel,
     linkHref,
     showLogo = false,
+    largeLogo = false,
 }: Readonly<AuthLayoutProps>): React.JSX.Element {
     const { logoScale, logoOpacity } = useKeyboardAnimation();
 
@@ -231,15 +239,15 @@ export function AuthLayout({
                         enableOnAndroid={SCROLL_CONFIG.enableOnAndroid}
                         enableAutomaticScroll={SCROLL_CONFIG.enableAutomaticScroll}
                         keyboardOpeningTime={SCROLL_CONFIG.keyboardOpeningTime}
+                        enableResetScrollToCoords={false}
                         bounces={false}
                     >
                         { }
                         {showLogo && (
-                            <AnimatedLogo scale={logoScale} opacity={logoOpacity} />
+                            <AnimatedLogo scale={logoScale} opacity={logoOpacity} largeLogo={largeLogo} />
                         )}
 
-                        { }
-                        {!showLogo && <StaticLogo title={title} subtitle={subtitle} />}
+                        {!showLogo && <StaticLogo title={title} subtitle={subtitle} largeLogo={largeLogo} />}
 
                         <View style={styles.formContainer}>
                             { }
@@ -278,7 +286,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     scrollViewContent: {
         flexGrow: 1,
-        justifyContent: "center",
+        paddingTop: 40,
         paddingBottom: Platform.select({ ios: 20, android: 40 }),
     } as ViewStyle,
     formContainer: {
@@ -287,22 +295,29 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     logoContainer: {
         alignItems: "center",
-        marginBottom: 32,
+        marginBottom: 24,
     } as ViewStyle,
     animatedLogoContainer: {
 
         overflow: "visible",
     } as ViewStyle,
-    logoText: {
-        color: Colors.bloodRed,
-        fontSize: 48,
-        lineHeight: 52,
-        marginBottom: 8,
-    } as TextStyle,
+    logoTextImage: {
+        width: 240,
+        height: 60,
+        marginBottom: -10, // Tighter gap with the skull logo
+    } as ImageStyle,
+    logoTextImageLarge: {
+        width: 300,
+        height: 80,
+    } as ImageStyle,
     logoImage: {
+        width: 160,
+        height: 160,
+        marginBottom: -10, // Tighter gap with the subtitle
+    } as ImageStyle,
+    logoImageLarge: {
         width: 200,
         height: 200,
-        marginBottom: 8,
     } as ImageStyle,
     logoSubtitle: {
         color: Colors.metalSilver,
@@ -311,18 +326,18 @@ const styles = StyleSheet.create({
     } as TextStyle,
     errorContainer: {
         backgroundColor: "rgba(220, 38, 38, 0.2)",
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.errorRed,
         borderWidth: 1,
         borderRadius: 4,
         padding: 12,
         marginBottom: 16,
     } as ViewStyle,
     errorText: {
-        color: Colors.bloodRed,
+        color: Colors.errorRed,
         textAlign: "center",
     } as TextStyle,
     button: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         paddingHorizontal: 24,
         paddingVertical: 16,
         borderRadius: 4,
@@ -332,7 +347,7 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     } as ViewStyle,
     buttonText: {
-        color: Colors.metalBlack,
+        color: Colors.white,
         fontWeight: "bold",
         textAlign: "center",
         textTransform: "uppercase",
@@ -348,7 +363,7 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
     } as TextStyle,
     link: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontWeight: "bold",
     } as TextStyle,
 });

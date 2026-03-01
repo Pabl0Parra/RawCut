@@ -61,7 +61,7 @@ const TabBarItem = memo(function TabBarItem({
 
     const renderedIcon = useMemo(() =>
         icon({
-            color: active ? Colors.bloodRed : Colors.metalSilver,
+            color: active ? Colors.vibrantRed : Colors.metalSilver,
             focused: active,
         }),
         [icon, active]
@@ -261,11 +261,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 4,
         borderWidth: 1.5,
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
         zIndex: 20,
     },
     badgeText: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontSize: 9,
         fontWeight: 'bold',
         lineHeight: 11,

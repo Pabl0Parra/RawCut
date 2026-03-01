@@ -13,6 +13,7 @@ import {
     type TextStyle,
 } from "react-native";
 import { Image } from 'expo-image';
+import ScreenTitle from "../../src/components/navigation/ScreenTitle";
 import { useFocusEffect, router } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
@@ -200,7 +201,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
 
     const renderLoadingState = (): React.JSX.Element => (
         <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={Colors.bloodRed} />
+            <ActivityIndicator size="large" color={Colors.vibrantRed} />
         </View>
     );
 
@@ -307,7 +308,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={styles.keyboardAvoidingView}
                 >
-                    { }
+                    <ScreenTitle title={t("tabs.recommendations").toUpperCase()} />
                     <View style={styles.tabsContainer}>
                         <View style={styles.tabsWrapper}>
                             {renderTab("received", t("recommendations.received"), received.length)}
@@ -350,7 +351,7 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
     } as ViewStyle,
     activeTab: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
     } as ViewStyle,
     inactiveTab: {
         backgroundColor: "transparent",
@@ -403,14 +404,14 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     } as TextStyle,
     loginButton: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 4,
         marginTop: 16,
     } as ViewStyle,
     loginButtonText: {
-        color: Colors.metalBlack,
+        color: Colors.white,
         fontWeight: "bold",
         textTransform: "uppercase",
     } as TextStyle,

@@ -100,7 +100,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({ targetUserId, compact = fal
             {isLoading ? (
                 <ActivityIndicator
                     size="small"
-                    color={status === "none" ? Colors.white : Colors.bloodRed}
+                    color={status === "none" ? Colors.white : Colors.vibrantRed}
                 />
             ) : (
                 <Text style={textStyle}>{label}</Text>
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
         minWidth: 76,
     } as ViewStyle,
     buttonFollow: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
     } as ViewStyle,
     buttonFollowing: {
         backgroundColor: "transparent",
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     buttonPending: {
         backgroundColor: "transparent",
         borderWidth: 1,
-        borderColor: Colors.bloodRed,
+        borderColor: Colors.vibrantRed,
     } as ViewStyle,
     label: {
         fontFamily: "Inter_600SemiBold",
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
     } as TextStyle,
     labelPending: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
     } as TextStyle,
 });
 

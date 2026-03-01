@@ -322,12 +322,12 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     } as ViewStyle,
     userText: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontSize: 12,
         fontWeight: "600",
     } as TextStyle,
     newBadge: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         borderRadius: 99,
         paddingHorizontal: 6,
         paddingVertical: 2,
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         marginBottom: 4,
     } as ViewStyle,
     expandedContent: {
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     } as ViewStyle,
     commentUser: {
-        color: Colors.bloodRed,
+        color: Colors.vibrantRed,
         fontSize: 10,
         fontWeight: "bold",
         marginBottom: 2,
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     } as TextStyle,
     sendButton: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.vibrantRed,
         width: 40,
         alignItems: "center",
         justifyContent: "center",

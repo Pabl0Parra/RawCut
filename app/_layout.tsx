@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     errorTitle: {
         fontSize: 24,
         fontFamily: "Inter_700Bold",
-        color: Colors.bloodRed,
+        color: Colors.errorRed,
         marginBottom: 12,
         textAlign: "center",
     },
@@ -445,12 +445,12 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     retryButton: {
-        backgroundColor: Colors.bloodRed,
+        backgroundColor: Colors.errorRed,
         paddingHorizontal: 32,
         paddingVertical: 12,
         borderRadius: 8,
         elevation: 3,
-        shadowColor: Colors.bloodRed,
+        shadowColor: Colors.errorRed,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 4,
