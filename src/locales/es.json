@@ -11,6 +11,8 @@
         "loading": "Cargando...",
         "loadingContent": "Cargando contenido...",
         "noResults": "No se encontraron resultados",
+        "browseAll": "Explorar Todo",
+        "viewAll": "Ver Todo",
         "cancel": "Cancelar",
         "delete": "Eliminar",
         "save": "Guardar",
@@ -35,12 +37,13 @@
     },
     "tabs": {
         "home": "Inicio",
+        "discover": "Descubrir",
         "foryou": "Para ti",
         "movies": "Películas",
         "tv": "Series",
         "favorites": "Favoritos",
         "watchlist": "Watchlist",
-        "recommendations": "Sugeridas",
+        "recommendations": "Correo",
         "profile": "Perfil"
     },
     "home": {

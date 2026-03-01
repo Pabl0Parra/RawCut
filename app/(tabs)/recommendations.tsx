@@ -13,6 +13,7 @@ import {
     type TextStyle,
 } from "react-native";
 import { Image } from 'expo-image';
+import { Ionicons } from "@expo/vector-icons";
 import ScreenTitle from "../../src/components/navigation/ScreenTitle";
 import { useFocusEffect, router } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -235,16 +236,22 @@ export default function RecommendationsScreen(): React.JSX.Element {
         count: number
     ): React.JSX.Element => {
         const isActive = activeTab === tab;
+        const iconName = tab === "received" ? "download-outline" : "paper-plane-outline";
 
         return (
             <TouchableOpacity
-                style={[styles.tab, isActive ? styles.activeTab : styles.inactiveTab]}
+                style={[styles.tab, isActive && styles.activeTab]}
                 onPress={() => handleTabChange(tab)}
             >
+                <Ionicons
+                    name={iconName as any}
+                    size={16}
+                    color={isActive ? Colors.white : Colors.metalSilver}
+                />
                 <Text
                     style={[
                         styles.tabText,
-                        isActive ? styles.activeTabText : styles.inactiveTabText,
+                        isActive && styles.activeTabText,
                     ]}
                 >
                     {label} ({count})
@@ -308,11 +315,17 @@ export default function RecommendationsScreen(): React.JSX.Element {
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={styles.keyboardAvoidingView}
                 >
-                    <ScreenTitle title={t("tabs.recommendations").toUpperCase()} />
-                    <View style={styles.tabsContainer}>
-                        <View style={styles.tabsWrapper}>
-                            {renderTab("received", t("recommendations.received"), received.length)}
-                            {renderTab("sent", t("recommendations.sent"), sent.length)}
+                    <View style={styles.headerContainer}>
+                        <View style={styles.headerRow}>
+                            <View style={styles.headerTitleContainer}>
+                                <Ionicons name="mail" size={24} color={Colors.vibrantRed} style={styles.headerIcon} />
+                                <Text style={styles.headerTitle}>{t("tabs.recommendations").toUpperCase()}</Text>
+                            </View>
+
+                            <View style={styles.tabsWrapper}>
+                                {renderTab("received", t("recommendations.received"), received.length)}
+                                {renderTab("sent", t("recommendations.sent"), sent.length)}
+                            </View>
                         </View>
                     </View>
 
@@ -335,37 +348,56 @@ const styles = StyleSheet.create({
     keyboardAvoidingView: {
         flex: 1,
     } as ViewStyle,
-    tabsContainer: {
+    headerContainer: {
         paddingHorizontal: 16,
         paddingBottom: 16,
-    } as ViewStyle,
+    },
+    headerRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    headerTitleContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        flex: 1,
+    },
+    headerIcon: {
+        marginRight: 8,
+    },
+    headerTitle: {
+        color: Colors.white,
+        fontSize: 24,
+        fontWeight: "bold",
+    },
     tabsWrapper: {
         flexDirection: "row",
-        backgroundColor: Colors.metalGray,
+        backgroundColor: "transparent",
         padding: 4,
-        borderRadius: 9999,
+        borderRadius: 12,
     } as ViewStyle,
     tab: {
-        flex: 1,
-        paddingVertical: 8,
-        borderRadius: 9999,
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        gap: 6,
     } as ViewStyle,
     activeTab: {
-        backgroundColor: Colors.vibrantRed,
+        backgroundColor: "rgba(239, 68, 68, 0.2)",
     } as ViewStyle,
     inactiveTab: {
         backgroundColor: "transparent",
     } as ViewStyle,
     tabText: {
         textAlign: "center",
-        fontWeight: "bold",
-        fontSize: 14,
+        fontWeight: "600",
+        fontSize: 12,
+        color: Colors.metalSilver,
     } as TextStyle,
     activeTabText: {
-        color: Colors.white,
-    } as TextStyle,
-    inactiveTabText: {
-        color: Colors.metalSilver,
+        color: Colors.vibrantRed,
     } as TextStyle,
     centerContainer: {
         flex: 1,

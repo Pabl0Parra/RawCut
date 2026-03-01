@@ -11,6 +11,8 @@
         "loading": "Carregant...",
         "loadingContent": "Carregant contingut...",
         "noResults": "No s'han trobat resultats",
+        "browseAll": "Explora-ho Tot",
+        "viewAll": "Veure-ho Tot",
         "cancel": "Cancel·lar",
         "delete": "Eliminar",
         "save": "Desar",
@@ -35,12 +37,13 @@
     },
     "tabs": {
         "home": "Inici",
+        "discover": "Descobrir",
         "foryou": "Per a tu",
         "movies": "Pel·lícules",
         "tv": "Sèries",
         "favorites": "Preferits",
         "watchlist": "Watchlist",
-        "recommendations": "Suggerides",
+        "recommendations": "Correu",
         "profile": "Perfil"
     },
     "home": {

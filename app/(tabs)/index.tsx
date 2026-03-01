@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, JSX, memo } from "react";
+import React, { useState, useEffect, useCallback, JSX, memo, useMemo } from "react";
 
 import Animated, {
     useSharedValue,
@@ -43,7 +43,7 @@ import {
 import { useContentStore } from "../../src/stores/contentStore";
 import { useVoteStore } from "../../src/stores/voteStore";
 import { useAuthStore } from "../../src/stores/authStore";
-import { Colors } from "../../src/constants/Colors";
+import { Colors, Fonts } from "../../src/constants/Colors";
 
 import type {
     ContentTab,
@@ -58,16 +58,10 @@ import {
 import {
     buildDiscoverParams,
     hasActiveFilters,
-    processContinueWatchingShow,
-    filterActualEpisodeProgress,
-    extractUniqueShowIds,
-    countWatchedEpisodes,
     processGenreName,
     sortGenresAlphabetically,
     isNotNull,
 } from "../../src/utils/contentLoader.utils";
-import { ContinueWatchingCard } from "../../src/components/ContinueWatchingCard";
-import { seasonsToProgressInfo } from "../../src/utils/tvDetail.utils";
 import SmokeBackground from "../../src/components/SmokeBackground";
 import { useForYouContent } from "../../src/hooks/useForYouContent";
 
@@ -83,9 +77,10 @@ import {
     useCuratedMovies,
     flattenPages,
 } from "../../src/hooks/useHomeContent";
+import { HeroCarousel } from "../../src/components/home/HeroCarousel";
+import { HomeSection } from "../../src/components/home/HomeSection";
 
 
-const MAX_CONTINUE_WATCHING_ITEMS = 10;
 const { height } = Dimensions.get("window");
 
 interface MovieCardItemProps {
@@ -136,7 +131,7 @@ const MovieCardItem = memo(({
 
 export default function HomeScreen(): JSX.Element {
     const { t } = useTranslation();
-    const [activeTab, setActiveTab] = useState<ContentTab>("movies");
+    const [activeTab, setActiveTab] = useState<MediaType>("movie");
     const [selectedCategory, setSelectedCategory] = useState<"custom" | "curated" | "classic">("custom");
 
 
@@ -146,7 +141,6 @@ export default function HomeScreen(): JSX.Element {
 
     const [refreshing, setRefreshing] = useState(false);
     const [showProfileBanner, setShowProfileBanner] = useState(false);
-    const [showContinueSection, setShowContinueSection] = useState(true);
 
 
     const [showFilterModal, setShowFilterModal] = useState(false);
@@ -156,47 +150,49 @@ export default function HomeScreen(): JSX.Element {
     const [filtersActive, setFiltersActive] = useState(false);
 
 
-    const [continueWatching, setContinueWatching] = useState<ContinueWatchingItem[]>([]);
-    const [loadingContinue, setLoadingContinue] = useState(false);
+
 
 
     const {
         recommendations,
-        loadingForYou,
-    } = useForYouContent(activeTab);
+    } = useForYouContent("foryou");
 
     // ─── Build discover params when filters are active ───────────────────────
-    const discoverParams = buildDiscoverParams({
+    const discoverParams = useMemo(() => buildDiscoverParams({
         currentPage: 1,
         sortBy,
         selectedGenre,
         selectedYear,
-        activeTab: activeTab === "foryou" ? "movies" : activeTab,
-    });
-    const useDiscover = filtersActive || sortBy !== DEFAULT_SORT_VALUE;
+        activeTab: activeTab === "movie" ? "movies" : "tv",
+    }), [sortBy, selectedGenre, selectedYear, activeTab]);
+
+    const useDiscover = useMemo(() => filtersActive || sortBy !== DEFAULT_SORT_VALUE, [filtersActive, sortBy]);
 
     // ─── Browse content via TanStack Query ───────────────────────────────────
     const popularMoviesQuery = usePopularMovies();
     const popularTVQuery = usePopularTVShows();
-    const discoverMoviesQuery = useDiscoverMovies(discoverParams, useDiscover && activeTab === "movies");
+    const discoverMoviesQuery = useDiscoverMovies(discoverParams, useDiscover && activeTab === "movie");
     const discoverTVQuery = useDiscoverTVShows(discoverParams, useDiscover && activeTab === "tv");
 
     // ─── Genre queries (auto-cached, no effect needed) ────────────────────────
     const movieGenresQuery = useMovieGenres();
     const tvGenresQuery = useTVGenres();
     // Derive processed genres from whichever query matches the active tab
-    const rawGenres = activeTab === "tv" ? (tvGenresQuery.data ?? []) : (movieGenresQuery.data ?? []);
-    const genres = sortGenresAlphabetically(
-        rawGenres.map((g) => ({ ...g, name: processGenreName(g.name) }))
-    );
+    const genres = useMemo(() => {
+        const rawGenres = activeTab === "tv" ? (tvGenresQuery.data ?? []) : (movieGenresQuery.data ?? []);
+        return sortGenresAlphabetically(
+            rawGenres.map((g) => ({ ...g, name: processGenreName(g.name) }))
+        );
+    }, [activeTab, movieGenresQuery.data, tvGenresQuery.data]);
 
     // ─── Derive data arrays ───────────────────────────────────────────────────
-    const moviesFromQuery = useDiscover
+    const moviesFromQuery = useMemo(() => useDiscover
         ? flattenPages(discoverMoviesQuery.data)
-        : flattenPages(popularMoviesQuery.data);
-    const tvShowsFromQuery = useDiscover
+        : flattenPages(popularMoviesQuery.data), [useDiscover, discoverMoviesQuery.data, popularMoviesQuery.data]);
+
+    const tvShowsFromQuery = useMemo(() => useDiscover
         ? flattenPages(discoverTVQuery.data)
-        : flattenPages(popularTVQuery.data);
+        : flattenPages(popularTVQuery.data), [useDiscover, discoverTVQuery.data, popularTVQuery.data]);
 
     // Local state for search overrides (search results aren't cached)
     const [searchMovies_, setSearchMovies] = useState<Movie[]>([]);
@@ -207,7 +203,7 @@ export default function HomeScreen(): JSX.Element {
     const tvShows: TVShow[] = isInSearchMode ? searchTVShows_ : tvShowsFromQuery;
 
     // ─── Active query for current tab ────────────────────────────────────────
-    const activeQuery = activeTab === "movies"
+    const activeQuery = activeTab === "movie"
         ? (useDiscover ? discoverMoviesQuery : popularMoviesQuery)
         : (useDiscover ? discoverTVQuery : popularTVQuery);
     const loading = activeQuery.isLoading;
@@ -217,9 +213,10 @@ export default function HomeScreen(): JSX.Element {
     const curatedTVQuery = useCuratedTVShows();
     const curatedMovieQuery = useCuratedMovies();
     const classicQuery = useClassicMovies();
-    const curatedShows = flattenPages(curatedTVQuery.data);
-    const curatedMovies = flattenPages(curatedMovieQuery.data);
-    const classicMovies_ = flattenPages(classicQuery.data);
+
+    const curatedShows = useMemo(() => flattenPages(curatedTVQuery.data), [curatedTVQuery.data]);
+    const curatedMovies = useMemo(() => flattenPages(curatedMovieQuery.data), [curatedMovieQuery.data]);
+    const classicMovies_ = useMemo(() => flattenPages(classicQuery.data), [classicQuery.data]);
 
     const translateY = useSharedValue(0);
 
@@ -258,8 +255,8 @@ export default function HomeScreen(): JSX.Element {
     const getNextEpisodeToWatch = useContentStore((s) => s.getNextEpisodeToWatch);
 
 
-    const data = activeTab === "movies" ? movies : tvShows;
-    const mediaType: MediaType = activeTab === "movies" ? "movie" : "tv";
+    const data = activeTab === "movie" ? movies : tvShows;
+    const mediaType: MediaType = activeTab === "movie" ? "movie" : "tv";
 
 
 
@@ -267,7 +264,7 @@ export default function HomeScreen(): JSX.Element {
         if (data.length === 0) return;
         const ids = data.map((item) => item.id);
         useVoteStore.getState().fetchVotes(ids, mediaType);
-    }, [data, mediaType]);
+    }, [data.length, mediaType]);
 
 
     useFocusEffect(
@@ -285,13 +282,7 @@ export default function HomeScreen(): JSX.Element {
     );
 
 
-    useEffect(() => {
-        if (activeTab === "foryou" && user && tvProgress.length > 0) {
-            loadContinueWatching();
-        } else {
-            setContinueWatching([]);
-        }
-    }, [activeTab, tvProgress.length, user]);
+
 
 
     useEffect(() => {
@@ -301,39 +292,7 @@ export default function HomeScreen(): JSX.Element {
         resetFilters(false);
     }, [activeTab]);
 
-    const loadContinueWatching = useCallback(async (): Promise<void> => {
-        setLoadingContinue(true);
 
-        try {
-            const currentTvProgress = useContentStore.getState().tvProgress;
-            const currentIsWatched = useContentStore.getState().isWatched;
-
-            const actualProgress = filterActualEpisodeProgress(currentTvProgress);
-            const showIds = extractUniqueShowIds(actualProgress);
-
-            if (showIds.length === 0) {
-                setContinueWatching([]);
-                return;
-            }
-
-            const showPromises = showIds
-                .slice(0, MAX_CONTINUE_WATCHING_ITEMS)
-                .map((showId) =>
-                    processContinueWatchingShow(
-                        showId,
-                        countWatchedEpisodes(currentTvProgress, showId),
-                        currentIsWatched(showId, "tv"),
-                    ),
-                );
-
-            const results = await Promise.all(showPromises);
-            setContinueWatching(results.filter(isNotNull));
-        } catch (err) {
-            console.error("[HomeScreen] Error loading continue watching:", err);
-        } finally {
-            setLoadingContinue(false);
-        }
-    }, []);
 
     const resetFilters = useCallback((reload: boolean = true): void => {
         setSelectedGenre(null);
@@ -365,7 +324,7 @@ export default function HomeScreen(): JSX.Element {
         setIsSearching(true);
 
         try {
-            if (activeTab === "movies") {
+            if (activeTab === "movie") {
                 const response = await searchMovies(searchQuery);
                 setSearchMovies(response.results);
             } else {
@@ -476,24 +435,7 @@ export default function HomeScreen(): JSX.Element {
         );
     }, [loading, data.length]);
 
-    const renderContinueWatchingItem = useCallback(
-        (renderProps: { item: ContinueWatchingItem }): JSX.Element => {
-            const { item } = renderProps;
-            const nextEpisode = getNextEpisodeToWatch(
-                item.show.id,
-                seasonsToProgressInfo(item.show.seasons),
-            );
 
-            return (
-                <ContinueWatchingCard
-                    item={item}
-                    onPress={(showId: number) => router.push(`/tv/${showId}`)}
-                    nextEpisode={nextEpisode}
-                />
-            );
-        },
-        [getNextEpisodeToWatch],
-    );
 
     const handleEndReached = useCallback((): void => {
         if (!isSearching && activeQuery.hasNextPage && !isFetchingNextPage) {
@@ -505,9 +447,7 @@ export default function HomeScreen(): JSX.Element {
         setShowProfileBanner(false);
     }, []);
 
-    const handleDismissContinue = useCallback((): void => {
-        setShowContinueSection(false);
-    }, []);
+
 
     const handleOpenFilters = useCallback((): void => {
         setShowFilterModal(true);
@@ -521,37 +461,7 @@ export default function HomeScreen(): JSX.Element {
 
 
 
-    const renderContinueWatching = (): JSX.Element | null => {
-        if (!showContinueSection) return null;
 
-        if (loadingContinue) {
-            return (
-                <View style={[styles.continueSection, styles.continueSectionLoading]}>
-                    <ActivityIndicator size="small" color={Colors.vibrantRed} />
-                </View>
-            );
-        }
-
-        if (continueWatching.length === 0) return null;
-
-        return (
-            <View style={styles.continueSection}>
-                <View style={styles.continueHeader}>
-                    <Text style={styles.continueTitle}>{t("home.continueWatching")}</Text>
-                    <TouchableOpacity onPress={handleDismissContinue}>
-                        <Ionicons name="close-circle" size={24} color={Colors.metalSilver} />
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.continueListVertical}>
-                    {continueWatching.map(item => (
-                        <React.Fragment key={String(item.show.id)}>
-                            {renderContinueWatchingItem({ item })}
-                        </React.Fragment>
-                    ))}
-                </View>
-            </View>
-        );
-    };
 
     const renderSortOption = (option: SortOption): JSX.Element => (
         <TouchableOpacity
@@ -577,570 +487,297 @@ export default function HomeScreen(): JSX.Element {
         </TouchableOpacity>
     );
 
-    const renderForYouContent = (): JSX.Element | null => {
-        if (activeTab !== "foryou") return null;
+    // The legacy renderForYouContent and renderMainContent are no longer used
+    // as we integrated everything into the main FlatList and ListHeaderComponent.
 
-        const CATEGORIES = [
-            { key: "custom" as const, label: t("home.forYouCategory.custom") },
-            { key: "curated" as const, label: t("home.forYouCategory.curated") },
-            { key: "classic" as const, label: t("home.forYouCategory.classic") },
-        ];
 
-        // ── Loading state per category ──────────────────────────────────────
-        const isLoadingCurrent =
-            (selectedCategory === "custom" && loadingForYou && recommendations.length === 0) ||
-            (selectedCategory === "curated" && (curatedTVQuery.isLoading || curatedMovieQuery.isLoading)) ||
-            (selectedCategory === "classic" && classicQuery.isLoading);
 
-        return (
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 20 }}
-                stickyHeaderIndices={[0]}
-            >
-                {/* ── Category pill selector ── */}
-                <View style={styles.categoryFilterWrapper}>
-                    <View style={styles.categoryFilterContainer}>
-                        {CATEGORIES.map((cat) => (
-                            <TouchableOpacity
-                                key={cat.key}
-                                style={[
-                                    styles.categoryTab,
-                                    selectedCategory === cat.key && styles.activeCategoryTab,
-                                ]}
-                                onPress={() => setSelectedCategory(cat.key)}
-                                activeOpacity={0.75}
-                            >
-                                <Text
-                                    style={[
-                                        styles.categoryTabText,
-                                        selectedCategory === cat.key && styles.activeCategoryTabText,
-                                    ]}
-                                >
-                                    {cat.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
 
-                {/* ── Loading spinner ── */}
-                {isLoadingCurrent && (
-                    <View style={styles.centerContainer}>
-                        <ActivityIndicator size="large" color={Colors.vibrantRed} />
-                    </View>
-                )}
 
-                {/* ── Custom: personalised recommendations ── */}
-                {!isLoadingCurrent && selectedCategory === "custom" && (
-                    <>
-                        {renderContinueWatching()}
-                        {recommendations.map((rec) => (
-                            <View key={rec.id} style={styles.continueSection}>
-                                <View style={styles.continueHeader}>
-                                    <Text style={styles.continueTitle}>{rec.title}</Text>
-                                </View>
-                                <View style={styles.recommendationGrid}>
-                                    {rec.items.slice(0, 6).map(item => (
-                                        <View key={`${rec.id}-${item.id}`} style={styles.recommendationGridItem}>
-                                            <MovieCardItem
-                                                item={item}
-                                                mediaType={rec.mediaType}
-                                                handleToggleFavorite={handleToggleFavorite}
-                                                handleToggleWatchlist={handleToggleWatchlist}
-                                                handleToggleWatched={handleToggleWatched}
-                                                handleVote={handleVote}
-                                                fullWidth={true}
-                                            />
-                                        </View>
-                                    ))}
-                                </View>
-                            </View>
-                        ))}
-                    </>
-                )}
 
-                {/* ── Curated: best-rated TV shows & Movies ── */}
-                {!isLoadingCurrent && selectedCategory === "curated" && (
-                    <>
-                        <View style={styles.continueSection}>
-                            <View style={styles.continueHeader}>
-                                <Text style={styles.continueTitle}>{t("home.curatedTVTitle")}</Text>
-                            </View>
-                            <View style={styles.recommendationGrid}>
-                                {curatedShows.slice(0, 50).map(item => (
-                                    <View key={`curated-tv-${item.id}`} style={styles.recommendationGridItem}>
-                                        <MovieCardItem
-                                            item={item}
-                                            mediaType="tv"
-                                            handleToggleFavorite={handleToggleFavorite}
-                                            handleToggleWatchlist={handleToggleWatchlist}
-                                            handleToggleWatched={handleToggleWatched}
-                                            handleVote={handleVote}
-                                            fullWidth={true}
-                                        />
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
 
-                        <View style={styles.continueSection}>
-                            <View style={styles.continueHeader}>
-                                <Text style={styles.continueTitle}>{t("home.curatedMoviesTitle")}</Text>
-                            </View>
-                            <View style={styles.recommendationGrid}>
-                                {curatedMovies.slice(0, 50).map(item => (
-                                    <View key={`curated-movie-${item.id}`} style={styles.recommendationGridItem}>
-                                        <MovieCardItem
-                                            item={item}
-                                            mediaType="movie"
-                                            handleToggleFavorite={handleToggleFavorite}
-                                            handleToggleWatchlist={handleToggleWatchlist}
-                                            handleToggleWatched={handleToggleWatched}
-                                            handleVote={handleVote}
-                                            fullWidth={true}
-                                        />
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
-                    </>
-                )}
-
-                {/* ── Classic: pre-2000 rated movies ── */}
-                {!isLoadingCurrent && selectedCategory === "classic" && (
-                    <View style={styles.continueSection}>
-                        <View style={styles.continueHeader}>
-                            <Text style={styles.continueTitle}>{t("home.classicTitle")}</Text>
-                        </View>
-                        <View style={styles.recommendationGrid}>
-                            {classicMovies_.slice(0, 50).map(item => (
-                                <View key={`classic-${item.id}`} style={styles.recommendationGridItem}>
-                                    <MovieCardItem
-                                        item={item}
-                                        mediaType="movie"
-                                        handleToggleFavorite={handleToggleFavorite}
-                                        handleToggleWatchlist={handleToggleWatchlist}
-                                        handleToggleWatched={handleToggleWatched}
-                                        handleVote={handleVote}
-                                        fullWidth={true}
-                                    />
-                                </View>
-                            ))}
-                        </View>
-                    </View>
-                )}
-            </ScrollView>
-        );
-    };
-
-    const renderMainContent = (): JSX.Element => {
-        if (loading && data.length === 0) {
-            return (
-                <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color={Colors.vibrantRed} />
-                    <Text style={styles.loadingText}>{t("common.loadingContent")}</Text>
-                </View>
-            );
-        }
-
-        if (data.length === 0) {
-            return (
-                <View style={styles.centerContainer}>
-                    <Image
-                        source={require("../../assets/icons/not-found.png")}
-                        style={styles.emptyIcon as any}
-                        contentFit="contain"
-                    />
-                    <Text style={styles.emptyText}>{t("common.noResults")}</Text>
-                </View>
-            );
-        }
-
-        return (
-            <FlatList
-                data={data}
-                renderItem={renderItem}
-                keyExtractor={(item) => `${mediaType}-${item.id}`}
-                numColumns={3}
-                columnWrapperStyle={styles.columnWrapper}
-                contentContainerStyle={styles.listContent}
-                showsVerticalScrollIndicator={false}
-                onEndReached={handleEndReached}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={renderFooter}
-                initialNumToRender={12}
-                maxToRenderPerBatch={6}
-                windowSize={3}
-                updateCellsBatchingPeriod={50}
-                removeClippedSubviews
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={handleRefresh}
-                        tintColor={Colors.vibrantRed}
-                        colors={[Colors.vibrantRed]}
-                    />
+    const swipeGesture = useMemo(() => {
+        const tabs: MediaType[] = ["movie", "tv"];
+        return Gesture.Pan()
+            .runOnJS(true)
+            .activeOffsetX([-50, 50])
+            .failOffsetY([-15, 15])
+            .onEnd((e) => {
+                const { translationX, velocityX } = e;
+                const currentIndex = tabs.indexOf(activeTab);
+                if (translationX < -50 || velocityX < -500) {
+                    if (currentIndex < tabs.length - 1) runOnJS(setActiveTab)(tabs[currentIndex + 1]);
+                } else if (translationX > 50 || velocityX > 500) {
+                    if (currentIndex > 0) runOnJS(setActiveTab)(tabs[currentIndex - 1]);
                 }
-            />
-        );
-    };
-
-
-
-
-
-
-    const tabs: ContentTab[] = ["foryou", "movies", "tv"];
-    const swipeGesture = Gesture.Pan()
-        .runOnJS(true)
-        .activeOffsetX([-20, 20])
-        .failOffsetY([-15, 15])
-        .onEnd((e) => {
-            const { translationX, velocityX } = e;
-            const currentIndex = tabs.indexOf(activeTab);
-            if (translationX < -50 || velocityX < -500) {
-                if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1]);
-            } else if (translationX > 50 || velocityX > 500) {
-                if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1]);
-            }
-        });
+            });
+    }, [activeTab]);
 
     return (
-        <GestureDetector gesture={swipeGesture}>
-            <View style={[styles.safeArea, styles.safeAreaPadding]}>
-                { }
-                <View style={styles.tabsContainer}>
-                    <View style={styles.tabsWrapper}>
-                        <TouchableOpacity
-                            style={[styles.tab, activeTab === "foryou" ? styles.activeTab : styles.inactiveTab]}
-                            onPress={() => setActiveTab("foryou")}
+        <View style={styles.safeArea}>
+            <GestureDetector gesture={swipeGesture}>
+                <FlatList
+                    data={data}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => `${mediaType}-${item.id}`}
+                    numColumns={3}
+                    columnWrapperStyle={styles.columnWrapper}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                    onEndReached={handleEndReached}
+                    onEndReachedThreshold={0.5}
+                    ListHeaderComponent={<DiscoverHeader
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        recommendations={recommendations}
+                        loading={loading}
+                        data={data}
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        handleSearch={handleSearch}
+                        handleClearSearch={handleClearSearch}
+                        filtersActive={filtersActive}
+                        handleOpenFilters={handleOpenFilters}
+                        resetFilters={resetFilters}
+                        isInSearchMode={isInSearchMode}
+                        curatedMovies={curatedMovies}
+                        curatedShows={curatedShows}
+                        classicMovies_={classicMovies_}
+                        handleToggleFavorite={handleToggleFavorite}
+                        handleToggleWatchlist={handleToggleWatchlist}
+                        handleToggleWatched={handleToggleWatched}
+                        handleVote={handleVote}
+                        moviesFromQuery={moviesFromQuery}
+                        tvShowsFromQuery={tvShowsFromQuery}
+                    />}
+                    ListFooterComponent={renderFooter}
+                    initialNumToRender={12}
+                    maxToRenderPerBatch={6}
+                    windowSize={3}
+                    updateCellsBatchingPeriod={50}
+                    removeClippedSubviews
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={handleRefresh}
+                            tintColor={Colors.vibrantRed}
+                            colors={[Colors.vibrantRed]}
+                        />
+                    }
+                />
+            </GestureDetector>
+
+            <Modal
+                visible={showFilterModal}
+                animationType="slide"
+                transparent
+                onRequestClose={handleCloseFilters}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={handleCloseFilters}
+                >
+                    <GestureDetector gesture={panGesture}>
+                        <Animated.View
+                            style={[styles.filterPanel, animatedModalStyle]}
+                            onStartShouldSetResponder={() => true}
                         >
-                            <View style={styles.tabContent}>
-                                <MaterialCommunityIcons
-                                    name="hand-pointing-right"
-                                    size={24}
-                                    color={activeTab === "foryou" ? Colors.white : Colors.metalSilver}
-                                />
-                                <Text
-                                    style={[
-                                        styles.tabText,
-                                        activeTab === "foryou" ? styles.activeTabText : styles.inactiveTabText,
-                                    ]}
+                            <View style={styles.modalHandleContainer}>
+                                <View style={styles.modalHandle} />
+                            </View>
+                            <SmokeBackground />
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>{t("common.filter")}</Text>
+                                <TouchableOpacity
+                                    onPress={handleCloseFilters}
+                                    style={styles.closeButtonContainer}
+                                    hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                                 >
-                                    {t("tabs.foryou")}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.tab, activeTab === "movies" ? styles.activeTab : styles.inactiveTab]}
-                            onPress={() => setActiveTab("movies")}
-                        >
-                            <View style={styles.tabContent}>
-                                <MaterialCommunityIcons
-                                    name="movie-open-play-outline"
-                                    size={24}
-                                    color={activeTab === "movies" ? Colors.white : Colors.metalSilver}
-                                />
-                                <Text
-                                    style={[
-                                        styles.tabText,
-                                        activeTab === "movies" ? styles.activeTabText : styles.inactiveTabText,
-                                    ]}
-                                >
-                                    {t("tabs.movies")}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.tab, activeTab === "tv" ? styles.activeTab : styles.inactiveTab]}
-                            onPress={() => setActiveTab("tv")}
-                        >
-                            <View style={styles.tabContent}>
-                                <Feather
-                                    name="tv"
-                                    size={24}
-                                    color={activeTab === "tv" ? Colors.white : Colors.metalSilver}
-                                />
-                                <Text
-                                    style={[
-                                        styles.tabText,
-                                        activeTab === "tv" ? styles.activeTabText : styles.inactiveTabText,
-                                    ]}
-                                >
-                                    {t("tabs.tv")}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                { }
-                {showProfileBanner && (
-                    <TouchableOpacity
-                        style={styles.profileBanner}
-                        onPress={() => router.push("/profile" as Parameters<typeof router.push>[0])}
-                    >
-                        <View style={styles.profileBannerContent}>
-                            <Ionicons name="sparkles" size={20} color={Colors.white} />
-                            <View style={styles.profileBannerTextContainer}>
-                                <Text style={styles.profileBannerTitle}>
-                                    {t("home.bannerTitle")}
-                                </Text>
-                                <Text style={styles.profileBannerSubtitle}>
-                                    {t("home.bannerSubtitle")}
-                                </Text>
-                            </View>
-                            <TouchableOpacity
-                                onPress={(e) => {
-                                    e.stopPropagation();
-                                    handleDismissBanner();
-                                }}
-                            >
-                                <Ionicons name="close" size={24} color={Colors.whiteOpacity60} />
-                            </TouchableOpacity>
-                        </View>
-                    </TouchableOpacity>
-                )}
-
-                { }
-                {activeTab !== "foryou" && (
-                    <View style={styles.controlsContainer}>
-                        <View style={styles.searchAndFilterRow}>
-                            <View style={styles.searchWrapper}>
-                                <TextInput
-                                    style={styles.searchInput}
-                                    placeholder={t("common.searchPlaceholder")}
-                                    placeholderTextColor={Colors.metalSilver}
-                                    value={searchQuery}
-                                    onChangeText={setSearchQuery}
-                                    onSubmitEditing={handleSearch}
-                                    returnKeyType="search"
-                                />
-                                {searchQuery.length > 0 && (
-                                    <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
-                                        <Ionicons name="close-circle" size={20} color={Colors.metalSilver} />
-                                    </TouchableOpacity>
-                                )}
-                                <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                                    <Entypo name="magnifying-glass" size={24} color={Colors.metalSilver} />
+                                    <Ionicons name="close" size={24} color={Colors.cinematicGold} />
                                 </TouchableOpacity>
                             </View>
 
-                            <TouchableOpacity
-                                style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
-                                onPress={handleOpenFilters}
-                            >
-                                <Ionicons
-                                    name="filter"
-                                    size={20}
-                                    color={filtersActive ? Colors.white : Colors.metalSilver}
+                            <ScrollView contentContainerStyle={styles.modalContent}>
+                                <Text style={styles.sectionHeader}>{t("common.sortBy")}</Text>
+                                <View style={styles.optionsRow}>
+                                    {SORT_OPTIONS.map(renderSortOption)}
+                                </View>
+
+                                <Text style={styles.sectionHeader}>{t("common.releaseYear")}</Text>
+                                <TextInput
+                                    style={styles.yearInput}
+                                    placeholder={t("common.exampleYear")}
+                                    placeholderTextColor={Colors.textPlaceholder}
+                                    keyboardType="number-pad"
+                                    value={selectedYear}
+                                    onChangeText={setSelectedYear}
+                                    maxLength={4}
                                 />
-                            </TouchableOpacity>
-                        </View>
 
-                        {filtersActive && (
-                            <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
-                                <Text style={styles.clearFiltersText}>{t("common.clearFilters")}</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                )}
-
-                {activeTab === "foryou" ? renderForYouContent() : renderMainContent()}
-
-                { }
-                <Modal
-                    visible={showFilterModal}
-                    animationType="slide"
-                    transparent
-                    onRequestClose={handleCloseFilters}
-                >
-                    { }
-                    <TouchableOpacity
-                        style={styles.modalOverlay}
-                        activeOpacity={1}
-                        onPress={handleCloseFilters}
-                    >
-                        { }
-                        <GestureDetector gesture={panGesture}>
-                            <Animated.View
-                                style={[styles.filterPanel, animatedModalStyle]}
-                                onStartShouldSetResponder={() => true}
-                            >
-                                <View style={styles.modalHandleContainer}>
-                                    <View style={styles.modalHandle} />
+                                <Text style={styles.sectionHeader}>{t("common.genre")}</Text>
+                                <View style={styles.genresRow}>
+                                    {genres.map(renderGenreChip)}
                                 </View>
-                                <SmokeBackground />
-                                <View style={styles.modalHeader}>
-                                    <Text style={styles.modalTitle}>{t("common.filter")}</Text>
-                                    <TouchableOpacity
-                                        onPress={handleCloseFilters}
-                                        style={styles.closeButtonContainer}
-                                        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                                    >
-                                        <Ionicons name="close" size={24} color={Colors.cinematicGold} />
-                                    </TouchableOpacity>
-                                </View>
+                            </ScrollView>
 
-                                <ScrollView contentContainerStyle={styles.modalContent}>
-                                    <Text style={styles.sectionHeader}>{t("common.sortBy")}</Text>
-                                    <View style={styles.optionsRow}>
-                                        {SORT_OPTIONS.map(renderSortOption)}
-                                    </View>
-
-                                    <Text style={styles.sectionHeader}>{t("common.releaseYear")}</Text>
-                                    <TextInput
-                                        style={styles.yearInput}
-                                        placeholder={t("common.exampleYear")}
-                                        placeholderTextColor={Colors.textPlaceholder}
-                                        keyboardType="number-pad"
-                                        value={selectedYear}
-                                        onChangeText={setSelectedYear}
-                                        maxLength={4}
-                                    />
-
-                                    <Text style={styles.sectionHeader}>{t("common.genre")}</Text>
-                                    <View style={styles.genresRow}>
-                                        {genres.map(renderGenreChip)}
-                                    </View>
-                                </ScrollView>
-
-                                <View style={styles.modalFooter}>
-                                    <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
-                                        <Text style={styles.applyButtonText}>{t("common.applyFilters")}</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </Animated.View>
-                        </GestureDetector>
-                    </TouchableOpacity>
-                </Modal>
-            </View>
-        </GestureDetector>
+                            <View style={styles.modalFooter}>
+                                <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
+                                    <Text style={styles.applyButtonText}>{t("common.applyFilters")}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Animated.View>
+                    </GestureDetector>
+                </TouchableOpacity>
+            </Modal>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "transparent",
+        backgroundColor: Colors.metalBlack,
     },
-    safeAreaPadding: {
-        paddingTop: 28,
-    },
-    tabContent: {
+    header: {
         flexDirection: "row",
+        justifyContent: "space-between",
         alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-    },
-    profileBannerTextContainer: {
-        flex: 1,
-    },
-    activeFilterButton: {
-        backgroundColor: Colors.vibrantRed,
-        borderColor: Colors.vibrantRed,
-    },
-    clearFiltersText: {
-        color: Colors.metalSilver,
-        textDecorationLine: "underline",
-    },
-    controlsContainer: {
         paddingHorizontal: 16,
+        paddingTop: 12,
         paddingBottom: 8,
     },
-    searchAndFilterRow: {
+    discoverHeader: {
+        paddingTop: 16,
+    },
+    headerTop: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        marginBottom: 16,
+    },
+    discoverTitle: {
+        fontSize: 28,
+        fontFamily: Fonts.bebas,
+        color: Colors.white,
+        letterSpacing: 1,
+    },
+    pillContainer: {
+        flexDirection: "row",
+        backgroundColor: Colors.metalGray,
+        borderRadius: 20,
+        padding: 2,
+        gap: 2,
+    },
+    pill: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 18,
+        gap: 6,
+    },
+    activePill: {
+        backgroundColor: Colors.vibrantRed,
+    },
+    pillText: {
+        fontSize: 12,
+        fontFamily: Fonts.interSemiBold,
+        color: Colors.metalSilver,
+    },
+    activePillText: {
+        color: Colors.white,
+    },
+    headerSearchRow: {
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-    },
-    filterButtonCompact: {
-        backgroundColor: Colors.metalGray,
-        padding: 8,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: Colors.metalSilver,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    clearFiltersContainer: {
-        marginTop: 4,
-        alignSelf: "flex-end",
+        paddingHorizontal: 16,
+        marginBottom: 16,
     },
     searchWrapper: {
         flex: 1,
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: Colors.metalGray,
-        borderRadius: 8,
-        borderColor: Colors.metalSilver,
+        borderRadius: 12,
+        paddingHorizontal: 12,
+        height: 44,
         borderWidth: 1,
+        borderColor: Colors.panelBorder,
+    },
+    searchButton: {
+        padding: 4,
     },
     searchInput: {
         flex: 1,
-        color: Colors.textPrimary,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-    },
-    searchButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 6,
+        color: Colors.white,
+        fontSize: 14,
+        fontFamily: Fonts.inter,
+        marginLeft: 8,
     },
     clearButton: {
-        paddingHorizontal: 8,
-        paddingVertical: 6,
+        padding: 4,
     },
-    tabsContainer: {
-        paddingHorizontal: 16,
-        paddingBottom: 8,
-        marginTop: -28,
-    },
-    tabsWrapper: {
-        flexDirection: "row",
+    filterButtonCompact: {
+        width: 44,
+        height: 44,
         backgroundColor: Colors.metalGray,
-        borderRadius: 9999,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 1,
+        borderColor: Colors.panelBorder,
     },
-    tab: {
-        flex: 1,
-        paddingVertical: 8,
-        borderRadius: 9999,
-    },
-    activeTab: {
+    activeFilterButton: {
         backgroundColor: Colors.vibrantRed,
+        borderColor: Colors.vibrantRed,
     },
-    inactiveTab: {
-        backgroundColor: "transparent",
+    clearFiltersContainer: {
+        paddingHorizontal: 16,
+        marginBottom: 12,
     },
-    tabText: {
-        textAlign: "center",
-        fontWeight: "bold",
+    clearFiltersText: {
+        color: Colors.vibrantRed,
+        fontSize: 12,
+        fontFamily: Fonts.interSemiBold,
     },
-    activeTabText: {
+    browseAllSection: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingHorizontal: 16,
+        marginTop: 8,
+        marginBottom: 16,
+    },
+    browseAllTitle: {
+        fontSize: 20,
+        fontFamily: Fonts.bebas,
         color: Colors.white,
-    },
-    inactiveTabText: {
-        color: Colors.metalSilver,
+        letterSpacing: 0.5,
     },
     centerContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+        paddingVertical: 40,
     },
     loadingText: {
         color: Colors.metalSilver,
         marginTop: 16,
+        fontFamily: Fonts.inter,
     },
     emptyIcon: {
-        width: 300,
-        height: 300,
+        width: 200,
+        height: 200,
         opacity: 0.8,
         marginBottom: 16,
     },
     emptyText: {
         color: Colors.metalSilver,
-        fontSize: 18,
+        fontSize: 16,
+        fontFamily: Fonts.inter,
     },
     columnWrapper: {
         paddingHorizontal: 8,
@@ -1164,10 +801,6 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 24,
         borderTopWidth: 1,
         borderTopColor: Colors.panelBorder,
-        borderLeftWidth: 1,
-        borderLeftColor: Colors.panelBorder,
-        borderRightWidth: 1,
-        borderRightColor: Colors.panelBorder,
         overflow: "hidden",
         elevation: 20,
         shadowColor: "#000",
@@ -1175,54 +808,46 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.5,
         shadowRadius: 10,
         maxHeight: height * 0.9,
-        marginTop: 60,
-        padding: 16,
-        paddingTop: 8,
     },
     modalHandleContainer: {
         width: "100%",
-        height: 20,
+        height: 24,
         alignItems: "center",
         justifyContent: "center",
-        marginTop: 8,
         zIndex: 100,
     },
     modalHandle: {
         width: 40,
         height: 4,
-        backgroundColor: "#ffffff22",
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
         borderRadius: 2,
     },
     modalHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 24,
+        marginBottom: 16,
         paddingHorizontal: 20,
     },
     modalTitle: {
-        color: Colors.textPrimary,
+        color: Colors.white,
         fontSize: 24,
-        fontWeight: "bold",
-        fontFamily: "BebasNeue_400Regular",
+        fontFamily: Fonts.bebas,
+        letterSpacing: 1,
     },
     closeButtonContainer: {
         padding: 4,
     },
-    closeButtonText: {
-        color: Colors.vibrantRed,
-        fontSize: 20,
-    },
     modalContent: {
-        paddingHorizontal: 16,
-        paddingBottom: 24,
+        paddingHorizontal: 20,
+        paddingBottom: 32,
     },
     sectionHeader: {
         color: Colors.metalSilver,
         fontSize: 14,
+        fontFamily: Fonts.bebas,
+        letterSpacing: 1.5,
         textTransform: "uppercase",
-        letterSpacing: 1,
-        fontFamily: "BebasNeue_400Regular",
         marginBottom: 12,
         marginTop: 16,
     },
@@ -1244,21 +869,22 @@ const styles = StyleSheet.create({
         borderColor: Colors.vibrantRed,
     },
     optionText: {
-        color: Colors.textMuted,
-        fontSize: 14,
+        color: Colors.metalSilver,
+        fontSize: 13,
+        fontFamily: Fonts.interMedium,
     },
     activeOptionText: {
         color: Colors.white,
-        fontWeight: "bold",
     },
     yearInput: {
         backgroundColor: Colors.metalGray,
         borderWidth: 1,
-        borderColor: Colors.metalSilver,
+        borderColor: Colors.panelBorder,
         borderRadius: 8,
         padding: 12,
-        color: Colors.textPrimary,
+        color: Colors.white,
         fontSize: 16,
+        fontFamily: Fonts.inter,
     },
     genresRow: {
         flexDirection: "row",
@@ -1278,21 +904,24 @@ const styles = StyleSheet.create({
         borderColor: Colors.vibrantRed,
     },
     genreChipText: {
-        color: Colors.textMuted,
+        color: Colors.metalSilver,
         fontSize: 12,
+        fontFamily: Fonts.interMedium,
     },
     activeGenreText: {
         color: Colors.white,
-        fontWeight: "bold",
     },
     modalFooter: {
-        paddingHorizontal: 24,
+        paddingHorizontal: 20,
         paddingTop: 16,
-        paddingBottom: 48,
+        paddingBottom: 40,
+        backgroundColor: Colors.panelBackground,
+        borderTopWidth: 1,
+        borderTopColor: Colors.panelBorder,
     },
     applyButton: {
         backgroundColor: Colors.vibrantRed,
-        paddingVertical: 18,
+        paddingVertical: 14,
         borderRadius: 12,
         alignItems: "center",
         shadowColor: Colors.vibrantRed,
@@ -1303,77 +932,9 @@ const styles = StyleSheet.create({
     },
     applyButtonText: {
         color: Colors.white,
-        fontWeight: "bold",
-        fontSize: 17,
-        fontFamily: "BebasNeue_400Regular",
-        textTransform: "uppercase",
+        fontSize: 16,
+        fontFamily: Fonts.bebas,
         letterSpacing: 1.5,
-    },
-    profileBanner: {
-        marginHorizontal: 16,
-        marginBottom: 16,
-        backgroundColor: Colors.vibrantRed,
-        borderRadius: 8,
-        padding: 12,
-        elevation: 4,
-        shadowColor: Colors.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    profileBannerContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-    },
-    profileBannerTitle: {
-        color: Colors.white,
-        fontWeight: "bold",
-        fontSize: 14,
-    },
-    profileBannerSubtitle: {
-        color: "rgba(255, 255, 255, 0.8)",
-        fontSize: 12,
-    },
-    continueSection: {
-        paddingVertical: 20,
-        backgroundColor: Colors.overlayDark,
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
-        borderTopColor: Colors.glassWhiteSubtle,
-        borderBottomColor: Colors.glassWhiteSubtle,
-        marginVertical: 8,
-    },
-    continueSectionLoading: {
-        height: 160,
-        justifyContent: "center",
-    },
-    continueHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingHorizontal: 16,
-        marginBottom: 8,
-    },
-    continueTitle: {
-        color: Colors.white,
-        fontSize: 18,
-        fontFamily: "BebasNeue_400Regular",
-        letterSpacing: 1.5,
-    },
-    continueListVertical: {
-        paddingHorizontal: 16,
-        paddingTop: 12,
-    },
-    recommendationGrid: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        paddingTop: 12,
-        gap: 12,
-    },
-    recommendationGridItem: {
-        flexBasis: '30%',
     },
     categoryFilterWrapper: {
         paddingHorizontal: 16,
@@ -1383,7 +944,7 @@ const styles = StyleSheet.create({
     },
     categoryFilterContainer: {
         flexDirection: "row",
-        backgroundColor: Colors.metalGray,
+        backgroundColor: "transparent",
         borderRadius: 9999,
     },
     categoryTab: {
@@ -1403,4 +964,261 @@ const styles = StyleSheet.create({
     activeCategoryTabText: {
         color: Colors.white,
     },
+    continueSection: {
+        paddingVertical: 8,
+    },
+    recommendationGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 12,
+        paddingHorizontal: 16,
+    },
+    recommendationGridItem: {
+        width: (Dimensions.get("window").width - 44) / 3,
+    },
+});
+
+// ─── DiscoverHeader Component ────────────────────────────────────────────────
+interface DiscoverHeaderProps {
+    activeTab: MediaType;
+    setActiveTab: (tab: MediaType) => void;
+    recommendations: any[];
+    loading: boolean;
+    data: any[];
+    searchQuery: string;
+    setSearchQuery: (q: string) => void;
+    handleSearch: () => void;
+    handleClearSearch: () => void;
+    filtersActive: boolean;
+    handleOpenFilters: () => void;
+    resetFilters: (reload?: boolean) => void;
+    isInSearchMode: boolean;
+    curatedMovies: Movie[];
+    curatedShows: TVShow[];
+    classicMovies_: Movie[];
+    handleToggleFavorite: any;
+    handleToggleWatchlist: any;
+    handleToggleWatched: any;
+    handleVote: any;
+    moviesFromQuery: Movie[];
+    tvShowsFromQuery: TVShow[];
+}
+
+const DiscoverHeader = memo(({
+    activeTab,
+    setActiveTab,
+    recommendations,
+    loading,
+    data,
+    searchQuery,
+    setSearchQuery,
+    handleSearch,
+    handleClearSearch,
+    filtersActive,
+    handleOpenFilters,
+    resetFilters,
+    isInSearchMode,
+    curatedMovies,
+    curatedShows,
+    classicMovies_,
+    handleToggleFavorite,
+    handleToggleWatchlist,
+    handleToggleWatched,
+    handleVote,
+    moviesFromQuery,
+    tvShowsFromQuery,
+}: DiscoverHeaderProps) => {
+    const { t } = useTranslation();
+
+    // Filter recommendations based on active media type
+    const filteredRecommendations = useMemo(() =>
+        recommendations.filter(rec => rec.mediaType === activeTab),
+        [recommendations, activeTab]
+    );
+
+    return (
+        <View style={styles.discoverHeader}>
+            <View style={styles.headerTop}>
+                <Text style={styles.discoverTitle}>{t("tabs.discover")}</Text>
+                <View style={styles.pillContainer}>
+                    <TouchableOpacity
+                        style={[styles.pill, activeTab === "movie" && styles.activePill]}
+                        onPress={() => setActiveTab("movie")}
+                    >
+                        <Ionicons
+                            name="film-outline"
+                            size={14}
+                            color={activeTab === "movie" ? Colors.white : Colors.metalSilver}
+                        />
+                        <Text style={[styles.pillText, activeTab === "movie" && styles.activePillText]}>
+                            {t("tabs.movies")}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.pill, activeTab === "tv" && styles.activePill]}
+                        onPress={() => setActiveTab("tv")}
+                    >
+                        <Ionicons
+                            name="tv-outline"
+                            size={14}
+                            color={activeTab === "tv" ? Colors.white : Colors.metalSilver}
+                        />
+                        <Text style={[styles.pillText, activeTab === "tv" && styles.activePillText]}>
+                            {t("tabs.tv")}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            <View style={styles.headerSearchRow}>
+                <View style={styles.searchWrapper}>
+                    <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                        <MaterialCommunityIcons name="magnify" size={20} color={Colors.metalSilver} />
+                    </TouchableOpacity>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder={t("common.searchPlaceholder")}
+                        placeholderTextColor={Colors.metalSilver}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        onSubmitEditing={handleSearch}
+                        returnKeyType="search"
+                    />
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
+                            <Ionicons name="close-circle" size={18} color={Colors.metalSilver} />
+                        </TouchableOpacity>
+                    )}
+                </View>
+                <TouchableOpacity
+                    style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
+                    onPress={handleOpenFilters}
+                >
+                    <Ionicons
+                        name="filter"
+                        size={20}
+                        color={filtersActive ? Colors.white : Colors.metalSilver}
+                    />
+                </TouchableOpacity>
+            </View>
+
+            {filtersActive && (
+                <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
+                    <Text style={styles.clearFiltersText}>{t("common.clearFilters")}</Text>
+                </TouchableOpacity>
+            )}
+
+            {loading && data.length === 0 ? (
+                <View style={styles.centerContainer}>
+                    <ActivityIndicator size="large" color={Colors.vibrantRed} />
+                    <Text style={styles.loadingText}>{t("common.loadingContent")}</Text>
+                </View>
+            ) : data.length === 0 && searchQuery.length > 0 ? (
+                <View style={styles.centerContainer}>
+                    <Image
+                        source={require("../../assets/icons/not-found.png")}
+                        style={styles.emptyIcon as any}
+                        contentFit="contain"
+                    />
+                    <Text style={styles.emptyText}>{t("common.noResults")}</Text>
+                </View>
+            ) : !isInSearchMode && (
+                <>
+                    <HeroCarousel
+                        data={activeTab === "movie" ? curatedMovies : curatedShows}
+                        mediaType={activeTab}
+                    />
+
+                    {filteredRecommendations.length > 0 && (
+                        <HomeSection
+                            title={t("home.forYouCategory.custom")}
+                            icon="sparkles"
+                            data={filteredRecommendations[0].items}
+                            mediaType={activeTab}
+                            renderItem={({ item }) => (
+                                <View style={styles.recommendationGridItem}>
+                                    <MovieCardItem
+                                        item={item}
+                                        mediaType={activeTab}
+                                        handleToggleFavorite={handleToggleFavorite}
+                                        handleToggleWatchlist={handleToggleWatchlist}
+                                        handleToggleWatched={handleToggleWatched}
+                                        handleVote={handleVote}
+                                        fullWidth
+                                    />
+                                </View>
+                            )}
+                        />
+                    )}
+
+                    <HomeSection
+                        title={activeTab === "movie" ? t("home.curatedMoviesTitle") : t("home.curatedTVTitle")}
+                        icon="trophy-outline"
+                        data={activeTab === "movie" ? curatedMovies : curatedShows}
+                        mediaType={activeTab}
+                        renderItem={({ item }) => (
+                            <View style={styles.recommendationGridItem}>
+                                <MovieCardItem
+                                    item={item}
+                                    mediaType={activeTab}
+                                    handleToggleFavorite={handleToggleFavorite}
+                                    handleToggleWatchlist={handleToggleWatchlist}
+                                    handleToggleWatched={handleToggleWatched}
+                                    handleVote={handleVote}
+                                    fullWidth
+                                />
+                            </View>
+                        )}
+                    />
+
+                    {activeTab === "movie" && classicMovies_.length > 0 && (
+                        <HomeSection
+                            title={t("home.classicTitle")}
+                            icon="film-outline"
+                            data={classicMovies_}
+                            mediaType="movie"
+                            renderItem={({ item }) => (
+                                <View style={styles.recommendationGridItem}>
+                                    <MovieCardItem
+                                        item={item}
+                                        mediaType="movie"
+                                        handleToggleFavorite={handleToggleFavorite}
+                                        handleToggleWatchlist={handleToggleWatchlist}
+                                        handleToggleWatched={handleToggleWatched}
+                                        handleVote={handleVote}
+                                        fullWidth
+                                    />
+                                </View>
+                            )}
+                        />
+                    )}
+
+                    <HomeSection
+                        title={activeTab === "movie" ? t("home.popularMovies") : t("home.popularTV")}
+                        icon="trending-up"
+                        data={activeTab === "movie" ? moviesFromQuery : tvShowsFromQuery}
+                        mediaType={activeTab}
+                        renderItem={({ item }) => (
+                            <View style={styles.recommendationGridItem}>
+                                <MovieCardItem
+                                    item={item}
+                                    mediaType={activeTab}
+                                    handleToggleFavorite={handleToggleFavorite}
+                                    handleToggleWatchlist={handleToggleWatchlist}
+                                    handleToggleWatched={handleToggleWatched}
+                                    handleVote={handleVote}
+                                    fullWidth
+                                />
+                            </View>
+                        )}
+                    />
+
+                    <View style={styles.browseAllSection}>
+                        <Ionicons name="apps-outline" size={20} color={Colors.vibrantRed} />
+                        <Text style={styles.browseAllTitle}>{t("common.browseAll")}</Text>
+                    </View>
+                </>
+            )}
+        </View>
+    );
 });

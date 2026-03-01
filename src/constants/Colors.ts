@@ -15,8 +15,8 @@ export const Colors = {
     panelBackground: "#141414", 
 
     
-    cinematicGold: "#fbbf24",        
-    vibrantRed: "#fc5f5fff",      
+    cinematicGold: "#F5C518",        
+    vibrantRed: "#E50914",      
     tmdbYellow: "#facc15",      
     tmdbBlue: "#22d3ee",        
     communityPurple: "#c084fc", 

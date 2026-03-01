@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -110,6 +111,11 @@ interface AnimatedLogoProps {
 }
 
 function AnimatedLogo({ scale, opacity, largeLogo }: Readonly<AnimatedLogoProps>): React.JSX.Element {
+    const { i18n } = useTranslation();
+    const textLogoSource = i18n.language === "en"
+        ? require("../../assets/icons/rawcut-text-logo.png")
+        : require("../../assets/icons/cortocrudotextlogo.png");
+
     return (
         <Animated.View
             style={[
@@ -122,7 +128,7 @@ function AnimatedLogo({ scale, opacity, largeLogo }: Readonly<AnimatedLogoProps>
             ]}
         >
             <Image
-                source={require("../../assets/icons/cortocrudotextlogo.png")}
+                source={textLogoSource}
                 style={[styles.logoTextImage, largeLogo && styles.logoTextImageLarge]}
                 resizeMode="contain"
             />
@@ -143,10 +149,15 @@ interface StaticLogoProps {
 }
 
 function StaticLogo({ title, subtitle, largeLogo }: Readonly<StaticLogoProps>): React.JSX.Element {
+    const { i18n } = useTranslation();
+    const textLogoSource = i18n.language === "en"
+        ? require("../../assets/icons/rawcut-text-logo.png")
+        : require("../../assets/icons/cortocrudotextlogo.png");
+
     return (
         <View style={styles.logoContainer}>
             <Image
-                source={require("../../assets/icons/cortocrudotextlogo.png")}
+                source={textLogoSource}
                 style={[styles.logoTextImage, largeLogo && styles.logoTextImageLarge]}
                 resizeMode="contain"
             />

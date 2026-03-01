@@ -140,53 +140,6 @@ export const shouldSkipContentLoad = (
     isLoading: boolean
 ): boolean => !isReset && (!hasMore || isLoading);
 
-export const processContinueWatchingShow = async (
-    showId: number,
-    watchedEpisodeCount: number,
-    isFullyWatched: boolean
-): Promise<ContinueWatchingItem | null> => {
-    if (isFullyWatched) {
-        return null;
-    }
-
-    try {
-        const show = await getTVShowDetails(showId);
-        if (!show) {
-            return null;
-        }
-
-        const progress: EpisodeProgress = {
-            watched: watchedEpisodeCount,
-            total: show.number_of_episodes ?? 0,
-        };
-
-        return { show, progress };
-    } catch (error) {
-        console.error(`Error fetching details for show ${showId}:`, error);
-        return null;
-    }
-};
-
-export const filterActualEpisodeProgress = <
-    T extends { season_number: number; tmdb_id: number }
->(
-    progressEntries: T[]
-): T[] => progressEntries.filter((entry) => entry.season_number > 0);
-
-export const extractUniqueShowIds = <T extends { tmdb_id: number }>(
-    progressEntries: T[]
-): number[] => [...new Set(progressEntries.map((entry) => entry.tmdb_id))];
-
-export const countWatchedEpisodes = <
-    T extends { tmdb_id: number; season_number: number }
->(
-    progressEntries: T[],
-    showId: number
-): number =>
-    progressEntries.filter(
-        (entry) => entry.tmdb_id === showId && entry.season_number > 0
-    ).length;
-
 export const processGenreName = (genreName: string): string => genreName;
 
 export const sortGenresAlphabetically = <T extends { name: string }>(

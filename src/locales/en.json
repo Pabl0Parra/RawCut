@@ -11,6 +11,8 @@
         "loading": "Loading...",
         "loadingContent": "Loading content...",
         "noResults": "No results found",
+        "browseAll": "Browse All",
+        "viewAll": "View All",
         "cancel": "Cancel",
         "delete": "Delete",
         "save": "Save",
@@ -35,12 +37,13 @@
     },
     "tabs": {
         "home": "Home",
+        "discover": "Discover",
         "foryou": "For you",
         "movies": "Movies",
         "tv": "TV Shows",
         "favorites": "Favorites",
         "watchlist": "Watchlist",
-        "recommendations": "Suggested",
+        "recommendations": "Mail",
         "profile": "Profile"
     },
     "home": {
@@ -191,7 +194,7 @@
     },
     "help": {
         "title": "Help Center",
-        "searchPlaceholder": "Search for your question (e.g. recommend, profile)...",
+        "searchPlaceholder": "Search for your question",
         "noResults": "We didn't find answers for that search.",
         "faqs": {
             "q1": "What is RawCut?",

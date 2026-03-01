@@ -15,27 +15,36 @@ import { getImageUrl } from '../lib/tmdb';
 import type { ContinueWatchingItem } from '../types/homeScreen.types';
 
 interface ContinueWatchingCardProps {
-    item: ContinueWatchingItem;
+    item: any; // Using any for now to support both home and watchlist types
     onPress: (showId: number) => void;
     nextEpisode?: { season: number; episode: number } | null;
+    horizontal?: boolean;
 }
 
 export const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
     item,
     onPress,
-    nextEpisode
+    nextEpisode,
+    horizontal = false
 }) => {
-    const { show, progress } = item;
+    // Handle both ContinueWatchingItem (home) and WatchlistTVItem (watchlist)
+    const show = item.show || item;
+    const progress = item.progress;
+
     const backdropUrl = getImageUrl(show.backdrop_path, 'w500');
-    const progressPercentage = (progress.watched / Math.max(1, progress.total)) * 100;
+
+    // progress can be the object from home or the direct 0-1 number from watchlist hook
+    const progressPercentage = typeof progress === 'number'
+        ? progress * 100
+        : (progress?.watched / Math.max(1, progress?.total)) * 100;
 
     return (
         <TouchableOpacity
-            style={styles.container}
+            style={[styles.container, horizontal && styles.horizontalContainer]}
             onPress={() => onPress(show.id)}
             activeOpacity={0.8}
         >
-            <View style={styles.imageWrapper}>
+            <View style={[styles.imageWrapper, horizontal && styles.horizontalImage]}>
                 {backdropUrl ? (
                     <Image
                         source={{ uri: backdropUrl }}
@@ -78,9 +87,11 @@ export const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
                 <Text style={styles.title} numberOfLines={1}>
                     {show.name}
                 </Text>
-                <Text style={styles.episodeText}>
-                    {progress.watched} / {progress.total} episodios completados
-                </Text>
+                {typeof progress === 'object' && progress.watched !== undefined && (
+                    <Text style={styles.episodeText}>
+                        {progress.watched} / {progress.total} episodios completados
+                    </Text>
+                )}
             </View>
         </TouchableOpacity>
     );
@@ -90,6 +101,11 @@ const styles = StyleSheet.create({
     container: {
         width: '100%',
         marginBottom: 16,
+    } as ViewStyle,
+    horizontalContainer: {
+        width: 280,
+        marginRight: 16,
+        marginBottom: 0,
     } as ViewStyle,
     imageWrapper: {
         width: '100%',
@@ -105,6 +121,9 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
         elevation: 6,
     } as ViewStyle,
+    horizontalImage: {
+        height: 157.5, // 280 * 9/16
+    } as ViewStyle,
     image: {
         width: '100%',
         height: '100%',
@@ -115,7 +134,7 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     overlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.15)',
+        backgroundColor: 'rgba(0,0,0,0.25)',
     } as ViewStyle,
     playOverlay: {
         ...StyleSheet.absoluteFillObject,
@@ -123,14 +142,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     } as ViewStyle,
     playCircle: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: 'rgba(220, 38, 38, 0.9)',
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: 'rgba(239, 68, 68, 0.9)', // vibrantRed with transparency
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 2,
-        borderColor: 'rgba(255,255,255,0.4)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255,255,255,0.3)',
         paddingLeft: 4,
     } as ViewStyle,
     nextBadge: {
@@ -142,7 +161,7 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         borderRadius: 6,
         borderWidth: 1,
-        borderColor: 'rgba(220, 38, 38, 0.8)',
+        borderColor: 'rgba(239, 68, 68, 0.8)',
         alignItems: 'center',
     } as ViewStyle,
     nextBadgeLabel: {
@@ -163,26 +182,26 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        height: 5,
-        backgroundColor: 'rgba(255,255,255,0.25)',
+        height: 4,
+        backgroundColor: 'rgba(255,255,255,0.2)',
     } as ViewStyle,
     progressBarFill: {
         height: '100%',
         backgroundColor: Colors.vibrantRed,
     } as ViewStyle,
     infoContainer: {
-        marginTop: 10,
-        paddingHorizontal: 2,
+        marginTop: 8,
+        paddingHorizontal: 4,
     } as ViewStyle,
     title: {
         color: Colors.white,
-        fontSize: 18,
+        fontSize: 16,
         fontFamily: Fonts.bebas,
         letterSpacing: 0.8,
     } as TextStyle,
     episodeText: {
         color: Colors.metalSilver,
-        fontSize: 12,
+        fontSize: 11,
         fontFamily: Fonts.inter,
         marginTop: 2,
     } as TextStyle,

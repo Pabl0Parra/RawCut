@@ -35,13 +35,20 @@ const HEADER_TITLE_STYLE = {
     color: Colors.white,
 } as const;
 
-const HeaderLogo = () => (
-    <Image
-        source={require("../../assets/icons/cortocrudotextlogo.png")}
-        style={{ width: 260, height: 56, marginTop: 6 }}
-        contentFit="contain"
-    />
-);
+const HeaderLogo = () => {
+    const { i18n } = useTranslation();
+    const logoSource = i18n.language === "en"
+        ? require("../../assets/icons/rawcut-text-logo.png")
+        : require("../../assets/icons/cortocrudotextlogo.png");
+
+    return (
+        <Image
+            source={logoSource}
+            style={{ width: 260, height: 56, marginTop: 6 }}
+            contentFit="contain"
+        />
+    );
+};
 
 const CustomHeaderTitle = () => {
     return (
