@@ -1,5 +1,5 @@
-import React, { useMemo, useEffect } from "react";
-import { View, StyleSheet, ScrollView, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import React, { useEffect } from "react";
+import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -7,6 +7,7 @@ import { Colors, Fonts } from "../src/constants/Colors";
 import { useStats } from "../src/hooks/useStats";
 import { StatCard, SplitStatRow } from "../src/components/stats/StatCards";
 import { RatedItemCard, GenreTable } from "../src/components/stats/SpecificStats";
+import { StatsSkeleton } from "../src/components/stats/StatsSkeleton";
 import { useVoteStore } from "../src/stores/voteStore";
 
 const formatTimeSpent = (minutes: number, t: any) => {
@@ -54,8 +55,7 @@ export default function StatsScreen() {
                         </TouchableOpacity>
                     ),
                 }} />
-                <ActivityIndicator size="large" color={Colors.vibrantRed} />
-                <Text style={styles.loadingText}>{t("stats.loading")}</Text>
+                <StatsSkeleton />
             </View>
         );
     }

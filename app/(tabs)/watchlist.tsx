@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { View, StyleSheet, ScrollView, Text, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect, router } from "expo-router";
@@ -11,6 +11,7 @@ import { ContinueWatchingCard } from "../../src/components/ContinueWatchingCard"
 import { UpcomingCard } from "../../src/components/watchlist/UpcomingCard";
 import { ContentGridLayout } from "../../src/components/ContentGridLayout";
 import { Colors, Fonts } from "../../src/constants/Colors";
+import { GridSkeleton } from "../../src/components/GridSkeleton";
 import { Ionicons } from "@expo/vector-icons";
 import { FlatList } from "react-native-gesture-handler";
 
@@ -83,8 +84,8 @@ export default function WatchlistScreen() {
 
     if (isLoading && (continueWatching.length === 0 && upcoming.length === 0 && allMovies.length === 0)) {
         return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color={Colors.vibrantRed} />
+            <View style={styles.safeArea}>
+                <GridSkeleton rows={4} />
             </View>
         );
     }

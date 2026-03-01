@@ -78,6 +78,8 @@ import {
     flattenPages,
 } from "../../src/hooks/useHomeContent";
 import { HeroCarousel } from "../../src/components/home/HeroCarousel";
+import { HomeSkeleton } from "../../src/components/home/HomeSkeleton";
+import { GridSkeleton } from "../../src/components/GridSkeleton";
 import { HomeSection } from "../../src/components/home/HomeSection";
 
 
@@ -581,6 +583,7 @@ export default function HomeScreen(): JSX.Element {
                         setSelectedYear={setSelectedYear}
                         setSortBy={setSortBy}
                         setFiltersActive={setFiltersActive}
+                        isSearching={isSearching}
                     />}
                     ListFooterComponent={renderFooter}
                     initialNumToRender={12}
@@ -1042,6 +1045,7 @@ interface DiscoverHeaderProps {
     setFiltersActive: (a: boolean) => void;
     curatedMovies: Movie[];
     curatedShows: TVShow[];
+    isSearching: boolean;
 }
 
 const DiscoverHeader = memo(({
@@ -1075,6 +1079,7 @@ const DiscoverHeader = memo(({
     setSelectedYear,
     setSortBy,
     setFiltersActive,
+    isSearching,
 }: DiscoverHeaderProps) => {
     const { t } = useTranslation();
 
@@ -1158,10 +1163,13 @@ const DiscoverHeader = memo(({
 
             {loading && data.length === 0 ? (
                 <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color={Colors.vibrantRed} />
-                    <Text style={styles.loadingText}>{t("common.loadingContent")}</Text>
+                    <HomeSkeleton />
                 </View>
-            ) : data.length === 0 && searchQuery.length > 0 ? (
+            ) : isSearching ? (
+                <View style={{ flex: 1, paddingTop: 16 }}>
+                    <GridSkeleton rows={3} />
+                </View>
+            ) : data.length === 0 && (searchQuery.length > 0 || filtersActive) ? (
                 <View style={styles.centerContainer}>
                     <Image
                         source={require("../../assets/icons/not-found.png")}
