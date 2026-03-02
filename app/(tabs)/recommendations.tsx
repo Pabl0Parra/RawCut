@@ -19,7 +19,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 import { useAuthStore } from "../../src/stores/authStore";
-import { Colors } from "../../src/constants/Colors";
+import { Colors, Fonts } from "../../src/constants/Colors";
 import RecommendationCard from "../../src/components/RecommendationCard";
 
 import type {
@@ -317,7 +317,6 @@ export default function RecommendationsScreen(): React.JSX.Element {
                     <View style={styles.headerContainer}>
                         <View style={styles.headerRow}>
                             <View style={styles.headerTitleContainer}>
-                                <Ionicons name="mail" size={24} color={Colors.vibrantRed} style={styles.headerIcon} />
                                 <Text style={styles.headerTitle}>{t("tabs.recommendations").toUpperCase()}</Text>
                             </View>
 
@@ -361,42 +360,40 @@ const styles = StyleSheet.create({
         alignItems: "center",
         flex: 1,
     },
-    headerIcon: {
-        marginRight: 8,
-    },
     headerTitle: {
+        fontSize: 28,
+        fontFamily: Fonts.bebas,
         color: Colors.white,
-        fontSize: 24,
-        fontWeight: "bold",
+        letterSpacing: 1,
     },
     tabsWrapper: {
         flexDirection: "row",
-        backgroundColor: "transparent",
-        padding: 4,
-        borderRadius: 12,
+        backgroundColor: Colors.metalGray,
+        borderRadius: 20,
+        padding: 2,
+        gap: 2,
     } as ViewStyle,
     tab: {
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 6,
         paddingHorizontal: 12,
-        borderRadius: 8,
+        paddingVertical: 6,
+        borderRadius: 18,
         gap: 6,
     } as ViewStyle,
     activeTab: {
-        backgroundColor: "rgba(239, 68, 68, 0.2)",
+        backgroundColor: Colors.vibrantRed,
     } as ViewStyle,
     inactiveTab: {
         backgroundColor: "transparent",
     } as ViewStyle,
     tabText: {
-        textAlign: "center",
-        fontWeight: "600",
         fontSize: 12,
+        fontFamily: Fonts.interSemiBold,
         color: Colors.metalSilver,
     } as TextStyle,
     activeTabText: {
-        color: Colors.vibrantRed,
+        color: Colors.white,
     } as TextStyle,
     centerContainer: {
         flex: 1,

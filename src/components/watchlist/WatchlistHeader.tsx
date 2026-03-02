@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "../../constants/Colors";
+import { Colors, Fonts } from "../../constants/Colors";
 
 interface WatchlistHeaderProps {
     activeTab: "movies" | "tv";
@@ -14,7 +14,6 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({ activeTab, onT
         <View style={styles.container}>
             <View style={styles.titleRow}>
                 <View style={styles.titleContainer}>
-                    <Ionicons name="bookmark" size={24} color={Colors.vibrantRed} style={styles.icon} />
                     <Text style={styles.title}>{title}</Text>
                 </View>
 
@@ -54,37 +53,36 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
     },
-    icon: {
-        marginRight: 8,
-    },
     title: {
+        fontSize: 28,
+        fontFamily: Fonts.bebas,
         color: Colors.white,
-        fontSize: 24,
-        fontWeight: "bold",
+        letterSpacing: 1,
     },
     tabsContainer: {
         flexDirection: "row",
-        backgroundColor: "transparent",
-        padding: 4,
-        borderRadius: 12,
+        backgroundColor: Colors.metalGray,
+        borderRadius: 20,
+        padding: 2,
+        gap: 2,
     },
     tab: {
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 12,
         paddingVertical: 6,
-        borderRadius: 8,
+        borderRadius: 18,
         gap: 6,
     },
     activeTab: {
-        backgroundColor: "rgba(239, 68, 68, 0.2)", // vibrantRed translucent
+        backgroundColor: Colors.vibrantRed,
     },
     tabText: {
+        fontSize: 12,
+        fontFamily: Fonts.interSemiBold,
         color: Colors.metalSilver,
-        fontSize: 13,
-        fontWeight: "600",
     },
     activeTabText: {
-        color: Colors.vibrantRed,
+        color: Colors.white,
     },
 });
