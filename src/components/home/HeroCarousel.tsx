@@ -1,4 +1,4 @@
-import React, { useRef, memo } from "react";
+import React, { useRef, memo, useEffect } from "react";
 import {
     View,
     Text,
@@ -26,6 +26,7 @@ const HERO_HEIGHT = 280;
 interface HeroCarouselProps {
     data: (Movie | TVShow)[];
     mediaType: MediaType;
+    isScrolling?: boolean;
 }
 
 const PaginationDot = memo(({ index, activeIndex }: { index: number; activeIndex: SharedValue<number> }) => {
@@ -45,23 +46,84 @@ const PaginationDot = memo(({ index, activeIndex }: { index: number; activeIndex
     );
 });
 
-export const HeroCarousel = ({ data, mediaType }: HeroCarouselProps) => {
+export const HeroCarousel = ({ data, mediaType, isScrolling = false }: HeroCarouselProps) => {
     const activeIndex = useSharedValue(0);
+    const flatListRef = useRef<FlatList>(null);
+    const scrollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const viewabilityConfig = useRef({
         itemVisiblePercentThreshold: 50,
     }).current;
 
-    const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-        if (viewableItems.length > 0 && viewableItems[0].index !== null) {
-            activeIndex.value = viewableItems[0].index;
+    // Only show top 5 in hero
+    const heroData = data?.slice(0, 5) || [];
+
+    const startAutoScroll = () => {
+        if (scrollTimerRef.current) clearInterval(scrollTimerRef.current);
+        if (isScrolling) return; // Don't start if user is scrolling the main feed
+
+        scrollTimerRef.current = setInterval(() => {
+            if (heroData.length === 0) return;
+            // The displayed index in flat list is `activeIndex + 1`
+            let nextDisplayedIndex = activeIndex.value + 1 + 1;
+
+            // Allow momentum scroll end to catch the reset boundary
+            flatListRef.current?.scrollToIndex({ index: nextDisplayedIndex, animated: true });
+        }, 5000); // 5 seconds
+    };
+
+    const stopAutoScroll = () => {
+        if (scrollTimerRef.current) clearInterval(scrollTimerRef.current);
+    };
+
+    const hasInitialScrolled = useRef(false);
+
+    useEffect(() => {
+        if (heroData.length > 0) {
+            if (!hasInitialScrolled.current) {
+                // Start at the real first item (index 1 in the duplicated array)
+                setTimeout(() => {
+                    flatListRef.current?.scrollToIndex({ index: 1, animated: false });
+                    hasInitialScrolled.current = true;
+                }, 100);
+            }
+
+            if (isScrolling) {
+                stopAutoScroll();
+            } else {
+                startAutoScroll();
+            }
         }
-    }).current;
+        return () => stopAutoScroll();
+    }, [heroData.length, isScrolling]);
 
     if (!data || data.length === 0) return null;
 
-    // Only show top 5 in hero
-    const heroData = data.slice(0, 5);
+    // Create a loop array: [last, 0, 1, 2, 3, 4, first]
+    const loopData = heroData.length > 0 ? [
+        heroData[heroData.length - 1],
+        ...heroData,
+        heroData[0]
+    ] : [];
+
+    const onScrollEnd = (e: any) => {
+        const xOffset = e.nativeEvent.contentOffset.x;
+        const index = Math.round(xOffset / width);
+
+        // If we scrolled to the clone of the last item (at the very beginning)
+        if (index === 0) {
+            flatListRef.current?.scrollToIndex({ index: heroData.length, animated: false });
+            activeIndex.value = heroData.length - 1;
+        }
+        // If we scrolled to the clone of the first item (at the very end)
+        else if (index === loopData.length - 1) {
+            flatListRef.current?.scrollToIndex({ index: 1, animated: false });
+            activeIndex.value = 0;
+        }
+        else {
+            activeIndex.value = index - 1;
+        }
+    };
 
     const renderItem = ({ item }: { item: Movie | TVShow }) => {
         const title = "title" in item ? item.title : item.name;
@@ -102,14 +164,21 @@ export const HeroCarousel = ({ data, mediaType }: HeroCarouselProps) => {
     return (
         <View style={styles.container}>
             <FlatList
-                data={heroData}
+                ref={flatListRef}
+                data={loopData}
                 renderItem={renderItem}
                 horizontal
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
-                onViewableItemsChanged={onViewableItemsChanged}
-                viewabilityConfig={viewabilityConfig}
-                keyExtractor={(item) => `hero-${item.id}`}
+                keyExtractor={(item, index) => `hero-${item.id}-${index}`}
+                onScrollBeginDrag={stopAutoScroll}
+                onScrollEndDrag={startAutoScroll}
+                onMomentumScrollEnd={onScrollEnd}
+                getItemLayout={(_, index) => ({
+                    length: width,
+                    offset: width * index,
+                    index,
+                })}
             />
             <View style={styles.pagination}>
                 {heroData.map((_, index) => (

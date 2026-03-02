@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "expo-router";
@@ -6,7 +6,7 @@ import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useEnrichedContent } from "../../src/hooks/useEnrichedContent";
 import { ContentGridLayout } from "../../src/components/ContentGridLayout";
-import ScreenTitle from "../../src/components/navigation/ScreenTitle";
+import { WatchlistHeader } from "../../src/components/watchlist/WatchlistHeader";
 import type { MediaType } from "../../src/types/homeScreen.types";
 
 export default function FavoritesScreen() {
@@ -18,6 +18,8 @@ export default function FavoritesScreen() {
     const isWatched = useContentStore((s) => s.isWatched);
 
     const { enrichedItems, isLoading } = useEnrichedContent(favorites);
+
+    const [activeTab, setActiveTab] = useState<"movies" | "tv">("movies");
 
     useFocusEffect(
         useCallback(() => {
@@ -69,11 +71,20 @@ export default function FavoritesScreen() {
         [],
     );
 
+    const filteredItems = enrichedItems.filter((item) => {
+        if (activeTab === "movies") return item.media_type === "movie";
+        return item.media_type === "tv";
+    });
+
     return (
         <View style={styles.safeArea}>
-            <ScreenTitle title={t("tabs.favorites").toUpperCase()} />
+            <WatchlistHeader
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                title={t("tabs.favorites").toUpperCase()}
+            />
             <ContentGridLayout
-                data={enrichedItems}
+                data={filteredItems}
                 isLoading={isLoading}
                 isAuthenticated={!!user}
                 emptyTitle={t("favorites.emptyTitle")}

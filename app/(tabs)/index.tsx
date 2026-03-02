@@ -150,6 +150,7 @@ export default function HomeScreen(): JSX.Element {
     const [selectedYear, setSelectedYear] = useState("");
     const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_VALUE);
     const [filtersActive, setFiltersActive] = useState(false);
+    const [isScrolling, setIsScrolling] = useState(false);
     const flatListRef = React.useRef<FlatList>(null);
 
 
@@ -540,6 +541,80 @@ export default function HomeScreen(): JSX.Element {
 
     return (
         <View style={styles.safeArea}>
+            <View style={styles.stickyHeaderContainer}>
+                <View style={styles.discoverHeader}>
+                    <View style={styles.headerTop}>
+                        <Text style={styles.discoverTitle}>{t("tabs.discover")}</Text>
+                        <View style={styles.pillContainer}>
+                            <TouchableOpacity
+                                style={[styles.pill, activeTab === "movie" && styles.activePill]}
+                                onPress={() => setActiveTab("movie")}
+                            >
+                                <Ionicons
+                                    name="film-outline"
+                                    size={14}
+                                    color={activeTab === "movie" ? Colors.white : Colors.metalSilver}
+                                />
+                                <Text style={[styles.pillText, activeTab === "movie" && styles.activePillText]}>
+                                    {t("tabs.movies")}
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.pill, activeTab === "tv" && styles.activePill]}
+                                onPress={() => setActiveTab("tv")}
+                            >
+                                <Ionicons
+                                    name="tv-outline"
+                                    size={14}
+                                    color={activeTab === "tv" ? Colors.white : Colors.metalSilver}
+                                />
+                                <Text style={[styles.pillText, activeTab === "tv" && styles.activePillText]}>
+                                    {t("tabs.tv")}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <View style={styles.headerSearchRow}>
+                        <View style={styles.searchWrapper}>
+                            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                                <MaterialCommunityIcons name="magnify" size={20} color={Colors.metalSilver} />
+                            </TouchableOpacity>
+                            <TextInput
+                                style={styles.searchInput}
+                                placeholder={t("common.searchPlaceholder")}
+                                placeholderTextColor={Colors.metalSilver}
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                onSubmitEditing={handleSearch}
+                                returnKeyType="search"
+                            />
+                            {searchQuery.length > 0 && (
+                                <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
+                                    <Ionicons name="close-circle" size={18} color={Colors.metalSilver} />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                        <TouchableOpacity
+                            style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
+                            onPress={handleOpenFilters}
+                        >
+                            <Ionicons
+                                name="filter"
+                                size={20}
+                                color={filtersActive ? Colors.white : Colors.metalSilver}
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                    {filtersActive && (
+                        <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
+                            <Text style={styles.clearFiltersText}>{t("common.clearFilters")}</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </View>
+
             <GestureDetector gesture={swipeGesture}>
                 <FlatList
                     ref={flatListRef}
@@ -552,6 +627,9 @@ export default function HomeScreen(): JSX.Element {
                     showsVerticalScrollIndicator={false}
                     onEndReached={handleEndReached}
                     onEndReachedThreshold={0.5}
+                    onScrollBeginDrag={() => setIsScrolling(true)}
+                    onScrollEndDrag={() => setIsScrolling(false)}
+                    onMomentumScrollEnd={() => setIsScrolling(false)}
                     ListHeaderComponent={<DiscoverHeader
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
@@ -584,6 +662,7 @@ export default function HomeScreen(): JSX.Element {
                         setSortBy={setSortBy}
                         setFiltersActive={setFiltersActive}
                         isSearching={isSearching}
+                        isScrolling={isScrolling}
                     />}
                     ListFooterComponent={renderFooter}
                     initialNumToRender={12}
@@ -673,6 +752,10 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: Colors.metalBlack,
+    },
+    stickyHeaderContainer: {
+        backgroundColor: Colors.metalBlack, // ensures content scrolling behind is hidden
+        zIndex: 10, // keeps it above content
     },
     header: {
         flexDirection: "row",
@@ -1046,6 +1129,7 @@ interface DiscoverHeaderProps {
     curatedMovies: Movie[];
     curatedShows: TVShow[];
     isSearching: boolean;
+    isScrolling: boolean;
 }
 
 const DiscoverHeader = memo(({
@@ -1080,6 +1164,7 @@ const DiscoverHeader = memo(({
     setSortBy,
     setFiltersActive,
     isSearching,
+    isScrolling,
 }: DiscoverHeaderProps) => {
     const { t } = useTranslation();
 
@@ -1091,76 +1176,6 @@ const DiscoverHeader = memo(({
 
     return (
         <View style={styles.discoverHeader}>
-            <View style={styles.headerTop}>
-                <Text style={styles.discoverTitle}>{t("tabs.discover")}</Text>
-                <View style={styles.pillContainer}>
-                    <TouchableOpacity
-                        style={[styles.pill, activeTab === "movie" && styles.activePill]}
-                        onPress={() => setActiveTab("movie")}
-                    >
-                        <Ionicons
-                            name="film-outline"
-                            size={14}
-                            color={activeTab === "movie" ? Colors.white : Colors.metalSilver}
-                        />
-                        <Text style={[styles.pillText, activeTab === "movie" && styles.activePillText]}>
-                            {t("tabs.movies")}
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.pill, activeTab === "tv" && styles.activePill]}
-                        onPress={() => setActiveTab("tv")}
-                    >
-                        <Ionicons
-                            name="tv-outline"
-                            size={14}
-                            color={activeTab === "tv" ? Colors.white : Colors.metalSilver}
-                        />
-                        <Text style={[styles.pillText, activeTab === "tv" && styles.activePillText]}>
-                            {t("tabs.tv")}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            <View style={styles.headerSearchRow}>
-                <View style={styles.searchWrapper}>
-                    <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                        <MaterialCommunityIcons name="magnify" size={20} color={Colors.metalSilver} />
-                    </TouchableOpacity>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder={t("common.searchPlaceholder")}
-                        placeholderTextColor={Colors.metalSilver}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        onSubmitEditing={handleSearch}
-                        returnKeyType="search"
-                    />
-                    {searchQuery.length > 0 && (
-                        <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
-                            <Ionicons name="close-circle" size={18} color={Colors.metalSilver} />
-                        </TouchableOpacity>
-                    )}
-                </View>
-                <TouchableOpacity
-                    style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
-                    onPress={handleOpenFilters}
-                >
-                    <Ionicons
-                        name="filter"
-                        size={20}
-                        color={filtersActive ? Colors.white : Colors.metalSilver}
-                    />
-                </TouchableOpacity>
-            </View>
-
-            {filtersActive && (
-                <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
-                    <Text style={styles.clearFiltersText}>{t("common.clearFilters")}</Text>
-                </TouchableOpacity>
-            )}
-
             {loading && data.length === 0 ? (
                 <View style={styles.centerContainer}>
                     <HomeSkeleton />
@@ -1188,6 +1203,7 @@ const DiscoverHeader = memo(({
                     <HeroCarousel
                         data={newReleases}
                         mediaType={activeTab}
+                        isScrolling={isScrolling}
                     />
 
                     {filteredRecommendations.length > 0 && (
