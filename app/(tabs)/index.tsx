@@ -639,7 +639,7 @@ export default function HomeScreen(): JSX.Element {
                                     style={styles.closeButtonContainer}
                                     hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                                 >
-                                    <Ionicons name="close" size={24} color={Colors.cinematicGold} />
+                                    <Ionicons name="close" size={24} color={Colors.vibrantRed} />
                                 </TouchableOpacity>
                             </View>
 
@@ -773,6 +773,7 @@ const StickyHeader = memo(function StickyHeader({
 
             {filtersActive && (
                 <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
+                    <Ionicons name="trash-outline" size={14} color={Colors.vibrantRed} />
                     <Text style={styles.clearFiltersText}>{t("common.clearFilters")}</Text>
                 </TouchableOpacity>
             )}
@@ -1071,6 +1072,9 @@ const styles = StyleSheet.create({
     clearFiltersContainer: {
         paddingHorizontal: 16,
         marginBottom: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
     },
     clearFiltersText: {
         color: Colors.vibrantRed,
