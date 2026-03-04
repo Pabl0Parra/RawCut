@@ -59,12 +59,6 @@ export const ContinueWatchingCard: React.FC<ContinueWatchingCardProps> = ({
                 {/* Overlay oscuro para legibilidad */}
                 <View style={styles.overlay} />
 
-                {/* Ícono de Play central */}
-                <View style={styles.playOverlay}>
-                    <View style={styles.playCircle}>
-                        <Ionicons name="play" size={24} color={Colors.white} />
-                    </View>
-                </View>
 
                 {/* Etiqueta de Siguiente Episodio */}
                 {nextEpisode && (

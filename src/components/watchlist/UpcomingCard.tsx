@@ -1,7 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../constants/Colors";
 import { getImageUrl } from "../../lib/tmdb";
 import { WatchlistTVItem } from "../../hooks/useWatchlistData";
@@ -42,10 +41,6 @@ export const UpcomingCard: React.FC<UpcomingCardProps> = ({ item, daysRemaining,
                         </Text>
                         {nextEp?.name && <Text style={styles.epTitle} numberOfLines={1}>{nextEp.name}</Text>}
                     </View>
-
-                    <TouchableOpacity style={styles.bellButton} onPress={onRemindMe}>
-                        <Ionicons name="notifications-outline" size={20} color={Colors.successGreen} />
-                    </TouchableOpacity>
                 </View>
             </TouchableOpacity>
         </View>
@@ -73,7 +68,7 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     urgentDot: {
-        borderColor: Colors.successGreen,
+        borderColor: Colors.cinematicGold,
     },
     daysText: {
         color: Colors.white,
@@ -128,9 +123,5 @@ const styles = StyleSheet.create({
         color: Colors.metalSilver,
         fontSize: 12,
     },
-    bellButton: {
-        padding: 8,
-        backgroundColor: "rgba(74, 222, 128, 0.1)",
-        borderRadius: 20,
-    },
 });
+

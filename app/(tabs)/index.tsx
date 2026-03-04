@@ -271,9 +271,12 @@ export default function HomeScreen(): JSX.Element {
         useVoteStore.getState().fetchVotes(ids, mediaType);
     }, [data.length, mediaType]);
 
-    // ─── On focus: refresh user data ─────────────────────────────────────
+    // ─── On focus: refresh user data + scroll to top ─────────────────────
     useFocusEffect(
         useCallback(() => {
+            // Scroll back to top so the screen feels "fresh" on every visit.
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+
             if (!user) return;
 
             const { fetchUserContent, fetchTVProgress } = useContentStore.getState();

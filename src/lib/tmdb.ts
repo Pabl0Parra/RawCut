@@ -137,13 +137,10 @@ const filterByLanguage = <T extends { original_language: string }>(items: T[]): 
 
 export const getPopularMovies = async (page = 1): Promise<TMDbResponse<Movie>> => {
   const today = new Date().toISOString().split('T')[0];
-  const threeMonthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
-    .toISOString().split('T')[0];
 
   const response = await fetchTMDb<TMDbResponse<Movie>>("/discover/movie", {
     page: page.toString(),
-    sort_by: "popularity.desc",
-    "primary_release_date.gte": threeMonthsAgo,
+    sort_by: "primary_release_date.desc",
     "primary_release_date.lte": today,
     "vote_count.gte": "50",
     include_adult: "false",
@@ -153,19 +150,16 @@ export const getPopularMovies = async (page = 1): Promise<TMDbResponse<Movie>> =
 
 export const getPopularTVShows = async (page = 1): Promise<TMDbResponse<TVShow>> => {
   const today = new Date().toISOString().split('T')[0];
-  const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000)
-    .toISOString().split('T')[0];
 
   const response = await fetchTMDb<TMDbResponse<TVShow>>("/discover/tv", {
     page: page.toString(),
-    sort_by: "popularity.desc",
-    "first_air_date.gte": sixMonthsAgo,   
+    sort_by: "first_air_date.desc",
     "first_air_date.lte": today,
-    "vote_count.gte": "20",               
+    "vote_count.gte": "5",
     include_null_first_air_dates: "false",
   });
   return { ...response, results: filterByLanguage(response.results) };
-}
+};
 
 export const getCuratedTVShows = async (page = 1): Promise<TMDbResponse<TVShow>> => {
   const response = await fetchTMDb<TMDbResponse<TVShow>>("/discover/tv", {

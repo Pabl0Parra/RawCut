@@ -374,16 +374,15 @@ const styles = StyleSheet.create({
         marginTop: 0,
     } as TextStyle,
     errorContainer: {
-        backgroundColor: "rgba(220, 38, 38, 0.2)",
-        borderColor: Colors.errorRed,
-        borderWidth: 1,
+        backgroundColor: Colors.errorRed,
         borderRadius: 4,
         padding: 12,
         marginBottom: 16,
     } as ViewStyle,
     errorText: {
-        color: Colors.errorRed,
+        color: Colors.white,
         textAlign: "center",
+        fontWeight: "600",
     } as TextStyle,
     button: {
         backgroundColor: Colors.vibrantRed,

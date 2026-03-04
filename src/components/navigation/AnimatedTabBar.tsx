@@ -60,7 +60,7 @@ const BloodDrip = memo(({ delay, offsetX = 0, active }: { delay: number; offsetX
 
     const streamProps = useAnimatedProps(() => {
         const streamLength = interpolate(progress.value, [0, 1], [0, 20]);
-        const topWidth = 3.5;
+        const topWidth = 5.5;
         const opacity = interpolate(progress.value, [0, 0.05, 0.85, 1], [0, 1, 1, 0]);
         const y1 = BOTTOM_Y;
         const y2 = BOTTOM_Y + streamLength;
@@ -92,18 +92,18 @@ const BloodRing = memo(({ active }: { active: boolean }) => (
     <View style={styles.bloodRingContainer}>
         <Svg width={SIZE} height={SIZE + 20} style={StyleSheet.absoluteFill}>
             {/* Dark ring base */}
-            <Circle cx={CX} cy={CY} r={RING_R} stroke="#1A0000" strokeWidth="5" fill="none" />
+            <Circle cx={CX} cy={CY} r={RING_R} stroke="#1A0000" strokeWidth="7" fill="none" />
             {/* Deep red ring */}
-            <Circle cx={CX} cy={CY} r={RING_R} stroke="#6B0000" strokeWidth="3" fill="none" />
+            <Circle cx={CX} cy={CY} r={RING_R} stroke="#6B0000" strokeWidth="5" fill="none" />
             {/* Bright blood highlight arc */}
             <Circle
                 cx={CX} cy={CY} r={RING_R}
                 stroke="#CC0000"
-                strokeWidth="1.5"
+                strokeWidth="2.5"
                 strokeDasharray={`${2 * Math.PI * RING_R * 0.35} ${2 * Math.PI * RING_R * 0.65}`}
                 strokeDashoffset={-2 * Math.PI * RING_R * 0.07}
                 fill="none"
-                opacity={0.8}
+                opacity={0.9}
             />
             <BloodDrip delay={0} offsetX={-2} active={active} />
             <BloodDrip delay={500} offsetX={3} active={active} />
@@ -144,7 +144,7 @@ const TabBarItem = memo(function TabBarItem({
     }), [active]);
 
     const renderedIcon = useMemo(() =>
-        icon({ color: active ? Colors.vibrantRed : Colors.metalSilver, focused: active }),
+        icon({ color: active ? Colors.white : Colors.metalSilver, focused: active }),
         [icon, active],
     );
 
@@ -170,7 +170,10 @@ const TabBarItem = memo(function TabBarItem({
                 </Animated.View>
 
                 {badge !== undefined && (
-                    <View style={styles.badge}>
+                    <View style={[
+                        styles.badge,
+                        active && styles.badgeActive,
+                    ]}>
                         <Text style={styles.badgeText}>{badge}</Text>
                     </View>
                 )}
@@ -290,7 +293,7 @@ const styles = StyleSheet.create({
         height: 42,
         borderRadius: 21,
         backgroundColor: Colors.metalGray,
-        borderWidth: 2,
+        borderWidth: 3.5,
         borderColor: Colors.vibrantRed,
         overflow: 'hidden',
         zIndex: 1,
@@ -309,21 +312,26 @@ const styles = StyleSheet.create({
     },
     badge: {
         position: 'absolute',
-        top: 6,
-        right: 6,
-        backgroundColor: Colors.white,
+        top: 2,
+        right: 2,
+        backgroundColor: Colors.vibrantRed,
         borderRadius: 10,
-        minWidth: 14,
-        height: 14,
+        minWidth: 16,
+        height: 16,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 4,
         borderWidth: 1.5,
-        borderColor: Colors.vibrantRed,
+        borderColor: Colors.metalBlack,
         zIndex: 20,
     },
+    badgeActive: {
+        // When the circle is raised, shift badge to sit on its top-right border
+        top: -6,
+        right: -4,
+    },
     badgeText: {
-        color: Colors.vibrantRed,
+        color: Colors.white,
         fontSize: 9,
         fontWeight: 'bold',
         lineHeight: 11,
