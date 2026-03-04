@@ -40,7 +40,7 @@ export interface AuthFormFieldProps<T extends FieldValues> {
 function getBorderColor(state: InputState): string {
     switch (state) {
         case "focused":
-            return Colors.vibrantRed;
+            return Colors.focusBlue;
         case "error":
             return Colors.errorRed;
         default:
@@ -169,7 +169,7 @@ export function AuthFormField<T extends FieldValues>({
                         <Ionicons
                             name={showPassword ? "eye-off-outline" : "eye-outline"}
                             size={24}
-                            color={isFocused ? Colors.vibrantRed : Colors.metalSilver}
+                            color={isFocused ? Colors.focusBlue : Colors.metalSilver}
                         />
                     </TouchableOpacity>
                 )}
@@ -180,7 +180,7 @@ export function AuthFormField<T extends FieldValues>({
                     accessibilityRole="alert"
                     accessibilityLiveRegion="polite"
                 >
-                    {error}
+                    {t(error)}
                 </Text>
             )}
         </View>

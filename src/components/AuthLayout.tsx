@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, type ReactNode } from "react";
+import React, { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
     View,
@@ -104,6 +104,44 @@ function dismissKeyboard(): void {
     Keyboard.dismiss();
 }
 
+interface TypewriterTextProps {
+    readonly text: string;
+    readonly delay?: number;
+    readonly startDelay?: number;
+    readonly style?: TextStyle;
+}
+
+function TypewriterText({ text, delay = 50, startDelay = 500, style }: TypewriterTextProps): React.JSX.Element {
+    const [displayedText, setDisplayedText] = useState("");
+
+    useEffect(() => {
+        setDisplayedText("");
+        let timeoutId: ReturnType<typeof setTimeout>;
+        let intervalId: ReturnType<typeof setInterval>;
+
+        const startTyping = () => {
+            intervalId = setInterval(() => {
+                setDisplayedText((prev) => {
+                    if (prev.length < text.length) {
+                        return text.slice(0, prev.length + 1);
+                    }
+                    clearInterval(intervalId);
+                    return prev;
+                });
+            }, delay);
+        };
+
+        timeoutId = setTimeout(startTyping, startDelay);
+
+        return () => {
+            clearTimeout(timeoutId);
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [text, delay, startDelay]);
+
+    return <Text style={style}>{displayedText}</Text>;
+}
+
 interface AnimatedLogoProps {
     readonly scale: Animated.Value;
     readonly opacity: Animated.Value;
@@ -111,7 +149,7 @@ interface AnimatedLogoProps {
 }
 
 function AnimatedLogo({ scale, opacity, largeLogo }: Readonly<AnimatedLogoProps>): React.JSX.Element {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const textLogoSource = i18n.language === "en"
         ? require("../../assets/icons/rawcut-text-logo.png")
         : require("../../assets/icons/cortocrudotextlogo.png");
@@ -137,7 +175,7 @@ function AnimatedLogo({ scale, opacity, largeLogo }: Readonly<AnimatedLogoProps>
                 style={[styles.logoImage, largeLogo && styles.logoImageLarge]}
                 resizeMode="contain"
             />
-            <Text style={styles.logoSubtitle}>Tu guía de cine y series</Text>
+            <TypewriterText text={t("auth.loginSubtitle")} style={styles.logoSubtitle} />
         </Animated.View>
     );
 }
@@ -161,7 +199,7 @@ function StaticLogo({ title, subtitle, largeLogo }: Readonly<StaticLogoProps>): 
                 style={[styles.logoTextImage, largeLogo && styles.logoTextImageLarge]}
                 resizeMode="contain"
             />
-            <Text style={styles.logoSubtitle}>{subtitle}</Text>
+            <TypewriterText text={subtitle} style={styles.logoSubtitle} />
         </View>
     );
 }

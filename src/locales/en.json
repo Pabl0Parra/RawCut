@@ -136,7 +136,31 @@
         "confirmPassword": "Confirm Password",
         "confirmPasswordPlaceholder": "Repeat your password",
         "showPassword": "Show password",
-        "hidePassword": "Hide password"
+        "hidePassword": "Hide password",
+        "errorInvalidCredentials": "Invalid credentials. Please check your email/username and password.",
+        "errorUserNotFound": "User not found.",
+        "errorConnection": "Connection error. Please try again.",
+        "errorEmailExists": "This email is already registered.",
+        "errorUsernameExists": "This username is already taken.",
+        "errorRegister": "Error creating account. Please try again.",
+        "errorNoSession": "No active session found.",
+        "errorUpdateUsername": "Error updating username. Please try again.",
+        "errorPermissionDenied": "Update failed. Permission denied.",
+        "errorDeleteAccount": "Error deleting account on server. Please try again.",
+        "validation": {
+            "usernameMin": "Username must be at least 3 characters",
+            "usernameMax": "Username cannot exceed 20 characters",
+            "usernameRegex": "Username can only contain letters, numbers and underscores",
+            "emailInvalid": "Invalid email",
+            "passwordMin": "Password must be at least 8 characters",
+            "confirmPasswordRequired": "Confirm your password",
+            "passwordsMatch": "Passwords do not match",
+            "identifierRequired": "Enter your email or username",
+            "passwordRequired": "Enter your password",
+            "commentRequired": "Comment cannot be empty",
+            "commentMax": "Maximum 500 characters",
+            "recommendationMax": "Maximum 200 characters"
+        }
     },
     "profile": {
         "title": "Profile",

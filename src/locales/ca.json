@@ -136,7 +136,31 @@
         "confirmPassword": "Confirmar Contrasenya",
         "confirmPasswordPlaceholder": "Repeteix la teva contrasenya",
         "showPassword": "Mostrar contrasenya",
-        "hidePassword": "Ocultar contrasenya"
+        "hidePassword": "Ocultar contrasenya",
+        "errorInvalidCredentials": "Credencials invàlides. Verifica el teu email/usuari i contrasenya.",
+        "errorUserNotFound": "Usuari no trobat.",
+        "errorConnection": "Error de connexió. Si us plau, torna-ho a provar.",
+        "errorEmailExists": "Aquest email ja està registrat.",
+        "errorUsernameExists": "Aquest nom d'usuari ja està en ús.",
+        "errorRegister": "Error en crear el compte. Si us plau, torna-ho a provar.",
+        "errorNoSession": "No hi ha sessió activa.",
+        "errorUpdateUsername": "Error en actualitzar el nom d'usuari.",
+        "errorPermissionDenied": "No s'ha pogut actualitzar. Permís denegat.",
+        "errorDeleteAccount": "Error en eliminar el compte al servidor. Si us plau, torna-ho a provar.",
+        "validation": {
+            "usernameMin": "El nom d'usuari ha de tenir almenys 3 caràcters",
+            "usernameMax": "El nom d'usuari no pot tenir més de 20 caràcters",
+            "usernameRegex": "El nom d'usuari només pot contenir lletres, números i guions baixos",
+            "emailInvalid": "Email invàlid",
+            "passwordMin": "La contrasenya ha de tenir almenys 8 caràcters",
+            "confirmPasswordRequired": "Confirma la teva contrasenya",
+            "passwordsMatch": "Les contrasenyes no coincideixen",
+            "identifierRequired": "Introduïu el vostre correu electrònic o nom d'usuari",
+            "passwordRequired": "Introduïu la vostra contrasenya",
+            "commentRequired": "El comentari no pot estar buit",
+            "commentMax": "Màxim 500 caràcters",
+            "recommendationMax": "Màxim 200 caràcters"
+        }
     },
     "profile": {
         "title": "Perfil",

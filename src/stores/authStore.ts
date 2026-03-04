@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { supabase, Profile } from "../lib/supabase";
 import type { User, Session } from "@supabase/supabase-js";
+import i18n from "../lib/i18n";
 
 interface AuthState {
     user: User | null;
@@ -44,7 +45,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 );
 
                 if (rpcError || !rpcData || rpcData.length === 0) {
-                    set({ isLoading: false, error: "Usuario no encontrado" });
+                    set({ isLoading: false, error: i18n.t("auth.errorUserNotFound") });
                     return false;
                 }
 
@@ -57,7 +58,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             });
 
             if (error) {
-                set({ isLoading: false, error: "Credenciales inválidas" });
+                set({ isLoading: false, error: i18n.t("auth.errorInvalidCredentials") });
                 return false;
             }
 
@@ -73,7 +74,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             return true;
         } catch (err) {
             console.error("Error al iniciar sesión:", err);
-            set({ isLoading: false, error: "Error de conexión" });
+            set({ isLoading: false, error: i18n.t("auth.errorConnection") });
             return false;
         }
     },
@@ -90,7 +91,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 .maybeSingle();
 
             if (existingUser) {
-                set({ isLoading: false, error: "Usuario ya existe" });
+                set({ isLoading: false, error: i18n.t("auth.errorUsernameExists") });
                 return false;
             }
 
@@ -109,9 +110,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
             if (error) {
                 if (error.message.includes("already registered")) {
-                    set({ isLoading: false, error: "Este email ya está registrado" });
+                    set({ isLoading: false, error: i18n.t("auth.errorEmailExists") });
                 } else {
-                    set({ isLoading: false, error: "Error al registrar usuario" });
+                    set({ isLoading: false, error: i18n.t("auth.errorRegister") });
                 }
                 return false;
             }
@@ -130,7 +131,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             return true;
         } catch (err) {
             console.error("Error al registrar usuario:", err);
-            set({ isLoading: false, error: "Error de conexión" });
+            set({ isLoading: false, error: i18n.t("auth.errorConnection") });
             return false;
         }
     },
@@ -227,7 +228,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { user, profile } = get();
 
         if (!user || !profile) {
-            set({ isLoading: false, error: "No hay sesión activa" });
+            set({ isLoading: false, error: i18n.t("auth.errorNoSession") });
             return false;
         }
 
@@ -241,7 +242,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 .maybeSingle();
 
             if (existingUser) {
-                set({ isLoading: false, error: "Este nombre de usuario ya está en uso" });
+                set({ isLoading: false, error: i18n.t("auth.errorUsernameExists") });
                 return false;
             }
 
@@ -253,13 +254,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 .select();
 
             if (error) {
-                set({ isLoading: false, error: "Error al actualizar nombre de usuario" });
+                set({ isLoading: false, error: i18n.t("auth.errorUpdateUsername") });
                 return false;
             }
 
             if (!updatedRows || updatedRows.length === 0) {
                 console.error("Store: Username update affected 0 rows. Possible RLS issue.");
-                set({ isLoading: false, error: "No se pudo actualizar. Permiso denegado." });
+                set({ isLoading: false, error: i18n.t("auth.errorPermissionDenied") });
                 return false;
             }
 
@@ -283,7 +284,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const { user } = get();
 
         if (!user) {
-            set({ isLoading: false, error: "No hay sesión activa" });
+            set({ isLoading: false, error: i18n.t("auth.errorNoSession") });
             return false;
         }
 
@@ -293,7 +294,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
             if (rpcError) {
                 console.error("Store: Error calling delete_user_account RPC:", rpcError);
-                set({ isLoading: false, error: "Error al eliminar la cuenta en el servidor" });
+                set({ isLoading: false, error: i18n.t("auth.errorDeleteAccount") });
                 return false;
             }
 

@@ -1,3 +1,4 @@
+// src/types/homeScreen.types.ts
 import type { Movie, TVShow } from "../lib/tmdb";
 
 export interface DiscoverParams {

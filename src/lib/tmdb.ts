@@ -1,3 +1,4 @@
+// src/lib/tmdb.ts
 import i18next from "i18next";
 
 const TMDB_API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY || "";

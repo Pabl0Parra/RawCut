@@ -1,3 +1,4 @@
+// src/stores/recommendationStore.ts
 import { create } from "zustand";
 import { supabase, Recommendation, RecommendationComment, Profile } from "../lib/supabase";
 import { useAuthStore } from "./authStore";

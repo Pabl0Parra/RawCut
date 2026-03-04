@@ -70,9 +70,7 @@ import {
     useDiscoverTVShows,
     useMovieGenres,
     useTVGenres,
-    useCuratedTVShows,
     useClassicMovies,
-    useCuratedMovies,
     useNewReleasesContent,
     useGenreContent,
     flattenPages,
@@ -80,38 +78,52 @@ import {
 import { HeroCarousel } from "../../src/components/home/HeroCarousel";
 import { HomeSkeleton } from "../../src/components/home/HomeSkeleton";
 import { GridSkeleton } from "../../src/components/GridSkeleton";
-import { HomeSection } from "../../src/components/home/HomeSection";
+import { HomeSection, type ContentActionHandlers } from "../../src/components/home/HomeSection";
 
 
-const { height } = Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-interface MovieCardItemProps {
-    item: Movie | TVShow;
-    mediaType: MediaType;
-    handleToggleFavorite: (id: number, type: MediaType) => Promise<void>;
-    handleToggleWatchlist: (id: number, type: MediaType) => Promise<void>;
-    handleToggleWatched: (id: number, type: MediaType) => Promise<void>;
-    handleVote: (id: number, type: MediaType, vote: number) => Promise<void>;
-    fullWidth?: boolean;
+const NUM_COLUMNS = 3;
+const COL_GAP = 12;
+const SIDE_PADDING = 16;
+const CARD_WIDTH = (SCREEN_WIDTH - SIDE_PADDING * 2 - COL_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
+const POSTER_HEIGHT = CARD_WIDTH * 1.5;
+const INFO_HEIGHT = 66;
+const ITEM_ROW_HEIGHT = POSTER_HEIGHT + INFO_HEIGHT + 16;
+
+// ─── Typed recommendation from useForYouContent ──────────────────────────────
+
+interface ForYouRecommendation {
+    readonly mediaType: MediaType;
+    readonly items: ReadonlyArray<Movie | TVShow>;
 }
 
-const MovieCardItem = memo(({
+// ─── MovieCardItem (grid cell) ───────────────────────────────────────────────
+
+interface MovieCardItemProps {
+    readonly item: Movie | TVShow;
+    readonly mediaType: MediaType;
+    readonly handleToggleFavorite: (id: number, type: MediaType) => Promise<void>;
+    readonly handleToggleWatchlist: (id: number, type: MediaType) => Promise<void>;
+    readonly handleToggleWatched: (id: number, type: MediaType) => Promise<void>;
+    readonly handleVote: (id: number, type: MediaType, vote: number) => Promise<void>;
+    readonly fullWidth?: boolean;
+}
+
+const MovieCardItem = memo(function MovieCardItem({
     item,
     mediaType,
     handleToggleFavorite,
     handleToggleWatchlist,
     handleToggleWatched,
     handleVote,
-    fullWidth
-}: MovieCardItemProps) => {
-
-
-    const isFavorite = useContentStore(s => s.isFavorite(item.id, mediaType));
-    const inWatchlist = useContentStore(s => s.isInWatchlist(item.id, mediaType));
-    const isWatched = useContentStore(s => s.isWatched(item.id, mediaType));
-
-    const communityRating = useVoteStore(s => s.getCommunityScore(item.id, mediaType)?.avg);
-    const userVote = useVoteStore(s => s.getUserVote(item.id, mediaType));
+    fullWidth,
+}: MovieCardItemProps) {
+    const isFavorite = useContentStore((s) => s.isFavorite(item.id, mediaType));
+    const inWatchlist = useContentStore((s) => s.isInWatchlist(item.id, mediaType));
+    const isWatched = useContentStore((s) => s.isWatched(item.id, mediaType));
+    const communityRating = useVoteStore((s) => s.getCommunityScore(item.id, mediaType)?.avg);
+    const userVote = useVoteStore((s) => s.getUserVote(item.id, mediaType));
 
     return (
         <MovieCard
@@ -131,19 +143,17 @@ const MovieCardItem = memo(({
     );
 });
 
+// ─── HomeScreen ──────────────────────────────────────────────────────────────
+
 export default function HomeScreen(): JSX.Element {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<MediaType>("movie");
-    const [selectedCategory, setSelectedCategory] = useState<"custom" | "curated" | "classic">("custom");
-
 
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
 
-
     const [refreshing, setRefreshing] = useState(false);
     const [showProfileBanner, setShowProfileBanner] = useState(false);
-
 
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [selectedGenre, setSelectedGenre] = useState<number | string | null>(null);
@@ -153,15 +163,12 @@ export default function HomeScreen(): JSX.Element {
     const [isScrolling, setIsScrolling] = useState(false);
     const flatListRef = React.useRef<FlatList>(null);
 
+    const { recommendations } = useForYouContent("foryou");
 
+    // Cast the weakly-typed hook result to our strict type
+    const typedRecommendations = recommendations as ReadonlyArray<ForYouRecommendation>;
 
-
-
-    const {
-        recommendations,
-    } = useForYouContent("foryou");
-
-    // ─── Build discover params when filters are active ───────────────────────
+    // ─── Build discover params when filters are active ───────────────────
     const discoverParams = useMemo(() => buildDiscoverParams({
         currentPage: 1,
         sortBy,
@@ -170,69 +177,51 @@ export default function HomeScreen(): JSX.Element {
         activeTab: activeTab === "movie" ? "movies" : "tv",
     }), [sortBy, selectedGenre, selectedYear, activeTab]);
 
-    const useDiscover = useMemo(() => filtersActive || sortBy !== DEFAULT_SORT_VALUE, [filtersActive, sortBy]);
+    const useDiscover = filtersActive || sortBy !== DEFAULT_SORT_VALUE;
 
-    // ─── Browse content via TanStack Query ───────────────────────────────────
+    // ─── Browse content via TanStack Query ───────────────────────────────
     const popularMoviesQuery = usePopularMovies();
     const popularTVQuery = usePopularTVShows();
     const discoverMoviesQuery = useDiscoverMovies(discoverParams, useDiscover && activeTab === "movie");
     const discoverTVQuery = useDiscoverTVShows(discoverParams, useDiscover && activeTab === "tv");
 
-    // ─── Genre queries (auto-cached, no effect needed) ────────────────────────
+    // ─── Genre queries ───────────────────────────────────────────────────
     const movieGenresQuery = useMovieGenres();
     const tvGenresQuery = useTVGenres();
-    // Derive processed genres from whichever query matches the active tab
     const genres = useMemo(() => {
         const rawGenres = activeTab === "tv" ? (tvGenresQuery.data ?? []) : (movieGenresQuery.data ?? []);
         return sortGenresAlphabetically(
-            rawGenres.map((g) => ({ ...g, name: processGenreName(g.name) }))
+            rawGenres.map((g) => ({ ...g, name: processGenreName(g.name) })),
         );
     }, [activeTab, movieGenresQuery.data, tvGenresQuery.data]);
 
-    // ─── Derive data arrays ───────────────────────────────────────────────────
-    const moviesFromQuery = useMemo(() => useDiscover
-        ? flattenPages(discoverMoviesQuery.data)
-        : flattenPages(popularMoviesQuery.data), [useDiscover, discoverMoviesQuery.data, popularMoviesQuery.data]);
+    // ─── Derive data arrays ──────────────────────────────────────────────
+    const moviesFromQuery = useMemo(
+        () => useDiscover ? flattenPages(discoverMoviesQuery.data) : flattenPages(popularMoviesQuery.data),
+        [useDiscover, discoverMoviesQuery.data, popularMoviesQuery.data],
+    );
+    const tvShowsFromQuery = useMemo(
+        () => useDiscover ? flattenPages(discoverTVQuery.data) : flattenPages(popularTVQuery.data),
+        [useDiscover, discoverTVQuery.data, popularTVQuery.data],
+    );
 
-    const tvShowsFromQuery = useMemo(() => useDiscover
-        ? flattenPages(discoverTVQuery.data)
-        : flattenPages(popularTVQuery.data), [useDiscover, discoverTVQuery.data, popularTVQuery.data]);
-
-    // Local state for search overrides (search results aren't cached)
+    // Local state for search overrides
     const [searchMovies_, setSearchMovies] = useState<Movie[]>([]);
     const [searchTVShows_, setSearchTVShows] = useState<TVShow[]>([]);
-    const isInSearchMode = isSearching || (searchQuery.trim().length > 0 && (searchMovies_.length > 0 || searchTVShows_.length > 0));
+    const isInSearchMode = isSearching
+        || (searchQuery.trim().length > 0 && (searchMovies_.length > 0 || searchTVShows_.length > 0));
 
     const movies: Movie[] = isInSearchMode ? searchMovies_ : moviesFromQuery;
     const tvShows: TVShow[] = isInSearchMode ? searchTVShows_ : tvShowsFromQuery;
 
-    // ─── Active query for current tab ────────────────────────────────────────
+    // ─── Active query for current tab ────────────────────────────────────
     const activeQuery = activeTab === "movie"
         ? (useDiscover ? discoverMoviesQuery : popularMoviesQuery)
         : (useDiscover ? discoverTVQuery : popularTVQuery);
     const loading = activeQuery.isLoading;
     const isFetchingNextPage = activeQuery.isFetchingNextPage;
 
-    // ─── ForYou subcategory queries ───────────────────────────────────────
-    const curatedTVQuery = useCuratedTVShows();
-    const curatedMovieQuery = useCuratedMovies();
-    const classicQuery = useClassicMovies();
-
-    const curatedShows = useMemo(() => flattenPages(curatedTVQuery.data), [curatedTVQuery.data]);
-    const curatedMovies = useMemo(() => flattenPages(curatedMovieQuery.data), [curatedMovieQuery.data]);
-    const classicMovies_ = useMemo(() => flattenPages(classicQuery.data), [classicQuery.data]);
-
-    // ─── New Content Queries ───────────────────────────────────────────────
-    const newReleasesQuery = useNewReleasesContent(activeTab);
-    const actionQuery = useGenreContent(activeTab, activeTab === "movie" ? "28" : "10759", "action");
-    const horrorQuery = useGenreContent(activeTab, activeTab === "movie" ? "27,53" : "9648,10765", "horror");
-
-    const newReleases = useMemo(() => flattenPages(newReleasesQuery.data), [newReleasesQuery.data]);
-    const actionContent = useMemo(() => flattenPages(actionQuery.data), [actionQuery.data]);
-    const horrorContent = useMemo(() => flattenPages(horrorQuery.data), [horrorQuery.data]);
-
     const translateY = useSharedValue(0);
-
 
     const animatedModalStyle = useAnimatedStyle(() => ({
         transform: [{ translateY: translateY.value }],
@@ -260,26 +249,29 @@ export default function HomeScreen(): JSX.Element {
         } else {
             translateY.value = 0;
         }
-    }, [showFilterModal]);
-
+    }, [showFilterModal, translateY]);
 
     const user = useAuthStore((s) => s.user);
-    const tvProgress = useContentStore((s) => s.tvProgress);
-    const getNextEpisodeToWatch = useContentStore((s) => s.getNextEpisodeToWatch);
-
 
     const data = activeTab === "movie" ? movies : tvShows;
     const mediaType: MediaType = activeTab === "movie" ? "movie" : "tv";
 
+    // Pad data array so partial last rows don't cause layout jank
+    const paddedData = useMemo(() => {
+        const remainder = data.length % NUM_COLUMNS;
+        if (remainder === 0) return data as ReadonlyArray<Movie | TVShow | null>;
+        const fillers: null[] = Array(NUM_COLUMNS - remainder).fill(null) as null[];
+        return [...data, ...fillers] as ReadonlyArray<Movie | TVShow | null>;
+    }, [data]);
 
-
+    // ─── Fetch community votes for visible content ──────────────────────
     useEffect(() => {
         if (data.length === 0) return;
         const ids = data.map((item) => item.id);
         useVoteStore.getState().fetchVotes(ids, mediaType);
     }, [data.length, mediaType]);
 
-
+    // ─── On focus: refresh user data ─────────────────────────────────────
     useFocusEffect(
         useCallback(() => {
             if (!user) return;
@@ -294,10 +286,7 @@ export default function HomeScreen(): JSX.Element {
         }, [user]),
     );
 
-
-
-
-
+    // ─── Reset on tab change ─────────────────────────────────────────────
     useEffect(() => {
         setSearchQuery("");
         setSearchMovies([]);
@@ -305,9 +294,9 @@ export default function HomeScreen(): JSX.Element {
         resetFilters(false);
     }, [activeTab]);
 
+    // ─── Filter management ───────────────────────────────────────────────
 
-
-    const resetFilters = useCallback((reload: boolean = true): void => {
+    const resetFilters = useCallback((_reload: boolean = true): void => {
         setSelectedGenre(null);
         setSelectedYear("");
         setSortBy(DEFAULT_SORT_VALUE);
@@ -315,13 +304,7 @@ export default function HomeScreen(): JSX.Element {
     }, []);
 
     const applyFilters = useCallback((): void => {
-        const activeFiltersExist = hasActiveFilters(
-            selectedGenre,
-            selectedYear,
-            sortBy,
-            DEFAULT_SORT_VALUE,
-        );
-
+        const activeFiltersExist = hasActiveFilters(selectedGenre, selectedYear, sortBy, DEFAULT_SORT_VALUE);
         setFiltersActive(activeFiltersExist);
         setShowFilterModal(false);
     }, [selectedGenre, selectedYear, sortBy]);
@@ -339,6 +322,16 @@ export default function HomeScreen(): JSX.Element {
         setFiltersActive(true);
     }, []);
 
+    // Specific callback for "classics" view-all (different filter combo)
+    const handleViewAllClassics = useCallback(() => {
+        setSelectedGenre(null);
+        setSelectedYear("2000");
+        setSortBy("vote_average.desc");
+        setFiltersActive(true);
+    }, []);
+
+    // ─── Search ──────────────────────────────────────────────────────────
+
     const handleSearch = useCallback(async (): Promise<void> => {
         if (!searchQuery.trim()) {
             setSearchMovies([]);
@@ -348,7 +341,6 @@ export default function HomeScreen(): JSX.Element {
         }
 
         setIsSearching(true);
-
         try {
             if (activeTab === "movie") {
                 const response = await searchMovies(searchQuery);
@@ -379,10 +371,11 @@ export default function HomeScreen(): JSX.Element {
         setSearchTVShows([]);
     }, []);
 
+    // ─── Content action handlers (stable — no deps) ─────────────────────
+
     const handleToggleFavorite = useCallback(
         async (tmdbId: number, type: MediaType): Promise<void> => {
             if (!useAuthStore.getState().user) return;
-
             try {
                 const store = useContentStore.getState();
                 if (store.isFavorite(tmdbId, type)) {
@@ -400,7 +393,6 @@ export default function HomeScreen(): JSX.Element {
     const handleToggleWatchlist = useCallback(
         async (tmdbId: number, type: MediaType): Promise<void> => {
             if (!useAuthStore.getState().user) return;
-
             try {
                 const store = useContentStore.getState();
                 if (store.isInWatchlist(tmdbId, type)) {
@@ -437,31 +429,47 @@ export default function HomeScreen(): JSX.Element {
         [],
     );
 
+    // Bundle action handlers into a stable object for DiscoverHeader
+    const actionHandlers: ContentActionHandlers = useMemo(() => ({
+        onToggleFavorite: handleToggleFavorite,
+        onToggleWatchlist: handleToggleWatchlist,
+        onToggleWatched: handleToggleWatched,
+        onVote: handleVote,
+    }), [handleToggleFavorite, handleToggleWatchlist, handleToggleWatched, handleVote]);
+
+    // ─── FlatList callbacks ──────────────────────────────────────────────
+
     const renderItem = useCallback(
-        (renderProps: { item: Movie | TVShow }): JSX.Element => (
-            <MovieCardItem
-                item={renderProps.item}
-                mediaType={mediaType}
-                handleToggleFavorite={handleToggleFavorite}
-                handleToggleWatchlist={handleToggleWatchlist}
-                handleToggleWatched={handleToggleWatched}
-                handleVote={handleVote}
-            />
-        ),
+        ({ item }: { item: Movie | TVShow | null }): JSX.Element => {
+            if (!item) return <View style={styles.placeholderCard} />;
+            return (
+                <MovieCardItem
+                    item={item}
+                    mediaType={mediaType}
+                    handleToggleFavorite={handleToggleFavorite}
+                    handleToggleWatchlist={handleToggleWatchlist}
+                    handleToggleWatched={handleToggleWatched}
+                    handleVote={handleVote}
+                />
+            );
+        },
         [mediaType, handleToggleFavorite, handleToggleWatchlist, handleToggleWatched, handleVote],
     );
 
+    // ⚠️ getItemLayout REMOVED — the ListHeaderComponent has highly variable
+    // height (hero carousel, conditional sections, skeletons). Providing fixed
+    // offsets causes FlatList to miscalculate scroll positions on pagination,
+    // producing the "jump" effect. Without it FlatList estimates layouts, which
+    // is slightly slower for scrollToIndex but eliminates the offset mismatch.
+
     const renderFooter = useCallback((): JSX.Element | null => {
         if (!isFetchingNextPage) return null;
-
         return (
             <View style={styles.footerContainer}>
                 <ActivityIndicator size="small" color={Colors.cinematicGold} />
             </View>
         );
-    }, [loading, data.length]);
-
-
+    }, [isFetchingNextPage]);
 
     const handleEndReached = useCallback((): void => {
         if (!isSearching && activeQuery.hasNextPage && !isFetchingNextPage) {
@@ -469,25 +477,10 @@ export default function HomeScreen(): JSX.Element {
         }
     }, [isSearching, activeQuery, isFetchingNextPage]);
 
-    const handleDismissBanner = useCallback((): void => {
-        setShowProfileBanner(false);
-    }, []);
+    const handleOpenFilters = useCallback((): void => setShowFilterModal(true), []);
+    const handleCloseFilters = useCallback((): void => setShowFilterModal(false), []);
 
-
-
-    const handleOpenFilters = useCallback((): void => {
-        setShowFilterModal(true);
-    }, []);
-
-    const handleCloseFilters = useCallback((): void => {
-        setShowFilterModal(false);
-    }, []);
-
-
-
-
-
-
+    // ─── Filter modal helpers ────────────────────────────────────────────
 
     const renderSortOption = (option: SortOption): JSX.Element => (
         <TouchableOpacity
@@ -513,14 +506,7 @@ export default function HomeScreen(): JSX.Element {
         </TouchableOpacity>
     );
 
-    // The legacy renderForYouContent and renderMainContent are no longer used
-    // as we integrated everything into the main FlatList and ListHeaderComponent.
-
-
-
-
-
-
+    // ─── Swipe gesture ───────────────────────────────────────────────────
 
     const swipeGesture = useMemo(() => {
         const tabs: MediaType[] = ["movie", "tv"];
@@ -539,136 +525,77 @@ export default function HomeScreen(): JSX.Element {
             });
     }, [activeTab]);
 
+    // ─── Scroll callbacks (stable refs to avoid re-renders) ──────────────
+
+    const onScrollBeginDrag = useCallback(() => setIsScrolling(true), []);
+    const onScrollEndDrag = useCallback(() => setIsScrolling(false), []);
+    const onMomentumScrollEnd = useCallback(() => setIsScrolling(false), []);
+
+    const keyExtractor = useCallback(
+        (item: Movie | TVShow | null, index: number) =>
+            item ? `${mediaType}-${item.id}` : `filler-${index}`,
+        [mediaType],
+    );
+
+    // ─── ListHeaderComponent — memoized via DiscoverHeader ───────────────
+    // We pass only primitives + stable callback refs so memo actually works.
+
+    const listHeader = useMemo(() => (
+        <DiscoverHeader
+            activeTab={activeTab}
+            loading={loading}
+            dataLength={data.length}
+            searchQuery={searchQuery}
+            filtersActive={filtersActive}
+            isInSearchMode={isInSearchMode}
+            isSearching={isSearching}
+            isScrolling={isScrolling}
+            recommendations={typedRecommendations}
+            actionHandlers={actionHandlers}
+            onViewAll={handleViewAll}
+            onViewAllClassics={handleViewAllClassics}
+        />
+    ), [
+        activeTab, loading, data.length, searchQuery, filtersActive,
+        isInSearchMode, isSearching, isScrolling, typedRecommendations,
+        actionHandlers, handleViewAll, handleViewAllClassics,
+    ]);
+
     return (
         <View style={styles.safeArea}>
-            <View style={styles.stickyHeaderContainer}>
-                <View style={styles.discoverHeader}>
-                    <View style={styles.headerTop}>
-                        <Text style={styles.discoverTitle}>{t("tabs.discover")}</Text>
-                        <View style={styles.pillContainer}>
-                            <TouchableOpacity
-                                style={[styles.pill, activeTab === "movie" && styles.activePill]}
-                                onPress={() => setActiveTab("movie")}
-                            >
-                                <Ionicons
-                                    name="film-outline"
-                                    size={14}
-                                    color={activeTab === "movie" ? Colors.white : Colors.metalSilver}
-                                />
-                                <Text style={[styles.pillText, activeTab === "movie" && styles.activePillText]}>
-                                    {t("tabs.movies")}
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.pill, activeTab === "tv" && styles.activePill]}
-                                onPress={() => setActiveTab("tv")}
-                            >
-                                <Ionicons
-                                    name="tv-outline"
-                                    size={14}
-                                    color={activeTab === "tv" ? Colors.white : Colors.metalSilver}
-                                />
-                                <Text style={[styles.pillText, activeTab === "tv" && styles.activePillText]}>
-                                    {t("tabs.tv")}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    <View style={styles.headerSearchRow}>
-                        <View style={styles.searchWrapper}>
-                            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                                <MaterialCommunityIcons name="magnify" size={20} color={Colors.metalSilver} />
-                            </TouchableOpacity>
-                            <TextInput
-                                style={styles.searchInput}
-                                placeholder={t("common.searchPlaceholder")}
-                                placeholderTextColor={Colors.metalSilver}
-                                value={searchQuery}
-                                onChangeText={setSearchQuery}
-                                onSubmitEditing={handleSearch}
-                                returnKeyType="search"
-                            />
-                            {searchQuery.length > 0 && (
-                                <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
-                                    <Ionicons name="close-circle" size={18} color={Colors.metalSilver} />
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                        <TouchableOpacity
-                            style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
-                            onPress={handleOpenFilters}
-                        >
-                            <Ionicons
-                                name="filter"
-                                size={20}
-                                color={filtersActive ? Colors.white : Colors.metalSilver}
-                            />
-                        </TouchableOpacity>
-                    </View>
-
-                    {filtersActive && (
-                        <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
-                            <Text style={styles.clearFiltersText}>{t("common.clearFilters")}</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </View>
+            <StickyHeader
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                handleSearch={handleSearch}
+                handleClearSearch={handleClearSearch}
+                filtersActive={filtersActive}
+                handleOpenFilters={handleOpenFilters}
+                resetFilters={resetFilters}
+            />
 
             <GestureDetector gesture={swipeGesture}>
                 <FlatList
                     ref={flatListRef}
-                    data={data}
+                    data={paddedData}
                     renderItem={renderItem}
-                    keyExtractor={(item) => `${mediaType}-${item.id}`}
-                    numColumns={3}
+                    keyExtractor={keyExtractor}
+                    numColumns={NUM_COLUMNS}
                     columnWrapperStyle={styles.columnWrapper}
                     contentContainerStyle={styles.listContent}
                     showsVerticalScrollIndicator={false}
                     onEndReached={handleEndReached}
                     onEndReachedThreshold={0.5}
-                    onScrollBeginDrag={() => setIsScrolling(true)}
-                    onScrollEndDrag={() => setIsScrolling(false)}
-                    onMomentumScrollEnd={() => setIsScrolling(false)}
-                    ListHeaderComponent={<DiscoverHeader
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                        recommendations={recommendations}
-                        loading={loading}
-                        data={data}
-                        searchQuery={searchQuery}
-                        setSearchQuery={setSearchQuery}
-                        handleSearch={handleSearch}
-                        handleClearSearch={handleClearSearch}
-                        filtersActive={filtersActive}
-                        handleOpenFilters={handleOpenFilters}
-                        resetFilters={resetFilters}
-                        isInSearchMode={isInSearchMode}
-                        curatedMovies={curatedMovies}
-                        curatedShows={curatedShows}
-                        classicMovies_={classicMovies_}
-                        handleToggleFavorite={handleToggleFavorite}
-                        handleToggleWatchlist={handleToggleWatchlist}
-                        handleToggleWatched={handleToggleWatched}
-                        handleVote={handleVote}
-                        moviesFromQuery={moviesFromQuery}
-                        tvShowsFromQuery={tvShowsFromQuery}
-                        newReleases={newReleases}
-                        actionContent={actionContent}
-                        horrorContent={horrorContent}
-                        handleViewAll={handleViewAll}
-                        setSelectedGenre={setSelectedGenre}
-                        setSelectedYear={setSelectedYear}
-                        setSortBy={setSortBy}
-                        setFiltersActive={setFiltersActive}
-                        isSearching={isSearching}
-                        isScrolling={isScrolling}
-                    />}
+                    onScrollBeginDrag={onScrollBeginDrag}
+                    onScrollEndDrag={onScrollEndDrag}
+                    onMomentumScrollEnd={onMomentumScrollEnd}
+                    ListHeaderComponent={listHeader}
                     ListFooterComponent={renderFooter}
-                    initialNumToRender={12}
-                    maxToRenderPerBatch={6}
-                    windowSize={3}
-                    updateCellsBatchingPeriod={50}
+                    initialNumToRender={9}
+                    maxToRenderPerBatch={9}
+                    windowSize={5}
+                    updateCellsBatchingPeriod={100}
                     removeClippedSubviews
                     refreshControl={
                         <RefreshControl
@@ -681,6 +608,7 @@ export default function HomeScreen(): JSX.Element {
                 />
             </GestureDetector>
 
+            {/* ─── Filter Modal ─── */}
             <Modal
                 visible={showFilterModal}
                 animationType="slide"
@@ -748,25 +676,310 @@ export default function HomeScreen(): JSX.Element {
     );
 }
 
+// ─── StickyHeader ────────────────────────────────────────────────────────────
+
+interface StickyHeaderProps {
+    readonly activeTab: MediaType;
+    readonly setActiveTab: (tab: MediaType) => void;
+    readonly searchQuery: string;
+    readonly setSearchQuery: (q: string) => void;
+    readonly handleSearch: () => void;
+    readonly handleClearSearch: () => void;
+    readonly filtersActive: boolean;
+    readonly handleOpenFilters: () => void;
+    readonly resetFilters: (reload?: boolean) => void;
+}
+
+const StickyHeader = memo(function StickyHeader({
+    activeTab,
+    setActiveTab,
+    searchQuery,
+    setSearchQuery,
+    handleSearch,
+    handleClearSearch,
+    filtersActive,
+    handleOpenFilters,
+    resetFilters,
+}: StickyHeaderProps) {
+    const { t } = useTranslation();
+    return (
+        <View style={styles.stickyHeader}>
+            <View style={styles.headerTop}>
+                <Text style={styles.discoverTitle}>{t("tabs.discover")}</Text>
+                <View style={styles.pillContainer}>
+                    <TouchableOpacity
+                        style={[styles.pill, activeTab === "movie" && styles.activePill]}
+                        onPress={() => setActiveTab("movie")}
+                    >
+                        <Ionicons
+                            name="film-outline"
+                            size={14}
+                            color={activeTab === "movie" ? Colors.white : Colors.metalSilver}
+                        />
+                        <Text style={[styles.pillText, activeTab === "movie" && styles.activePillText]}>
+                            {t("tabs.movies")}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.pill, activeTab === "tv" && styles.activePill]}
+                        onPress={() => setActiveTab("tv")}
+                    >
+                        <Ionicons
+                            name="tv-outline"
+                            size={14}
+                            color={activeTab === "tv" ? Colors.white : Colors.metalSilver}
+                        />
+                        <Text style={[styles.pillText, activeTab === "tv" && styles.activePillText]}>
+                            {t("tabs.tv")}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            <View style={styles.headerSearchRow}>
+                <View style={styles.searchWrapper}>
+                    <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                        <MaterialCommunityIcons name="magnify" size={20} color={Colors.metalSilver} />
+                    </TouchableOpacity>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder={t("common.searchPlaceholder")}
+                        placeholderTextColor={Colors.metalSilver}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        onSubmitEditing={handleSearch}
+                        returnKeyType="search"
+                    />
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity style={styles.clearButton} onPress={handleClearSearch}>
+                            <Ionicons name="close-circle" size={18} color={Colors.metalSilver} />
+                        </TouchableOpacity>
+                    )}
+                </View>
+                <TouchableOpacity
+                    style={[styles.filterButtonCompact, filtersActive && styles.activeFilterButton]}
+                    onPress={handleOpenFilters}
+                >
+                    <Ionicons
+                        name="filter"
+                        size={20}
+                        color={filtersActive ? Colors.white : Colors.metalSilver}
+                    />
+                </TouchableOpacity>
+            </View>
+
+            {filtersActive && (
+                <TouchableOpacity style={styles.clearFiltersContainer} onPress={() => resetFilters(true)}>
+                    <Text style={styles.clearFiltersText}>{t("common.clearFilters")}</Text>
+                </TouchableOpacity>
+            )}
+        </View>
+    );
+});
+
+// ─── DiscoverHeader ──────────────────────────────────────────────────────────
+// KEY CHANGE: This component now calls TanStack Query hooks directly for its
+// section data. Since TanStack Query deduplicates by queryKey, no extra network
+// requests are made — it reads from the same cache the parent populated.
+// This means we pass ZERO array props, so memo actually blocks re-renders.
+
+interface DiscoverHeaderProps {
+    readonly activeTab: MediaType;
+    readonly loading: boolean;
+    readonly dataLength: number;
+    readonly searchQuery: string;
+    readonly filtersActive: boolean;
+    readonly isInSearchMode: boolean;
+    readonly isSearching: boolean;
+    readonly isScrolling: boolean;
+    readonly recommendations: ReadonlyArray<ForYouRecommendation>;
+    readonly actionHandlers: ContentActionHandlers;
+    readonly onViewAll: (genreId: number | string | null) => void;
+    readonly onViewAllClassics: () => void;
+}
+
+const DiscoverHeader = memo(function DiscoverHeader({
+    activeTab,
+    loading,
+    dataLength,
+    searchQuery,
+    filtersActive,
+    isInSearchMode,
+    isSearching,
+    isScrolling,
+    recommendations,
+    actionHandlers,
+    onViewAll,
+    onViewAllClassics,
+}: DiscoverHeaderProps) {
+    const { t } = useTranslation();
+
+    // ─── Consume TanStack Query caches directly (no extra fetches) ───────
+    const newReleasesQuery = useNewReleasesContent(activeTab);
+    const actionQuery = useGenreContent(activeTab, activeTab === "movie" ? "28" : "10759", "action");
+    const horrorQuery = useGenreContent(activeTab, activeTab === "movie" ? "27,53" : "9648,10765", "horror");
+    const popularMoviesQuery = usePopularMovies();
+    const popularTVQuery = usePopularTVShows();
+
+    // Only needed when activeTab === "movie"
+    const classicQuery = useClassicMovies();
+
+    const newReleases = useMemo(() => flattenPages(newReleasesQuery.data), [newReleasesQuery.data]);
+    const actionContent = useMemo(() => flattenPages(actionQuery.data), [actionQuery.data]);
+    const horrorContent = useMemo(() => flattenPages(horrorQuery.data), [horrorQuery.data]);
+    const popularMovies = useMemo(() => flattenPages(popularMoviesQuery.data), [popularMoviesQuery.data]);
+    const popularTV = useMemo(() => flattenPages(popularTVQuery.data), [popularTVQuery.data]);
+    const classicMovies = useMemo(() => flattenPages(classicQuery.data), [classicQuery.data]);
+
+    const popularContent = activeTab === "movie" ? popularMovies : popularTV;
+
+    const filteredRecommendations = useMemo(
+        () => recommendations.filter((rec) => rec.mediaType === activeTab),
+        [recommendations, activeTab],
+    );
+
+    // Stable view-all callbacks for genre sections
+    const handleViewAllAction = useCallback(
+        () => onViewAll(activeTab === "movie" ? "28" : "10759"),
+        [activeTab, onViewAll],
+    );
+    const handleViewAllHorror = useCallback(
+        () => onViewAll(activeTab === "movie" ? "27,53" : "9648,10765"),
+        [activeTab, onViewAll],
+    );
+    const handleViewAllPopular = useCallback(
+        () => onViewAll(null),
+        [onViewAll],
+    );
+
+    // ─── Conditional rendering ───────────────────────────────────────────
+
+    if (loading && dataLength === 0) {
+        return (
+            <View style={styles.discoverHeader}>
+                <View style={styles.centerContainer}>
+                    <HomeSkeleton />
+                </View>
+            </View>
+        );
+    }
+
+    if (isSearching) {
+        return (
+            <View style={styles.discoverHeader}>
+                <View style={{ flex: 1, paddingTop: 16 }}>
+                    <GridSkeleton rows={3} />
+                </View>
+            </View>
+        );
+    }
+
+    if (dataLength === 0 && (searchQuery.length > 0 || filtersActive)) {
+        return (
+            <View style={styles.discoverHeader}>
+                <View style={styles.centerContainer}>
+                    <Image
+                        source={require("../../assets/icons/not-found.png")}
+                        style={styles.emptyIcon}
+                        contentFit="contain"
+                    />
+                    <Text style={styles.emptyText}>{t("common.noResults")}</Text>
+                </View>
+            </View>
+        );
+    }
+
+    if (isInSearchMode || filtersActive) {
+        return <View style={styles.discoverHeader} />;
+    }
+
+    return (
+        <View style={styles.discoverHeader}>
+            <Animated.View
+                entering={FadeInDown.duration(400)}
+                exiting={FadeOutUp.duration(300)}
+                layout={LinearTransition}
+                style={{ width: "100%" }}
+            >
+                <HeroCarousel
+                    data={newReleases}
+                    mediaType={activeTab}
+                    isScrolling={isScrolling}
+                />
+
+                {filteredRecommendations.length > 0 && (
+                    <HomeSection
+                        title={t("home.forYouCategory.custom")}
+                        icon="sparkles"
+                        data={filteredRecommendations[0].items}
+                        mediaType={activeTab}
+                        onViewAll={handleViewAllPopular}
+                        {...actionHandlers}
+                    />
+                )}
+
+                <HomeSection
+                    title={activeTab === "movie" ? t("home.popularMovies") : t("home.popularTV")}
+                    icon="trending-up"
+                    data={popularContent}
+                    mediaType={activeTab}
+                    onViewAll={handleViewAllPopular}
+                    {...actionHandlers}
+                />
+
+                {actionContent.length > 0 && (
+                    <HomeSection
+                        title={t("common.action")}
+                        icon="flash"
+                        data={actionContent}
+                        mediaType={activeTab}
+                        onViewAll={handleViewAllAction}
+                        {...actionHandlers}
+                    />
+                )}
+
+                {horrorContent.length > 0 && (
+                    <HomeSection
+                        title={t("common.horror")}
+                        icon="skull"
+                        data={horrorContent}
+                        mediaType={activeTab}
+                        onViewAll={handleViewAllHorror}
+                        {...actionHandlers}
+                    />
+                )}
+
+                {activeTab === "movie" && classicMovies.length > 0 && (
+                    <HomeSection
+                        title={t("home.classicTitle")}
+                        icon="film-outline"
+                        data={classicMovies}
+                        mediaType="movie"
+                        onViewAll={onViewAllClassics}
+                        {...actionHandlers}
+                    />
+                )}
+
+                <View style={styles.browseAllSection}>
+                    <Ionicons name="apps-outline" size={20} color={Colors.vibrantRed} />
+                    <Text style={styles.browseAllTitle}>{t("common.browseAll")}</Text>
+                </View>
+            </Animated.View>
+        </View>
+    );
+});
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: Colors.metalBlack,
     },
-    stickyHeaderContainer: {
-        backgroundColor: Colors.metalBlack, // ensures content scrolling behind is hidden
-        zIndex: 10, // keeps it above content
-    },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    discoverHeader: {
+    stickyHeader: {
+        backgroundColor: Colors.metalBlack,
         paddingTop: 16,
+        zIndex: 10,
     },
     headerTop: {
         flexDirection: "row",
@@ -875,16 +1088,14 @@ const styles = StyleSheet.create({
         color: Colors.white,
         letterSpacing: 0.5,
     },
+    discoverHeader: {
+        paddingTop: 8,
+    },
     centerContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
         paddingVertical: 40,
-    },
-    loadingText: {
-        color: Colors.metalSilver,
-        marginTop: 16,
-        fontFamily: Fonts.inter,
     },
     emptyIcon: {
         width: 200,
@@ -908,6 +1119,11 @@ const styles = StyleSheet.create({
     footerContainer: {
         paddingVertical: 16,
     },
+    placeholderCard: {
+        width: "30%",
+        marginBottom: 16,
+    },
+    // ─── Filter Modal ────────────────────────────────────────────────────
     modalOverlay: {
         flex: 1,
         backgroundColor: Colors.overlayDarker,
@@ -925,7 +1141,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.5,
         shadowRadius: 10,
-        maxHeight: height * 0.9,
+        maxHeight: SCREEN_HEIGHT * 0.9,
     },
     modalHandleContainer: {
         width: "100%",
@@ -1054,282 +1270,4 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.bebas,
         letterSpacing: 1.5,
     },
-    categoryFilterWrapper: {
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: Colors.metalBlack,
-        marginTop: 12,
-    },
-    categoryFilterContainer: {
-        flexDirection: "row",
-        backgroundColor: "transparent",
-        borderRadius: 9999,
-    },
-    categoryTab: {
-        flex: 1,
-        paddingVertical: 8,
-        borderRadius: 9999,
-        alignItems: "center",
-    },
-    activeCategoryTab: {
-        backgroundColor: Colors.vibrantRed,
-    },
-    categoryTabText: {
-        fontWeight: "bold",
-        fontSize: 13,
-        color: Colors.metalSilver,
-    },
-    activeCategoryTabText: {
-        color: Colors.white,
-    },
-    continueSection: {
-        paddingVertical: 8,
-    },
-    recommendationGrid: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 12,
-        paddingHorizontal: 16,
-    },
-    recommendationGridItem: {
-        width: (Dimensions.get("window").width - 44) / 3,
-    },
-});
-
-// ─── DiscoverHeader Component ────────────────────────────────────────────────
-interface DiscoverHeaderProps {
-    activeTab: MediaType;
-    setActiveTab: (tab: MediaType) => void;
-    recommendations: any[];
-    loading: boolean;
-    data: any[];
-    searchQuery: string;
-    setSearchQuery: (q: string) => void;
-    handleSearch: () => void;
-    handleClearSearch: () => void;
-    filtersActive: boolean;
-    handleOpenFilters: () => void;
-    resetFilters: (reload?: boolean) => void;
-    isInSearchMode: boolean;
-    classicMovies_: Movie[];
-    handleToggleFavorite: (id: number, type: MediaType) => Promise<void>;
-    handleToggleWatchlist: (id: number, type: MediaType) => Promise<void>;
-    handleToggleWatched: (id: number, type: MediaType) => Promise<void>;
-    handleVote: (id: number, type: MediaType, vote: number) => Promise<void>;
-    moviesFromQuery: Movie[];
-    tvShowsFromQuery: TVShow[];
-    newReleases: (Movie | TVShow)[];
-    actionContent: (Movie | TVShow)[];
-    horrorContent: (Movie | TVShow)[];
-    handleViewAll: (genreId: number | string | null) => void;
-    setSelectedGenre: (g: number | string | null) => void;
-    setSelectedYear: (y: string) => void;
-    setSortBy: (s: string) => void;
-    setFiltersActive: (a: boolean) => void;
-    curatedMovies: Movie[];
-    curatedShows: TVShow[];
-    isSearching: boolean;
-    isScrolling: boolean;
-}
-
-const DiscoverHeader = memo(({
-    activeTab,
-    setActiveTab,
-    recommendations,
-    loading,
-    data,
-    searchQuery,
-    setSearchQuery,
-    handleSearch,
-    handleClearSearch,
-    filtersActive,
-    handleOpenFilters,
-    resetFilters,
-    isInSearchMode,
-    curatedMovies,
-    curatedShows,
-    classicMovies_,
-    handleToggleFavorite,
-    handleToggleWatchlist,
-    handleToggleWatched,
-    handleVote,
-    moviesFromQuery,
-    tvShowsFromQuery,
-    newReleases,
-    actionContent,
-    horrorContent,
-    handleViewAll,
-    setSelectedGenre,
-    setSelectedYear,
-    setSortBy,
-    setFiltersActive,
-    isSearching,
-    isScrolling,
-}: DiscoverHeaderProps) => {
-    const { t } = useTranslation();
-
-    // Filter recommendations based on active media type
-    const filteredRecommendations = useMemo(() =>
-        recommendations.filter(rec => rec.mediaType === activeTab),
-        [recommendations, activeTab]
-    );
-
-    return (
-        <View style={styles.discoverHeader}>
-            {loading && data.length === 0 ? (
-                <View style={styles.centerContainer}>
-                    <HomeSkeleton />
-                </View>
-            ) : isSearching ? (
-                <View style={{ flex: 1, paddingTop: 16 }}>
-                    <GridSkeleton rows={3} />
-                </View>
-            ) : data.length === 0 && (searchQuery.length > 0 || filtersActive) ? (
-                <View style={styles.centerContainer}>
-                    <Image
-                        source={require("../../assets/icons/not-found.png")}
-                        style={styles.emptyIcon as any}
-                        contentFit="contain"
-                    />
-                    <Text style={styles.emptyText}>{t("common.noResults")}</Text>
-                </View>
-            ) : !isInSearchMode && !filtersActive ? (
-                <Animated.View
-                    entering={FadeInDown.duration(400)}
-                    exiting={FadeOutUp.duration(300)}
-                    layout={LinearTransition}
-                    style={{ width: "100%" }}
-                >
-                    <HeroCarousel
-                        data={newReleases}
-                        mediaType={activeTab}
-                        isScrolling={isScrolling}
-                    />
-
-                    {filteredRecommendations.length > 0 && (
-                        <HomeSection
-                            title={t("home.forYouCategory.custom")}
-                            icon="sparkles"
-                            data={filteredRecommendations[0].items}
-                            mediaType={activeTab}
-                            onViewAll={() => handleViewAll(null)}
-                            renderItem={({ item }) => (
-                                <View style={styles.recommendationGridItem}>
-                                    <MovieCardItem
-                                        item={item}
-                                        mediaType={activeTab}
-                                        handleToggleFavorite={handleToggleFavorite}
-                                        handleToggleWatchlist={handleToggleWatchlist}
-                                        handleToggleWatched={handleToggleWatched}
-                                        handleVote={handleVote}
-                                        fullWidth
-                                    />
-                                </View>
-                            )}
-                        />
-                    )}
-
-                    <HomeSection
-                        title={activeTab === "movie" ? t("home.popularMovies") : t("home.popularTV")}
-                        icon="trending-up"
-                        data={activeTab === "movie" ? moviesFromQuery : tvShowsFromQuery}
-                        mediaType={activeTab}
-                        onViewAll={() => handleViewAll(null)}
-                        renderItem={({ item }) => (
-                            <View style={styles.recommendationGridItem}>
-                                <MovieCardItem
-                                    item={item}
-                                    mediaType={activeTab}
-                                    handleToggleFavorite={handleToggleFavorite}
-                                    handleToggleWatchlist={handleToggleWatchlist}
-                                    handleToggleWatched={handleToggleWatched}
-                                    handleVote={handleVote}
-                                    fullWidth
-                                />
-                            </View>
-                        )}
-                    />
-
-                    {actionContent.length > 0 && (
-                        <HomeSection
-                            title={t("common.action")}
-                            icon="flash"
-                            data={actionContent}
-                            mediaType={activeTab}
-                            onViewAll={() => handleViewAll(activeTab === "movie" ? "28" : "10759")}
-                            renderItem={({ item }) => (
-                                <View style={styles.recommendationGridItem}>
-                                    <MovieCardItem
-                                        item={item}
-                                        mediaType={activeTab}
-                                        handleToggleFavorite={handleToggleFavorite}
-                                        handleToggleWatchlist={handleToggleWatchlist}
-                                        handleToggleWatched={handleToggleWatched}
-                                        handleVote={handleVote}
-                                        fullWidth
-                                    />
-                                </View>
-                            )}
-                        />
-                    )}
-
-                    {horrorContent.length > 0 && (
-                        <HomeSection
-                            title={t("common.horror")}
-                            icon="skull"
-                            data={horrorContent}
-                            mediaType={activeTab}
-                            onViewAll={() => handleViewAll(activeTab === "movie" ? "27,53" : "9648,10765")}
-                            renderItem={({ item }) => (
-                                <View style={styles.recommendationGridItem}>
-                                    <MovieCardItem
-                                        item={item}
-                                        mediaType={activeTab}
-                                        handleToggleFavorite={handleToggleFavorite}
-                                        handleToggleWatchlist={handleToggleWatchlist}
-                                        handleToggleWatched={handleToggleWatched}
-                                        handleVote={handleVote}
-                                        fullWidth
-                                    />
-                                </View>
-                            )}
-                        />
-                    )}
-
-                    {activeTab === "movie" && classicMovies_.length > 0 && (
-                        <HomeSection
-                            title={t("home.classicTitle")}
-                            icon="film-outline"
-                            data={classicMovies_}
-                            mediaType="movie"
-                            onViewAll={() => {
-                                setSelectedGenre(null);
-                                setSelectedYear("2000"); // Example of navigating to classics
-                                setSortBy("vote_average.desc");
-                                setFiltersActive(true);
-                            }}
-                            renderItem={({ item }) => (
-                                <View style={styles.recommendationGridItem}>
-                                    <MovieCardItem
-                                        item={item}
-                                        mediaType="movie"
-                                        handleToggleFavorite={handleToggleFavorite}
-                                        handleToggleWatchlist={handleToggleWatchlist}
-                                        handleToggleWatched={handleToggleWatched}
-                                        handleVote={handleVote}
-                                        fullWidth
-                                    />
-                                </View>
-                            )}
-                        />
-                    )}
-
-                    <View style={styles.browseAllSection}>
-                        <Ionicons name="apps-outline" size={20} color={Colors.vibrantRed} />
-                        <Text style={styles.browseAllTitle}>{t("common.browseAll")}</Text>
-                    </View>
-                </Animated.View>
-            ) : null}
-        </View>
-    );
 });

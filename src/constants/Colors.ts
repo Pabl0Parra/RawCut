@@ -19,17 +19,14 @@ export const Colors = {
     vibrantRed: "#E50914",      
     tmdbYellow: "#facc15",      
     tmdbBlue: "#22d3ee",        
+    focusBlue: "#22d3ee", 
     communityPurple: "#c084fc", 
     successGreen: "#4ade80",
-    errorRed: "#ef4444",    
-
-
-    
+    errorRed: "#ef4444",        
     overlayDarker: "rgba(0, 0, 0, 0.92)",  
     overlayDark: "rgba(0, 0, 0, 0.85)",    
     overlayMedium: "rgba(0, 0, 0, 0.5)",   
-    overlayLight: "rgba(0, 0, 0, 0.2)",    
-
+    overlayLight: "rgba(0, 0, 0, 0.2)",   
     glassWhite: "rgba(255, 255, 255, 0.12)", 
     glassWhiteMedium: "rgba(255, 255, 255, 0.33)", 
     glassWhiteSubtle: "rgba(255, 255, 255, 0.06)", 

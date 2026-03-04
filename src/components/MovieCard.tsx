@@ -1,3 +1,4 @@
+// src/components/MovieCard.tsx
 import React, { JSX, memo, useMemo, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {

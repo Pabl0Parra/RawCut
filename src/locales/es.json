@@ -136,7 +136,31 @@
         "confirmPassword": "Confirmar Contraseña",
         "confirmPasswordPlaceholder": "Repite tu contraseña",
         "showPassword": "Mostrar contraseña",
-        "hidePassword": "Ocultar contraseña"
+        "hidePassword": "Ocultar contraseña",
+        "errorInvalidCredentials": "Credenciales inválidas. Verifica tu email/usuario y contraseña.",
+        "errorUserNotFound": "Usuario no encontrado.",
+        "errorConnection": "Error de conexión. Por favor, inténtalo de nuevo.",
+        "errorEmailExists": "Este email ya está registrado.",
+        "errorUsernameExists": "Este nombre de usuario ya está en uso.",
+        "errorRegister": "Error al crear la cuenta. Por favor, inténtalo de nuevo.",
+        "errorNoSession": "No hay sesión activa.",
+        "errorUpdateUsername": "Error al actualizar nombre de usuario.",
+        "errorPermissionDenied": "No se pudo actualizar. Permiso denegado.",
+        "errorDeleteAccount": "Error al eliminar la cuenta en el servidor. Por favor, inténtalo de nuevo.",
+        "validation": {
+            "usernameMin": "El nombre de usuario debe tener al menos 3 caracteres",
+            "usernameMax": "El nombre de usuario no puede tener más de 20 caracteres",
+            "usernameRegex": "El nombre de usuario solo puede contener letras, números y guiones bajos",
+            "emailInvalid": "Email inválido",
+            "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+            "confirmPasswordRequired": "Confirma tu contraseña",
+            "passwordsMatch": "Las contraseñas no coinciden",
+            "identifierRequired": "Ingresa tu email o nombre de usuario",
+            "passwordRequired": "Ingresa tu contraseña",
+            "commentRequired": "El comentario no puede estar vacío",
+            "commentMax": "Máximo 500 caracteres",
+            "recommendationMax": "Máximo 200 caracteres"
+        }
     },
     "profile": {
         "title": "Perfil",

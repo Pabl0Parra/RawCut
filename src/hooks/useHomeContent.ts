@@ -43,6 +43,14 @@ export const tvKeys = {
     genres: () => ["genres", "tv"] as const,
 };
 
+// ─── Shared infinite query config ────────────────────────────────────────────
+
+const infinitePageParam = {
+    initialPageParam: 1 as number,
+    getNextPageParam: <T>(lastPage: TMDbResponse<T>): number | undefined =>
+        lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+};
+
 // ─── Infinite Query Hooks (for paginated browse lists) ───────────────────────
 
 export const usePopularMovies = (): UseInfiniteQueryResult<
@@ -51,10 +59,8 @@ export const usePopularMovies = (): UseInfiniteQueryResult<
 > =>
     useInfiniteQuery({
         queryKey: movieKeys.popular(),
-        queryFn: ({ pageParam }) => getPopularMovies(pageParam as number),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) =>
-            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        queryFn: ({ pageParam }) => getPopularMovies(pageParam),
+        ...infinitePageParam,
         staleTime: 5 * 60 * 1000,
     });
 
@@ -64,10 +70,8 @@ export const usePopularTVShows = (): UseInfiniteQueryResult<
 > =>
     useInfiniteQuery({
         queryKey: tvKeys.popular(),
-        queryFn: ({ pageParam }) => getPopularTVShows(pageParam as number),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) =>
-            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        queryFn: ({ pageParam }) => getPopularTVShows(pageParam),
+        ...infinitePageParam,
         staleTime: 5 * 60 * 1000,
     });
 
@@ -78,10 +82,8 @@ export const useDiscoverMovies = (
     useInfiniteQuery({
         queryKey: movieKeys.discover(params),
         queryFn: ({ pageParam }) =>
-            discoverMovies({ ...params, page: pageParam as number }),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) =>
-            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+            discoverMovies({ ...params, page: pageParam }),
+        ...infinitePageParam,
         enabled,
     });
 
@@ -92,10 +94,8 @@ export const useDiscoverTVShows = (
     useInfiniteQuery({
         queryKey: tvKeys.discover(params),
         queryFn: ({ pageParam }) =>
-            discoverTVShows({ ...params, page: pageParam as number }),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) =>
-            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+            discoverTVShows({ ...params, page: pageParam }),
+        ...infinitePageParam,
         enabled,
     });
 
@@ -129,11 +129,9 @@ export const useCuratedTVShows = (): UseInfiniteQueryResult<
 > =>
     useInfiniteQuery({
         queryKey: tvKeys.curated(),
-        queryFn: ({ pageParam }) => getCuratedTVShows(pageParam as number),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) =>
-            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
-        staleTime: 10 * 60 * 1000, // top-rated changes slowly
+        queryFn: ({ pageParam }) => getCuratedTVShows(pageParam),
+        ...infinitePageParam,
+        staleTime: 10 * 60 * 1000,
     });
 
 export const useClassicMovies = (): UseInfiniteQueryResult<
@@ -142,11 +140,9 @@ export const useClassicMovies = (): UseInfiniteQueryResult<
 > =>
     useInfiniteQuery({
         queryKey: movieKeys.classics(),
-        queryFn: ({ pageParam }) => getClassicMovies(pageParam as number),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) =>
-            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
-        staleTime: 30 * 60 * 1000, // classics never change
+        queryFn: ({ pageParam }) => getClassicMovies(pageParam),
+        ...infinitePageParam,
+        staleTime: 30 * 60 * 1000,
     });
 
 export const useCuratedMovies = (): UseInfiniteQueryResult<
@@ -155,43 +151,40 @@ export const useCuratedMovies = (): UseInfiniteQueryResult<
 > =>
     useInfiniteQuery({
         queryKey: movieKeys.curated(),
-        queryFn: ({ pageParam }) => getCuratedMovies(pageParam as number),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) =>
-            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        queryFn: ({ pageParam }) => getCuratedMovies(pageParam),
+        ...infinitePageParam,
         staleTime: 10 * 60 * 1000,
     });
 
 // ─── New Content Hooks ────────────────────────────────────────────────────────
+// Fixed: replaced `any` with proper Movie | TVShow union type
 
-export const useNewReleasesContent = (type: "movie" | "tv"): UseInfiniteQueryResult<
-    InfiniteData<TMDbResponse<any>>,
-    Error
-> =>
+export const useNewReleasesContent = (
+    type: "movie" | "tv",
+): UseInfiniteQueryResult<InfiniteData<TMDbResponse<Movie | TVShow>>, Error> =>
     useInfiniteQuery({
         queryKey: [type === "movie" ? "movies" : "tv", "new_releases"],
-        queryFn: ({ pageParam }) => getNewReleases(type, pageParam as number),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) =>
-            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        queryFn: ({ pageParam }) =>
+            getNewReleases(type, pageParam) as Promise<TMDbResponse<Movie | TVShow>>,
+        ...infinitePageParam,
         staleTime: 15 * 60 * 1000,
     });
 
-export const useGenreContent = (type: "movie" | "tv", genreIds: string, genreKey: string): UseInfiniteQueryResult<
-    InfiniteData<TMDbResponse<any>>,
-    Error
-> =>
+export const useGenreContent = (
+    type: "movie" | "tv",
+    genreIds: string,
+    genreKey: string,
+): UseInfiniteQueryResult<InfiniteData<TMDbResponse<Movie | TVShow>>, Error> =>
     useInfiniteQuery({
         queryKey: [type === "movie" ? "movies" : "tv", "genre", genreKey],
-        queryFn: ({ pageParam }) => getByGenre(type, genreIds, pageParam as number),
-        initialPageParam: 1,
-        getNextPageParam: (lastPage) =>
-            lastPage.page < lastPage.total_pages ? lastPage.page + 1 : undefined,
+        queryFn: ({ pageParam }) =>
+            getByGenre(type, genreIds, pageParam) as Promise<TMDbResponse<Movie | TVShow>>,
+        ...infinitePageParam,
         staleTime: 20 * 60 * 1000,
     });
 
 // ─── Utility: flatten infinite pages into flat array ─────────────────────────
 
 export const flattenPages = <T>(
-    data: InfiniteData<TMDbResponse<T>> | undefined
+    data: InfiniteData<TMDbResponse<T>> | undefined,
 ): T[] => data?.pages.flatMap((p) => p.results) ?? [];
