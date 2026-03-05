@@ -56,7 +56,7 @@ export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix 
             <Text style={detailScreenStyles.sectionTitle}>{title}</Text>
             <FlatList
                 data={items}
-                keyExtractor={(item) => `${keyPrefix}-${item.id}`}
+                keyExtractor={(item, index) => `${keyPrefix}-${item.id}-${index}`}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={detailScreenStyles.horizontalList}
