@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
@@ -60,29 +60,65 @@ export default function WatchlistScreen() {
             }
         });
 
-    const handleMarkAsWatched = async (tmdbId: number, season: number, episode: number) => {
+    const handleMarkAsWatched = useCallback(async (tmdbId: number, season: number, episode: number) => {
         await toggleEpisodeWatched(tmdbId, season, episode);
-    };
+    }, [toggleEpisodeWatched]);
 
-    const handleToggleFavorite = async (tmdbId: number, mediaType: "movie" | "tv") => {
+    const handleToggleFavorite = useCallback(async (tmdbId: number, mediaType: "movie" | "tv") => {
         if (isFavorite(tmdbId, mediaType)) {
             await removeFromFavorites(tmdbId, mediaType);
         } else {
             await addToFavorites(tmdbId, mediaType);
         }
-    };
+    }, [isFavorite, removeFromFavorites, addToFavorites]);
 
-    const handleToggleWatchlist = async (tmdbId: number, mediaType: "movie" | "tv") => {
+    const handleToggleWatchlist = useCallback(async (tmdbId: number, mediaType: "movie" | "tv") => {
         if (isInWatchlist(tmdbId, mediaType)) {
             await removeFromWatchlist(tmdbId, mediaType);
         } else {
             await addToWatchlist(tmdbId, mediaType);
         }
-    };
+    }, [isInWatchlist, removeFromWatchlist, addToWatchlist]);
 
-    const handleToggleWatched = async (tmdbId: number, mediaType: "movie" | "tv") => {
+    const handleToggleWatched = useCallback(async (tmdbId: number, mediaType: "movie" | "tv") => {
         await toggleWatched(tmdbId, mediaType);
-    };
+    }, [toggleWatched]);
+
+    const statsSection = useMemo(() => (
+        <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+                <Ionicons name="stats-chart-outline" size={20} color={Colors.white} />
+                <Text style={styles.sectionTitle}>{t("common.statistics")}</Text>
+            </View>
+            <TouchableOpacity
+                style={styles.statsCard}
+                onPress={() => router.push("/stats")}
+            >
+                <View style={styles.statsCardContent}>
+                    <Text style={styles.statsLink}>{t("watchlist.viewDetailedStats")}</Text>
+                    <Ionicons name="chevron-forward" size={16} color={Colors.metalSilver} />
+                </View>
+            </TouchableOpacity>
+        </View>
+    ), [t]);
+
+    const movieData = useMemo(() => allMovies.map(item => ({
+        id: item.internal_id,
+        tmdb_id: item.id,
+        media_type: "movie" as const,
+        title: item.title,
+        poster_path: item.poster_path,
+        vote_average: item.vote_average,
+    })), [allMovies]);
+
+    const tvData = useMemo(() => allTVShows.map(item => ({
+        id: item.internal_id,
+        tmdb_id: item.id,
+        media_type: "tv" as const,
+        title: item.name,
+        poster_path: item.poster_path,
+        vote_average: item.vote_average,
+    })), [allTVShows]);
 
     if (isLoading && (continueWatching.length === 0 && upcoming.length === 0 && allMovies.length === 0)) {
         return (
@@ -156,21 +192,7 @@ export default function WatchlistScreen() {
                                     </View>
                                 )}
 
-                                <View style={styles.section}>
-                                    <View style={styles.sectionHeader}>
-                                        <Ionicons name="stats-chart-outline" size={20} color={Colors.white} />
-                                        <Text style={styles.sectionTitle}>{t("common.statistics")}</Text>
-                                    </View>
-                                    <TouchableOpacity
-                                        style={styles.statsCard}
-                                        onPress={() => router.push("/stats")}
-                                    >
-                                        <View style={styles.statsCardContent}>
-                                            <Text style={styles.statsLink}>{t("watchlist.viewDetailedStats")}</Text>
-                                            <Ionicons name="chevron-forward" size={16} color={Colors.metalSilver} />
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
+                                {statsSection}
                             </View>
                         </GestureDetector>
                     </ScrollView>
@@ -178,14 +200,7 @@ export default function WatchlistScreen() {
                     <GestureDetector gesture={swipeGesture}>
                         <View style={{ flex: 1 }}>
                             <ContentGridLayout
-                                data={allTVShows.map(item => ({
-                                    id: item.internal_id,
-                                    tmdb_id: item.id,
-                                    media_type: "tv",
-                                    title: item.name,
-                                    poster_path: item.poster_path,
-                                    vote_average: item.vote_average,
-                                }))}
+                                data={tvData}
                                 isLoading={false}
                                 isAuthenticated={true}
                                 emptyTitle={t("watchlist.emptyTitle")}
@@ -195,9 +210,9 @@ export default function WatchlistScreen() {
                                 onToggleFavorite={handleToggleFavorite}
                                 onToggleWatchlist={handleToggleWatchlist}
                                 onToggleWatched={handleToggleWatched}
-                                isFavorite={isFavorite}
                                 isInWatchlist={isInWatchlist}
                                 isWatched={isWatched}
+                                ListFooterComponent={statsSection}
                             />
                         </View>
                     </GestureDetector>
@@ -206,14 +221,7 @@ export default function WatchlistScreen() {
                 <GestureDetector gesture={swipeGesture}>
                     <View style={{ flex: 1 }}>
                         <ContentGridLayout
-                            data={allMovies.map(item => ({
-                                id: item.internal_id,
-                                tmdb_id: item.id,
-                                media_type: "movie",
-                                title: item.title,
-                                poster_path: item.poster_path,
-                                vote_average: item.vote_average,
-                            }))}
+                            data={movieData}
                             isLoading={false}
                             isAuthenticated={true}
                             emptyTitle={t("watchlist.emptyTitle")}
@@ -226,11 +234,13 @@ export default function WatchlistScreen() {
                             isFavorite={isFavorite}
                             isInWatchlist={isInWatchlist}
                             isWatched={isWatched}
+                            ListFooterComponent={statsSection}
                         />
                     </View>
                 </GestureDetector>
-            )}
-        </View>
+            )
+            }
+        </View >
     );
 }
 

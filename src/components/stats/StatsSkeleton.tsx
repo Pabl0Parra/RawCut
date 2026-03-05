@@ -6,7 +6,6 @@ import { Colors } from "../../constants/Colors";
 export const StatsSkeleton = () => (
     <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            <View style={styles.headerSpacer} />
 
             <View style={styles.row}>
                 <Skeleton width="48%" height={110} borderRadius={8} />
@@ -51,10 +50,9 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingHorizontal: 16,
+        paddingTop: 16,
     },
-    headerSpacer: {
-        height: 100,
-    },
+
     row: {
         flexDirection: "row",
         justifyContent: "space-between",

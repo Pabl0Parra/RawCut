@@ -42,8 +42,9 @@ export default function StatsScreen() {
                 <Stack.Screen options={{
                     headerShown: true,
                     title: t("stats.title"),
-                    headerTransparent: true,
-                    headerTintColor: Colors.vibrantRed,
+                    headerTransparent: false,
+                    headerStyle: { backgroundColor: Colors.black },
+                    headerTintColor: Colors.cinematicGold,
                     headerTitleStyle: { color: Colors.white, fontFamily: Fonts.bebas },
                     headerLeft: () => (
                         <TouchableOpacity
@@ -51,7 +52,7 @@ export default function StatsScreen() {
                             style={styles.backButton}
                             hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                         >
-                            <Ionicons name="chevron-back" size={28} color={Colors.vibrantRed} />
+                            <Ionicons name="chevron-back" size={28} color={Colors.cinematicGold} />
                         </TouchableOpacity>
                     ),
                 }} />
@@ -65,8 +66,9 @@ export default function StatsScreen() {
             <Stack.Screen options={{
                 headerShown: true,
                 title: t("stats.title"),
-                headerTransparent: true,
-                headerTintColor: Colors.vibrantRed,
+                headerTransparent: false,
+                headerStyle: { backgroundColor: Colors.black },
+                headerTintColor: Colors.cinematicGold,
                 headerTitleStyle: { color: Colors.white, fontFamily: Fonts.bebas, fontSize: 24 },
                 headerLeft: () => (
                     <TouchableOpacity
@@ -74,14 +76,13 @@ export default function StatsScreen() {
                         style={styles.backButton}
                         hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
                     >
-                        <Ionicons name="chevron-back" size={28} color={Colors.vibrantRed} />
+                        <Ionicons name="chevron-back" size={28} color={Colors.cinematicGold} />
                     </TouchableOpacity>
                 ),
                 headerTitleAlign: "center",
             }} />
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                <View style={styles.headerSpacer} />
 
                 <SplitStatRow>
                     <StatCard icon="film" label={t("stats.moviesWatched")} value={stats.moviesWatched} halfWidth />
@@ -174,9 +175,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingHorizontal: 16,
-    },
-    headerSpacer: {
-        height: 100, // Account for transparent header
+        paddingTop: 16,
     },
     backButton: {
         marginLeft: 0,

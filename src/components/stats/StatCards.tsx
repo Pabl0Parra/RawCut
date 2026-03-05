@@ -15,7 +15,7 @@ export const StatCard: React.FC<StatCardProps> = ({ icon, label, value, subValue
     return (
         <View style={[styles.card, halfWidth && styles.halfWidth]}>
             <View style={styles.header}>
-                <Ionicons name={icon} size={13} color={Colors.vibrantRed} />
+                <Ionicons name={icon} size={13} color={Colors.cinematicGold} />
                 <Text style={styles.label}>{label}</Text>
             </View>
             <Text style={styles.value}>{value}</Text>

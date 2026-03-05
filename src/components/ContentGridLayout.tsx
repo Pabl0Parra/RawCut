@@ -25,9 +25,10 @@ interface ContentGridLayoutProps {
     readonly isFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
     readonly isInWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
     readonly isWatched?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
+    readonly ListFooterComponent?: React.ComponentType<any> | React.ReactElement | null;
 }
 
-export function ContentGridLayout({
+export const ContentGridLayout = React.memo(function ContentGridLayout({
     data,
     isLoading,
     isAuthenticated,
@@ -42,6 +43,7 @@ export function ContentGridLayout({
     isFavorite,
     isInWatchlist,
     isWatched,
+    ListFooterComponent,
 }: Readonly<ContentGridLayoutProps>): JSX.Element {
     if (!isAuthenticated) {
         return (
@@ -144,9 +146,10 @@ export function ContentGridLayout({
             columnWrapperStyle={styles.columnWrapper}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            ListFooterComponent={ListFooterComponent}
         />
     );
-}
+});
 
 const styles = StyleSheet.create({
     columnWrapper: {

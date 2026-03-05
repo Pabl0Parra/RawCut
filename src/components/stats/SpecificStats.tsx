@@ -14,13 +14,13 @@ export const RatedItemCard: React.FC<RatedItemCardProps> = ({ type, label, title
     return (
         <View style={styles.card}>
             <View style={styles.header}>
-                <Ionicons name={type === "movie" ? "film" : "tv"} size={13} color={Colors.vibrantRed} />
+                <Ionicons name={type === "movie" ? "film" : "tv"} size={13} color={Colors.cinematicGold} />
                 <Text style={styles.label}>{label}</Text>
             </View>
             <View style={styles.content}>
                 <Text style={styles.title} numberOfLines={1}>{title}</Text>
                 <View style={styles.ratingBadge}>
-                    <Ionicons name="star" size={14} color={Colors.vibrantRed} />
+                    <Ionicons name="star" size={14} color={Colors.cinematicGold} />
                     <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
                     <Text style={styles.myRating}>My rating</Text>
                 </View>
@@ -33,7 +33,7 @@ export const GenreTable: React.FC<{ genres: { name: string; count: number }[]; t
     return (
         <View style={styles.card}>
             <View style={styles.header}>
-                <Ionicons name="stats-chart" size={13} color={Colors.vibrantRed} />
+                <Ionicons name="stats-chart" size={13} color={Colors.cinematicGold} />
                 <Text style={styles.label}>{title}</Text>
             </View>
             <View style={styles.tableHeader}>
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
         borderColor: "rgba(255, 255, 255, 0.05)",
     },
     ratingText: {
-        color: Colors.vibrantRed,
+        color: Colors.cinematicGold,
         fontSize: 18,
         fontWeight: "800",
     },
