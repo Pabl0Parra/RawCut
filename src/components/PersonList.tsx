@@ -18,10 +18,8 @@ interface PersonListProps {
     keyPrefix: string;
 }
 
-export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix }) => {
-    if (!items || items.length === 0) return null;
-
-    const renderItem = ({ item }: { item: PersonListItem }) => {
+const PersonCard = React.memo(
+    ({ item }: { item: PersonListItem }) => {
         const profileUrl = getImageUrl(item.profile_path, "w200");
 
         return (
@@ -49,7 +47,25 @@ export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix 
                 </Text>
             </TouchableOpacity>
         );
-    };
+    },
+    (prevProps, nextProps) => prevProps.item.id === nextProps.item.id && prevProps.item.subtitle === nextProps.item.subtitle
+);
+
+export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix }) => {
+    if (!items || items.length === 0) return null;
+
+    const renderItem = React.useCallback(({ item }: { item: PersonListItem }) => {
+        return <PersonCard item={item} />;
+    }, []);
+
+    const getItemLayout = React.useCallback(
+        (_: any, index: number) => ({
+            length: 112, // 100 width + 12 gap
+            offset: 112 * index,
+            index,
+        }),
+        []
+    );
 
     return (
         <View style={detailScreenStyles.sectionContainer}>
@@ -61,6 +77,11 @@ export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix 
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={detailScreenStyles.horizontalList}
                 renderItem={renderItem}
+                getItemLayout={getItemLayout}
+                initialNumToRender={5}
+                maxToRenderPerBatch={5}
+                windowSize={5}
+                removeClippedSubviews={false}
             />
         </View>
     );
