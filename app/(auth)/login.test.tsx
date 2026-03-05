@@ -38,8 +38,8 @@ describe('LoginScreen Integration', () => {
         fireEvent.press(getByText('auth.loginTitle'));
 
         await waitFor(() => {
-            expect(getByText('Ingresa tu email o nombre de usuario')).toBeTruthy();
-            expect(getByText('Ingresa tu contraseña')).toBeTruthy();
+            expect(getByText('auth.validation.identifierRequired')).toBeTruthy();
+            expect(getByText('auth.validation.passwordRequired')).toBeTruthy();
         });
 
         expect(mockSignIn).not.toHaveBeenCalled();
@@ -65,7 +65,7 @@ describe('LoginScreen Integration', () => {
         (useAuthStore as unknown as jest.Mock).mockReturnValue({
             signIn: mockSignIn,
             isLoading: false,
-            error: 'Credenciales inválidas',
+            error: 'auth.errorInvalidCredentials',
             clearError: jest.fn(),
         });
 
@@ -80,7 +80,7 @@ describe('LoginScreen Integration', () => {
             expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'wrongpass');
         });
 
-        expect(getByText('Credenciales inválidas')).toBeTruthy();
+        expect(getByText('auth.errorInvalidCredentials')).toBeTruthy();
         expect(mockRouterReplace).not.toHaveBeenCalled();
     });
 });

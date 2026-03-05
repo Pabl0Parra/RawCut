@@ -81,7 +81,7 @@ describe('authStore', () => {
             
             const state = useAuthStore.getState();
             expect(state.user).toBeNull();
-            expect(state.error).toBe('Credenciales inválidas');
+            expect(state.error).toBe('auth.errorInvalidCredentials');
             expect(state.isLoading).toBe(false);
         });
     });

@@ -34,13 +34,26 @@ jest.mock('expo-font', () => ({
     isLoaded: jest.fn(() => true),
 }));
 
+jest.mock('./src/lib/i18n', () => ({
+    __esModule: true,
+    default: {
+        t: (key: string) => key,
+        use: jest.fn().mockReturnThis(),
+        init: jest.fn().mockReturnThis(),
+    },
+}));
+
 jest.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (str: string) => str,
         i18n: {
-            changeLanguage: () => new Promise(() => {}),
+            changeLanguage: () => Promise.resolve(),
         },
     }),
+    initReactI18next: {
+        type: '3rdParty',
+        init: () => {},
+    },
     Trans: ({ children }: any) => children,
 }));
 
