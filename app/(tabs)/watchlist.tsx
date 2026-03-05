@@ -142,7 +142,7 @@ export default function WatchlistScreen() {
 
             {activeTab === "tv" ? (
                 continueWatching.length > 0 || upcoming.length > 0 ? (
-                    <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+                    <ScrollView key={activeTab} style={styles.content} showsVerticalScrollIndicator={false}>
                         {continueWatching.length > 0 && (
                             <View style={styles.section}>
                                 <View style={styles.sectionHeader}>
@@ -200,6 +200,7 @@ export default function WatchlistScreen() {
                     <GestureDetector gesture={swipeGesture}>
                         <View style={{ flex: 1 }}>
                             <ContentGridLayout
+                                key={activeTab}
                                 data={tvData}
                                 isLoading={false}
                                 isAuthenticated={true}
@@ -221,6 +222,7 @@ export default function WatchlistScreen() {
                 <GestureDetector gesture={swipeGesture}>
                     <View style={{ flex: 1 }}>
                         <ContentGridLayout
+                            key={activeTab}
                             data={movieData}
                             isLoading={false}
                             isAuthenticated={true}

@@ -581,6 +581,7 @@ export default function HomeScreen(): JSX.Element {
             <GestureDetector gesture={swipeGesture}>
                 <FlatList
                     ref={flatListRef}
+                    key={activeTab}
                     data={paddedData}
                     renderItem={renderItem}
                     keyExtractor={keyExtractor}
