@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import { Colors, Fonts } from "../../constants/Colors";
 
 interface WatchlistHeaderProps {
@@ -10,6 +11,8 @@ interface WatchlistHeaderProps {
 }
 
 export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({ activeTab, onTabChange, title }) => {
+    const { t } = useTranslation();
+
     return (
         <View style={styles.container}>
             <View style={styles.titleRow}>
@@ -23,7 +26,9 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({ activeTab, onT
                         onPress={() => onTabChange("movies")}
                     >
                         <Ionicons name="film-outline" size={16} color={activeTab === "movies" ? Colors.white : Colors.metalSilver} />
-                        <Text style={[styles.tabText, activeTab === "movies" && styles.activeTabText]}>Movies</Text>
+                        <Text style={[styles.tabText, activeTab === "movies" && styles.activeTabText]}>
+                            {t("tabs.movies")}
+                        </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -31,7 +36,9 @@ export const WatchlistHeader: React.FC<WatchlistHeaderProps> = ({ activeTab, onT
                         onPress={() => onTabChange("tv")}
                     >
                         <Ionicons name="tv-outline" size={16} color={activeTab === "tv" ? Colors.white : Colors.metalSilver} />
-                        <Text style={[styles.tabText, activeTab === "tv" && styles.activeTabText]}>TV</Text>
+                        <Text style={[styles.tabText, activeTab === "tv" && styles.activeTabText]}>
+                            {t("tabs.tv")}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </View>

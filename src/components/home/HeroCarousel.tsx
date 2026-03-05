@@ -104,7 +104,6 @@ export const HeroCarousel = memo(function HeroCarousel({
     const activeIndex = useSharedValue(0);
     const flatListRef = useRef<FlatList>(null);
     const scrollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const hasInitialScrolled = useRef(false);
 
     // Keep mutable refs so the interval callback always reads fresh values
     const activeIndexRef = useRef(0);
@@ -126,10 +125,32 @@ export const HeroCarousel = memo(function HeroCarousel({
         scrollTimerRef.current = setInterval(() => {
             if (heroDataLengthRef.current === 0 || isScrollingRef.current) return;
 
-            const nextDisplayedIndex = activeIndexRef.current + 1 + 1;
-            flatListRef.current?.scrollToIndex({ index: nextDisplayedIndex, animated: true });
+            let nextRealIndex = activeIndexRef.current + 1;
+
+            if (nextRealIndex >= heroDataLengthRef.current) {
+                // Animate smoothly to the trailing clone (looks exactly like the first movie)
+                const trailingCloneIndex = heroDataLengthRef.current + 1;
+                flatListRef.current?.scrollToIndex({ index: trailingCloneIndex, animated: true });
+
+                // Immediately set dots to first element so it feels like we wrapped around
+                activeIndexRef.current = 0;
+                activeIndex.value = 0;
+
+                // After the 300ms scroll animation finishes, silently snap to the real first element
+                // so the NEXT slide has room to go to element 2 natively.
+                setTimeout(() => {
+                    if (isScrollingRef.current) return;
+                    flatListRef.current?.scrollToIndex({ index: 1, animated: false });
+                }, 400);
+            } else {
+                // Normal auto-scroll
+                const nextDisplayedIndex = nextRealIndex + 1; // +1 to account for the leading clone
+                flatListRef.current?.scrollToIndex({ index: nextDisplayedIndex, animated: true });
+                activeIndexRef.current = nextRealIndex;
+                activeIndex.value = nextRealIndex;
+            }
         }, 5000);
-    }, []);
+    }, [activeIndex]);
 
     const stopAutoScroll = useCallback(() => {
         if (scrollTimerRef.current) {
@@ -140,14 +161,6 @@ export const HeroCarousel = memo(function HeroCarousel({
 
     useEffect(() => {
         if (heroData.length === 0) return;
-
-        if (!hasInitialScrolled.current) {
-            const timeout = setTimeout(() => {
-                flatListRef.current?.scrollToIndex({ index: 1, animated: false });
-                hasInitialScrolled.current = true;
-            }, 100);
-            return () => clearTimeout(timeout);
-        }
 
         if (isScrolling) {
             stopAutoScroll();
@@ -222,9 +235,10 @@ export const HeroCarousel = memo(function HeroCarousel({
                 onScrollEndDrag={startAutoScroll}
                 onMomentumScrollEnd={onMomentumScrollEnd}
                 getItemLayout={getItemLayout}
-                initialNumToRender={3}
-                maxToRenderPerBatch={2}
-                windowSize={3}
+                initialNumToRender={7}
+                maxToRenderPerBatch={7}
+                windowSize={11}
+                initialScrollIndex={1}
                 removeClippedSubviews={false}
             />
             <View style={styles.pagination}>

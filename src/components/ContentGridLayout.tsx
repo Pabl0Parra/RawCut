@@ -7,6 +7,8 @@ import {
 import MovieCard from "./MovieCard";
 import { UnauthenticatedState, LoadingState, EmptyState } from "./ContentLayoutStates";
 import type { EnrichedContentItem } from "../hooks/useEnrichedContent";
+import { useContentStore } from "../stores/contentStore";
+import { useVoteStore } from "../stores/voteStore";
 
 interface ContentGridLayoutProps {
     readonly data: EnrichedContentItem[];
@@ -65,7 +67,27 @@ export function ContentGridLayout({
         );
     }
 
-    const renderItem = ({ item }: { item: EnrichedContentItem }): JSX.Element => {
+    interface GridMovieCardProps {
+        readonly item: EnrichedContentItem;
+        readonly onToggleFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+        readonly onToggleWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+        readonly onToggleWatched?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+        readonly onRecommend?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+    }
+
+    const GridMovieCard = React.memo(function GridMovieCard({
+        item,
+        onToggleFavorite,
+        onToggleWatchlist,
+        onToggleWatched,
+        onRecommend,
+    }: GridMovieCardProps) {
+        const isFavorite = useContentStore((s) => s.isFavorite(item.tmdb_id, item.media_type));
+        const inWatchlist = useContentStore((s) => s.isInWatchlist(item.tmdb_id, item.media_type));
+        const isWatched = useContentStore((s) => s.isWatched(item.tmdb_id, item.media_type));
+        const communityRating = useVoteStore((s) => s.getCommunityScore(item.tmdb_id, item.media_type)?.avg);
+        const userVote = useVoteStore((s) => s.getUserVote(item.tmdb_id, item.media_type));
+
         const cardItem = {
             id: item.tmdb_id,
             title: item.title,
@@ -88,29 +110,27 @@ export function ContentGridLayout({
             <MovieCard
                 item={cardItem}
                 mediaType={item.media_type}
-                isFavorite={isFavorite?.(item.tmdb_id, item.media_type)}
-                inWatchlist={isInWatchlist?.(item.tmdb_id, item.media_type)}
-                isWatched={isWatched?.(item.tmdb_id, item.media_type)}
-                onToggleFavorite={
-                    onToggleFavorite
-                        ? () => onToggleFavorite(item.tmdb_id, item.media_type)
-                        : undefined
-                }
-                onToggleWatchlist={
-                    onToggleWatchlist
-                        ? () => onToggleWatchlist(item.tmdb_id, item.media_type)
-                        : undefined
-                }
-                onToggleWatched={
-                    onToggleWatched
-                        ? () => onToggleWatched(item.tmdb_id, item.media_type)
-                        : undefined
-                }
-                onRecommend={
-                    onRecommend
-                        ? () => onRecommend(item.tmdb_id, item.media_type)
-                        : undefined
-                }
+                isFavorite={isFavorite}
+                inWatchlist={inWatchlist}
+                isWatched={isWatched}
+                communityRating={communityRating}
+                userVote={userVote}
+                onToggleFavorite={onToggleFavorite ? () => onToggleFavorite(item.tmdb_id, item.media_type) : undefined}
+                onToggleWatchlist={onToggleWatchlist ? () => onToggleWatchlist(item.tmdb_id, item.media_type) : undefined}
+                onToggleWatched={onToggleWatched ? () => onToggleWatched(item.tmdb_id, item.media_type) : undefined}
+                onRecommend={onRecommend ? () => onRecommend(item.tmdb_id, item.media_type) : undefined}
+            />
+        );
+    });
+
+    const renderItem = ({ item }: { item: EnrichedContentItem }): JSX.Element => {
+        return (
+            <GridMovieCard
+                item={item}
+                onToggleFavorite={onToggleFavorite}
+                onToggleWatchlist={onToggleWatchlist}
+                onToggleWatched={onToggleWatched}
+                onRecommend={onRecommend}
             />
         );
     };

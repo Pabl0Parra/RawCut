@@ -28,7 +28,7 @@ import {
 
 export const movieKeys = {
     all: ["movies"] as const,
-    popular: (page?: number) => ["movies", "popular", page ?? "infinite"] as const,
+    popular: (page?: number) => ["movies", "latest", page ?? "infinite"] as const,
     discover: (params: DiscoverParams) => ["movies", "discover", params] as const,
     classics: () => ["movies", "classics"] as const,
     curated: () => ["movies", "curated"] as const,
@@ -37,7 +37,7 @@ export const movieKeys = {
 
 export const tvKeys = {
     all: ["tv"] as const,
-    popular: (page?: number) => ["tv", "popular", page ?? "infinite"] as const,
+    popular: (page?: number) => ["tv", "latest", page ?? "infinite"] as const,
     discover: (params: DiscoverParams) => ["tv", "discover", params] as const,
     curated: () => ["tv", "curated"] as const,
     genres: () => ["genres", "tv"] as const,

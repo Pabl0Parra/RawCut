@@ -15,6 +15,8 @@ import { GridSkeleton } from "../../src/components/GridSkeleton";
 import { Ionicons } from "@expo/vector-icons";
 import { FlatList } from "react-native-gesture-handler";
 
+const EMPTY_WATCHLIST_ASSET = require("../../assets/icons/broken-heart.png");
+
 export default function WatchlistScreen() {
     const { t } = useTranslation();
     const { user } = useAuthStore();
@@ -188,7 +190,8 @@ export default function WatchlistScreen() {
                                 isAuthenticated={true}
                                 emptyTitle={t("watchlist.emptyTitle")}
                                 emptySubtitle={t("watchlist.emptySubtitle")}
-                                emptyIcon="📺"
+                                emptyIcon="💔"
+                                emptyAsset={EMPTY_WATCHLIST_ASSET}
                                 onToggleFavorite={handleToggleFavorite}
                                 onToggleWatchlist={handleToggleWatchlist}
                                 onToggleWatched={handleToggleWatched}
@@ -215,7 +218,8 @@ export default function WatchlistScreen() {
                             isAuthenticated={true}
                             emptyTitle={t("watchlist.emptyTitle")}
                             emptySubtitle={t("watchlist.emptySubtitle")}
-                            emptyIcon="🎬"
+                            emptyIcon="💔"
+                            emptyAsset={EMPTY_WATCHLIST_ASSET}
                             onToggleFavorite={handleToggleFavorite}
                             onToggleWatchlist={handleToggleWatchlist}
                             onToggleWatched={handleToggleWatched}
