@@ -42,6 +42,35 @@ export const useContentStore = create<ContentState>((set, get) => ({
     watchlist: [],
     tvProgress: [],
     isLoading: false,
+    error: null,
+
+    fetchUserContent: async () => {
+        const user = useAuthStore.getState().user;
+        if (!user) return;
+
+        set({ isLoading: true, error: null });
+
+        try {
+            const { data, error } = await supabase
+                .from("user_content")
+                .select("*")
+                .eq("user_id", user.id)
+                .order("created_at", { ascending: false });
+
+            if (error) throw error;
+
+            const favorites = data?.filter((item: UserContent) => item.list_type === "favorite") || [];
+            const watchlist = data?.filter((item: UserContent) => item.list_type === "watchlist") || [];
+
+            set({ favorites, watchlist, isLoading: false });
+        } catch (err) {
+            console.error("Error al cargar contenido:", err);
+            set({ isLoading: false, error: "Error al cargar contenido" });
+        }
+    },
+
+    fetchTVProgress: async () => {
+        const user = useAuthStore.getState().user;
         if (!user) return;
 
         try {
