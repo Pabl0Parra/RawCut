@@ -33,6 +33,8 @@ import type { Profile } from "../../src/lib/supabase";
 
 const AVATAR_BASE = "https://ui-avatars.com/api/?background=1c1c1e&color=e5e5e5&bold=true&size=64&name=";
 
+type FindFriendsTab = "search" | "following" | "followers";
+
 function getAvatarUri(profile: Profile): string {
     if (profile.avatar_url) return profile.avatar_url;
     return AVATAR_BASE + encodeURIComponent(profile.username ?? "U");
@@ -101,7 +103,7 @@ export default function FindFriendsScreen() {
     const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState<Profile[]>([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [activeTab, setActiveTab] = useState<"search" | "following" | "followers">("search");
+    const [activeTab, setActiveTab] = useState<FindFriendsTab>("search");
 
     const scrollX = useSharedValue(0);
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -121,7 +123,7 @@ export default function FindFriendsScreen() {
         };
     });
 
-    const handleTabPress = (index: number, tabName: "search" | "following" | "followers") => {
+    const handleTabPress = (index: number, tabName: FindFriendsTab) => {
         setActiveTab(tabName);
         scrollRef.current?.scrollTo({ x: index * SCREEN_WIDTH, animated: true });
     };
@@ -344,7 +346,7 @@ export default function FindFriendsScreen() {
                 style={styles.content}
                 onMomentumScrollEnd={(e) => {
                     const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-                    const tabs: Array<"search" | "following" | "followers"> = ["search", "following", "followers"];
+                    const tabs: FindFriendsTab[] = ["search", "following", "followers"];
                     setActiveTab(tabs[index]);
                 }}
             >
