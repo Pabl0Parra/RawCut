@@ -78,6 +78,7 @@ import {
 import { HeroCarousel } from "../../src/components/home/HeroCarousel";
 import { HomeSkeleton } from "../../src/components/home/HomeSkeleton";
 import { GridSkeleton } from "../../src/components/GridSkeleton";
+import { Skeleton } from "../../src/components/Skeleton";
 import { HomeSection, type ContentActionHandlers } from "../../src/components/home/HomeSection";
 
 
@@ -471,9 +472,17 @@ export default function HomeScreen(): JSX.Element {
 
     const renderFooter = useCallback((): JSX.Element | null => {
         if (!isFetchingNextPage) return null;
+        // Show 3 skeleton cards that exactly match the browse grid dimensions
+        // so there's no empty gap while the next page loads.
         return (
-            <View style={styles.footerContainer}>
-                <ActivityIndicator size="small" color={Colors.cinematicGold} />
+            <View style={styles.skeletonFooter}>
+                {[0, 1, 2].map((i) => (
+                    <View key={i} style={styles.skeletonCard}>
+                        <Skeleton width={CARD_WIDTH} height={POSTER_HEIGHT} borderRadius={8} />
+                        <Skeleton width={CARD_WIDTH * 0.75} height={12} borderRadius={4} style={{ marginTop: 6 }} />
+                        <Skeleton width={CARD_WIDTH * 0.5} height={10} borderRadius={4} style={{ marginTop: 4 }} />
+                    </View>
+                ))}
             </View>
         );
     }, [isFetchingNextPage]);
@@ -1171,6 +1180,16 @@ const styles = StyleSheet.create({
     },
     footerContainer: {
         paddingVertical: 16,
+    },
+    skeletonFooter: {
+        flexDirection: "row",
+        paddingHorizontal: 8,
+        gap: 12,
+        paddingTop: 4,
+        paddingBottom: 20,
+    },
+    skeletonCard: {
+        width: CARD_WIDTH,
     },
     placeholderCard: {
         width: "30%",
