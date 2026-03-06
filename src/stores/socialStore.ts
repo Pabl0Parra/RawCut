@@ -27,7 +27,34 @@ interface SocialState {
     clearSocial: () => void;
 }
 
-const CACHE_TTL_MS = 60_000; 
+const CACHE_TTL_MS = 60_000;
+
+function processFollowRow(
+    row: any,
+    userId: string,
+    following: Profile[],
+    followers: Profile[],
+    pendingIncoming: FollowWithProfile[],
+    pendingOutgoingIds: Set<string>
+): void {
+    if (row.follower_id === userId) {
+        if (row.status === "accepted") following.push(row.following as Profile);
+        else if (row.status === "pending") pendingOutgoingIds.add(row.following_id);
+    }
+    if (row.following_id === userId) {
+        if (row.status === "accepted") followers.push(row.follower as Profile);
+        else if (row.status === "pending") {
+            pendingIncoming.push({
+                id: row.id,
+                follower_id: row.follower_id,
+                following_id: row.following_id,
+                status: row.status,
+                created_at: row.created_at,
+                profile: row.follower as Profile,
+            });
+        }
+    }
+}
 
 export const useSocialStore = create<SocialState>((set, get) => ({
     following: [],
@@ -71,31 +98,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
             const pendingOutgoingIds = new Set<string>();
 
             for (const row of rows) {
-                const iAmFollower = row.follower_id === user.id;
-                const iAmFollowing = row.following_id === user.id;
-
-                if (iAmFollower) {
-                    if (row.status === "accepted") {
-                        following.push(row.following as Profile);
-                    } else if (row.status === "pending") {
-                        pendingOutgoingIds.add(row.following_id);
-                    }
-                }
-
-                if (iAmFollowing) {
-                    if (row.status === "accepted") {
-                        followers.push(row.follower as Profile);
-                    } else if (row.status === "pending") {
-                        pendingIncoming.push({
-                            id: row.id,
-                            follower_id: row.follower_id,
-                            following_id: row.following_id,
-                            status: row.status,
-                            created_at: row.created_at,
-                            profile: row.follower as Profile,
-                        });
-                    }
-                }
+                processFollowRow(row, user.id, following, followers, pendingIncoming, pendingOutgoingIds);
             }
 
             set({
