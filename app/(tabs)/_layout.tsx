@@ -28,6 +28,7 @@ const renderTabBar = (props: BottomTabBarProps) => (
     <AnimatedTabBar {...props} />
 );
 const renderHeaderRight = () => <HeaderRight />;
+const renderHeaderTitle = () => <CustomHeaderTitle />;
 
 const HEADER_TITLE_STYLE = {
     fontFamily: "BebasNeue_400Regular",
@@ -104,7 +105,7 @@ export default function TabLayout() {
                         backgroundColor: Colors.metalBlack,
                     },
                     headerTintColor: Colors.white,
-                    headerTitle: () => <CustomHeaderTitle />,
+                    headerTitle: renderHeaderTitle,
                     headerTitleAlign: "center",
                     headerLeft: renderHeaderLeft,
                     headerRight: renderHeaderRight,
@@ -180,7 +181,7 @@ export default function TabLayout() {
                             backgroundColor: Colors.metalBlack,
                         },
                         headerTintColor: Colors.white,
-                        headerTitle: () => <CustomHeaderTitle />,
+                        headerTitle: renderHeaderTitle,
                         headerTitleAlign: "center",
                         headerLeft: renderHeaderLeft,
                         headerRight: renderHeaderRight,
