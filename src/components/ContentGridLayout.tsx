@@ -1,4 +1,4 @@
-import React, { JSX } from "react";
+import React, { JSX, useCallback } from "react";
 import {
     FlatList,
     StyleSheet,
@@ -27,6 +27,62 @@ interface ContentGridLayoutProps {
     readonly isWatched?: (tmdbId: number, mediaType: "movie" | "tv") => boolean;
     readonly ListFooterComponent?: React.ComponentType<any> | React.ReactElement | null;
 }
+
+interface GridMovieCardProps {
+    readonly item: EnrichedContentItem;
+    readonly onToggleFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+    readonly onToggleWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+    readonly onToggleWatched?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+    readonly onRecommend?: (tmdbId: number, mediaType: "movie" | "tv") => void;
+}
+
+const GridMovieCard = React.memo(function GridMovieCard({
+    item,
+    onToggleFavorite,
+    onToggleWatchlist,
+    onToggleWatched,
+    onRecommend,
+}: GridMovieCardProps) {
+    const isFavorite = useContentStore((s) => s.isFavorite(item.tmdb_id, item.media_type));
+    const inWatchlist = useContentStore((s) => s.isInWatchlist(item.tmdb_id, item.media_type));
+    const isWatched = useContentStore((s) => s.isWatched(item.tmdb_id, item.media_type));
+    const communityRating = useVoteStore((s) => s.getCommunityScore(item.tmdb_id, item.media_type)?.avg);
+    const userVote = useVoteStore((s) => s.getUserVote(item.tmdb_id, item.media_type));
+
+    const cardItem = {
+        id: item.tmdb_id,
+        title: item.title,
+        name: item.title,
+        poster_path: item.poster_path,
+        backdrop_path: null,
+        vote_average: item.vote_average,
+        release_date: "",
+        first_air_date: "",
+        overview: "",
+        original_title: item.title,
+        original_name: item.title,
+        vote_count: 0,
+        genre_ids: [],
+        popularity: 0,
+        original_language: "en",
+    };
+
+    return (
+        <MovieCard
+            item={cardItem as any}
+            mediaType={item.media_type}
+            isFavorite={isFavorite}
+            inWatchlist={inWatchlist}
+            isWatched={isWatched}
+            communityRating={communityRating}
+            userVote={userVote}
+            onToggleFavorite={onToggleFavorite ? () => onToggleFavorite(item.tmdb_id, item.media_type) : undefined}
+            onToggleWatchlist={onToggleWatchlist ? () => onToggleWatchlist(item.tmdb_id, item.media_type) : undefined}
+            onToggleWatched={onToggleWatched ? () => onToggleWatched(item.tmdb_id, item.media_type) : undefined}
+            onRecommend={onRecommend ? () => onRecommend(item.tmdb_id, item.media_type) : undefined}
+        />
+    );
+});
 
 export const ContentGridLayout = React.memo(function ContentGridLayout({
     data,
@@ -69,63 +125,7 @@ export const ContentGridLayout = React.memo(function ContentGridLayout({
         );
     }
 
-    interface GridMovieCardProps {
-        readonly item: EnrichedContentItem;
-        readonly onToggleFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => void;
-        readonly onToggleWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => void;
-        readonly onToggleWatched?: (tmdbId: number, mediaType: "movie" | "tv") => void;
-        readonly onRecommend?: (tmdbId: number, mediaType: "movie" | "tv") => void;
-    }
-
-    const GridMovieCard = React.memo(function GridMovieCard({
-        item,
-        onToggleFavorite,
-        onToggleWatchlist,
-        onToggleWatched,
-        onRecommend,
-    }: GridMovieCardProps) {
-        const isFavorite = useContentStore((s) => s.isFavorite(item.tmdb_id, item.media_type));
-        const inWatchlist = useContentStore((s) => s.isInWatchlist(item.tmdb_id, item.media_type));
-        const isWatched = useContentStore((s) => s.isWatched(item.tmdb_id, item.media_type));
-        const communityRating = useVoteStore((s) => s.getCommunityScore(item.tmdb_id, item.media_type)?.avg);
-        const userVote = useVoteStore((s) => s.getUserVote(item.tmdb_id, item.media_type));
-
-        const cardItem = {
-            id: item.tmdb_id,
-            title: item.title,
-            name: item.title,
-            poster_path: item.poster_path,
-            backdrop_path: null,
-            vote_average: item.vote_average,
-            release_date: "",
-            first_air_date: "",
-            overview: "",
-            original_title: item.title,
-            original_name: item.title,
-            vote_count: 0,
-            genre_ids: [],
-            popularity: 0,
-            original_language: "en",
-        };
-
-        return (
-            <MovieCard
-                item={cardItem}
-                mediaType={item.media_type}
-                isFavorite={isFavorite}
-                inWatchlist={inWatchlist}
-                isWatched={isWatched}
-                communityRating={communityRating}
-                userVote={userVote}
-                onToggleFavorite={onToggleFavorite ? () => onToggleFavorite(item.tmdb_id, item.media_type) : undefined}
-                onToggleWatchlist={onToggleWatchlist ? () => onToggleWatchlist(item.tmdb_id, item.media_type) : undefined}
-                onToggleWatched={onToggleWatched ? () => onToggleWatched(item.tmdb_id, item.media_type) : undefined}
-                onRecommend={onRecommend ? () => onRecommend(item.tmdb_id, item.media_type) : undefined}
-            />
-        );
-    });
-
-    const renderItem = ({ item }: { item: EnrichedContentItem }): JSX.Element => {
+    const renderItem = useCallback(({ item }: { item: EnrichedContentItem }): JSX.Element => {
         return (
             <GridMovieCard
                 item={item}
@@ -135,7 +135,7 @@ export const ContentGridLayout = React.memo(function ContentGridLayout({
                 onRecommend={onRecommend}
             />
         );
-    };
+    }, [onToggleFavorite, onToggleWatchlist, onToggleWatched, onRecommend]);
 
     return (
         <FlatList

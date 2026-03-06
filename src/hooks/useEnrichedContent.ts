@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { getMovieDetails, getTVShowDetails } from "../lib/tmdb";
 
 export interface EnrichedContentItem {
@@ -21,8 +21,11 @@ export function useEnrichedContent(rawItems: RawContentItem[]) {
     const [isLoading, setIsLoading] = useState(rawItems.length > 0);
     const cancelledRef = useRef(false);
 
+    const joinedIds = rawItems.map(item => `${item.tmdb_id}-${item.media_type}`).join(',');
+    const stableRawItems = useMemo(() => rawItems, [joinedIds]);
+
     const enrichItems = useCallback(async () => {
-        if (!rawItems || rawItems.length === 0) {
+        if (!stableRawItems || stableRawItems.length === 0) {
             setEnrichedItems([]);
             setIsLoading(false);
             return;
@@ -31,7 +34,7 @@ export function useEnrichedContent(rawItems: RawContentItem[]) {
         setIsLoading(true);
         try {
             const enriched = await Promise.all(
-                rawItems.map(async (item) => {
+                stableRawItems.map(async (item) => {
                     try {
                         if (item.media_type === "movie") {
                             const details = await getMovieDetails(item.tmdb_id);
@@ -79,7 +82,7 @@ export function useEnrichedContent(rawItems: RawContentItem[]) {
                 setIsLoading(false);
             }
         }
-    }, [rawItems]);
+    }, [stableRawItems]);
 
     useEffect(() => {
         cancelledRef.current = false;
