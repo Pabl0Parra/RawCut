@@ -35,14 +35,17 @@ export const useForYouContent = (activeTab: ContentTab) => {
         setLoading(true);
         try {
             // 1. Get recent items from favorites and watchlist
-            const sourceItems = [...favorites, ...watchlist]
+            const uniqueSortedItems = [...favorites, ...watchlist]
                 .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                 .filter((item, index, self) =>
                     index === self.findIndex((t) => (
                         t.tmdb_id === item.tmdb_id && t.media_type === item.media_type
                     ))
-                )
-                .slice(0, 3); // Max 3 source items
+                );
+
+            const movieItems = uniqueSortedItems.filter((item) => item.media_type === "movie").slice(0, 3);
+            const tvItems = uniqueSortedItems.filter((item) => item.media_type === "tv").slice(0, 3);
+            const sourceItems = [...movieItems, ...tvItems];
 
             const newRecs: ForYouRecommendation[] = [];
 

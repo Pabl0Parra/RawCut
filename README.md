@@ -24,6 +24,8 @@ CortoCrudo is a comprehensive movie and television recommendation platform devel
 <summary>Click to expand</summary>
 
 - [Overview](#overview)
+- [Demo](#demo)
+- [Screenshots](#screenshots)
 - [Key Features](#key-features)
 - [Technical Architecture](#technical-architecture)
 - [Getting Started](#getting-started)
@@ -39,6 +41,73 @@ CortoCrudo is a comprehensive movie and television recommendation platform devel
 ## Overview
 
 The application serves as a centralized hub for media enthusiasts to track their viewing progress and exchange high-quality recommendations. Built with a focus on real-time interaction and data integrity, CortoCrudo utilizes the TMDb API for comprehensive media metadata and Supabase for secure backend services.
+
+---
+
+## Demo
+
+> 🎬 **Promo video coming soon** — replace the block below with your video embed.
+
+<!-- OPTION A: YouTube embed (recommended for GitHub README) -->
+<!-- Replace YOUR_VIDEO_ID with the actual YouTube video ID -->
+<!--
+[![CortoCrudo Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+-->
+
+<!-- OPTION B: Direct video file hosted in the repo or CDN -->
+<!--
+<video src="assets/demo/promo.mp4" controls width="100%"></video>
+-->
+
+<!-- PLACEHOLDER — remove this section once you add the real embed above -->
+<div align="center">
+  <img src="https://placehold.co/800x450/1a1a2e/ffffff?text=🎬+Promo+Video+Coming+Soon" alt="Promo video placeholder" width="800"/>
+</div>
+
+---
+
+## Screenshots
+
+> 📸 **App screenshots coming soon** — replace each placeholder below with a real screenshot.
+
+<!-- Replace the src values with paths to your actual screenshots.
+     Recommended: store them in assets/screenshots/ and commit to the repo,
+     or host them on an image CDN and link directly. -->
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Home+Screen" alt="Home Screen" width="200"/>
+        <br/><sub><b>Home</b></sub>
+      </td>
+      <td align="center">
+        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Discover" alt="Discover Screen" width="200"/>
+        <br/><sub><b>Discover</b></sub>
+      </td>
+      <td align="center">
+        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Detail+View" alt="Detail View" width="200"/>
+        <br/><sub><b>Detail View</b></sub>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Watchlist" alt="Watchlist Screen" width="200"/>
+        <br/><sub><b>Watchlist</b></sub>
+      </td>
+      <td align="center">
+        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Recommendations" alt="Recommendations Screen" width="200"/>
+        <br/><sub><b>Recommendations</b></sub>
+      </td>
+      <td align="center">
+        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Profile" alt="Profile Screen" width="200"/>
+        <br/><sub><b>Profile</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
 
 ## Key Features
 

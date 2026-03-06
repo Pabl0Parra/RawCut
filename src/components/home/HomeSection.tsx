@@ -1,5 +1,5 @@
 // src/components/home/HomeSection.tsx
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useState, useMemo } from "react";
 import {
     View,
     Text,
@@ -98,21 +98,66 @@ export const HomeSection = memo(function HomeSection({
 }: HomeSectionProps) {
     const { t } = useTranslation();
 
-    // Stable slice — avoid re-creating on every render
-    const displayData = data.length > 10 ? data.slice(0, 10) : data;
+    // ─── Sticky State ────────────────────────────────────────────────────────
+    // Keeps items visible even if the parent hook removes them after interaction.
+    // Reset when the section unmounts (e.g. navigation).
+    const [stickyItems, setStickyItems] = useState<ReadonlyArray<Movie | TVShow>>([]);
+
+    const handleInteraction = useCallback((item: Movie | TVShow) => {
+        setStickyItems((prev) => {
+            if (prev.some((pi) => pi.id === item.id)) return prev;
+            return [...prev, item];
+        });
+    }, []);
+
+    // ─── Wrapped Handlers ───────────────────────────────────────────────────
+    const wrappedToggleFavorite = useCallback(async (id: number, type: MediaType) => {
+        const item = data.find(d => d.id === id);
+        if (item) handleInteraction(item);
+        await onToggleFavorite(id, type);
+    }, [data, handleInteraction, onToggleFavorite]);
+
+    const wrappedToggleWatchlist = useCallback(async (id: number, type: MediaType) => {
+        const item = data.find(d => d.id === id);
+        if (item) handleInteraction(item);
+        await onToggleWatchlist(id, type);
+    }, [data, handleInteraction, onToggleWatchlist]);
+
+    const wrappedToggleWatched = useCallback(async (id: number, type: MediaType) => {
+        const item = data.find(d => d.id === id);
+        if (item) handleInteraction(item);
+        await onToggleWatched(id, type);
+    }, [data, handleInteraction, onToggleWatched]);
+
+    const wrappedVote = useCallback(async (id: number, type: MediaType, vote: number) => {
+        const item = data.find(d => d.id === id);
+        if (item) handleInteraction(item);
+        await onVote(id, type, vote);
+    }, [data, handleInteraction, onVote]);
+
+    // ─── Merge Data ──────────────────────────────────────────────────────────
+    // Merge current data with sticky items, maintaining data order when possible.
+    const mergedData = useMemo(() => {
+        const stickyNotInData = stickyItems.filter(si => !data.some(d => d.id === si.id));
+        return [...data, ...stickyNotInData];
+    }, [data, stickyItems]);
+
+    const displayData = useMemo(() => {
+        return mergedData.length > 10 ? mergedData.slice(0, 10) : mergedData;
+    }, [mergedData]);
 
     const renderItem = useCallback(
         ({ item }: { item: Movie | TVShow }) => (
             <SectionCard
                 item={item}
                 mediaType={mediaType}
-                onToggleFavorite={onToggleFavorite}
-                onToggleWatchlist={onToggleWatchlist}
-                onToggleWatched={onToggleWatched}
-                onVote={onVote}
+                onToggleFavorite={wrappedToggleFavorite}
+                onToggleWatchlist={wrappedToggleWatchlist}
+                onToggleWatched={wrappedToggleWatched}
+                onVote={wrappedVote}
             />
         ),
-        [mediaType, onToggleFavorite, onToggleWatchlist, onToggleWatched, onVote],
+        [mediaType, wrappedToggleFavorite, wrappedToggleWatchlist, wrappedToggleWatched, wrappedVote],
     );
 
     const getItemLayout = useCallback(

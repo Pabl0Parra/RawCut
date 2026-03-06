@@ -860,10 +860,11 @@ const DiscoverHeader = memo(function DiscoverHeader({
 
     const popularContent = activeTab === "movie" ? popularMovies : popularTV;
 
-    const filteredRecommendations = useMemo(
-        () => recommendations.filter((rec) => rec.mediaType === activeTab),
-        [recommendations, activeTab],
-    );
+    const filteredRecommendationsData = useMemo(() => {
+        const filtered = recommendations.filter((rec) => rec.mediaType === activeTab);
+        const allItems = filtered.flatMap((rec) => rec.items);
+        return allItems.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
+    }, [recommendations, activeTab]);
 
     // Stable view-all callbacks for genre sections
     const handleViewAllAction = useCallback(
@@ -934,11 +935,11 @@ const DiscoverHeader = memo(function DiscoverHeader({
                     isScrolling={isScrolling}
                 />
 
-                {filteredRecommendations.length > 0 && (
+                {filteredRecommendationsData.length > 0 && (
                     <HomeSection
                         title={t("home.forYouCategory.custom")}
                         icon="sparkles"
-                        data={filteredRecommendations[0].items}
+                        data={filteredRecommendationsData}
                         mediaType={activeTab}
                         onViewAll={handleViewAllPopular}
                         {...actionHandlers}

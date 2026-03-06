@@ -230,21 +230,16 @@ const MovieCard = memo(function MovieCard({
                 <TouchableOpacity
                     onPress={handlePress}
                     activeOpacity={0.8}
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 44, // Height of quickActions
-                    }}
+                    style={StyleSheet.absoluteFill}
                 >
                     {renderPoster()}
                 </TouchableOpacity>
 
                 {renderWatchedOverlay()}
                 {renderNewBadge()}
-                {renderQuickActions()}
             </View>
+
+            {renderQuickActions()}
 
             <TouchableOpacity
                 style={styles.infoContainer}
@@ -365,15 +360,9 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
     } as TextStyle,
     quickActions: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
         flexDirection: "row",
-        backgroundColor: "rgba(20, 20, 20, 0.95)",
-        borderTopWidth: 1.5,
-        borderTopColor: Colors.cinematicGold,
-        height: 44,
+        height: 38,
+        marginTop: 4,
         zIndex: 100,
     } as ViewStyle,
     quickActionButton: {
@@ -383,7 +372,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     } as ViewStyle,
     infoContainer: {
-        marginTop: 8,
+        marginTop: 6,
     } as ViewStyle,
     title: {
         color: Colors.textPrimary,
