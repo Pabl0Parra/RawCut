@@ -309,21 +309,28 @@ export default function FindFriendsScreen() {
             </View>
 
             <View style={styles.tabs}>
-                {(["search", "following", "followers"] as const).map((tab, index) => (
-                    <TouchableOpacity
-                        key={tab}
-                        style={styles.tab}
-                        onPress={() => handleTabPress(index, tab)}
-                    >
-                        <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
-                            {tab === "search"
-                                ? t("common.search")
-                                : tab === "following"
-                                    ? `${t("social.followingCount")} (${following.length})`
-                                    : `${t("social.followers")} (${followers.length + pendingIncoming.length})`}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
+                {(["search", "following", "followers"] as const).map((tab, index) => {
+                    let tabLabel = "";
+                    if (tab === "search") {
+                        tabLabel = t("common.search");
+                    } else if (tab === "following") {
+                        tabLabel = `${t("social.followingCount")} (${following.length})`;
+                    } else {
+                        tabLabel = `${t("social.followers")} (${followers.length + pendingIncoming.length})`;
+                    }
+
+                    return (
+                        <TouchableOpacity
+                            key={tab}
+                            style={styles.tab}
+                            onPress={() => handleTabPress(index, tab)}
+                        >
+                            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
+                                {tabLabel}
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                })}
                 <Animated.View style={[styles.tabIndicator, indicatorStyle]} />
             </View>
 
