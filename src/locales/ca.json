@@ -304,7 +304,7 @@
         "badge": "Font de dades",
         "text": "La informació sobre pel·lícules i sèries (títols, sinopsis, pòsters, dates d'estrena i valoracions) és proporcionada per <0>The Movie Database (TMDB)</0>. Aquesta aplicació utilitza l'API de TMDB per obtenir dades però no està recolzada ni certificada per TMDB.",
         "ratingTitle": "Com es calcula la puntuació?",
-        "ratingTmdb": "La puntuació <0>⭐ TMDB</0> reflecteix la valoració mitjana dels usuaris de The Movie Database.",
+        "ratingTmdb": "La puntuació <0>TMDB</0> reflecteix la valoració mitjana dels usuaris de The Movie Database.",
         "ratingCommunity": "La puntuació <0>👥 Comunitat</0> reflecteix la mitjana de vots (0-10) dels usuaris d'aquesta aplicació."
     },
     "person": {

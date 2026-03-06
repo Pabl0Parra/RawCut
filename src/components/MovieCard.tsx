@@ -252,7 +252,10 @@ const MovieCard = memo(function MovieCard({
                 <View style={styles.metaRow}>
                     {!!year && <Text style={styles.year}>{year}</Text>}
                     <View style={styles.ratingsRow}>
-                        <Text style={styles.rating}>⭐ {rating}</Text>
+                        <View style={styles.ratingBadge}>
+                            <Text style={styles.tmdbLabel}>TMDB</Text>
+                            <Text style={styles.rating}>{rating}</Text>
+                        </View>
                         <TouchableOpacity
                             onPress={() => setShowVotePicker(true)}
                             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
@@ -379,7 +382,8 @@ const styles = StyleSheet.create({
     metaRow: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
+        justifyContent: "flex-start",
+        gap: 6,
         marginTop: 4,
     } as ViewStyle,
     ratingsRow: {
@@ -394,6 +398,19 @@ const styles = StyleSheet.create({
     rating: {
         color: Colors.tmdbYellow,
         fontSize: 10,
+        fontWeight: "700",
+    } as TextStyle,
+    ratingBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 3,
+    } as ViewStyle,
+    tmdbLabel: {
+        color: "#01b4e4",
+        fontSize: 8,
+        fontWeight: "900",
+        letterSpacing: 0.5,
+        fontFamily: "Inter_700Bold",
     } as TextStyle,
     communityRating: {
         color: Colors.communityPurple,

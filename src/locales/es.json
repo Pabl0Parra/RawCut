@@ -304,7 +304,7 @@
         "badge": "Fuente de datos",
         "text": "La información sobre películas y series (títulos, sinopsis, pósters, fechas de estreno y valoraciones) es proporcionada por <0>The Movie Database (TMDB)</0>. Esta aplicación utiliza la API de TMDB pero no está respaldada ni certificada por TMDB.",
         "ratingTitle": "¿Cómo se calcula la puntuación?",
-        "ratingTmdb": "La puntuación <0>⭐ TMDB</0> refleja la valoración media de los usuarios de The Movie Database.",
+        "ratingTmdb": "La puntuación <0>TMDB</0> refleja la valoración media de los usuarios de The Movie Database.",
         "ratingCommunity": "La puntuación <0>👥 Comunidad</0> refleja el promedio de votos (0-10) de los usuarios de esta aplicación."
     },
     "person": {

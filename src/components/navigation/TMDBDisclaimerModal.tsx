@@ -85,9 +85,7 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
                         </TouchableOpacity>
 
                         <View style={styles.tmdbRow}>
-                            <View style={styles.tmdbLogo}>
-                                <Text style={styles.tmdbLogoText}>TMDB</Text>
-                            </View>
+                            <Text style={styles.newTmdbLabel}>TMDB</Text>
                             <Text style={styles.tmdbBadge}>{t('disclaimer.badge')}</Text>
                         </View>
 
@@ -103,7 +101,7 @@ export const TMDBDisclaimerModal: React.FC<TMDBDisclaimerModalProps> = ({
                             <Text style={styles.ratingText}>
                                 <Trans
                                     i18nKey="disclaimer.ratingTmdb"
-                                    components={[<Text style={{ color: Colors.tmdbYellow, fontWeight: "bold" }} key="tmdb-bold" />]}
+                                    components={[<Text style={styles.newTmdbLabelInline} key="tmdb-bold" />]}
                                 />
                             </Text>
                             <View style={styles.divider} />
@@ -171,18 +169,19 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         marginTop: 4,
     } as ViewStyle,
-    tmdbLogo: {
-        backgroundColor: Colors.tmdbBlue,
-        borderRadius: 6,
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-    } as ViewStyle,
-    tmdbLogoText: {
-        fontSize: 14,
-        fontWeight: "bold",
-        color: Colors.metalBlack,
+    newTmdbLabel: {
+        color: "#01b4e4",
+        fontSize: 16,
+        fontWeight: "900",
         letterSpacing: 0.5,
-        fontFamily: Fonts.bebas,
+        fontFamily: Fonts.interBold,
+    } as TextStyle,
+    newTmdbLabelInline: {
+        color: "#01b4e4",
+        fontSize: 12,
+        fontWeight: "900",
+        letterSpacing: 0.5,
+        fontFamily: Fonts.interBold,
     } as TextStyle,
     tmdbBadge: {
         fontSize: 12,
