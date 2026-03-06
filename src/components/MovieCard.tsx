@@ -292,7 +292,6 @@ const styles = StyleSheet.create({
     container: {
         width: "30%",
         marginBottom: 16,
-        gap: 4,
     } as ViewStyle,
     fullWidthContainer: {
         width: "100%",
@@ -362,7 +361,6 @@ const styles = StyleSheet.create({
     quickActions: {
         flexDirection: "row",
         height: 38,
-        marginTop: 4,
         zIndex: 100,
     } as ViewStyle,
     quickActionButton: {
@@ -372,7 +370,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     } as ViewStyle,
     infoContainer: {
-        marginTop: 6,
     } as ViewStyle,
     title: {
         color: Colors.textPrimary,

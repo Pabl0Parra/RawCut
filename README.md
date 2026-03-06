@@ -46,61 +46,65 @@ The application serves as a centralized hub for media enthusiasts to track their
 
 ## Demo
 
-> 🎬 **Promo video coming soon** — replace the block below with your video embed.
+## Demo
 
-<!-- OPTION A: YouTube embed (recommended for GitHub README) -->
-<!-- Replace YOUR_VIDEO_ID with the actual YouTube video ID -->
-<!--
-[![CortoCrudo Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
--->
-
-<!-- OPTION B: Direct video file hosted in the repo or CDN -->
-<!--
-<video src="assets/demo/promo.mp4" controls width="100%"></video>
--->
-
-<!-- PLACEHOLDER — remove this section once you add the real embed above -->
-<div align="center">
-  <img src="https://placehold.co/800x450/1a1a2e/ffffff?text=🎬+Promo+Video+Coming+Soon" alt="Promo video placeholder" width="800"/>
-</div>
+[![CortoCrudo Demo](https://img.youtube.com/vi/SCV3KcW4htM/0.jpg)](https://youtu.be/SCV3KcW4htM)
 
 ---
 
 ## Screenshots
 
-> 📸 **App screenshots coming soon** — replace each placeholder below with a real screenshot.
-
-<!-- Replace the src values with paths to your actual screenshots.
-     Recommended: store them in assets/screenshots/ and commit to the repo,
-     or host them on an image CDN and link directly. -->
-
 <div align="center">
   <table>
     <tr>
       <td align="center">
-        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Home+Screen" alt="Home Screen" width="200"/>
+        <img src="./assets/screenshots/0.PNG" alt="Home Screen" width="200"/>
         <br/><sub><b>Home</b></sub>
       </td>
       <td align="center">
-        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Discover" alt="Discover Screen" width="200"/>
+        <img src="./assets/screenshots/1.PNG" alt="Discover Screen" width="200"/>
         <br/><sub><b>Discover</b></sub>
       </td>
       <td align="center">
-        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Detail+View" alt="Detail View" width="200"/>
+        <img src="./assets/screenshots/1-b.PNG" alt="Detail View" width="200"/>
         <br/><sub><b>Detail View</b></sub>
       </td>
     </tr>
     <tr>
       <td align="center">
-        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Watchlist" alt="Watchlist Screen" width="200"/>
+        <img src="./assets/screenshots/2.PNG" alt="Watchlist Screen" width="200"/>
         <br/><sub><b>Watchlist</b></sub>
       </td>
       <td align="center">
-        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Recommendations" alt="Recommendations Screen" width="200"/>
+        <img src="./assets/screenshots/3.PNG" alt="Recommendations Screen" width="200"/>
         <br/><sub><b>Recommendations</b></sub>
       </td>
       <td align="center">
-        <img src="https://placehold.co/300x600/1a1a2e/ffffff?text=Profile" alt="Profile Screen" width="200"/>
+        <img src="./assets/screenshots/4.PNG" alt="Profile Screen" width="200"/>
+        <br/><sub><b>Profile</b></sub>
+      </td>
+      <td align="center">
+        <img src="./assets/screenshots/5.PNG" alt="Profile Screen" width="200"/>
+        <br/><sub><b>Profile</b></sub>
+      </td>
+      <td align="center">
+        <img src="./assets/screenshots/6.PNG" alt="Profile Screen" width="200"/>
+        <br/><sub><b>Profile</b></sub>
+      </td>
+      <td align="center">
+        <img src="./assets/screenshots/7.PNG" alt="Profile Screen" width="200"/>
+        <br/><sub><b>Profile</b></sub>
+      </td>
+      <td align="center">
+        <img src="./assets/screenshots/8.PNG" alt="Profile Screen" width="200"/>
+        <br/><sub><b>Profile</b></sub>
+      </td>
+      <td align="center">
+        <img src="./assets/screenshots/9.PNG" alt="Profile Screen" width="200"/>
+        <br/><sub><b>Profile</b></sub>
+      </td>
+      <td align="center">
+        <img src="./assets/screenshots/8.PNG" alt="Profile Screen" width="200"/>
         <br/><sub><b>Profile</b></sub>
       </td>
     </tr>

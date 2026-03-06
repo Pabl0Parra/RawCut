@@ -1,7 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "expo-router";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, { runOnJS } from "react-native-reanimated";
 import { useContentStore } from "../../src/stores/contentStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useEnrichedContent } from "../../src/hooks/useEnrichedContent";
@@ -20,6 +22,23 @@ export default function FavoritesScreen() {
     const { enrichedItems, isLoading } = useEnrichedContent(favorites);
 
     const [activeTab, setActiveTab] = useState<"movies" | "tv">("movies");
+
+    const swipeGesture = useMemo(() => {
+        const tabs: ("movies" | "tv")[] = ["movies", "tv"];
+        return Gesture.Pan()
+            .runOnJS(true)
+            .activeOffsetX([-50, 50])
+            .failOffsetY([-15, 15])
+            .onEnd((e) => {
+                const { translationX, velocityX } = e;
+                const currentIndex = tabs.indexOf(activeTab);
+                if (translationX < -50 || velocityX < -500) {
+                    if (currentIndex < tabs.length - 1) runOnJS(setActiveTab)(tabs[currentIndex + 1]);
+                } else if (translationX > 50 || velocityX > 500) {
+                    if (currentIndex > 0) runOnJS(setActiveTab)(tabs[currentIndex - 1]);
+                }
+            });
+    }, [activeTab]);
 
     useFocusEffect(
         useCallback(() => {
@@ -83,21 +102,25 @@ export default function FavoritesScreen() {
                 onTabChange={setActiveTab}
                 title={t("tabs.favorites").toUpperCase()}
             />
-            <ContentGridLayout
-                data={filteredItems}
-                isLoading={isLoading}
-                isAuthenticated={!!user}
-                emptyTitle={t("favorites.emptyTitle")}
-                emptySubtitle={t("favorites.emptySubtitle")}
-                emptyIcon="💔"
-                emptyAsset={require("../../assets/icons/broken-heart.png")}
-                onToggleFavorite={handleToggleFavorite}
-                onToggleWatchlist={handleToggleWatchlist}
-                onToggleWatched={handleToggleWatched}
-                isFavorite={isFavorite}
-                isInWatchlist={isInWatchlist}
-                isWatched={isWatched}
-            />
+            <GestureDetector gesture={swipeGesture}>
+                <Animated.View style={{ flex: 1 }}>
+                    <ContentGridLayout
+                        data={filteredItems}
+                        isLoading={isLoading}
+                        isAuthenticated={!!user}
+                        emptyTitle={t("favorites.emptyTitle")}
+                        emptySubtitle={t("favorites.emptySubtitle")}
+                        emptyIcon="💔"
+                        emptyAsset={require("../../assets/icons/broken-heart.png")}
+                        onToggleFavorite={handleToggleFavorite}
+                        onToggleWatchlist={handleToggleWatchlist}
+                        onToggleWatched={handleToggleWatched}
+                        isFavorite={isFavorite}
+                        isInWatchlist={isInWatchlist}
+                        isWatched={isWatched}
+                    />
+                </Animated.View>
+            </GestureDetector>
         </View>
     );
 }
