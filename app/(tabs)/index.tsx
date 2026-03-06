@@ -164,7 +164,7 @@ export default function HomeScreen(): JSX.Element {
     const [isScrolling, setIsScrolling] = useState(false);
     const flatListRef = React.useRef<FlatList>(null);
 
-    const { recommendations } = useForYouContent("foryou");
+    const { recommendations, forYouSettled } = useForYouContent("foryou");
 
     // Cast the weakly-typed hook result to our strict type
     const typedRecommendations = recommendations as ReadonlyArray<ForYouRecommendation>;
@@ -558,13 +558,14 @@ export default function HomeScreen(): JSX.Element {
             isSearching={isSearching}
             isScrolling={isScrolling}
             recommendations={typedRecommendations}
+            forYouSettled={forYouSettled}
             actionHandlers={actionHandlers}
             onViewAll={handleViewAll}
             onViewAllClassics={handleViewAllClassics}
         />
     ), [
         activeTab, loading, data.length, searchQuery, filtersActive,
-        isInSearchMode, isSearching, isScrolling, typedRecommendations,
+        isInSearchMode, isSearching, isScrolling, typedRecommendations, forYouSettled,
         actionHandlers, handleViewAll, handleViewAllClassics,
     ]);
 
@@ -820,6 +821,7 @@ interface DiscoverHeaderProps {
     readonly isSearching: boolean;
     readonly isScrolling: boolean;
     readonly recommendations: ReadonlyArray<ForYouRecommendation>;
+    readonly forYouSettled: boolean;
     readonly actionHandlers: ContentActionHandlers;
     readonly onViewAll: (genreId: number | string | null) => void;
     readonly onViewAllClassics: () => void;
@@ -835,6 +837,7 @@ const DiscoverHeader = memo(function DiscoverHeader({
     isSearching,
     isScrolling,
     recommendations,
+    forYouSettled,
     actionHandlers,
     onViewAll,
     onViewAllClassics,
@@ -865,6 +868,13 @@ const DiscoverHeader = memo(function DiscoverHeader({
         const allItems = filtered.flatMap((rec) => rec.items);
         return allItems.filter((item, index, self) => index === self.findIndex((t) => t.id === item.id));
     }, [recommendations, activeTab]);
+
+    // ─── heroReady: all key data has at least one page loaded ───────────
+    // We wait for the hero (new releases), popular content, AND for personalizado
+    // to have settled (fetch completed, success or failure). This ensures all
+    // sections — including Personalizado — paint in a single pass. Without this,
+    // Personalizado pops in after the other sections causing a visible layout shift.
+    const heroReady = newReleasesQuery.isSuccess && newReleases.length > 0 && popularContent.length > 0 && forYouSettled;
 
     // Stable view-all callbacks for genre sections
     const handleViewAllAction = useCallback(
@@ -919,6 +929,18 @@ const DiscoverHeader = memo(function DiscoverHeader({
 
     if (isInSearchMode || filtersActive) {
         return <View style={styles.discoverHeader} />;
+    }
+
+    // While hero data is loading, show the HomeSkeleton so the grid below
+    // doesn't jump upward when the hero finally arrives.
+    if (!heroReady) {
+        return (
+            <View style={styles.discoverHeader}>
+                <View style={styles.centerContainer}>
+                    <HomeSkeleton />
+                </View>
+            </View>
+        );
     }
 
     return (

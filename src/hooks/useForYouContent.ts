@@ -11,6 +11,7 @@ import {
     type TVShow
 } from "../lib/tmdb";
 import { useContentStore } from "../stores/contentStore";
+import { useAuthStore } from "../stores/authStore";
 import type { ContentTab } from "../types/homeScreen.types";
 
 export interface ForYouRecommendation {
@@ -24,13 +25,35 @@ export const useForYouContent = (activeTab: ContentTab) => {
     const { t } = useTranslation();
     const [recommendations, setRecommendations] = useState<ForYouRecommendation[]>([]);
     const [loading, setLoading] = useState(false);
+    // True once the first fetch attempt has completed (success or failure).
+    // Used by callers to gate rendering until personalizado is settled so it
+    // doesn't pop-in after other sections causing a visible layout shift.
+    const [forYouSettled, setForYouSettled] = useState(false);
 
-    type ContentState = ReturnType<typeof useContentStore.getState>;
-    const favorites = useContentStore((s: ContentState) => s.favorites);
-    const watchlist = useContentStore((s: ContentState) => s.watchlist);
+    // ─── Read store values imperatively inside the callback ──────────────
+    // We intentionally do NOT subscribe to `favorites`, `watchlist`, or
+    // `contentLoaded` as reactive values here. If we did, every time Zustand
+    // updates those arrays (e.g. when fetchUserContent() resolves), React
+    // would recreate `fetchRecommendations`, fire the useEffect again, and
+    // trigger a second fetch that causes the Personalizado section to re-render.
+    // Reading via getState() makes the callback stable.
 
     const fetchRecommendations = useCallback(async () => {
         if (activeTab !== "foryou") return;
+
+        const { favorites, watchlist, contentLoaded } = useContentStore.getState();
+        const { user, authInitialized } = useAuthStore.getState();
+
+        // Block until auth has fully resolved (setSession has been called).
+        // Without this, the effect fires immediately on mount with user=null
+        // (before supabase.auth.getSession() returns), fetches popular movies
+        // as a fallback, and then fires AGAIN once auth + content loads —
+        // causing the visible Personalizado re-render.
+        if (!authInitialized) return;
+
+        // If user is logged in, additionally wait for their content (favorites/
+        // watchlist) to be fetched before building personalized recommendations.
+        if (user && !contentLoaded) return;
 
         setLoading(true);
         try {
@@ -120,14 +143,27 @@ export const useForYouContent = (activeTab: ContentTab) => {
             console.error("Error fetching For You content:", err);
         } finally {
             setLoading(false);
+            // Mark as settled regardless of outcome so callers can unlock rendering.
+            setForYouSettled(true);
         }
-    }, [activeTab, favorites, watchlist, t]);
+    // Only depends on activeTab and t — store values are read imperatively
+    }, [activeTab, t]);
+
+    // Subscribe to authInitialized AND contentLoaded so the effect re-fires
+    // exactly the right number of times:
+    //   1. Once when auth resolves (authInitialized flips true)
+    //   2. Once when user content loads (contentLoaded flips true)
+    // The guard inside fetchRecommendations ensures only the correct call
+    // actually executes a fetch.
+    const authInitialized = useAuthStore((s) => s.authInitialized);
+    const contentLoaded = useContentStore((s) => s.contentLoaded);
 
     useEffect(() => {
         if (activeTab === "foryou") {
             fetchRecommendations();
         }
-    }, [activeTab, fetchRecommendations]);
+    }, [activeTab, fetchRecommendations, authInitialized, contentLoaded]);
 
-    return { recommendations, loadingForYou: loading, fetchForYouContent: fetchRecommendations };
+    return { recommendations, loadingForYou: loading, forYouSettled, fetchForYouContent: fetchRecommendations };
 };
+

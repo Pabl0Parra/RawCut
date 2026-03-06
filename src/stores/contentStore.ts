@@ -16,6 +16,7 @@ interface ContentState {
     watchlist: UserContent[];
     tvProgress: TVProgress[];
     isLoading: boolean;
+    contentLoaded: boolean;
     error: string | null;
 
     
@@ -42,6 +43,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
     watchlist: [],
     tvProgress: [],
     isLoading: false,
+    contentLoaded: false,
     error: null,
 
     fetchUserContent: async () => {
@@ -62,10 +64,10 @@ export const useContentStore = create<ContentState>((set, get) => ({
             const favorites = data?.filter((item: UserContent) => item.list_type === "favorite") || [];
             const watchlist = data?.filter((item: UserContent) => item.list_type === "watchlist") || [];
 
-            set({ favorites, watchlist, isLoading: false });
+            set({ favorites, watchlist, isLoading: false, contentLoaded: true });
         } catch (err) {
             console.error("Error al cargar contenido:", err);
-            set({ isLoading: false, error: "Error al cargar contenido" });
+            set({ isLoading: false, error: "Error al cargar contenido", contentLoaded: true });
         }
     },
 
@@ -407,6 +409,6 @@ export const useContentStore = create<ContentState>((set, get) => ({
     },
 
     clearContent: () => {
-        set({ favorites: [], watchlist: [], tvProgress: [], isLoading: false, error: null });
+        set({ favorites: [], watchlist: [], tvProgress: [], isLoading: false, contentLoaded: false, error: null });
     },
 }));

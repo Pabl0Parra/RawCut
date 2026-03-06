@@ -8,6 +8,7 @@ interface AuthState {
     session: Session | null;
     profile: Profile | null;
     isLoading: boolean;
+    authInitialized: boolean;
     error: string | null;
 
     
@@ -27,6 +28,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     session: null,
     profile: null,
     isLoading: false,
+    authInitialized: false,
     error: null,
 
     signIn: async (identifier: string, password: string) => {
@@ -217,6 +219,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({
             session,
             user: session?.user || null,
+            authInitialized: true,
         });
     },
     setProfile: (profile: Profile | null) => {
