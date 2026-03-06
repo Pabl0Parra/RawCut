@@ -1,6 +1,6 @@
 import { useCallback, useState, useMemo } from "react";
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, FlatList } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect, router } from "expo-router";
 import { useContentStore } from "../../src/stores/contentStore";
@@ -13,7 +13,6 @@ import { ContentGridLayout } from "../../src/components/ContentGridLayout";
 import { Colors, Fonts } from "../../src/constants/Colors";
 import { GridSkeleton } from "../../src/components/GridSkeleton";
 import { Ionicons } from "@expo/vector-icons";
-import { FlatList } from "react-native-gesture-handler";
 
 const EMPTY_WATCHLIST_ASSET = require("../../assets/icons/broken-heart.png");
 
@@ -32,7 +31,6 @@ export default function WatchlistScreen() {
         addToWatchlist,
         removeFromWatchlist,
         toggleWatched,
-        getNextEpisodeToWatch,
     } = useContentStore();
 
     const [activeTab, setActiveTab] = useState<"movies" | "tv">("tv");
@@ -59,10 +57,6 @@ export default function WatchlistScreen() {
                 if (activeTab === "movies") setActiveTab("tv");
             }
         });
-
-    const handleMarkAsWatched = useCallback(async (tmdbId: number, season: number, episode: number) => {
-        await toggleEpisodeWatched(tmdbId, season, episode);
-    }, [toggleEpisodeWatched]);
 
     const handleToggleFavorite = useCallback(async (tmdbId: number, mediaType: "movie" | "tv") => {
         if (isFavorite(tmdbId, mediaType)) {

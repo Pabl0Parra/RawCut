@@ -9,8 +9,6 @@ import {
     KeyboardAvoidingView,
     Platform,
     StyleSheet,
-    type ViewStyle,
-    type TextStyle,
 } from "react-native";
 import { Image } from 'expo-image';
 import { useFocusEffect, router } from "expo-router";
@@ -289,7 +287,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
                     style={styles.keyboardAvoidingView}
                 >
                     {/* Removed empty fragments { } that could interfere with reconciliation */}
-                    
+
                     <View style={styles.tabsContainer}>
                         <View style={styles.tabsWrapper}>
                             {renderTab("received", t("recommendations.received"), received.length)}
@@ -392,7 +390,7 @@ const styles = StyleSheet.create({
     },
     loginButtonText: {
         color: Colors.metalBlack,
-        fontWeight: "bold",        
+        fontWeight: "bold",
         textTransform: "uppercase",
     },
     listContent: {
