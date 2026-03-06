@@ -28,7 +28,7 @@ import {
     MaterialCommunityIcons,
     Ionicons,
 } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
@@ -147,6 +147,7 @@ const MovieCardItem = memo(function MovieCardItem({
 
 export default function HomeScreen(): JSX.Element {
     const { t } = useTranslation();
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<MediaType>("movie");
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -215,9 +216,12 @@ export default function HomeScreen(): JSX.Element {
     const tvShows: TVShow[] = isInSearchMode ? searchTVShows_ : tvShowsFromQuery;
 
     // ─── Active query for current tab ────────────────────────────────────
-    const activeQuery = activeTab === "movie"
-        ? (useDiscover ? discoverMoviesQuery : popularMoviesQuery)
-        : (useDiscover ? discoverTVQuery : popularTVQuery);
+    let activeQuery;
+    if (activeTab === "movie") {
+        activeQuery = useDiscover ? discoverMoviesQuery : popularMoviesQuery;
+    } else {
+        activeQuery = useDiscover ? discoverTVQuery : popularTVQuery;
+    }
     const loading = activeQuery.isLoading;
     const isFetchingNextPage = activeQuery.isFetchingNextPage;
 
@@ -577,6 +581,24 @@ export default function HomeScreen(): JSX.Element {
                 handleOpenFilters={handleOpenFilters}
                 resetFilters={resetFilters}
             />
+
+            {showProfileBanner && (
+                <View style={styles.profileBanner}>
+                    <TouchableOpacity
+                        style={styles.profileBannerContent}
+                        onPress={() => router.push("/profile")}
+                    >
+                        <Ionicons name="information-circle" size={20} color={Colors.white} />
+                        <View style={{ flex: 1, marginLeft: 12 }}>
+                            <Text style={styles.profileBannerTitle}>{t("profile.bannerTitle", "Update your username")}</Text>
+                            <Text style={styles.profileBannerSubtitle}>
+                                {t("profile.bannerSubtitle", "Choose a unique username so friends can find you.")}
+                            </Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color={Colors.white} />
+                    </TouchableOpacity>
+                </View>
+            )}
 
             <GestureDetector gesture={swipeGesture}>
                 <FlatList
@@ -1130,6 +1152,30 @@ const styles = StyleSheet.create({
     placeholderCard: {
         width: "30%",
         marginBottom: 16,
+    },
+    profileBanner: {
+        backgroundColor: Colors.vibrantRed,
+        marginHorizontal: 16,
+        marginBottom: 12,
+        borderRadius: 12,
+        overflow: "hidden",
+    },
+    profileBannerContent: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 12,
+    },
+    profileBannerTitle: {
+        color: Colors.white,
+        fontSize: 14,
+        fontFamily: Fonts.interSemiBold,
+    },
+    profileBannerSubtitle: {
+        color: Colors.white,
+        fontSize: 12,
+        fontFamily: Fonts.inter,
+        opacity: 0.9,
+        marginTop: 2,
     },
     // ─── Filter Modal ────────────────────────────────────────────────────
     modalOverlay: {
