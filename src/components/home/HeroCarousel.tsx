@@ -22,7 +22,10 @@ import { getImageUrl, type Movie, type TVShow } from "../../lib/tmdb";
 import type { MediaType } from "../../types/homeScreen.types";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const HERO_HEIGHT = 280;
+const ITEM_WIDTH = 280;
+const ITEM_HEIGHT = 157.5; // 280 * 9/16
+const ITEM_SPACING = 16;
+const SNAP_INTERVAL = ITEM_WIDTH + ITEM_SPACING;
 
 // ─── Pagination Dot ──────────────────────────────────────────────────────────
 
@@ -174,7 +177,7 @@ export const HeroCarousel = memo(function HeroCarousel({
     const onMomentumScrollEnd = useCallback(
         (e: NativeSyntheticEvent<NativeScrollEvent>) => {
             const xOffset = e.nativeEvent.contentOffset.x;
-            const index = Math.round(xOffset / SCREEN_WIDTH);
+            const index = Math.round(xOffset / SNAP_INTERVAL);
             const totalLoopItems = heroDataLengthRef.current + 2; // clones at both ends
 
             if (index === 0) {
@@ -212,8 +215,8 @@ export const HeroCarousel = memo(function HeroCarousel({
 
     const getItemLayout = useCallback(
         (_: ArrayLike<Movie | TVShow> | null | undefined, index: number) => ({
-            length: SCREEN_WIDTH,
-            offset: SCREEN_WIDTH * index,
+            length: SNAP_INTERVAL,
+            offset: SNAP_INTERVAL * index,
             index,
         }),
         [],
@@ -228,7 +231,6 @@ export const HeroCarousel = memo(function HeroCarousel({
                 data={loopData}
                 renderItem={renderItem}
                 horizontal
-                pagingEnabled
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={keyExtractor}
                 onScrollBeginDrag={stopAutoScroll}
@@ -240,6 +242,9 @@ export const HeroCarousel = memo(function HeroCarousel({
                 windowSize={11}
                 initialScrollIndex={1}
                 removeClippedSubviews={false}
+                snapToInterval={SNAP_INTERVAL}
+                decelerationRate="fast"
+                contentContainerStyle={{ paddingHorizontal: 16 }}
             />
             <View style={styles.pagination}>
                 {heroData.map((_, index) => (
@@ -258,13 +263,22 @@ export const HeroCarousel = memo(function HeroCarousel({
 
 const styles = StyleSheet.create({
     container: {
-        height: HERO_HEIGHT,
-        marginBottom: 20,
+        height: ITEM_HEIGHT + 36, // Make room for dots
+        marginBottom: 8,
     },
     heroItem: {
-        width: SCREEN_WIDTH,
-        height: HERO_HEIGHT,
+        width: ITEM_WIDTH,
+        height: ITEM_HEIGHT,
+        marginRight: ITEM_SPACING,
         position: "relative",
+        borderRadius: 12,
+        overflow: "hidden",
+        backgroundColor: Colors.metalGray,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 6,
     },
     backdrop: {
         width: "100%",
@@ -279,12 +293,12 @@ const styles = StyleSheet.create({
     },
     heroContent: {
         position: "absolute",
-        bottom: 30,
-        left: 16,
-        right: 16,
+        bottom: 12,
+        left: 12,
+        right: 12,
     },
     heroTitle: {
-        fontSize: 28,
+        fontSize: 18,
         fontFamily: Fonts.bebas,
         color: Colors.white,
         textShadowColor: "rgba(0, 0, 0, 0.75)",
@@ -297,7 +311,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 6,
         position: "absolute",
-        bottom: 12,
+        bottom: 0,
         width: "100%",
     },
     dot: {
