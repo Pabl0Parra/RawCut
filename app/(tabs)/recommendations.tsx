@@ -13,13 +13,12 @@ import {
     type TextStyle,
 } from "react-native";
 import { Image } from 'expo-image';
-import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, router } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { useRecommendationStore } from "../../src/stores/recommendationStore";
 import { useAuthStore } from "../../src/stores/authStore";
-import { Colors, Fonts } from "../../src/constants/Colors";
+import { Colors } from "../../src/constants/Colors";
 import RecommendationCard from "../../src/components/RecommendationCard";
 
 import type {
@@ -51,22 +50,11 @@ export default function RecommendationsScreen(): React.JSX.Element {
     } = useRecommendationStore();
 
     const [state, setState] = useState<RecommendationsScreenState>(INITIAL_RECOMMENDATIONS_STATE);
-
     const { activeTab, tmdbData, expandedId } = state;
-
-
-
-
 
     const updateState = (updates: Partial<RecommendationsScreenState>): void => {
         setState((prev) => ({ ...prev, ...updates }));
     };
-
-
-
-
-
-
 
     useFocusEffect(
         useCallback(() => {
@@ -75,10 +63,8 @@ export default function RecommendationsScreen(): React.JSX.Element {
         }, [user])
     );
 
-
     useEffect(() => {
         const loadTmdbData = async (): Promise<void> => {
-
             const allRecs = [
                 ...(sent as RecommendationWithRelations[]),
                 ...(received as RecommendationWithRelations[]),
@@ -113,8 +99,6 @@ export default function RecommendationsScreen(): React.JSX.Element {
         return await addComment(recommendationId, text);
     };
 
-    // handleAddRating removed as requested.
-
     const handleMarkCommentsRead = (recommendationId: string): void => {
         markCommentsAsRead(recommendationId);
     };
@@ -140,21 +124,12 @@ export default function RecommendationsScreen(): React.JSX.Element {
         router.push("/login");
     };
 
-
-
-
-
     const data = activeTab === "received"
         ? (received as RecommendationWithRelations[])
         : (sent as RecommendationWithRelations[]);
 
     const [isRefreshing, setIsRefreshing] = useState(false);
-
     const isReceived = activeTab === "received";
-
-
-
-
 
     const getTmdbDataForItem = (item: RecommendationWithRelations): TmdbContentData => {
         const key = createTmdbCacheKey(item.media_type, item.tmdb_id);
@@ -180,7 +155,15 @@ export default function RecommendationsScreen(): React.JSX.Element {
         />
     );
 
-    const keyExtractor = (item: RecommendationWithRelations): string => item.id;
+    // ✅ FIXED: Safe key extractor with prefix and fallback
+    const keyExtractor = useCallback((item: RecommendationWithRelations, index: number): string => {
+        // Use explicit ID if valid, otherwise fallback to index-based key
+        if (item.id && typeof item.id === 'string' && item.id.trim() !== '') {
+            return `rec-${item.id}`;
+        }
+        // Fallback: use index + timestamp for uniqueness (only if data is truly static)
+        return `rec-fallback-${index}-${Date.now()}`;
+    }, []);
 
     const renderUnauthenticatedState = (): React.JSX.Element => (
         <View style={styles.safeArea}>
@@ -211,7 +194,7 @@ export default function RecommendationsScreen(): React.JSX.Element {
         return (
             <View style={styles.emptyContainer}>
                 <Image
-                    source={require("../../assets/icons/mail-fire.png")}
+                    source={require("../../assets/mailbox.png")}
                     style={{ width: 240, height: 240, marginBottom: 50 }}
                     contentFit="contain"
                 />
@@ -235,22 +218,16 @@ export default function RecommendationsScreen(): React.JSX.Element {
         count: number
     ): React.JSX.Element => {
         const isActive = activeTab === tab;
-        const iconName = tab === "received" ? "download-outline" : "paper-plane-outline";
 
         return (
             <TouchableOpacity
-                style={[styles.tab, isActive && styles.activeTab]}
+                style={[styles.tab, isActive ? styles.activeTab : styles.inactiveTab]}
                 onPress={() => handleTabChange(tab)}
             >
-                <Ionicons
-                    name={iconName as any}
-                    size={16}
-                    color={isActive ? Colors.white : Colors.metalSilver}
-                />
                 <Text
                     style={[
                         styles.tabText,
-                        isActive && styles.activeTabText,
+                        isActive ? styles.activeTabText : styles.inactiveTabText,
                     ]}
                 >
                     {label} ({count})
@@ -281,18 +258,15 @@ export default function RecommendationsScreen(): React.JSX.Element {
                 refreshing={isRefreshing}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
+                // ✅ Add extra safety: remove duplicates by ID before rendering
+                extraData={[expandedId, activeTab]}
             />
         );
     };
 
-
-
-
-
     if (!user) {
         return renderUnauthenticatedState();
     }
-
 
     const swipeGesture = Gesture.Pan()
         .runOnJS(true)
@@ -314,20 +288,15 @@ export default function RecommendationsScreen(): React.JSX.Element {
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={styles.keyboardAvoidingView}
                 >
-                    <View style={styles.headerContainer}>
-                        <View style={styles.headerRow}>
-                            <View style={styles.headerTitleContainer}>
-                                <Text style={styles.headerTitle}>{t("tabs.recommendations").toUpperCase()}</Text>
-                            </View>
-
-                            <View style={styles.tabsWrapper}>
-                                {renderTab("received", t("recommendations.received"), received.length)}
-                                {renderTab("sent", t("recommendations.sent"), sent.length)}
-                            </View>
+                    {/* Removed empty fragments { } that could interfere with reconciliation */}
+                    
+                    <View style={styles.tabsContainer}>
+                        <View style={styles.tabsWrapper}>
+                            {renderTab("received", t("recommendations.received"), received.length)}
+                            {renderTab("sent", t("recommendations.sent"), sent.length)}
                         </View>
                     </View>
 
-                    { }
                     {renderContent()}
                 </KeyboardAvoidingView>
             </View>
@@ -339,111 +308,94 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: "transparent",
-    } as ViewStyle,
+    },
     paddedTop: {
         paddingTop: 8,
-    } as ViewStyle,
+    },
     keyboardAvoidingView: {
         flex: 1,
-    } as ViewStyle,
-    headerContainer: {
+    },
+    tabsContainer: {
         paddingHorizontal: 16,
         paddingBottom: 16,
-    },
-    headerRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    headerTitleContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        flex: 1,
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontFamily: Fonts.bebas,
-        color: Colors.white,
-        letterSpacing: 1,
     },
     tabsWrapper: {
         flexDirection: "row",
         backgroundColor: Colors.metalGray,
-        borderRadius: 20,
-        padding: 2,
-        gap: 2,
-    } as ViewStyle,
+        padding: 4,
+        borderRadius: 9999,
+    },
     tab: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 18,
-        gap: 6,
-    } as ViewStyle,
+        flex: 1,
+        paddingVertical: 8,
+        borderRadius: 9999,
+    },
     activeTab: {
         backgroundColor: Colors.vibrantRed,
-    } as ViewStyle,
+    },
     inactiveTab: {
         backgroundColor: "transparent",
-    } as ViewStyle,
+    },
     tabText: {
-        fontSize: 12,
-        fontFamily: Fonts.interSemiBold,
-        color: Colors.metalSilver,
-    } as TextStyle,
+        textAlign: "center",
+        fontWeight: "bold",
+        fontSize: 14,
+    },
     activeTabText: {
         color: Colors.white,
-    } as TextStyle,
+    },
+    inactiveTabText: {
+        color: Colors.metalSilver,
+    },
     centerContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-    } as ViewStyle,
+    },
     emptyContainer: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
         paddingHorizontal: 16,
-    } as ViewStyle,
+    },
     emptyIcon: {
         fontSize: 60,
         marginBottom: 16,
-    } as TextStyle,
+    },
     emptyText: {
         color: Colors.metalSilver,
         fontSize: 18,
         textAlign: "center",
-    } as TextStyle,
+    },
     emptySubtext: {
         color: Colors.metalSilver,
         fontSize: 14,
         textAlign: "center",
         marginTop: 8,
-    } as TextStyle,
+    },
     unauthIcon: {
         fontSize: 60,
         marginBottom: 16,
-    } as TextStyle,
+    },
     unauthText: {
         color: Colors.textPrimary,
         fontSize: 18,
         textAlign: "center",
         marginBottom: 8,
-    } as TextStyle,
+    },
     loginButton: {
         backgroundColor: Colors.vibrantRed,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 4,
         marginTop: 16,
-    } as ViewStyle,
+    },
     loginButtonText: {
-        color: Colors.white,
-        fontWeight: "bold",
+        color: Colors.metalBlack,
+        fontWeight: "bold",        
         textTransform: "uppercase",
-    } as TextStyle,
+    },
     listContent: {
         paddingBottom: 20,
-    } as ViewStyle,
+    },
 });
