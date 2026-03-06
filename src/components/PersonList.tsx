@@ -52,8 +52,6 @@ const PersonCard = React.memo(
 );
 
 export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix }) => {
-    if (!items || items.length === 0) return null;
-
     const renderItem = React.useCallback(({ item }: { item: PersonListItem }) => {
         return <PersonCard item={item} />;
     }, []);
@@ -66,6 +64,8 @@ export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix 
         }),
         []
     );
+
+    if (!items || items.length === 0) return null;
 
     return (
         <View style={detailScreenStyles.sectionContainer}>
