@@ -90,6 +90,8 @@
       align-items: center;
       justify-content: space-between;
       padding: 1rem 4rem;
+      padding-left: max(4rem, env(safe-area-inset-left));
+      padding-right: max(4rem, env(safe-area-inset-right));
       background: rgba(5, 5, 5, 0.98);
       border-bottom: 2px solid var(--red);
       backdrop-filter: blur(8px);
@@ -164,6 +166,8 @@
       justify-content: center;
       overflow: hidden;
       padding: 0 4rem;
+      padding-left: max(4rem, env(safe-area-inset-left));
+      padding-right: max(4rem, env(safe-area-inset-right));
     }
 
     #hero-video {
@@ -489,6 +493,8 @@
 
     section {
       padding: 8rem 4rem;
+      padding-left: max(4rem, env(safe-area-inset-left));
+      padding-right: max(4rem, env(safe-area-inset-right));
     }
 
     .section-label {
@@ -930,6 +936,9 @@
     footer {
       border-top: 2px solid var(--red);
       padding: 2.5rem 4rem;
+      padding-left: max(2.5rem, env(safe-area-inset-left));
+      padding-right: max(2.5rem, env(safe-area-inset-right));
+      padding-bottom: max(2rem, env(safe-area-inset-bottom));
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -977,26 +986,7 @@
       will-change: transform, opacity;
     }
 
-    nav {
-      padding-left: max(4rem, env(safe-area-inset-left));
-      padding-right: max(4rem, env(safe-area-inset-right));
-    }
 
-    section {
-      padding-left: max(4rem, env(safe-area-inset-left));
-      padding-right: max(4rem, env(safe-area-inset-right));
-    }
-
-    footer {
-      padding-left: max(2.5rem, env(safe-area-inset-left));
-      padding-right: max(2.5rem, env(safe-area-inset-right));
-      padding-bottom: max(2rem, env(safe-area-inset-bottom));
-    }
-
-    #hero {
-      padding-left: max(4rem, env(safe-area-inset-left));
-      padding-right: max(4rem, env(safe-area-inset-right));
-    }
 
     @media (max-width: 768px) {
       nav {
@@ -1060,10 +1050,7 @@
         gap: 2rem;
       }
 
-      #download .download-wrapper {
-        width: 100%;
-        overflow-x: hidden;
-      }
+
 
       .how-box {
         width: 100%;
