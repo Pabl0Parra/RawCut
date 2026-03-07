@@ -15,7 +15,6 @@ import {
     Text,
     TouchableOpacity,
     FlatList,
-    ActivityIndicator,
     TextInput,
     RefreshControl,
     StyleSheet,
