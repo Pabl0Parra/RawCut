@@ -132,7 +132,7 @@ describe('recommendationStore', () => {
 
             const { lastFetched } = useRecommendationStore.getState();
             expect(lastFetched).not.toBeNull();
-            expect(lastFetched!).toBeGreaterThanOrEqual(before);
+            expect(lastFetched).toBeGreaterThanOrEqual(before);
         });
     });
 
