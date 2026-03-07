@@ -115,9 +115,10 @@ describe('useEnrichedContent Hook', () => {
   it('is stable and does not refetch if input array reference changes but ids do not', async () => {
     let rawItems = [{ id: '1', tmdb_id: 101, media_type: 'movie' as const }];
     
-    const { result, rerender } = renderHook(({ items }) => useEnrichedContent(items), {
-      initialProps: { items: rawItems }
-    });
+    const { result, rerender } = renderHook(
+      ({ items }: { items: typeof rawItems }) => useEnrichedContent(items),
+      { initialProps: { items: rawItems } }
+    );
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
