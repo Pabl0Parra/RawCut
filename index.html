@@ -12,15 +12,15 @@
       --graphite: #0e0e0e;
       --card: #111111;
       --border: #2a2a2a;
-      --red: #a01010;        /* buttons, borders, decorative — white text on top ✅ AAA 8.15:1 */
-      --red-text: #ff7070;   /* text & icons on dark bg ✅ AAA 7.34:1 */
+      --dim: #989898;
+      --red: #a01010;
+      --red-text: #ff7070;
       --cobalt: #00d4ff;
       --silver: #d4d4d4;
       --muted: #a8a8a8;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    /* Lenis handles scroll smoothness — disable native smooth scroll */
     html { scroll-behavior: auto; }
 
     body {
@@ -28,7 +28,7 @@
       color: var(--silver);
       font-family: 'JetBrains Mono', monospace;
       overflow-x: hidden;
-      -webkit-text-size-adjust: 100%; /* prevent iOS font inflation */
+      -webkit-text-size-adjust: 100%;
     }
 
     body::before {
@@ -47,7 +47,20 @@
       pointer-events: none; z-index: 9998;
     }
 
-    /* NAV */
+    .hero-title .line-inner .letter {
+      display: inline-block;
+      color: #fff;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.8), 0 4px 20px rgba(0,0,0,0.6);
+      transition: color 0.35s ease, text-shadow 0.35s ease;
+    }
+    .hero-title .line:nth-child(2) .line-inner .letter {
+      text-shadow: 4px 4px 0 rgba(0,0,0,0.9), 0 0 30px rgba(255,112,112,0.5);
+    }
+    .hero-title .line-inner .letter.lit {
+      color: var(--red-text);
+      text-shadow: 0 0 18px rgba(255,112,112,0.7), 4px 4px 0 rgba(0,0,0,0.9);
+    }
+
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
       display: flex; align-items: center; justify-content: space-between;
@@ -58,19 +71,14 @@
     }
 
     .nav-logo { text-decoration: none; display: flex; align-items: center; }
-
     .nav-links { display: flex; gap: 2.5rem; list-style: none; }
-
     .nav-links a {
       font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2em;
       text-transform: uppercase; color: var(--muted); text-decoration: none;
       transition: color 0.2s, text-shadow 0.2s;
     }
-
     .nav-links a:hover { color: var(--cobalt); text-shadow: 0 0 8px var(--cobalt); }
-
     .lang-switcher { display: flex; border: 1px solid var(--border); }
-
     .lang-btn {
       font-size: 0.6rem; font-weight: 800; letter-spacing: 0.15em;
       text-transform: uppercase; color: var(--muted);
@@ -78,43 +86,31 @@
       padding: 0.4rem 0.8rem; font-family: 'JetBrains Mono', monospace;
       transition: color 0.2s, background 0.2s;
     }
-
     .lang-btn.active { background: var(--red); color: #fff; }
     .lang-btn:not(.active):hover { color: var(--silver); }
 
-    /* HERO — scroll-scrubbed video */
-    #hero-scroll-container {
-      height: 400vh;       /* scroll distance that drives the video */
-      position: relative;
-    }
+    #hero-scroll-container { height: 100vh; position: relative; }
 
     #hero {
-      position: sticky;
-      top: 0;
-      height: 100vh;
+      position: sticky; top: 0; height: 100vh;
       display: flex; align-items: center; justify-content: center;
-      overflow: hidden;
-      padding: 0 4rem;
+      overflow: hidden; padding: 0 4rem;
     }
 
-    /* Video layer — fullscreen behind everything */
     #hero-video {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
-      object-fit: cover;
-      display: none;
-      z-index: 0;
+      object-fit: cover; object-position: center center;
+      display: none; z-index: 0;
     }
-
+    @media (max-width: 768px) { #hero-video { object-position: center center; } }
     #hero-video.loaded { display: block; }
 
     #hero-video-placeholder {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
-      background: var(--obsidian);
-      z-index: 0;
+      background: var(--obsidian); z-index: 0;
     }
-
     #hero-video-placeholder.hidden { display: none; }
 
     .hero-video-loading {
@@ -123,73 +119,57 @@
       animation: pulse 1.2s ease-in-out infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
-    }
+    @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-    /* Dark overlay on top of the video */
     .hero-overlay {
       position: absolute; inset: 0;
-      background: linear-gradient(
-        to bottom,
-        rgba(5,5,5,0.45) 0%,
-        rgba(5,5,5,0.3) 50%,
-        rgba(5,5,5,0.75) 100%
-      );
+      background: linear-gradient(to bottom, rgba(5,5,5,0.45) 0%, rgba(5,5,5,0.3) 50%, rgba(5,5,5,0.75) 100%);
       z-index: 1;
     }
 
-    /* Scroll-down hint */
     .scroll-hint {
-      position: absolute;
-      bottom: 2.5rem; left: 50%;
+      position: absolute; bottom: 2.5rem; left: 50%;
       transform: translateX(-50%);
       display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-      z-index: 2;
-      animation: fadeIn 1s 2s both;
+      z-index: 2; animation: fadeIn 1s 2s both;
     }
-
     .scroll-hint span {
       font-size: 0.5rem; font-weight: 800; letter-spacing: 0.35em;
-      text-transform: uppercase; color: var(--muted);
+      text-transform: uppercase; color: #fff;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.9);
     }
-
     .scroll-hint-arrow {
       width: 1px; height: 40px;
       background: linear-gradient(to bottom, var(--red-text), transparent);
       animation: scrollArrow 1.5s ease-in-out infinite;
     }
-
     @keyframes scrollArrow {
-      0% { transform: scaleY(0); transform-origin: top; }
-      50% { transform: scaleY(1); transform-origin: top; }
-      51% { transform: scaleY(1); transform-origin: bottom; }
+      0%   { transform: scaleY(0); transform-origin: top; }
+      50%  { transform: scaleY(1); transform-origin: top; }
+      51%  { transform: scaleY(1); transform-origin: bottom; }
       100% { transform: scaleY(0); transform-origin: bottom; }
     }
 
-    .hero-inner { position: relative; z-index: 2; max-width: 960px; width: 100%; }
-
-    .hero-eyebrow {
-      display: inline-flex; align-items: center; gap: 0.8rem;
-      font-size: 0.65rem; font-weight: 800; letter-spacing: 0.4em; text-transform: uppercase;
-      color: var(--cobalt); background: rgba(0,212,255,0.08);
-      border: 1px solid rgba(0,212,255,0.2); padding: 0.3rem 1rem; margin-bottom: 2rem;
-    }
+    .hero-inner { position: relative; z-index: 2; max-width: 960px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
 
     .hero-title {
       font-family: 'Metal Mania', cursive;
-      font-size: clamp(4rem, 12vw, 10rem);
+      font-size: clamp(2.4rem, 7.5vw, 6.5rem);
       line-height: 0.85; text-transform: uppercase;
       margin-bottom: 2rem; transform: skewX(-3deg);
+      width: 100%; text-align: center;
     }
 
     .hero-title .line { display: block; overflow: hidden; }
     .hero-title .line-inner {
       display: block; color: #fff;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.8), 0 4px 20px rgba(0,0,0,0.6);
       animation: slideUp 0.9s cubic-bezier(0.16,1,0.3,1) both;
     }
-    .hero-title .line:nth-child(2) .line-inner { animation-delay: 0.1s; color: var(--red-text); text-shadow: 4px 4px 0 rgba(0,0,0,0.8); }
+    .hero-title .line:nth-child(2) .line-inner {
+      animation-delay: 0.1s; color: #fff;
+      text-shadow: 4px 4px 0 rgba(0,0,0,0.9), 0 0 30px rgba(255,112,112,0.5);
+    }
     .hero-title .line:nth-child(3) .line-inner { animation-delay: 0.2s; }
 
     @keyframes slideUp {
@@ -198,8 +178,9 @@
     }
 
     .hero-sub {
-      font-size: 0.8rem; line-height: 1.9; color: var(--muted);
-      max-width: 540px; margin: 0 0 2.5rem;
+      font-size: 0.8rem; line-height: 1.9; color: #fff;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.95), 0 2px 12px rgba(0,0,0,0.7);
+      max-width: 540px; margin: 0 auto 2.5rem;
       animation: fadeIn 1s 0.5s both;
     }
 
@@ -208,7 +189,7 @@
       to   { opacity: 1; transform: none; }
     }
 
-    .hero-ctas { display: flex; gap: 1.2rem; flex-wrap: wrap; animation: fadeIn 1s 0.7s both; }
+    .hero-ctas { display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; animation: fadeIn 1s 0.7s both; }
 
     .btn-main {
       display: inline-flex; align-items: center; gap: 0.5rem;
@@ -218,7 +199,6 @@
       clip-path: polygon(8% 0, 100% 0, 92% 100%, 0% 100%);
       transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
     }
-
     .btn-main:hover { background: #fff; color: #000; transform: translateY(-2px); box-shadow: 0 0 24px var(--red); }
 
     .btn-outline {
@@ -229,250 +209,216 @@
       clip-path: polygon(8% 0, 100% 0, 92% 100%, 0% 100%);
       transition: background 0.2s, color 0.2s, transform 0.2s;
     }
-
     .btn-outline:hover { background: var(--cobalt); color: #000; transform: translateY(-2px); }
 
-    .tech-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2.5rem; animation: fadeIn 1s 0.9s both; }
-
-    .badge {
-      font-size: 0.55rem; font-weight: 800; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--muted);
-      border: 1px solid var(--border); padding: 0.3rem 0.7rem;
+    .hero-logo-wrap {
+      margin-bottom: 1.6rem;
+      display: inline-flex; flex-direction: column; align-items: center;
+      animation: heroLogoIn 1s cubic-bezier(0.16,1,0.3,1) both;
+      align-self: center;
+    }
+    @keyframes heroLogoIn {
+      from { opacity: 0; transform: translateY(-18px) scale(0.94); filter: blur(6px); }
+      to   { opacity: 1; transform: none; filter: none; }
+    }
+    .hero-logo-img {
+      height: clamp(4.5rem, 11vw, 8.5rem);
+      max-width: min(90vw, 680px);
+      width: auto;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+    .hero-logo-rule {
+      display: flex; align-items: center; gap: 1rem; margin-top: 0.9rem; width: min(90vw, 480px);
+    }
+    .hero-logo-rule::before,
+    .hero-logo-rule::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(to right, transparent, rgba(160,16,16,0.55), transparent);
+    }
+    .hero-logo-tagline {
+      font-size: 0.48rem; font-weight: 800; letter-spacing: 0.45em;
+      text-transform: uppercase; color: rgba(255,255,255,0.4);
+      white-space: nowrap;
     }
 
-    /* SHARED SECTION */
-    section { padding: 8rem 4rem; }
+    .tech-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2.5rem; justify-content: center; animation: fadeIn 1s 0.9s both; }
+    .badge {
+      font-size: 0.55rem; font-weight: 800; letter-spacing: 0.15em;
+      text-transform: uppercase; color: #fff;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.2); padding: 0.3rem 0.7rem;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    }
 
+    section { padding: 8rem 4rem; }
     .section-label {
       font-size: 0.6rem; font-weight: 800; letter-spacing: 0.35em;
       text-transform: uppercase; color: var(--cobalt); margin-bottom: 0.8rem;
     }
-
     .section-title {
       font-family: 'Metal Mania', cursive;
       font-size: clamp(2.5rem, 5vw, 4.5rem);
       text-transform: uppercase; color: #fff; line-height: 1; margin-bottom: 1rem;
     }
-
     .section-title em { font-style: normal; color: var(--red-text); }
-
     .section-header { border-left: 6px solid var(--red); padding-left: 1.5rem; margin-bottom: 4rem; }
 
-    /* FEATURES */
     #features { background: var(--graphite); }
-
     .features-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       border: 1px solid var(--border); max-width: 1200px; margin: 0 auto;
     }
-
     .feature-card {
       background: linear-gradient(145deg, #161616, #0a0a0a);
-      padding: 2.5rem;
-      border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 2.5rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
       position: relative; transition: background 0.3s;
     }
-
-    .feature-card:hover { background: linear-gradient(145deg, #1e1e1e, #111); }
-    .feature-card:hover { border-color: var(--cobalt); }
-
+    .feature-card:hover { background: linear-gradient(145deg, #1e1e1e, #111); border-color: var(--cobalt); }
     .feature-card::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0;
       height: 3px; background: var(--red);
     }
-
     .feature-num {
       font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem;
       color: rgba(255,255,255,0.04); position: absolute; top: 0.8rem; right: 1rem; line-height: 1;
     }
-
     .feature-icon { display: block; margin-bottom: 1.2rem; color: var(--red-text); width: 24px; height: 24px; }
-
     .feature-title {
       font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
       letter-spacing: 0.1em; color: #fff; text-transform: uppercase; margin-bottom: 0.8rem;
     }
-
     .feature-desc { font-size: 0.72rem; line-height: 1.8; color: var(--muted); }
 
-    /* DEMO */
     #demo { background: var(--obsidian); }
     .demo-wrapper { max-width: 1200px; margin: 0 auto; }
-
     .demo-inner {
       display: grid; grid-template-columns: 1fr 1.4fr;
       gap: 4rem; margin-top: 3.5rem; align-items: center;
     }
-
     .demo-video-box {
       position: relative; aspect-ratio: 9/16; max-width: 260px;
       margin: 0 auto; border: 1px solid var(--border);
     }
-
     .demo-video-box::after {
       content: ''; position: absolute; inset: -6px;
       border: 1px solid rgba(230,57,70,0.25); pointer-events: none;
     }
-
     .demo-label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
-
     .play-circle {
       width: 60px; height: 60px; border-radius: 50%;
       border: 2px solid var(--red);
       display: flex; align-items: center; justify-content: center;
       transition: transform 0.25s, background 0.25s;
     }
-
     .play-circle svg { width: 20px; height: 20px; margin-left: 3px; }
     .play-circle svg path { fill: var(--red); transition: fill 0.25s; }
-
     .demo-text h3 {
       font-family: 'Metal Mania', cursive; font-size: 2.2rem;
       text-transform: uppercase; color: #fff; margin-bottom: 1rem; line-height: 1.1;
     }
-
     .demo-text h3 em { font-style: normal; color: var(--red-text); }
     .demo-text p { font-size: 0.72rem; line-height: 1.9; color: var(--muted); margin-bottom: 2rem; }
-
     .screens-strip { display: flex; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
-
     .screen-thumb {
       font-size: 0.55rem; font-weight: 800; letter-spacing: 0.1em;
       color: var(--cobalt); border: 1px solid rgba(0,212,255,0.25);
       padding: 0.3rem 0.6rem; text-transform: uppercase;
     }
 
-    /* DOWNLOAD */
     #download { background: var(--graphite); }
     .download-wrapper { max-width: 1200px; margin: 0 auto; width: 100%; }
-
     .download-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-top: 3.5rem; align-items: start; }
-
     .req-item {
       border-left: 3px solid var(--border); padding: 1rem 1.2rem;
       background: #000; margin-bottom: 1px; transition: border-color 0.2s;
     }
-
     .req-item:hover { border-left-color: var(--red); }
     .req-key { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em; color: var(--cobalt); text-transform: uppercase; margin-bottom: 0.3rem; }
     .req-desc { font-size: 0.65rem; color: var(--muted); line-height: 1.6; }
-
     .how-box { border: 1px solid var(--border); padding: 2rem; background: #000; position: relative; }
-
     .how-box::before {
       content: 'HOW TO INSTALL'; position: absolute; top: -1px; left: 1.5rem;
       background: var(--red); color: #fff;
       font-size: 0.5rem; font-weight: 800; letter-spacing: 0.2em;
       padding: 0.2rem 0.8rem; transform: translateY(-50%);
     }
-
     .how-step {
       display: grid; grid-template-columns: 2.5rem 1fr;
       gap: 1rem; align-items: start; padding: 1rem 0;
       border-bottom: 1px solid var(--border);
     }
-
     .how-step:last-child { border-bottom: none; }
-    .how-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--border); line-height: 1; }
+    .how-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--dim); line-height: 1; }
     .how-text { font-size: 0.65rem; line-height: 1.7; color: var(--muted); }
 
-    /* INSTALL */
     #install { background: var(--obsidian); }
     .install-wrapper { max-width: 1200px; margin: 0 auto; width: 100%; }
-
     .install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-top: 3.5rem; }
     .install-steps { display: flex; flex-direction: column; min-width: 0; }
-
     .step {
       display: grid; grid-template-columns: 3rem 1fr;
       gap: 1.5rem; padding: 2rem 0;
-      border-bottom: 1px solid var(--border); align-items: start;
-      min-width: 0;
+      border-bottom: 1px solid var(--border); align-items: start; min-width: 0;
     }
-
     .step:first-child { border-top: 1px solid var(--border); }
-    .step-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--border); line-height: 1; }
-
+    .step-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--dim); line-height: 1; }
     .step-content { min-width: 0; }
     .step-content h4 {
       font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
       letter-spacing: 0.1em; color: #fff; text-transform: uppercase; margin-bottom: 0.5rem;
     }
-
     .step-content p { font-size: 0.65rem; line-height: 1.8; color: var(--muted); }
-
     .code-block {
       background: #000; border: 1px solid #333;
       padding: 1.5rem; margin-top: 1rem; position: relative;
-      overflow-x: auto; /* prevent code from blowing out layout */
-      -webkit-overflow-scrolling: touch;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
     }
-
     .code-block::after {
       content: attr(data-label); position: absolute; bottom: -10px; right: 10px;
       background: var(--red); color: #fff;
       font-size: 0.5rem; font-weight: 800; letter-spacing: 0.15em;
       text-transform: uppercase; padding: 2px 10px;
     }
-
     .code-block code {
       font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
       color: var(--cobalt); white-space: pre; display: block; line-height: 1.8;
     }
-
     .install-env { min-width: 0; }
     .install-env h4 {
       font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
       letter-spacing: 0.1em; color: #fff; text-transform: uppercase; margin-bottom: 1.5rem;
     }
-
     .env-vars { display: flex; flex-direction: column; gap: 1px; }
-
     .env-var {
       display: flex; flex-direction: column; gap: 0.2rem;
       padding: 1rem; background: #000; min-width: 0;
       border-left: 3px solid var(--border); transition: border-color 0.2s;
     }
-
     .env-var:hover { border-left-color: var(--red); }
     .env-key {
       font-size: 0.6rem; font-weight: 800; color: var(--cobalt);
-      letter-spacing: 0.05em; text-transform: uppercase;
-      word-break: break-all; /* long env var names don't overflow */
+      letter-spacing: 0.05em; text-transform: uppercase; word-break: break-all;
     }
     .env-desc { font-size: 0.6rem; color: var(--muted); line-height: 1.5; }
 
-    /* FOOTER */
     footer {
       border-top: 2px solid var(--red); padding: 2.5rem 4rem;
       display: flex; align-items: center; justify-content: space-between;
       flex-wrap: wrap; gap: 1.5rem; background: #000;
     }
-
     .footer-links { display: flex; gap: 2rem; list-style: none; }
-
     .footer-links a {
       font-size: 0.6rem; font-weight: 800; letter-spacing: 0.15em;
       text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s;
     }
-
     .footer-links a:hover { color: var(--cobalt); }
-    .footer-copy { font-size: 0.6rem; letter-spacing: 0.1em; color: var(--border); text-transform: uppercase; }
+    .footer-copy { font-size: 0.6rem; letter-spacing: 0.1em; color: var(--dim); text-transform: uppercase; }
 
-    /* PARALLAX — GPU compositing hints */
-    .feature-card,
-    .demo-video-box,
-    .demo-text,
-    .step,
-    .step-num,
-    .how-step,
-    .env-var,
-    .section-header,
-    footer {
-      will-change: transform, opacity;
-    }
+    .feature-card, .demo-video-box, .demo-text, .step, .step-num,
+    .how-step, .env-var, .section-header, footer { will-change: transform, opacity; }
 
-    /* ── SAFE AREA (notch / home bar support) ── */
     nav {
       padding-left: max(4rem, env(safe-area-inset-left));
       padding-right: max(4rem, env(safe-area-inset-right));
@@ -492,56 +438,32 @@
     }
 
     @media (max-width: 768px) {
-      nav {
-        padding: 1rem max(1.5rem, env(safe-area-inset-right)) 1rem max(1.5rem, env(safe-area-inset-left));
-      }
+      nav { padding: 1rem max(1.5rem, env(safe-area-inset-right)) 1rem max(1.5rem, env(safe-area-inset-left)); }
+      #hero-scroll-container { height: 100vh; }
       .nav-links { display: none; }
-
       section {
-        padding-top: 5rem;
-        padding-bottom: 5rem;
+        padding-top: 5rem; padding-bottom: 5rem;
         padding-left: max(1.5rem, env(safe-area-inset-left));
         padding-right: max(1.5rem, env(safe-area-inset-right));
       }
-
       #hero {
         padding-left: max(1.5rem, env(safe-area-inset-left));
         padding-right: max(1.5rem, env(safe-area-inset-right));
-        align-items: flex-end;
-        padding-bottom: max(6rem, calc(env(safe-area-inset-bottom) + 5rem));
+        align-items: center;
+        padding-top: max(4rem, calc(env(safe-area-inset-top) + 3.5rem));
+        padding-bottom: 2rem;
       }
-
-      /* Smaller hero title on mobile */
-      .hero-title {
-        font-size: clamp(2.6rem, 15vw, 4.5rem);
-        margin-bottom: 1.2rem;
-      }
-
+      .hero-title { font-size: clamp(1.8rem, 10vw, 3rem); margin-bottom: 1rem; }
       .hero-sub { font-size: 0.72rem; margin-bottom: 1.8rem; }
       .hero-eyebrow { font-size: 0.55rem; margin-bottom: 1.2rem; }
       .hero-ctas { gap: 0.8rem; }
       .btn-main, .btn-outline { font-size: 1rem; padding: 0.8rem 1.8rem; }
       .tech-badges { margin-top: 1.5rem; }
-
-      /* Download section — stack and respect safe area */
-      .download-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-      #download .download-wrapper {
-        width: 100%;
-        overflow-x: hidden;
-      }
+      .download-grid { grid-template-columns: 1fr; gap: 2rem; }
+      #download .download-wrapper { width: 100%; overflow-x: hidden; }
       .how-box { width: 100%; }
-
       .demo-inner, .install-grid { grid-template-columns: 1fr; }
-
-      /* Install section mobile */
-      #install .install-wrapper,
-      #download .download-wrapper {
-        width: 100%;
-        overflow-x: hidden;
-      }
+      #install .install-wrapper, #download .download-wrapper { width: 100%; overflow-x: hidden; }
       .install-grid { gap: 2rem; }
       .step { grid-template-columns: 2.2rem 1fr; gap: 1rem; padding: 1.2rem 0; }
       .step-num { font-size: 1.8rem; }
@@ -549,31 +471,23 @@
       .code-block code { font-size: 0.62rem; }
       .env-key { font-size: 0.55rem; }
       .env-var { padding: 0.8rem; }
-
       footer {
-        flex-direction: column;
-        text-align: center;
-        gap: 1.5rem;
+        flex-direction: column; text-align: center; gap: 1.5rem;
         padding-left: max(1.5rem, env(safe-area-inset-left));
         padding-right: max(1.5rem, env(safe-area-inset-right));
         padding-bottom: max(2rem, env(safe-area-inset-bottom));
       }
-
       .footer-links { justify-content: center; }
-
-      /* Reduce parallax intensity on mobile for perf */
       .feature-card, .demo-video-box, .demo-text,
       .step, .how-step, .env-var { will-change: auto; }
     }
   </style>
-  <!-- GSAP + ScrollTrigger + Lenis (same stack as GTA-V-Scroll-Effect) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 </head>
 <body>
 
-  <!-- NAV -->
   <nav>
     <a href="#" class="nav-logo">
       <img id="nav-logo-img"
@@ -595,27 +509,31 @@
     </div>
   </nav>
 
-  <!-- HERO — scroll-scrubbed video (same technique as GTA-V-Scroll-Effect) -->
   <div id="hero-scroll-container">
     <section id="hero">
-      <!-- Video background -->
       <video
         id="hero-video"
         preload="metadata"
         muted
         playsinline
-        src="https://www.rockstargames.com/VI/_next/static/media/1920.3d68f6e504f43f0cb92374767a339900.mp4"
+        src="./assets/video/9089136-hd_1080_1920_30fps.mp4"
       ></video>
       <div id="hero-video-placeholder">
         <span class="hero-video-loading">Loading...</span>
       </div>
-
-      <!-- Cinematic overlay -->
       <div class="hero-overlay"></div>
 
-      <!-- Content -->
       <div class="hero-inner">
-        <p class="hero-eyebrow" data-i18n="hero_eyebrow">Código Abierto · React Native · Expo</p>
+        <div class="hero-logo-wrap">
+          <img id="hero-logo-img"
+            src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png"
+            alt="CortoCrudo"
+            class="hero-logo-img"
+          />
+          <div class="hero-logo-rule">
+            <span class="hero-logo-tagline" data-i18n="hero_eyebrow">Código Abierto · React Native · Expo</span>
+          </div>
+        </div>
         <h1 class="hero-title">
           <span class="line"><span class="line-inner" data-i18n="hero_title_1">Descubre.</span></span>
           <span class="line"><span class="line-inner" data-i18n="hero_title_2">Comparte.</span></span>
@@ -623,8 +541,8 @@
         </h1>
         <p class="hero-sub" data-i18n="hero_sub">Una plataforma social cinematográfica para amantes del cine y las series. Explora títulos, crea tu lista de seguimiento y comparte recomendaciones con tus colegas.</p>
         <div class="hero-ctas">
-          <a href="#features" class="btn-main" data-i18n="hero_cta1">▶ &nbsp;Ver Demo</a>
-          <a href="https://github.com/Pabl0Parra/RawCut" class="btn-outline" target="_blank" data-i18n="hero_cta2">Ver en GitHub</a>
+          <a href="https://expo.dev/accounts/pabl0parra/projects/CortoCrudo/builds/214560ec-3a90-4305-b8b5-26f7e9d22385" class="btn-main" target="_blank" data-i18n="hero_cta1">⬇ &nbsp;Descargar APK</a>
+          <a href="https://youtu.be/SCV3KcW4htM" class="btn-outline" target="_blank" data-i18n="hero_cta2">▶ &nbsp;Ver Demo</a>
         </div>
         <div class="tech-badges">
           <span class="badge">React Native</span>
@@ -638,7 +556,6 @@
         </div>
       </div>
 
-      <!-- Scroll hint -->
       <div class="scroll-hint">
         <div class="scroll-hint-arrow"></div>
         <span>scroll</span>
@@ -646,7 +563,6 @@
     </section>
   </div>
 
-  <!-- FEATURES -->
   <section id="features">
     <div class="section-header reveal">
       <p class="section-label" data-i18n="feat_label">Qué hace</p>
@@ -692,7 +608,6 @@
     </div>
   </section>
 
-  <!-- DEMO -->
   <section id="demo">
     <div class="demo-wrapper reveal">
       <div class="section-header">
@@ -731,7 +646,6 @@
     </div>
   </section>
 
-  <!-- DOWNLOAD -->
   <section id="download">
     <div class="download-wrapper reveal">
       <div class="section-header">
@@ -749,6 +663,10 @@
             <div class="req-item">
               <p class="req-key" data-i18n="dl_req2_title">Sin build para iOS aún</p>
               <p class="req-desc" data-i18n="dl_req2_desc">Los usuarios de iOS pueden ejecutar la app con Expo Go clonando el repositorio e iniciando el servidor de desarrollo.</p>
+            </div>
+            <div class="req-item" style="border-left-color: #2a6a2a;">
+              <p class="req-key" style="color: #6dbe6d;" data-i18n="dl_req3_title">✓ &nbsp;Sin permisos del dispositivo</p>
+              <p class="req-desc" data-i18n="dl_req3_desc">La app no solicita acceso a cámara, micrófono, contactos ni ningún otro permiso del sistema. Solo necesitas conexión a internet.</p>
             </div>
           </div>
           <a href="https://expo.dev/accounts/pabl0parra/projects/CortoCrudo/builds/214560ec-3a90-4305-b8b5-26f7e9d22385"
@@ -779,7 +697,6 @@
     </div>
   </section>
 
-  <!-- INSTALL -->
   <section id="install">
     <div class="install-wrapper reveal">
       <div class="section-header">
@@ -850,7 +767,6 @@ npm install</code>
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     <img id="footer-logo-img"
       src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png"
@@ -866,47 +782,97 @@ npm install</code>
   </footer>
 
   <script>
-    // ── SCROLL-SCRUBBED VIDEO (GTA-V-Scroll-Effect technique) ──
     gsap.registerPlugin(ScrollTrigger);
 
-    const heroVideo    = document.getElementById('hero-video');
+    const heroVideo       = document.getElementById('hero-video');
     const heroPlaceholder = document.getElementById('hero-video-placeholder');
-    const heroContainer   = document.getElementById('hero-scroll-container');
 
-    const initScrollVideo = () => {
+    const initVideo = () => {
       heroPlaceholder.classList.add('hidden');
       heroVideo.classList.add('loaded');
-      gsap.to(heroVideo, {
-        currentTime: heroVideo.duration || 1,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: heroContainer,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: true,
-        },
-      });
     };
 
+    heroVideo.loop = true;
+
     if (heroVideo.readyState >= 1) {
-      initScrollVideo();
+      initVideo();
     } else {
-      heroVideo.addEventListener('loadedmetadata', initScrollVideo);
+      heroVideo.addEventListener('loadedmetadata', initVideo);
     }
 
-    // Prime so browser allows frame scrubbing
-    (async () => { try { await heroVideo.play(); heroVideo.pause(); } catch(e) {} })();
+    (async () => { try { await heroVideo.play(); } catch(e) {} })();
 
-    // ── LENIS SMOOTH SCROLL ──
     const lenis = new Lenis({ smoothWheel: true });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
 
-    // ── PARALLAX INIT (DOM already ready — script runs after body) ──
-    (() => {
+    let letterAnimTimer = null;
 
-      // ── 1. SECTION TITLES — skew + slide in from left ──
+    function wrapLetters() {
+      const lineInners = document.querySelectorAll('.hero-title .line-inner');
+      lineInners.forEach(el => {
+        const text = el.textContent;
+        el.innerHTML = text.split('').map(ch =>
+          ch === ' ' ? ' ' : `<span class="letter">${ch}</span>`
+        ).join('');
+      });
+    }
+
+    function getLetters(lineIndex) {
+      const lines = document.querySelectorAll('.hero-title .line');
+      if (!lines[lineIndex]) return [];
+      return Array.from(lines[lineIndex].querySelectorAll('.letter'));
+    }
+
+    const STEP = 220;
+    const TAIL = 280;
+    const HOLD = 1200;
+
+    function litSequence(letters, ltr, baseDelay) {
+      const seq = ltr ? letters : [...letters].reverse();
+      seq.forEach((l, i) => {
+        setTimeout(() => l.classList.add('lit'), baseDelay + i * STEP);
+      });
+      return baseDelay + seq.length * STEP + TAIL;
+    }
+
+    function dimSequence(letters, ltr, baseDelay) {
+      const seq = ltr ? letters : [...letters].reverse();
+      seq.forEach((l, i) => {
+        setTimeout(() => l.classList.remove('lit'), baseDelay + i * STEP);
+      });
+      return baseDelay + seq.length * STEP + TAIL;
+    }
+
+    function runLetterLoop() {
+      if (letterAnimTimer) clearTimeout(letterAnimTimer);
+
+      function loop() {
+        const l0 = getLetters(0);
+        const l1 = getLetters(1);
+        const l2 = getLetters(2);
+
+        if (!l0.length || !l1.length || !l2.length) return;
+
+        let t = 0;
+
+        t = litSequence(l1, true, t);  t += HOLD;
+        t = dimSequence(l1, false, t); t += HOLD;
+
+        t = litSequence(l0, false, t); t += HOLD;
+        t = dimSequence(l0, true, t);  t += HOLD;
+
+        t = litSequence(l2, true, t);  t += HOLD;
+        t = dimSequence(l2, false, t); t += HOLD;
+
+        letterAnimTimer = setTimeout(loop, t);
+      }
+
+      loop();
+    }
+
+    (() => {
       gsap.utils.toArray('.section-header').forEach(el => {
         gsap.from(el, {
           x: -60, opacity: 0, skewX: -4,
@@ -915,36 +881,25 @@ npm install</code>
         });
       });
 
-      // ── 2. FEATURE CARDS — staggered parallax rise ──
       gsap.utils.toArray('.feature-card').forEach((card, i) => {
         gsap.from(card, {
           y: 80 + i * 12, opacity: 0, scale: 0.95,
           duration: 0.9, ease: 'power3.out',
           scrollTrigger: { trigger: card, start: 'top 88%', toggleActions: 'play none none reverse' }
         });
-        // Subtle floating while in view
         gsap.to(card, {
-          y: -18,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: card,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 1.5,
-          }
+          y: -18, ease: 'none',
+          scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: 1.5 }
         });
       });
 
-      // ── 3. DEMO — screenshot drifts up slower than text (depth split) ──
-      const demoImg = document.querySelector('.demo-video-box');
+      const demoImg  = document.querySelector('.demo-video-box');
       const demoText = document.querySelector('.demo-text');
       if (demoImg) {
         gsap.from(demoImg, { y: 100, opacity: 0, duration: 1, ease: 'power3.out',
           scrollTrigger: { trigger: '#demo', start: 'top 80%', toggleActions: 'play none none reverse' }
         });
-        gsap.to(demoImg, {
-          y: -50,
-          ease: 'none',
+        gsap.to(demoImg, { y: -50, ease: 'none',
           scrollTrigger: { trigger: '#demo', start: 'top bottom', end: 'bottom top', scrub: 1 }
         });
       }
@@ -952,22 +907,18 @@ npm install</code>
         gsap.from(demoText, { y: 60, opacity: 0, duration: 1, delay: 0.15, ease: 'power3.out',
           scrollTrigger: { trigger: '#demo', start: 'top 80%', toggleActions: 'play none none reverse' }
         });
-        gsap.to(demoText, {
-          y: -90,
-          ease: 'none',
+        gsap.to(demoText, { y: -90, ease: 'none',
           scrollTrigger: { trigger: '#demo', start: 'top bottom', end: 'bottom top', scrub: 1 }
         });
       }
 
-      // ── 4. DOWNLOAD — left col drifts left, right col drifts right (desktop only) ──
       if (window.innerWidth > 768) {
         const dlCols = document.querySelectorAll('#download .download-grid > div');
         if (dlCols[0]) {
           gsap.from(dlCols[0], { x: -80, opacity: 0, duration: 1, ease: 'power3.out',
             scrollTrigger: { trigger: '#download', start: 'top 80%', toggleActions: 'play none none reverse' }
           });
-          gsap.to(dlCols[0], {
-            x: -30, ease: 'none',
+          gsap.to(dlCols[0], { x: -30, ease: 'none',
             scrollTrigger: { trigger: '#download', start: 'top bottom', end: 'bottom top', scrub: 2 }
           });
         }
@@ -975,13 +926,11 @@ npm install</code>
           gsap.from(dlCols[1], { x: 80, opacity: 0, duration: 1, ease: 'power3.out',
             scrollTrigger: { trigger: '#download', start: 'top 80%', toggleActions: 'play none none reverse' }
           });
-          gsap.to(dlCols[1], {
-            x: 30, ease: 'none',
+          gsap.to(dlCols[1], { x: 30, ease: 'none',
             scrollTrigger: { trigger: '#download', start: 'top bottom', end: 'bottom top', scrub: 2 }
           });
         }
       } else {
-        // Mobile: simple fade-in, no horizontal drift
         document.querySelectorAll('#download .download-grid > div').forEach((el, i) => {
           gsap.from(el, { y: 40, opacity: 0, duration: 0.8, delay: i * 0.15, ease: 'power3.out',
             scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' }
@@ -989,68 +938,52 @@ npm install</code>
         });
       }
 
-      // ── 5. INSTALL STEPS — each step cascades in + step numbers float independently ──
       gsap.utils.toArray('.step').forEach((step, i) => {
-        gsap.from(step, {
-          x: -50, opacity: 0,
-          duration: 0.8, delay: i * 0.08, ease: 'power3.out',
+        gsap.from(step, { x: -50, opacity: 0, duration: 0.8, delay: i * 0.08, ease: 'power3.out',
           scrollTrigger: { trigger: step, start: 'top 88%', toggleActions: 'play none none reverse' }
         });
         const num = step.querySelector('.step-num');
         if (num) {
-          gsap.to(num, {
-            y: -40,
-            ease: 'none',
+          gsap.to(num, { y: -40, ease: 'none',
             scrollTrigger: { trigger: step, start: 'top bottom', end: 'bottom top', scrub: 1 }
           });
         }
       });
 
-      // ── 6. ENV VARS — stagger from right ──
       gsap.utils.toArray('.env-var').forEach((el, i) => {
-        gsap.from(el, {
-          x: 40, opacity: 0, duration: 0.6,
-          delay: i * 0.05, ease: 'power2.out',
+        gsap.from(el, { x: 40, opacity: 0, duration: 0.6, delay: i * 0.05, ease: 'power2.out',
           scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' }
         });
       });
 
-      // ── 7. SECTION DIVIDERS — red line expands width on enter ──
       gsap.utils.toArray('.section-label').forEach(el => {
-        gsap.from(el, {
-          scaleX: 0, opacity: 0, transformOrigin: 'left center',
+        gsap.from(el, { scaleX: 0, opacity: 0, transformOrigin: 'left center',
           duration: 0.7, ease: 'power3.out',
           scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' }
         });
       });
 
-      // ── 8. NAV — subtle parallax logo drift ──
-      gsap.to('nav', {
-        backgroundPositionY: '100%',
-        ease: 'none',
+      gsap.to('nav', { backgroundPositionY: '100%', ease: 'none',
         scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 1 }
       });
 
-      // ── 9. FOOTER — rises up dramatically ──
-      gsap.from('footer', {
-        y: 80, opacity: 0, duration: 1.2, ease: 'power3.out',
+      gsap.from('footer', { y: 80, opacity: 0, duration: 1.2, ease: 'power3.out',
         scrollTrigger: { trigger: 'footer', start: 'top 95%', toggleActions: 'play none none reverse' }
       });
 
-      // ── 10. HOW-TO STEPS — cascade ──
       gsap.utils.toArray('.how-step').forEach((el, i) => {
-        gsap.from(el, {
-          y: 40, opacity: 0, duration: 0.7, delay: i * 0.1, ease: 'power2.out',
+        gsap.from(el, { y: 40, opacity: 0, duration: 0.7, delay: i * 0.1, ease: 'power2.out',
           scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' }
         });
-        gsap.to(el, {
-          y: -20,
-          ease: 'none',
+        gsap.to(el, { y: -20, ease: 'none',
           scrollTrigger: { trigger: '#download', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
         });
       });
 
-      setLang('es');
+      setTimeout(() => {
+        wrapLetters();
+        runLetterLoop();
+      }, 1400);
     })();
 
     const translations = {
@@ -1059,7 +992,7 @@ npm install</code>
         hero_eyebrow:'Open Source · React Native · Expo',
         hero_title_1:'Discover.', hero_title_2:'Share.', hero_title_3:'Recommend.',
         hero_sub:'A cinematic social platform for movie and TV enthusiasts. Browse titles, build your watchlist, and share recommendations with people whose taste you trust.',
-        hero_cta1:'▶ \u00a0Watch Demo', hero_cta2:'View on GitHub',
+        hero_cta1:'⬇ \u00a0Download APK', hero_cta2:'▶ \u00a0Watch Demo',
         feat_label:'What it does', feat_title:'Built for <em>cinephiles</em> who share.',
         f1_title:'Media Discovery', f1_desc:'Search and browse thousands of movies and TV series powered by the TMDb API. Watch trailers, explore trending titles, and dive into curated collections.',
         f2_title:'Personal Lists', f2_desc:"Maintain a Favorites collection and a Watchlist. Track what you've seen, queue what's next, and never lose a recommendation.",
@@ -1080,6 +1013,7 @@ npm install</code>
         dl_desc:'No need to clone the repo. Download the APK directly from the Expo build dashboard and install it on any Android device. No Play Store required.',
         dl_req1_title:'Android required', dl_req1_desc:'Enable "Install from unknown sources" in your device settings before installing.',
         dl_req2_title:'No iOS build yet', dl_req2_desc:'iOS users can run the app via Expo Go by cloning the repo and starting the dev server.',
+        dl_req3_title:'✓ \u00a0No device permissions', dl_req3_desc:'The app does not request access to your camera, microphone, contacts, or any other system permission. An internet connection is all it needs.',
         dl_btn:'Download APK',
         dl_step1:'Tap the <strong style="color:#fff">Download APK</strong> button and open the Expo build page.',
         dl_step2:'Click <strong style="color:#fff">Download build artifact</strong> to get the <code style="color:var(--cobalt)">.apk</code> file.',
@@ -1091,7 +1025,7 @@ npm install</code>
         hero_eyebrow:'Código Abierto · React Native · Expo',
         hero_title_1:'Descubre.', hero_title_2:'Comparte.', hero_title_3:'Recomienda.',
         hero_sub:'Una plataforma social cinematográfica para amantes del cine y las series. Explora títulos, crea tu lista de seguimiento y comparte recomendaciones con tus colegas.',
-        hero_cta1:'▶ \u00a0Ver Demo', hero_cta2:'Ver en GitHub',
+        hero_cta1:'⬇ \u00a0Descargar APK', hero_cta2:'▶ \u00a0Ver Demo',
         feat_label:'Qué hace', feat_title:'Hecha para <em>cinéfilos</em> que comparten.',
         f1_title:'Descubrimiento', f1_desc:'Busca y explora miles de películas y series gracias a la API de TMDb. Mira tráilers, descubre títulos en tendencia y sumérgete en colecciones curadas.',
         f2_title:'Listas Personales', f2_desc:'Mantén una colección de Favoritos y una Lista de Seguimiento. Registra lo que has visto, añade lo que quieres ver y nunca pierdas una recomendación.',
@@ -1112,6 +1046,7 @@ npm install</code>
         dl_desc:'No hace falta clonar el repositorio. Descarga el APK directamente desde el panel de Expo e instálalo en cualquier dispositivo Android. Sin Play Store.',
         dl_req1_title:'Requiere Android', dl_req1_desc:'Activa "Instalar desde fuentes desconocidas" en los ajustes de tu dispositivo antes de instalar.',
         dl_req2_title:'Sin build para iOS aún', dl_req2_desc:'Los usuarios de iOS pueden ejecutar la app con Expo Go clonando el repositorio e iniciando el servidor de desarrollo.',
+        dl_req3_title:'✓ \u00a0Sin permisos del dispositivo', dl_req3_desc:'La app no solicita acceso a cámara, micrófono, contactos ni ningún otro permiso del sistema. Solo necesitas conexión a internet.',
         dl_btn:'Descargar APK',
         dl_step1:'Pulsa el botón <strong style="color:#fff">Descargar APK</strong> y abre la página de build en Expo.',
         dl_step2:'Haz clic en <strong style="color:#fff">Download build artifact</strong> para obtener el archivo <code style="color:var(--cobalt)">.apk</code>.',
@@ -1135,14 +1070,20 @@ npm install</code>
         ? 'https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png'
         : 'https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/rawcut-text-logo.png';
       const logoAlt = isEs ? 'CortoCrudo' : 'RawCut';
-      ['nav-logo-img','footer-logo-img'].forEach(id => {
+      ['nav-logo-img','hero-logo-img','footer-logo-img'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.src = logoSrc; el.alt = logoAlt; }
       });
       document.title = isEs
         ? 'CortoCrudo — Descubre. Comparte. Recomienda.'
         : 'RawCut — Discover. Share. Recommend.';
+
+      if (letterAnimTimer) clearTimeout(letterAnimTimer);
+      wrapLetters();
+      runLetterLoop();
     }
+
+    setLang('es');
   </script>
 </body>
 </html>
