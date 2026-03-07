@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CortoCrudo — Discover. Share. Watch.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black: #080808;
+      --dark: #111010;
+      --card: #161514;
+      --border: #2a2825;
+      --gold: #c8a96e;
+      --gold-dim: #8a6f42;
+      --cream: #f0e9db;
+      --muted: #7a7368;
+      --red: #c0392b;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--cream);
+      font-family: 'DM Mono', monospace;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ── GRAIN OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 3rem;
+      background: linear-gradient(to bottom, rgba(8,8,8,0.95), transparent);
+    }
+
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--cream); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 8rem 3rem 4rem;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 60% 40%, rgba(200,169,110,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(192,57,43,0.05) 0%, transparent 50%),
+        var(--black);
+    }
+
+    /* Film strip decorative lines */
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 5%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    }
+
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      right: 5%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.6rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 2.5rem;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(4rem, 10vw, 9rem);
+      font-weight: 300;
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.2em;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-title .block {
+      display: block;
+      overflow: hidden;
+    }
+
+    .hero-title .inner {
+      display: block;
+      animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .hero-title .block:nth-child(2) .inner { animation-delay: 0.1s; }
+    .hero-title .block:nth-child(3) .inner { animation-delay: 0.2s; }
+
+    @keyframes slideUp {
+      from { transform: translateY(110%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .hero-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 2rem 0 3rem;
+      line-height: 1.7;
+      animation: fadeIn 1.2s 0.5s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      animation: fadeIn 1.2s 0.7s both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      background: var(--gold);
+      color: var(--black);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--cream);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s, transform 0.2s;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--gold-dim);
+      color: var(--cream);
+      transform: translateY(-1px);
+    }
+
+    /* Badges */
+    .tech-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 3rem;
+      animation: fadeIn 1.2s 0.9s both;
+    }
+
+    .badge {
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+    }
+
+    /* ── SECTION SHARED ── */
+    section { padding: 7rem 3rem; }
+
+    .section-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 1.5rem;
+      height: 1px;
+      background: var(--gold-dim);
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .section-title em { font-style: italic; color: var(--gold); }
+
+    /* ── FEATURES ── */
+    #features {
+      background: var(--dark);
+      position: relative;
+    }
+
+    #features::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border), transparent);
+    }
+
+    .features-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .features-header {
+      margin-bottom: 4rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+
+    .feature-card {
+      padding: 2.5rem;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .feature-card:hover { background: rgba(200,169,110,0.03); }
+
+    .feature-num {
+      font-size: 0.55rem;
+      letter-spacing: 0.3em;
+      color: var(--gold-dim);
+      margin-bottom: 1.2rem;
+    }
+
+    .feature-icon {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .feature-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 0.8rem;
+      color: var(--cream);
+    }
+
+    .feature-desc {
+      font-size: 0.7rem;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    /* ── DEMO ── */
+    #demo {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    #demo > * { max-width: 1100px; }
+
+    .demo-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .demo-inner {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .demo-video-box {
+      position: relative;
+      aspect-ratio: 9/16;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
+    .demo-video-box::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border: 1px solid var(--border);
+    }
+
+    .demo-video-box::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border: 1px solid rgba(200,169,110,0.15);
+      pointer-events: none;
+    }
+
+    .demo-video-box iframe,
+    .demo-video-box .demo-placeholder {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .demo-placeholder {
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      text-decoration: none;
+    }
+
+    .demo-placeholder:hover .play-circle { transform: scale(1.08); background: var(--gold); }
+    .demo-placeholder:hover .play-circle svg path { fill: var(--black); }
+
+    .play-circle {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.25s, background 0.25s;
+    }
+
+    .play-circle svg { width: 20px; height: 20px; margin-left: 3px; }
+    .play-circle svg path { fill: var(--gold); transition: fill 0.25s; }
+
+    .demo-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .demo-text h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      margin-bottom: 1rem;
+    }
+
+    .demo-text p {
+      font-size: 0.7rem;
+      line-height: 1.9;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    .screens-strip {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .screen-thumb {
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      color: var(--gold-dim);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.6rem;
+      text-transform: uppercase;
+    }
+
+    /* ── INSTALL ── */
+    #install {
+      background: var(--dark);
+      position: relative;
+    }
+
+    #install::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border), transparent);
+    }
+
+    .install-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .install-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      margin-top: 3.5rem;
+    }
+
+    .install-steps { display: flex; flex-direction: column; gap: 0; }
+
+    .step {
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 1.5rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+    }
+
+    .step:first-child { border-top: 1px solid var(--border); }
+
+    .step-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.5rem;
+      color: var(--border);
+      line-height: 1;
+    }
+
+    .step-content h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-content p {
+      font-size: 0.65rem;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .code-block {
+      background: var(--black);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin-top: 1rem;
+      position: relative;
+    }
+
+    .code-block::before {
+      content: attr(data-label);
+      position: absolute;
+      top: -1px; right: 1rem;
+      background: var(--gold-dim);
+      color: var(--black);
+      font-size: 0.5rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.6rem;
+      transform: translateY(-50%);
+    }
+
+    .code-block code {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--cream);
+      white-space: pre;
+      display: block;
+      line-height: 1.8;
+    }
+
+    .code-block code .comment { color: var(--muted); }
+    .code-block code .key { color: var(--gold); }
+
+    .install-env h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      color: var(--cream);
+    }
+
+    .env-vars { display: flex; flex-direction: column; gap: 1px; }
+
+    .env-var {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 1rem;
+      background: var(--black);
+      border-left: 2px solid var(--border);
+      transition: border-color 0.2s;
+    }
+
+    .env-var:hover { border-left-color: var(--gold-dim); }
+
+    .env-key {
+      font-size: 0.6rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+
+    .env-desc {
+      font-size: 0.6rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: gap;
+    }
+
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.15em;
+      color: var(--gold-dim);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--cream); }
+
+    .footer-copy {
+      font-size: 0.6rem;
+      color: var(--border);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── SCROLL ANIMATIONS ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 1.2rem 1.5rem; }
+      .nav-links { display: none; }
+      section { padding: 5rem 1.5rem; }
+      .demo-inner { grid-template-columns: 1fr; }
+      .install-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">CortoCrudo</a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="https://github.com/Pabl0Parra/RawCut" target="_blank">GitHub ↗</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Open Source · React Native · Expo</p>
+      <h1 class="hero-title">
+        <span class="block"><span class="inner">Discover.</span></span>
+        <span class="block"><span class="inner"><em>Share.</em></span></span>
+        <span class="block"><span class="inner">Watch.</span></span>
+      </h1>
+      <p class="hero-sub">
+        A cinematic social platform for movie and TV enthusiasts. Browse titles, build your watchlist, and share recommendations with people whose taste you trust.
+      </p>
+      <div class="hero-ctas">
+        <a href="#demo" class="btn-primary">▶ &nbsp;Watch Demo</a>
+        <a href="https://github.com/Pabl0Parra/RawCut" class="btn-ghost" target="_blank">View on GitHub</a>
+      </div>
+      <div class="tech-badges">
+        <span class="badge">React Native</span>
+        <span class="badge">Expo 54</span>
+        <span class="badge">TypeScript</span>
+        <span class="badge">Supabase</span>
+        <span class="badge">TMDb API</span>
+        <span class="badge">Zustand</span>
+        <span class="badge">NativeWind</span>
+        <span class="badge">MIT License</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="features-layout">
+      <div class="features-header reveal">
+        <p class="section-label">What it does</p>
+        <h2 class="section-title">Built for <em>cinephiles</em><br>who share.</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <p class="feature-num">01</p>
+          <span class="feature-icon">🎬</span>
+          <h3 class="feature-title">Media Discovery</h3>
+          <p class="feature-desc">Search and browse thousands of movies and TV series powered by the TMDb API. Trending, popular, and curated collections at your fingertips.</p>
+        </div>
+        <div class="feature-card reveal">
+          <p class="feature-num">02</p>
+          <span class="feature-icon">📋</span>
+          <h3 class="feature-title">Personal Lists</h3>
+          <p class="feature-desc">Maintain a Favorites collection and a Watchlist. Track what you've seen, queue what's next, and never lose a recommendation.</p>
+        </div>
+        <div class="feature-card reveal">
+          <p class="feature-num">03</p>
+          <span class="feature-icon">💬</span>
+          <h3 class="feature-title">Social Recommendations</h3>
+          <p class="feature-desc">Send direct recommendations to friends with a personal note. Rate received picks on a five-star scale and spark threaded discussions.</p>
+        </div>
+        <div class="feature-card reveal">
+          <p class="feature-num">04</p>
+          <span class="feature-icon">⚡</span>
+          <h3 class="feature-title">Real-time Updates</h3>
+          <p class="feature-desc">Comments, likes, and notifications powered by Supabase Realtime. Live interaction without manual refreshes.</p>
+        </div>
+        <div class="feature-card reveal">
+          <p class="feature-num">05</p>
+          <span class="feature-icon">🔒</span>
+          <h3 class="feature-title">Secure Backend</h3>
+          <p class="feature-desc">PostgreSQL with Row Level Security (RLS) ensures every user only sees what they're authorised to access. Auth with custom profile triggers.</p>
+        </div>
+        <div class="feature-card reveal">
+          <p class="feature-num">06</p>
+          <span class="feature-icon">🎨</span>
+          <h3 class="feature-title">Cinematic UI</h3>
+          <p class="feature-desc">High-contrast dark theme with NativeWind (Tailwind CSS for React Native) styling. Optimised for readability and engagement on any device.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section id="demo" style="padding: 7rem 3rem;">
+    <div class="demo-wrapper reveal">
+      <p class="section-label">See it in action</p>
+      <h2 class="section-title"><em>Live demo</em><br>on YouTube</h2>
+      <div class="demo-inner">
+        <div class="demo-video-box">
+          <a href="https://youtu.be/SCV3KcW4htM" target="_blank" class="demo-placeholder" style="height:100%; aspect-ratio:9/16; display:flex;">
+            <div class="play-circle">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 5.14v14l11-7-11-7z"/>
+              </svg>
+            </div>
+            <span class="demo-label">Watch Demo</span>
+          </a>
+        </div>
+        <div class="demo-text">
+          <h3>The full experience,<br><em>in two minutes.</em></h3>
+          <p>The demo walks through onboarding, browsing trending titles, building a watchlist, sending a recommendation to a friend, and real-time comment threads — all on a physical device.</p>
+          <a href="https://youtu.be/SCV3KcW4htM" target="_blank" class="btn-primary">▶ &nbsp;Open on YouTube</a>
+          <div class="screens-strip">
+            <span class="screen-thumb">Home</span>
+            <span class="screen-thumb">Discover</span>
+            <span class="screen-thumb">Detail</span>
+            <span class="screen-thumb">Recs</span>
+            <span class="screen-thumb">Messages</span>
+            <span class="screen-thumb">Profile</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section id="install">
+    <div class="install-wrapper">
+      <div class="reveal">
+        <p class="section-label">Get started</p>
+        <h2 class="section-title">Up and running<br>in <em>minutes.</em></h2>
+      </div>
+      <div class="install-grid">
+        <div class="install-steps reveal">
+          <div class="step">
+            <span class="step-num">01</span>
+            <div class="step-content">
+              <h4>Clone & install</h4>
+              <p>Clone the repository and install dependencies with npm.</p>
+              <div class="code-block" data-label="terminal">
+                <code>git clone https://github.com/Pabl0Parra/RawCut
+cd RawCut
+npm install</code>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">02</span>
+            <div class="step-content">
+              <h4>Configure environment</h4>
+              <p>Copy the example env file and fill in your Supabase and TMDb credentials.</p>
+              <div class="code-block" data-label="terminal">
+                <code>cp .env.example .env</code>
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">03</span>
+            <div class="step-content">
+              <h4>Set up the database</h4>
+              <p>Run <code style="color:var(--gold)">supabase/schema.sql</code> in your Supabase SQL editor to scaffold tables, RLS policies, and triggers.</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">04</span>
+            <div class="step-content">
+              <h4>Start the dev server</h4>
+              <div class="code-block" data-label="terminal">
+                <code>npx expo start</code>
+              </div>
+              <p style="margin-top:0.8rem;">Scan the QR with Expo Go, or press <span style="color:var(--gold)">a</span> / <span style="color:var(--gold)">i</span> / <span style="color:var(--gold)">w</span> for emulators.</p>
+            </div>
+          </div>
+        </div>
+        <div class="install-env reveal">
+          <h4>Environment variables</h4>
+          <div class="env-vars">
+            <div class="env-var">
+              <span class="env-key">EXPO_PUBLIC_SUPABASE_URL</span>
+              <span class="env-desc">Your Supabase project URL (Settings → API)</span>
+            </div>
+            <div class="env-var">
+              <span class="env-key">EXPO_PUBLIC_SUPABASE_ANON_KEY</span>
+              <span class="env-desc">Supabase anonymous public key</span>
+            </div>
+            <div class="env-var">
+              <span class="env-key">EXPO_PUBLIC_TMDB_API_KEY</span>
+              <span class="env-desc">TMDb API v3 key — free at themoviedb.org</span>
+            </div>
+            <div class="env-var">
+              <span class="env-key">EXPO_PUBLIC_TMDB_IMAGE_BASE</span>
+              <span class="env-desc">https://image.tmdb.org/t/p/w500</span>
+            </div>
+          </div>
+          <div style="margin-top:2rem;">
+            <p class="section-label" style="margin-bottom:0.5rem;">Prerequisites</p>
+            <div class="env-vars">
+              <div class="env-var"><span class="env-key">Node.js 18+</span></div>
+              <div class="env-var"><span class="env-key">Expo Go app</span><span class="env-desc">For physical device testing</span></div>
+              <div class="env-var"><span class="env-key">Supabase project</span><span class="env-desc">Free tier works fine</span></div>
+              <div class="env-var"><span class="env-key">TMDb API key</span><span class="env-desc">Free registration at themoviedb.org</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">CortoCrudo</span>
+    <ul class="footer-links">
+      <li><a href="https://github.com/Pabl0Parra/RawCut" target="_blank">GitHub</a></li>
+      <li><a href="https://youtu.be/SCV3KcW4htM" target="_blank">Demo</a></li>
+      <li><a href="https://github.com/Pabl0Parra/RawCut/blob/main/README.md" target="_blank">Docs</a></li>
+    </ul>
+    <span class="footer-copy">MIT License · © 2026 Pablo Parra</span>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const els = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    els.forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
