@@ -25,7 +25,6 @@ import { Colors } from "../constants/Colors";
 import type { Profile } from "../lib/supabase";
 import { supabase } from "../lib/supabase";
 import {
-    searchUsers,
     sendRecommendation,
 } from "../utils/movieDetail.utils";
 import { useSocialStore } from "../stores/socialStore";
@@ -296,7 +295,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                 <Text style={styles.emptyUsersText}>
                     {t("social.emptyModal")}
                 </Text>
-                <Text style={[styles.emptyUsersText, { fontSize: 13, marginTop: 4 }]}>
+                <Text style={styles.emptyUsersSubtitle}>
                     {t("social.emptyModalSubtitle")}
                 </Text>
                 <TouchableOpacity
@@ -338,7 +337,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={styles.modalContainer}
                 >
-                    { }
+
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>{t("recommendations.recommend")}</Text>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -351,7 +350,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                         keyboardShouldPersistTaps="handled"
                         contentContainerStyle={styles.scrollContent}
                     >
-                        { }
+
                         <View style={styles.previewContainer}>
                             {!!posterUrl && (
                                 <Image
@@ -365,7 +364,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                             </View>
                         </View>
 
-                        { }
+
                         {enableSearch && (
                             <>
                                 <Text style={styles.inputLabel}>{t("recommendations.searchUser")}</Text>
@@ -380,12 +379,12 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                             </>
                         )}
 
-                        { }
+
                         {!enableSearch && (
                             <Text style={styles.inputLabel}>{t("recommendations.selectUsers")}</Text>
                         )}
 
-                        { }
+
                         <TouchableOpacity
                             style={styles.dropdownButton}
                             onPress={handleToggleUserList}
@@ -398,7 +397,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                             />
                         </TouchableOpacity>
 
-                        { }
+
                         <View style={styles.userListContainer}>{renderUserList()}</View>
 
                         { }
@@ -420,7 +419,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                             </View>
                         )}
 
-                        { }
+
                         <View style={styles.messageContainer}>
                             <TextInput
                                 style={[styles.input, styles.multilineInput]}
@@ -437,7 +436,7 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
                             </Text>
                         </View>
 
-                        { }
+
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity
                                 style={[styles.sendButton, !canSend && styles.disabledButton]}
@@ -602,6 +601,12 @@ const styles = StyleSheet.create({
     emptyUsersText: {
         color: Colors.metalSilver,
         textAlign: "center",
+    } as TextStyle,
+    emptyUsersSubtitle: {
+        color: Colors.metalSilver,
+        textAlign: "center",
+        fontSize: 13,
+        marginTop: 4,
     } as TextStyle,
     findFriendsBtn: {
         marginTop: 12,

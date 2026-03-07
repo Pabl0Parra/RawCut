@@ -42,6 +42,10 @@ export type { ContentActionHandlers };
 
 // ─── Individual card wrapper (subscribes to its own store slices) ─────────────
 
+interface SectionCardArgs {
+    readonly item: Movie | TVShow;
+}
+
 interface SectionCardProps extends ContentActionHandlers {
     readonly item: Movie | TVShow;
     readonly mediaType: MediaType;
@@ -147,7 +151,7 @@ export const HomeSection = memo(function HomeSection({
     }, [mergedData]);
 
     const renderItem = useCallback(
-        ({ item }: { item: Movie | TVShow }) => (
+        ({ item }: SectionCardArgs) => (
             <SectionCard
                 item={item}
                 mediaType={mediaType}

@@ -28,7 +28,11 @@ interface ContentGridLayoutProps {
     readonly ListFooterComponent?: React.ComponentType<any> | React.ReactElement | null;
 }
 
-interface GridMovieCardProps {
+interface ContentGridItemRenderArgs {
+    readonly item: EnrichedContentItem;
+}
+
+interface GridMovieCardArgs {
     readonly item: EnrichedContentItem;
     readonly onToggleFavorite?: (tmdbId: number, mediaType: "movie" | "tv") => void;
     readonly onToggleWatchlist?: (tmdbId: number, mediaType: "movie" | "tv") => void;
@@ -42,7 +46,7 @@ const GridMovieCard = React.memo(function GridMovieCard({
     onToggleWatchlist,
     onToggleWatched,
     onRecommend,
-}: GridMovieCardProps) {
+}: GridMovieCardArgs) {
     const isFavorite = useContentStore((s) => s.isFavorite(item.tmdb_id, item.media_type));
     const inWatchlist = useContentStore((s) => s.isInWatchlist(item.tmdb_id, item.media_type));
     const isWatched = useContentStore((s) => s.isWatched(item.tmdb_id, item.media_type));
@@ -101,7 +105,7 @@ export const ContentGridLayout = React.memo(function ContentGridLayout({
     isWatched,
     ListFooterComponent,
 }: Readonly<ContentGridLayoutProps>): JSX.Element {
-    const renderItem = useCallback(({ item }: { item: EnrichedContentItem }): JSX.Element => {
+    const renderItem = useCallback(({ item }: ContentGridItemRenderArgs): JSX.Element => {
         return (
             <GridMovieCard
                 item={item}
