@@ -157,7 +157,7 @@ export default function WatchlistScreen() {
                             </View>
                             {upcoming.map((item) => {
                                 const airDate = new Date(item.next_episode_to_air?.air_date || "");
-                                const diff = airDate.getTime() - new Date().getTime();
+                                const diff = airDate.getTime() - Date.now();
                                 const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
                                 return (
                                     <UpcomingCard
