@@ -77,7 +77,10 @@ export function useWatchlistData() {
                         if (!details) return null;
                         const internal = watchlist.find(w => Number(w.tmdb_id) === id && w.media_type === 'movie');
                         return { ...details, internal_id: internal?.id || String(id), type: 'movie' };
-                    } catch (e) { return null; }
+                    } catch (e) { 
+                        console.error(`[useWatchlistData] Error fetching movie details for ID ${id}:`, e);
+                        return null; 
+                    }
                 })
             );
 
@@ -114,6 +117,7 @@ export function useWatchlistData() {
                                     nextEpDetails = { season: next.season, episode: next.episode };
                                 }
                             } catch (e) {
+                                console.error(`[useWatchlistData] Error fetching next episode details for TV ID ${id}:`, e);
                                 nextEpDetails = { season: next.season, episode: next.episode };
                             }
                         }
@@ -126,7 +130,10 @@ export function useWatchlistData() {
                             progress,
                             inWatchlist: !!internal
                         };
-                    } catch (e) { return null; }
+                    } catch (e) { 
+                        console.error(`[useWatchlistData] Error fetching TV show details for ID ${id}:`, e);
+                        return null; 
+                    }
                 })
             );
 
