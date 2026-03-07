@@ -400,7 +400,6 @@ export const BaseRecommendModal: React.FC<BaseRecommendModalProps> = ({
 
                         <View style={styles.userListContainer}>{renderUserList()}</View>
 
-                        { }
                         {selectedUsers.length > 0 && (
                             <View style={styles.chipsContainer}>
                                 {selectedUsers.map((user) => (
