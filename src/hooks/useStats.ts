@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useQueries, UseQueryResult } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { useContentStore } from "../stores/contentStore";
 import { useVoteStore } from "../stores/voteStore";
 import { getMovieDetails, getTVShowDetails, Movie, TVShow } from "../lib/tmdb";
@@ -100,14 +100,10 @@ export const useStats = () => {
         Object.entries(userVotes).forEach(([key, rating]) => {
             const [idStr, type] = key.split(":");
             const id = Number(idStr);
-            if (type === "movie") {
-                if (!highestRatedMovie || rating > highestRatedMovie.rating) {
-                    highestRatedMovie = { title: movieMetadata[id]?.title || "Unknown", rating, id };
-                }
-            } else {
-                if (!highestRatedShow || rating > highestRatedShow.rating) {
-                    highestRatedShow = { title: tvMetadata[id]?.name || "Unknown", rating, id };
-                }
+            if (type === "movie" && (!highestRatedMovie || rating > highestRatedMovie.rating)) {
+                highestRatedMovie = { title: movieMetadata[id]?.title || "Unknown", rating, id };
+            } else if (type === "tv" && (!highestRatedShow || rating > highestRatedShow.rating)) {
+                highestRatedShow = { title: tvMetadata[id]?.name || "Unknown", rating, id };
             }
         });
 
