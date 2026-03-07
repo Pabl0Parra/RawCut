@@ -98,6 +98,13 @@ interface ForYouRecommendation {
     readonly items: ReadonlyArray<Movie | TVShow>;
 }
 
+type GridItem = Movie | TVShow | null;
+type GenreIdItem = number | string | null;
+
+interface RenderGridItemProps {
+    readonly item: GridItem;
+}
+
 // ─── MovieCardItem (grid cell) ───────────────────────────────────────────────
 
 interface MovieCardItemProps {
@@ -157,7 +164,7 @@ export default function HomeScreen(): JSX.Element {
     const [showProfileBanner, setShowProfileBanner] = useState(false);
 
     const [showFilterModal, setShowFilterModal] = useState(false);
-    const [selectedGenre, setSelectedGenre] = useState<number | string | null>(null);
+    const [selectedGenre, setSelectedGenre] = useState<GenreIdItem>(null);
     const [selectedYear, setSelectedYear] = useState("");
     const [sortBy, setSortBy] = useState<string>(DEFAULT_SORT_VALUE);
     const [filtersActive, setFiltersActive] = useState(false);
@@ -207,13 +214,13 @@ export default function HomeScreen(): JSX.Element {
     );
 
     // Local state for search overrides
-    const [searchMovies_, setSearchMovies] = useState<Movie[]>([]);
-    const [searchTVShows_, setSearchTVShows] = useState<TVShow[]>([]);
+    const [searchedMovies, setSearchedMovies] = useState<Movie[]>([]);
+    const [searchedTVShows, setSearchedTVShows] = useState<TVShow[]>([]);
     const isInSearchMode = isSearching
-        || (searchQuery.trim().length > 0 && (searchMovies_.length > 0 || searchTVShows_.length > 0));
+        || (searchQuery.trim().length > 0 && (searchedMovies.length > 0 || searchedTVShows.length > 0));
 
-    const movies: Movie[] = isInSearchMode ? searchMovies_ : moviesFromQuery;
-    const tvShows: TVShow[] = isInSearchMode ? searchTVShows_ : tvShowsFromQuery;
+    const movies: Movie[] = isInSearchMode ? searchedMovies : moviesFromQuery;
+    const tvShows: TVShow[] = isInSearchMode ? searchedTVShows : tvShowsFromQuery;
 
     // ─── Active query for current tab ────────────────────────────────────
     let activeQuery;
@@ -263,9 +270,9 @@ export default function HomeScreen(): JSX.Element {
     // Pad data array so partial last rows don't cause layout jank
     const paddedData = useMemo(() => {
         const remainder = data.length % NUM_COLUMNS;
-        if (remainder === 0) return data as ReadonlyArray<Movie | TVShow | null>;
-        const fillers: null[] = Array(NUM_COLUMNS - remainder).fill(null) as null[];
-        return [...data, ...fillers] as ReadonlyArray<Movie | TVShow | null>;
+        if (remainder === 0) return data as ReadonlyArray<GridItem>;
+        const fillers: null[] = new Array(NUM_COLUMNS - remainder).fill(null) as null[];
+        return [...data, ...fillers] as ReadonlyArray<GridItem>;
     }, [data]);
 
     // ─── Fetch community votes for visible content ──────────────────────
@@ -296,8 +303,8 @@ export default function HomeScreen(): JSX.Element {
     // ─── Reset on tab change ─────────────────────────────────────────────
     useEffect(() => {
         setSearchQuery("");
-        setSearchMovies([]);
-        setSearchTVShows([]);
+        setSearchedMovies([]);
+        setSearchedTVShows([]);
         resetFilters(false);
     }, [activeTab]);
 
@@ -322,7 +329,7 @@ export default function HomeScreen(): JSX.Element {
         }
     }, [filtersActive, selectedGenre, selectedYear, sortBy]);
 
-    const handleViewAll = useCallback((genreId: number | string | null) => {
+    const handleViewAll = useCallback((genreId: GenreIdItem) => {
         setSelectedGenre(genreId);
         setSelectedYear("");
         setSortBy(DEFAULT_SORT_VALUE);
@@ -341,8 +348,8 @@ export default function HomeScreen(): JSX.Element {
 
     const handleSearch = useCallback(async (): Promise<void> => {
         if (!searchQuery.trim()) {
-            setSearchMovies([]);
-            setSearchTVShows([]);
+            setSearchedMovies([]);
+            setSearchedTVShows([]);
             setIsSearching(false);
             return;
         }
@@ -351,10 +358,10 @@ export default function HomeScreen(): JSX.Element {
         try {
             if (activeTab === "movie") {
                 const response = await searchMovies(searchQuery);
-                setSearchMovies(response.results);
+                setSearchedMovies(response.results);
             } else {
                 const response = await searchTVShows(searchQuery);
-                setSearchTVShows(response.results);
+                setSearchedTVShows(response.results);
             }
         } catch (err) {
             console.error("[HomeScreen] Error searching:", err);
@@ -366,16 +373,16 @@ export default function HomeScreen(): JSX.Element {
     const handleRefresh = useCallback(async (): Promise<void> => {
         setRefreshing(true);
         setSearchQuery("");
-        setSearchMovies([]);
-        setSearchTVShows([]);
+        setSearchedMovies([]);
+        setSearchedTVShows([]);
         await activeQuery.refetch();
         setRefreshing(false);
     }, [activeQuery]);
 
     const handleClearSearch = useCallback((): void => {
         setSearchQuery("");
-        setSearchMovies([]);
-        setSearchTVShows([]);
+        setSearchedMovies([]);
+        setSearchedTVShows([]);
     }, []);
 
     // ─── Content action handlers (stable — no deps) ─────────────────────
@@ -447,7 +454,7 @@ export default function HomeScreen(): JSX.Element {
     // ─── FlatList callbacks ──────────────────────────────────────────────
 
     const renderItem = useCallback(
-        ({ item }: { item: Movie | TVShow | null }): JSX.Element => {
+        ({ item }: RenderGridItemProps): JSX.Element => {
             if (!item) return <View style={styles.placeholderCard} />;
             return (
                 <MovieCardItem
@@ -547,7 +554,7 @@ export default function HomeScreen(): JSX.Element {
     const onMomentumScrollEnd = useCallback(() => setIsScrolling(false), []);
 
     const keyExtractor = useCallback(
-        (item: Movie | TVShow | null, index: number) =>
+        (item: GridItem, index: number) =>
             item ? `${mediaType}-${item.id}` : `filler-${index}`,
         [mediaType],
     );
