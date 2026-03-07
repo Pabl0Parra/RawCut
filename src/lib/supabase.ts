@@ -17,7 +17,7 @@ const LargeSecureStore = {
             // Fallback: value may have been written without chunking
             return SecureStore.getItemAsync(key);
         }
-        const count = parseInt(countStr, 10);
+        const count = Number.parseInt(countStr, 10);
         const chunks = await Promise.all(
             Array.from({ length: count }, (_, i) =>
                 SecureStore.getItemAsync(`${key}.${i}`)
@@ -46,7 +46,7 @@ const LargeSecureStore = {
             await SecureStore.deleteItemAsync(key).catch(() => {});
             return;
         }
-        const count = parseInt(countStr, 10);
+        const count = Number.parseInt(countStr, 10);
         await Promise.all([
             SecureStore.deleteItemAsync(`${key}.chunks`),
             ...Array.from({ length: count }, (_, i) =>

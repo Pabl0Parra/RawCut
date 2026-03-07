@@ -50,7 +50,7 @@ const PaginationDot = memo(function PaginationDot({ index, activeIndex }: Pagina
 // ─── Individual Hero Card ────────────────────────────────────────────────────
 // Extracted so the parent FlatList's renderItem is a stable reference.
 
-interface HeroCardRenderArgs {
+interface HeroCardRenderInfo {
     readonly item: Movie | TVShow;
 }
 
@@ -206,7 +206,7 @@ export const HeroCarousel = memo(function HeroCarousel({
     );
 
     const renderItem = useCallback(
-        ({ item }: HeroCardRenderArgs) => (
+        ({ item }: HeroCardRenderInfo) => (
             <HeroCard item={item} mediaType={mediaType} />
         ),
         [mediaType],
@@ -251,9 +251,9 @@ export const HeroCarousel = memo(function HeroCarousel({
                 contentContainerStyle={{ paddingHorizontal: 16 }}
             />
             <View style={styles.pagination}>
-                {heroData.map((_, index) => (
+                {heroData.map((item, index) => (
                     <PaginationDot
-                        key={`dot-${index}`}
+                        key={`hero-dot-${item.id}`}
                         index={index}
                         activeIndex={activeIndex}
                     />
