@@ -111,7 +111,6 @@ export default function HelpCenterScreen(): React.JSX.Element {
         Linking.canOpenURL(mailtoUrl).then((supported) => {
             if (supported) {
                 Linking.openURL(mailtoUrl);
-            } else {
             }
         });
     };
