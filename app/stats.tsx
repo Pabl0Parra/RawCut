@@ -27,6 +27,16 @@ const formatTimeSpent = (minutes: number, t: any) => {
     return parts.join(", ");
 };
 
+const HeaderBackButton = () => (
+    <TouchableOpacity
+        onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/watchlist")}
+        style={styles.backButton}
+        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+    >
+        <Ionicons name="chevron-back" size={28} color={Colors.cinematicGold} />
+    </TouchableOpacity>
+);
+
 export default function StatsScreen() {
     const { t } = useTranslation();
     const { stats, isLoading } = useStats();
@@ -46,15 +56,7 @@ export default function StatsScreen() {
                     headerStyle: { backgroundColor: Colors.black },
                     headerTintColor: Colors.cinematicGold,
                     headerTitleStyle: { color: Colors.white, fontFamily: Fonts.bebas },
-                    headerLeft: () => (
-                        <TouchableOpacity
-                            onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/watchlist")}
-                            style={styles.backButton}
-                            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                        >
-                            <Ionicons name="chevron-back" size={28} color={Colors.cinematicGold} />
-                        </TouchableOpacity>
-                    ),
+                    headerLeft: HeaderBackButton,
                 }} />
                 <StatsSkeleton />
             </View>
@@ -70,15 +72,7 @@ export default function StatsScreen() {
                 headerStyle: { backgroundColor: Colors.black },
                 headerTintColor: Colors.cinematicGold,
                 headerTitleStyle: { color: Colors.white, fontFamily: Fonts.bebas, fontSize: 24 },
-                headerLeft: () => (
-                    <TouchableOpacity
-                        onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/watchlist")}
-                        style={styles.backButton}
-                        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-                    >
-                        <Ionicons name="chevron-back" size={28} color={Colors.cinematicGold} />
-                    </TouchableOpacity>
-                ),
+                headerLeft: HeaderBackButton,
                 headerTitleAlign: "center",
             }} />
 
