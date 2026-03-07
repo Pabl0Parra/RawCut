@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
@@ -89,7 +89,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem max(4rem, env(safe-area-inset-right)) 1rem max(4rem, env(safe-area-inset-left));
+      padding: 1rem 4rem;
       background: rgba(5, 5, 5, 0.98);
       border-bottom: 2px solid var(--red);
       backdrop-filter: blur(8px);
@@ -163,7 +163,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      padding: 0 max(4rem, env(safe-area-inset-right)) 0 max(4rem, env(safe-area-inset-left));
+      padding: 0 4rem;
     }
 
     #hero-video {
@@ -488,7 +488,7 @@
     }
 
     section {
-      padding: 8rem max(4rem, env(safe-area-inset-right)) 8rem max(4rem, env(safe-area-inset-left));
+      padding: 8rem 4rem;
     }
 
     .section-label {
@@ -612,22 +612,6 @@
       max-width: 260px;
       margin: 0 auto;
       border: 1px solid var(--border);
-    }
-
-    .demo-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.45);
-      transition: background 0.3s;
-    }
-
-    .demo-video-box a:hover .demo-overlay,
-    .demo-video-box a:focus .demo-overlay {
-      background: rgba(0, 0, 0, 0.65);
     }
 
     .demo-video-box::after {
@@ -945,7 +929,7 @@
 
     footer {
       border-top: 2px solid var(--red);
-      padding: 2.5rem max(2.5rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(2.5rem, env(safe-area-inset-left));
+      padding: 2.5rem 4rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -991,6 +975,27 @@
     .section-header,
     footer {
       will-change: transform, opacity;
+    }
+
+    nav {
+      padding-left: max(4rem, env(safe-area-inset-left));
+      padding-right: max(4rem, env(safe-area-inset-right));
+    }
+
+    section {
+      padding-left: max(4rem, env(safe-area-inset-left));
+      padding-right: max(4rem, env(safe-area-inset-right));
+    }
+
+    footer {
+      padding-left: max(2.5rem, env(safe-area-inset-left));
+      padding-right: max(2.5rem, env(safe-area-inset-right));
+      padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    }
+
+    #hero {
+      padding-left: max(4rem, env(safe-area-inset-left));
+      padding-right: max(4rem, env(safe-area-inset-right));
     }
 
     @media (max-width: 768px) {
@@ -1149,18 +1154,15 @@
       <li><a href="https://github.com/Pabl0Parra/RawCut" target="_blank">GitHub ↗</a></li>
     </ul>
     <div class="lang-switcher">
-      <button class="lang-btn" onclick="setLang('en')">EN</button>
-      <button class="lang-btn active" onclick="setLang('es')">ES</button>
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('es')">ES</button>
     </div>
   </nav>
 
   <div id="hero-scroll-container">
     <section id="hero">
-      <video id="hero-video" preload="metadata" muted playsinline>
-        <source src="./assets/video/9089136-hd_1080_1920_30fps.mp4" type="video/mp4">
-        <track kind="captions" src="./assets/video/subtitles-es.vtt" srclang="es" label="Español">
-        <track kind="descriptions" src="./assets/video/descriptions-es.vtt" srclang="es" label="Descripción de video">
-      </video>
+      <video id="hero-video" preload="metadata" muted playsinline
+        src="./assets/video/9089136-hd_1080_1920_30fps.mp4"></video>
       <div id="hero-video-placeholder">
         <span class="hero-video-loading">Loading...</span>
       </div>
@@ -1308,7 +1310,10 @@
           <a href="https://youtu.be/SCV3KcW4htM" target="_blank" style="display:block;height:100%;position:relative;">
             <img src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/screenshots/0.PNG"
               alt="RawCut App Screenshot" style="width:100%;height:100%;object-fit:cover;display:block;" />
-            <div class="demo-overlay" aria-hidden="true">
+            <div
+              style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);transition:background 0.3s;"
+              onmouseover="this.style.background='rgba(0,0,0,0.65)'"
+              onmouseout="this.style.background='rgba(0,0,0,0.45)'">
               <div class="play-circle">
                 <svg viewBox="0 0 24 24" fill="none">
                   <path d="M8 5.14v14l11-7-11-7z" />
@@ -1514,7 +1519,7 @@ npm install</code>
       heroVideo.addEventListener('loadedmetadata', initVideo);
     }
 
-    heroVideo.play().catch(e => console.error("Autoplay prevented:", e));
+    (async () => { try { await heroVideo.play(); } catch (e) { } })();
 
     const lenis = new Lenis({ smoothWheel: true });
     lenis.on('scroll', ScrollTrigger.update);
@@ -1816,7 +1821,7 @@ npm install</code>
       runLetterLoop();
     }
 
-    setLang('es');
+    setLang('en');
   </script>
 </body>
 
