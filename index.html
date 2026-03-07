@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CortoCrudo — Discover. Share. Watch.</title>
+  <title>RawCut — Discover. Share. Recommend.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Bebas+Neue&display=swap" rel="stylesheet" />
   <style>
@@ -13,9 +13,9 @@
       --card: #161514;
       --border: #2a2825;
       --gold: #c8a96e;
-      --gold-dim: #8a6f42;
+      --gold-dim: #ba9258;
       --cream: #f0e9db;
-      --muted: #7a7368;
+      --muted: #a3978c;
       --red: #c0392b;
     }
 
@@ -51,7 +51,9 @@
       align-items: center;
       justify-content: space-between;
       padding: 1.5rem 3rem;
-      background: linear-gradient(to bottom, rgba(8,8,8,0.95), transparent);
+      background: rgba(8,8,8,0.98);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
     }
 
     .nav-logo {
@@ -78,6 +80,34 @@
     }
 
     .nav-links a:hover { color: var(--cream); }
+
+    .lang-switcher {
+      display: flex;
+      align-items: center;
+      gap: 0.1rem;
+      border: 1px solid var(--border);
+      padding: 0.2rem;
+    }
+
+    .lang-btn {
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.3rem 0.6rem;
+      font-family: 'DM Mono', monospace;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .lang-btn.active {
+      background: var(--gold);
+      color: var(--black);
+    }
+
+    .lang-btn:not(.active):hover { color: var(--cream); }
 
     /* ── HERO ── */
     #hero {
@@ -338,9 +368,11 @@
     }
 
     .feature-icon {
-      font-size: 1.4rem;
-      margin-bottom: 1rem;
       display: block;
+      margin-bottom: 1rem;
+      color: var(--gold);
+      width: 24px;
+      height: 24px;
     }
 
     .feature-title {
@@ -661,31 +693,42 @@
 
   <!-- NAV -->
   <nav>
-    <a href="#" class="nav-logo">CortoCrudo</a>
+    <a href="#" class="nav-logo">
+      <img id="nav-logo-img"
+        src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png"
+        alt="CortoCrudo"
+        style="height:2.2rem;width:auto;object-fit:contain;display:block;"
+      />
+    </a>
     <ul class="nav-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#demo">Demo</a></li>
-      <li><a href="#install">Install</a></li>
+      <li><a href="#features" data-i18n="nav_features">Features</a></li>
+      <li><a href="#demo" data-i18n="nav_demo">Demo</a></li>
+      <li><a href="#download" data-i18n="nav_download">Download</a></li>
+      <li><a href="#install" data-i18n="nav_install">Install</a></li>
       <li><a href="https://github.com/Pabl0Parra/RawCut" target="_blank">GitHub ↗</a></li>
     </ul>
+    <div class="lang-switcher">
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+      <button class="lang-btn active" onclick="setLang('es')">ES</button>
+    </div>
   </nav>
 
   <!-- HERO -->
   <section id="hero">
     <div class="hero-bg"></div>
     <div class="hero-inner">
-      <p class="hero-eyebrow">Open Source · React Native · Expo</p>
+      <p class="hero-eyebrow" data-i18n="hero_eyebrow">Open Source · React Native · Expo</p>
       <h1 class="hero-title">
-        <span class="block"><span class="inner">Discover.</span></span>
-        <span class="block"><span class="inner"><em>Share.</em></span></span>
-        <span class="block"><span class="inner">Watch.</span></span>
+        <span class="block"><span class="inner" data-i18n="hero_title_1">Discover.</span></span>
+        <span class="block"><span class="inner"><em data-i18n="hero_title_2">Share.</em></span></span>
+        <span class="block"><span class="inner" data-i18n="hero_title_3">Recommend.</span></span>
       </h1>
-      <p class="hero-sub">
+      <p class="hero-sub" data-i18n="hero_sub">
         A cinematic social platform for movie and TV enthusiasts. Browse titles, build your watchlist, and share recommendations with people whose taste you trust.
       </p>
       <div class="hero-ctas">
-        <a href="#demo" class="btn-primary">▶ &nbsp;Watch Demo</a>
-        <a href="https://github.com/Pabl0Parra/RawCut" class="btn-ghost" target="_blank">View on GitHub</a>
+        <a href="#demo" class="btn-primary" data-i18n="hero_cta1">▶ &nbsp;Watch Demo</a>
+        <a href="https://github.com/Pabl0Parra/RawCut" class="btn-ghost" target="_blank" data-i18n="hero_cta2">View on GitHub</a>
       </div>
       <div class="tech-badges">
         <span class="badge">React Native</span>
@@ -704,45 +747,45 @@
   <section id="features">
     <div class="features-layout">
       <div class="features-header reveal">
-        <p class="section-label">What it does</p>
-        <h2 class="section-title">Built for <em>cinephiles</em><br>who share.</h2>
+        <p class="section-label" data-i18n="feat_label">What it does</p>
+        <h2 class="section-title" data-i18n="feat_title">Built for <em>cinephiles</em><br>who share.</h2>
       </div>
       <div class="features-grid">
         <div class="feature-card reveal">
           <p class="feature-num">01</p>
-          <span class="feature-icon">🎬</span>
-          <h3 class="feature-title">Media Discovery</h3>
-          <p class="feature-desc">Search and browse thousands of movies and TV series powered by the TMDb API. Trending, popular, and curated collections at your fingertips.</p>
+          <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 2l-4 5-4-5"/><circle cx="12" cy="14" r="3"/></svg></span>
+          <h3 class="feature-title" data-i18n="f1_title">Media Discovery</h3>
+          <p class="feature-desc" data-i18n="f1_desc">Search and browse thousands of movies and TV series powered by the TMDb API. Trending, popular, and curated collections at your fingertips.</p>
         </div>
         <div class="feature-card reveal">
           <p class="feature-num">02</p>
-          <span class="feature-icon">📋</span>
-          <h3 class="feature-title">Personal Lists</h3>
-          <p class="feature-desc">Maintain a Favorites collection and a Watchlist. Track what you've seen, queue what's next, and never lose a recommendation.</p>
+          <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg></span>
+          <h3 class="feature-title" data-i18n="f2_title">Personal Lists</h3>
+          <p class="feature-desc" data-i18n="f2_desc">Maintain a Favorites collection and a Watchlist. Track what you've seen, queue what's next, and never lose a recommendation.</p>
         </div>
         <div class="feature-card reveal">
           <p class="feature-num">03</p>
-          <span class="feature-icon">💬</span>
-          <h3 class="feature-title">Social Recommendations</h3>
-          <p class="feature-desc">Send direct recommendations to friends with a personal note. Rate received picks on a five-star scale and spark threaded discussions.</p>
+          <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <h3 class="feature-title" data-i18n="f3_title">Social Recommendations</h3>
+          <p class="feature-desc" data-i18n="f3_desc">Send direct recommendations to friends with a personal note. Rate received picks on a five-star scale and spark threaded discussions.</p>
         </div>
         <div class="feature-card reveal">
           <p class="feature-num">04</p>
-          <span class="feature-icon">⚡</span>
-          <h3 class="feature-title">Real-time Updates</h3>
-          <p class="feature-desc">Comments, likes, and notifications powered by Supabase Realtime. Live interaction without manual refreshes.</p>
+          <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+          <h3 class="feature-title" data-i18n="f4_title">Real-time Updates</h3>
+          <p class="feature-desc" data-i18n="f4_desc">Comments, likes, and notifications powered by Supabase Realtime. Live interaction without manual refreshes.</p>
         </div>
         <div class="feature-card reveal">
           <p class="feature-num">05</p>
-          <span class="feature-icon">🔒</span>
-          <h3 class="feature-title">Secure Backend</h3>
-          <p class="feature-desc">PostgreSQL with Row Level Security (RLS) ensures every user only sees what they're authorised to access. Auth with custom profile triggers.</p>
+          <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <h3 class="feature-title" data-i18n="f5_title">Secure Backend</h3>
+          <p class="feature-desc" data-i18n="f5_desc">PostgreSQL with Row Level Security (RLS) ensures every user only sees what they're authorised to access. Auth with custom profile triggers.</p>
         </div>
         <div class="feature-card reveal">
           <p class="feature-num">06</p>
-          <span class="feature-icon">🎨</span>
-          <h3 class="feature-title">Cinematic UI</h3>
-          <p class="feature-desc">High-contrast dark theme with NativeWind (Tailwind CSS for React Native) styling. Optimised for readability and engagement on any device.</p>
+          <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20c-2 0-3-1-3-2s1-2 1-3-2-2-4-2a5 5 0 0 1 0-10h.5"/><circle cx="7.5" cy="10.5" r="1" fill="currentColor"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/><circle cx="16.5" cy="10.5" r="1" fill="currentColor"/></svg></span>
+          <h3 class="feature-title" data-i18n="f6_title">Cinematic UI</h3>
+          <p class="feature-desc" data-i18n="f6_desc">High-contrast dark theme with NativeWind (Tailwind CSS for React Native) styling. Optimised for readability and engagement on any device.</p>
         </div>
       </div>
     </div>
@@ -751,13 +794,13 @@
   <!-- DEMO -->
   <section id="demo" style="padding: 7rem 3rem;">
     <div class="demo-wrapper reveal">
-      <p class="section-label">See it in action</p>
-      <h2 class="section-title"><em>Live demo</em><br>on YouTube</h2>
+      <p class="section-label" data-i18n="demo_label">See it in action</p>
+      <h2 class="section-title" data-i18n="demo_title"><em>Live demo</em><br>on YouTube</h2>
       <div class="demo-inner">
         <div class="demo-video-box">
           <a href="https://youtu.be/SCV3KcW4htM" target="_blank" style="display:block; height:100%; position:relative;">
             <img
-              src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/screenshots/1-b.PNG"
+              src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/screenshots/0.PNG"
               alt="RawCut App Screenshot"
               style="width:100%; height:100%; object-fit:cover; display:block;"
             />
@@ -767,14 +810,14 @@
                   <path d="M8 5.14v14l11-7-11-7z"/>
                 </svg>
               </div>
-              <span class="demo-label" style="margin-top:0.8rem;">Watch Demo</span>
+              <span class="demo-label" style="margin-top:0.8rem;" data-i18n="demo_watch">Watch Demo</span>
             </div>
           </a>
         </div>
         <div class="demo-text">
-          <h3>The full experience,<br><em>in two minutes.</em></h3>
-          <p>The demo walks through onboarding, browsing trending titles, building a watchlist, sending a recommendation to a friend, and real-time comment threads — all on a physical device.</p>
-          <a href="https://youtu.be/SCV3KcW4htM" target="_blank" class="btn-primary">▶ &nbsp;Open on YouTube</a>
+          <h3 data-i18n="demo_h3">The full experience,<br><em>in two minutes.</em></h3>
+          <p data-i18n="demo_p">The demo walks through onboarding, browsing trending titles, building a watchlist, sending a recommendation to a friend, and real-time comment threads — all on a physical device.</p>
+          <a href="https://youtu.be/SCV3KcW4htM" target="_blank" class="btn-primary" data-i18n="demo_yt">▶ &nbsp;Open on YouTube</a>
           <div class="screens-strip">
             <span class="screen-thumb">Home</span>
             <span class="screen-thumb">Discover</span>
@@ -788,20 +831,77 @@
     </div>
   </section>
 
-  <!-- INSTALL -->
+  <!-- DOWNLOAD -->
+  <section id="download" style="padding: 7rem 3rem; background: var(--black); position:relative;">
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--border),transparent);"></div>
+    <div style="max-width:1100px;margin:0 auto;" class="reveal">
+      <p class="section-label" data-i18n="dl_label">Download</p>
+      <h2 class="section-title" data-i18n="dl_title">Try it on your<br><em>Android device.</em></h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;margin-top:3.5rem;align-items:center;">
+        <div>
+          <p style="font-size:0.7rem;line-height:1.9;color:var(--muted);margin-bottom:2rem;" data-i18n="dl_desc">
+            No need to clone the repo. Download the APK directly from the Expo build dashboard and install it on any Android device. No Play Store required.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:1px;margin-bottom:2.5rem;">
+            <div class="env-var">
+              <span class="env-key" data-i18n="dl_req1_title">Android required</span>
+              <span class="env-desc" data-i18n="dl_req1_desc">Enable "Install from unknown sources" in your device settings before installing.</span>
+            </div>
+            <div class="env-var">
+              <span class="env-key" data-i18n="dl_req2_title">No iOS build yet</span>
+              <span class="env-desc" data-i18n="dl_req2_desc">iOS users can run the app via Expo Go by cloning the repo and starting the dev server.</span>
+            </div>
+          </div>
+          <a href="https://expo.dev/accounts/pabl0parra/projects/CortoCrudo/builds/214560ec-3a90-4305-b8b5-26f7e9d22385"
+             target="_blank"
+             class="btn-primary"
+             style="display:inline-flex;align-items:center;gap:0.6rem;text-decoration:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 16l-6-6h4V4h4v6h4l-6 6z" fill="currentColor"/>
+              <path d="M4 20h16v-2H4v2z" fill="currentColor"/>
+            </svg>
+            <span data-i18n="dl_btn">Download APK</span>
+          </a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div style="border:1px solid var(--border);padding:2rem;background:var(--card);">
+            <p style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:1.2rem;" data-i18n="dl_steps_label">How to install</p>
+            <div style="display:flex;flex-direction:column;gap:1.2rem;">
+              <div style="display:grid;grid-template-columns:1.8rem 1fr;gap:1rem;align-items:start;">
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--border);line-height:1;">01</span>
+                <p style="font-size:0.65rem;line-height:1.7;color:var(--muted);" data-i18n="dl_step1">Tap the <strong style="color:var(--cream)">Download APK</strong> button and open the Expo build page.</p>
+              </div>
+              <div style="display:grid;grid-template-columns:1.8rem 1fr;gap:1rem;align-items:start;">
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--border);line-height:1;">02</span>
+                <p style="font-size:0.65rem;line-height:1.7;color:var(--muted);" data-i18n="dl_step2">Click <strong style="color:var(--cream)">Download build artifact</strong> to get the <code style="color:var(--gold)">.apk</code> file.</p>
+              </div>
+              <div style="display:grid;grid-template-columns:1.8rem 1fr;gap:1rem;align-items:start;">
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--border);line-height:1;">03</span>
+                <p style="font-size:0.65rem;line-height:1.7;color:var(--muted);" data-i18n="dl_step3">Transfer the file to your Android phone and open it to install.</p>
+              </div>
+              <div style="display:grid;grid-template-columns:1.8rem 1fr;gap:1rem;align-items:start;">
+                <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--border);line-height:1;">04</span>
+                <p style="font-size:0.65rem;line-height:1.7;color:var(--muted);" data-i18n="dl_step4">If prompted, allow installation from unknown sources and you're good to go.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
   <section id="install">
     <div class="install-wrapper">
       <div class="reveal">
-        <p class="section-label">Get started</p>
-        <h2 class="section-title">Up and running<br>in <em>minutes.</em></h2>
+        <p class="section-label" data-i18n="install_label">Get started</p>
+        <h2 class="section-title" data-i18n="install_title">Up and running<br>in <em>minutes.</em></h2>
       </div>
       <div class="install-grid">
         <div class="install-steps reveal">
           <div class="step">
             <span class="step-num">01</span>
             <div class="step-content">
-              <h4>Clone & install</h4>
-              <p>Clone the repository and install dependencies with npm.</p>
+              <h4 data-i18n="step1_title">Clone & install</h4>
+              <p data-i18n="step1_desc">Clone the repository and install dependencies with npm.</p>
               <div class="code-block" data-label="terminal">
                 <code>git clone https://github.com/Pabl0Parra/RawCut
 cd RawCut
@@ -812,8 +912,8 @@ npm install</code>
           <div class="step">
             <span class="step-num">02</span>
             <div class="step-content">
-              <h4>Configure environment</h4>
-              <p>Copy the example env file and fill in your Supabase and TMDb credentials.</p>
+              <h4 data-i18n="step2_title">Configure environment</h4>
+              <p data-i18n="step2_desc">Copy the example env file and fill in your Supabase and TMDb credentials.</p>
               <div class="code-block" data-label="terminal">
                 <code>cp .env.example .env</code>
               </div>
@@ -822,14 +922,14 @@ npm install</code>
           <div class="step">
             <span class="step-num">03</span>
             <div class="step-content">
-              <h4>Set up the database</h4>
-              <p>Run <code style="color:var(--gold)">supabase/schema.sql</code> in your Supabase SQL editor to scaffold tables, RLS policies, and triggers.</p>
+              <h4 data-i18n="step3_title">Set up the database</h4>
+              <p data-i18n="step3_desc">Run <code style="color:var(--gold)">supabase/schema.sql</code> in your Supabase SQL editor to scaffold tables, RLS policies, and triggers.</p>
             </div>
           </div>
           <div class="step">
             <span class="step-num">04</span>
             <div class="step-content">
-              <h4>Start the dev server</h4>
+              <h4 data-i18n="step4_title">Start the dev server</h4>
               <div class="code-block" data-label="terminal">
                 <code>npx expo start</code>
               </div>
@@ -838,7 +938,7 @@ npm install</code>
           </div>
         </div>
         <div class="install-env reveal">
-          <h4>Environment variables</h4>
+          <h4 data-i18n="env_title">Environment variables</h4>
           <div class="env-vars">
             <div class="env-var">
               <span class="env-key">EXPO_PUBLIC_SUPABASE_URL</span>
@@ -873,17 +973,21 @@ npm install</code>
 
   <!-- FOOTER -->
   <footer>
-    <span class="footer-logo">CortoCrudo</span>
+    <img id="footer-logo-img"
+      src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png"
+      alt="CortoCrudo"
+      style="height:1.8rem;width:auto;object-fit:contain;display:block;"
+    />
     <ul class="footer-links">
       <li><a href="https://github.com/Pabl0Parra/RawCut" target="_blank">GitHub</a></li>
       <li><a href="https://youtu.be/SCV3KcW4htM" target="_blank">Demo</a></li>
       <li><a href="https://github.com/Pabl0Parra/RawCut/blob/main/README.md" target="_blank">Docs</a></li>
     </ul>
-    <span class="footer-copy">MIT License · © 2026 Pabl0Parra</span>
+    <span class="footer-copy">MIT License · © 2026 Pablo Parra</span>
   </footer>
 
   <script>
-    // Scroll reveal
+    // ── SCROLL REVEAL ──
     const els = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((e, i) => {
@@ -894,6 +998,151 @@ npm install</code>
       });
     }, { threshold: 0.1 });
     els.forEach(el => observer.observe(el));
+
+    // Default language: Spanish
+    window.addEventListener('DOMContentLoaded', () => setLang('es'));
+
+    // ── I18N ──
+    const translations = {
+      en: {
+        nav_features: 'Features',
+        nav_demo: 'Demo',
+        nav_download: 'Download',
+        nav_install: 'Install',
+        hero_eyebrow: 'Open Source · React Native · Expo',
+        hero_title_1: 'Discover.',
+        hero_title_2: 'Share.',
+        hero_title_3: 'Recommend.',
+        hero_sub: 'A cinematic social platform for movie and TV enthusiasts. Browse titles, build your watchlist, and share recommendations with people whose taste you trust.',
+        hero_cta1: '▶ \u00a0Watch Demo',
+        hero_cta2: 'View on GitHub',
+        feat_label: 'What it does',
+        feat_title: 'Built for <em>cinephiles</em><br>who share.',
+        f1_title: 'Media Discovery',
+        f1_desc: 'Search and browse thousands of movies and TV series powered by the TMDb API. Watch trailers, explore trending titles, and dive into curated collections.',
+        f2_title: 'Personal Lists',
+        f2_desc: "Maintain a Favorites collection and a Watchlist. Track what you've seen, queue what's next, and never lose a recommendation.",
+        f3_title: 'Social Recommendations',
+        f3_desc: 'Send direct recommendations to friends with a personal note. Rate received picks on a five-star scale and spark threaded discussions.',
+        f4_title: 'Real-time Updates',
+        f4_desc: 'Comments, likes, and notifications powered by Supabase Realtime. Live interaction without manual refreshes.',
+        f5_title: 'Secure Backend',
+        f5_desc: "PostgreSQL with Row Level Security (RLS) ensures every user only sees what they're authorised to access. Auth with custom profile triggers.",
+        f6_title: 'Cinematic UI',
+        f6_desc: 'High-contrast dark theme with NativeWind (Tailwind CSS for React Native) styling. Optimised for readability and engagement on any device.',
+        demo_label: 'See it in action',
+        demo_title: '<em>Live demo</em><br>on YouTube',
+        demo_watch: 'Watch Demo',
+        demo_h3: 'The full experience,<br><em>in two minutes.</em>',
+        demo_p: 'The demo walks through onboarding, browsing trending titles, watching trailers, building a watchlist, and sending a recommendation to a friend with real-time comment threads — all on a physical device.',
+        demo_yt: '▶ \u00a0Open on YouTube',
+        install_label: 'Get started',
+        install_title: 'Up and running<br>in <em>minutes.</em>',
+        step1_title: 'Clone & install',
+        step1_desc: 'Clone the repository and install dependencies with npm.',
+        step2_title: 'Configure environment',
+        step2_desc: 'Copy the example env file and fill in your Supabase and TMDb credentials.',
+        step3_title: 'Set up the database',
+        step3_desc: 'Run <code style="color:var(--gold)">supabase/schema.sql</code> in your Supabase SQL editor to scaffold tables, RLS policies, and triggers.',
+        step4_title: 'Start the dev server',
+        env_title: 'Environment variables',
+        dl_label: 'Download',
+        dl_title: 'Try it on your<br><em>Android device.</em>',
+        dl_desc: 'No need to clone the repo. Download the APK directly from the Expo build dashboard and install it on any Android device. No Play Store required.',
+        dl_req1_title: 'Android required',
+        dl_req1_desc: 'Enable "Install from unknown sources" in your device settings before installing.',
+        dl_req2_title: 'No iOS build yet',
+        dl_req2_desc: 'iOS users can run the app via Expo Go by cloning the repo and starting the dev server.',
+        dl_btn: 'Download APK',
+        dl_steps_label: 'How to install',
+        dl_step1: 'Tap the <strong style="color:var(--cream)">Download APK</strong> button and open the Expo build page.',
+        dl_step2: 'Click <strong style="color:var(--cream)">Download build artifact</strong> to get the <code style="color:var(--gold)">.apk</code> file.',
+        dl_step3: 'Transfer the file to your Android phone and open it to install.',
+        dl_step4: 'If prompted, allow installation from unknown sources and you\'re good to go.',
+      },
+      es: {
+        nav_features: 'Funciones',
+        nav_demo: 'Demo',
+        nav_download: 'Descargar',
+        nav_install: 'Instalar',
+        hero_eyebrow: 'Código Abierto · React Native · Expo',
+        hero_title_1: 'Descubre.',
+        hero_title_2: 'Comparte.',
+        hero_title_3: 'Recomienda.',
+        hero_sub: 'Una plataforma social cinematográfica para amantes del cine y las series. Explora títulos, crea tu lista de seguimiento y comparte recomendaciones con tus colegas.',
+        hero_cta1: '▶ \u00a0Ver Demo',
+        hero_cta2: 'Ver en GitHub',
+        feat_label: 'Qué hace',
+        feat_title: 'Hecha para <em>cinéfilos</em><br>que comparten.',
+        f1_title: 'Descubrimiento',
+        f1_desc: 'Busca y explora miles de películas y series gracias a la API de TMDb. Mira tráilers, descubre títulos en tendencia y sumérgete en colecciones curadas.',
+        f2_title: 'Listas Personales',
+        f2_desc: 'Mantén una colección de Favoritos y una Lista de Seguimiento. Registra lo que has visto, añade lo que quieres ver y nunca pierdas una recomendación.',
+        f3_title: 'Recomendaciones Sociales',
+        f3_desc: 'Envía recomendaciones directas a tus amigos con un mensaje personal. Valora las sugerencias recibidas con un sistema de cinco estrellas.',
+        f4_title: 'Actualizaciones en Tiempo Real',
+        f4_desc: 'Comentarios, reacciones y notificaciones impulsados por Supabase Realtime. Interacción en vivo sin recargar la página.',
+        f5_title: 'Backend Seguro',
+        f5_desc: 'PostgreSQL con Row Level Security (RLS) garantiza que cada usuario solo accede a lo que le corresponde. Autenticación con disparadores de perfil personalizados.',
+        f6_title: 'Interfaz Cinematográfica',
+        f6_desc: 'Tema oscuro de alto contraste con estilos NativeWind (Tailwind CSS para React Native). Optimizado para legibilidad y engagement en cualquier dispositivo.',
+        demo_label: 'En acción',
+        demo_title: '<em>Demo en vivo</em><br>en YouTube',
+        demo_watch: 'Ver Demo',
+        demo_h3: 'La experiencia completa,<br><em>en dos minutos.</em>',
+        demo_p: 'La demo recorre el onboarding, la exploración de títulos en tendencia, el visionado de tráilers, la creación de una lista y el envío de una recomendación a un amigo con hilos de comentarios en tiempo real — todo en un dispositivo físico.',
+        demo_yt: '▶ \u00a0Abrir en YouTube',
+        install_label: 'Empieza ya',
+        install_title: 'En marcha<br>en <em>minutos.</em>',
+        step1_title: 'Clonar e instalar',
+        step1_desc: 'Clona el repositorio e instala las dependencias con npm.',
+        step2_title: 'Configurar el entorno',
+        step2_desc: 'Copia el archivo de ejemplo y rellena tus credenciales de Supabase y TMDb.',
+        step3_title: 'Configurar la base de datos',
+        step3_desc: 'Ejecuta <code style="color:var(--gold)">supabase/schema.sql</code> en el editor SQL de Supabase para crear las tablas, políticas RLS y triggers.',
+        step4_title: 'Arrancar el servidor',
+        env_title: 'Variables de entorno',
+        dl_label: 'Descarga',
+        dl_title: 'Pruébala en tu<br><em>dispositivo Android.</em>',
+        dl_desc: 'No hace falta clonar el repositorio. Descarga el APK directamente desde el panel de Expo e instálalo en cualquier dispositivo Android. Sin Play Store.',
+        dl_req1_title: 'Requiere Android',
+        dl_req1_desc: 'Activa "Instalar desde fuentes desconocidas" en los ajustes de tu dispositivo antes de instalar.',
+        dl_req2_title: 'Sin build para iOS aún',
+        dl_req2_desc: 'Los usuarios de iOS pueden ejecutar la app con Expo Go clonando el repositorio e iniciando el servidor de desarrollo.',
+        dl_btn: 'Descargar APK',
+        dl_steps_label: 'Cómo instalar',
+        dl_step1: 'Pulsa el botón <strong style="color:var(--cream)">Descargar APK</strong> y abre la página de build en Expo.',
+        dl_step2: 'Haz clic en <strong style="color:var(--cream)">Download build artifact</strong> para obtener el archivo <code style="color:var(--gold)">.apk</code>.',
+        dl_step3: 'Transfiere el archivo a tu móvil Android y ábrelo para instalarlo.',
+        dl_step4: 'Si se te solicita, permite la instalación desde fuentes desconocidas y listo.',
+      }
+    };
+
+    function setLang(lang) {
+      const t = translations[lang];
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key] !== undefined) el.innerHTML = t[key];
+      });
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === lang);
+      });
+      document.documentElement.lang = lang;
+
+      // Swap logos
+      const isEs = lang === 'es';
+      const logoSrc = isEs
+        ? 'https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png'
+        : 'https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/rawcut-text-logo.png';
+      const logoAlt = isEs ? 'CortoCrudo' : 'RawCut';
+      ['nav-logo-img', 'footer-logo-img'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.src = logoSrc; el.alt = logoAlt; }
+      });
+      document.title = isEs
+        ? 'CortoCrudo — Descubre. Comparte. Recomienda.'
+        : 'RawCut — Discover. Share. Recommend.';
+    }
   </script>
 </body>
 </html>
