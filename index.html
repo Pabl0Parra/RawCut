@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>CortoCrudo — Descubre. Comparte. Recomienda.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=JetBrains+Mono:wght@300;500;800&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=JetBrains+Mono:wght@300;500;800&family=Bebas+Neue&display=swap"
+    rel="stylesheet" />
   <style>
     :root {
       --obsidian: #050505;
@@ -20,8 +23,17 @@
       --muted: #a8a8a8;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: auto; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
 
     body {
       background: var(--obsidian);
@@ -33,194 +45,393 @@
 
     body::before {
       content: '';
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E");
-      pointer-events: none; z-index: 9999; opacity: 0.06;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.06;
     }
 
     body::after {
       content: '';
-      position: fixed; inset: 0;
-      background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.18) 50%),
-                  linear-gradient(90deg, rgba(255,0,0,0.02), rgba(0,255,0,0.01), rgba(0,0,255,0.02));
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.18) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
       background-size: 100% 4px, 3px 100%;
-      pointer-events: none; z-index: 9998;
+      pointer-events: none;
+      z-index: 9998;
     }
 
     .hero-title .line-inner .letter {
       display: inline-block;
       color: #fff;
-      text-shadow: 2px 2px 0 rgba(0,0,0,0.8), 0 4px 20px rgba(0,0,0,0.6);
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8), 0 4px 20px rgba(0, 0, 0, 0.6);
       transition: color 0.35s ease, text-shadow 0.35s ease;
     }
+
     .hero-title .line:nth-child(2) .line-inner .letter {
-      text-shadow: 4px 4px 0 rgba(0,0,0,0.9), 0 0 30px rgba(255,112,112,0.5);
+      text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 112, 112, 0.5);
     }
+
     .hero-title .line-inner .letter.lit {
       color: var(--red-text);
-      text-shadow: 0 0 18px rgba(255,112,112,0.7), 4px 4px 0 rgba(0,0,0,0.9);
+      text-shadow: 0 0 18px rgba(255, 112, 112, 0.7), 4px 4px 0 rgba(0, 0, 0, 0.9);
     }
 
     nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      display: flex; align-items: center; justify-content: space-between;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 1rem 4rem;
-      background: rgba(5,5,5,0.98);
+      background: rgba(5, 5, 5, 0.98);
       border-bottom: 2px solid var(--red);
       backdrop-filter: blur(8px);
     }
 
-    .nav-logo { text-decoration: none; display: flex; align-items: center; }
-    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-logo {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
     .nav-links a {
-      font-size: 0.7rem; font-weight: 800; letter-spacing: 0.2em;
-      text-transform: uppercase; color: var(--muted); text-decoration: none;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
       transition: color 0.2s, text-shadow 0.2s;
     }
-    .nav-links a:hover { color: var(--cobalt); text-shadow: 0 0 8px var(--cobalt); }
-    .lang-switcher { display: flex; border: 1px solid var(--border); }
+
+    .nav-links a:hover {
+      color: var(--cobalt);
+      text-shadow: 0 0 8px var(--cobalt);
+    }
+
+    .lang-switcher {
+      display: flex;
+      border: 1px solid var(--border);
+    }
+
     .lang-btn {
-      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--muted);
-      background: none; border: none; cursor: pointer;
-      padding: 0.4rem 0.8rem; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.4rem 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
       transition: color 0.2s, background 0.2s;
     }
-    .lang-btn.active { background: var(--red); color: #fff; }
-    .lang-btn:not(.active):hover { color: var(--silver); }
 
-    #hero-scroll-container { height: 100vh; position: relative; }
+    .lang-btn.active {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .lang-btn:not(.active):hover {
+      color: var(--silver);
+    }
+
+    #hero-scroll-container {
+      height: 100vh;
+      position: relative;
+    }
 
     #hero {
-      position: sticky; top: 0; height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden; padding: 0 4rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 0 4rem;
     }
 
     #hero-video {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover; object-position: center center;
-      display: none; z-index: 0;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: none;
+      z-index: 0;
     }
-    @media (max-width: 768px) { #hero-video { object-position: center center; } }
-    #hero-video.loaded { display: block; }
+
+    @media (max-width: 768px) {
+      #hero-video {
+        object-position: center center;
+      }
+    }
+
+    #hero-video.loaded {
+      display: block;
+    }
 
     #hero-video-placeholder {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--obsidian); z-index: 0;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--obsidian);
+      z-index: 0;
     }
-    #hero-video-placeholder.hidden { display: none; }
+
+    #hero-video-placeholder.hidden {
+      display: none;
+    }
 
     .hero-video-loading {
-      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.3em;
-      text-transform: uppercase; color: var(--muted);
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--muted);
       animation: pulse 1.2s ease-in-out infinite;
     }
 
-    @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 0.4;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
 
     .hero-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to bottom, rgba(5,5,5,0.45) 0%, rgba(5,5,5,0.3) 50%, rgba(5,5,5,0.75) 100%);
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(5, 5, 5, 0.45) 0%, rgba(5, 5, 5, 0.3) 50%, rgba(5, 5, 5, 0.75) 100%);
       z-index: 1;
     }
 
     .scroll-hint {
-      position: absolute; bottom: 2.5rem; left: 50%;
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
       transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-      z-index: 2; animation: fadeIn 1s 2s both;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 2;
+      animation: fadeIn 1s 2s both;
     }
+
     .scroll-hint span {
-      font-size: 0.5rem; font-weight: 800; letter-spacing: 0.35em;
-      text-transform: uppercase; color: #fff;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
     }
+
     .scroll-hint-arrow {
-      width: 1px; height: 40px;
+      width: 1px;
+      height: 40px;
       background: linear-gradient(to bottom, var(--red-text), transparent);
       animation: scrollArrow 1.5s ease-in-out infinite;
     }
+
     @keyframes scrollArrow {
-      0%   { transform: scaleY(0); transform-origin: top; }
-      50%  { transform: scaleY(1); transform-origin: top; }
-      51%  { transform: scaleY(1); transform-origin: bottom; }
-      100% { transform: scaleY(0); transform-origin: bottom; }
+      0% {
+        transform: scaleY(0);
+        transform-origin: top;
+      }
+
+      50% {
+        transform: scaleY(1);
+        transform-origin: top;
+      }
+
+      51% {
+        transform: scaleY(1);
+        transform-origin: bottom;
+      }
+
+      100% {
+        transform: scaleY(0);
+        transform-origin: bottom;
+      }
     }
 
-    .hero-inner { position: relative; z-index: 2; max-width: 960px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 960px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
 
     .hero-title {
       font-family: 'Metal Mania', cursive;
       font-size: clamp(2.4rem, 7.5vw, 6.5rem);
-      line-height: 0.85; text-transform: uppercase;
-      margin-bottom: 2rem; transform: skewX(-3deg);
-      width: 100%; text-align: center;
+      line-height: 0.85;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      transform: skewX(-3deg);
+      width: 100%;
+      text-align: center;
     }
 
-    .hero-title .line { display: block; overflow: hidden; }
+    .hero-title .line {
+      display: block;
+      overflow: hidden;
+    }
+
     .hero-title .line-inner {
-      display: block; color: #fff;
-      text-shadow: 2px 2px 0 rgba(0,0,0,0.8), 0 4px 20px rgba(0,0,0,0.6);
-      animation: slideUp 0.9s cubic-bezier(0.16,1,0.3,1) both;
+      display: block;
+      color: #fff;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8), 0 4px 20px rgba(0, 0, 0, 0.6);
+      animation: slideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
+
     .hero-title .line:nth-child(2) .line-inner {
-      animation-delay: 0.1s; color: #fff;
-      text-shadow: 4px 4px 0 rgba(0,0,0,0.9), 0 0 30px rgba(255,112,112,0.5);
+      animation-delay: 0.1s;
+      color: #fff;
+      text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.9), 0 0 30px rgba(255, 112, 112, 0.5);
     }
-    .hero-title .line:nth-child(3) .line-inner { animation-delay: 0.2s; }
+
+    .hero-title .line:nth-child(3) .line-inner {
+      animation-delay: 0.2s;
+    }
 
     @keyframes slideUp {
-      from { transform: translateY(110%); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
+      from {
+        transform: translateY(110%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     .hero-sub {
-      font-size: 0.8rem; line-height: 1.9; color: #fff;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.95), 0 2px 12px rgba(0,0,0,0.7);
-      max-width: 540px; margin: 0 auto 2.5rem;
+      font-size: 0.8rem;
+      line-height: 1.9;
+      color: #fff;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95), 0 2px 12px rgba(0, 0, 0, 0.7);
+      max-width: 540px;
+      margin: 0 auto 2.5rem;
       animation: fadeIn 1s 0.5s both;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: none; }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
     }
 
-    .hero-ctas { display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; animation: fadeIn 1s 0.7s both; }
+    .hero-ctas {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeIn 1s 0.7s both;
+    }
 
     .btn-main {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 1rem 2.5rem; background: var(--red); color: #fff;
-      font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.15em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2.5rem;
+      background: var(--red);
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.15em;
       text-decoration: none;
       clip-path: polygon(8% 0, 100% 0, 92% 100%, 0% 100%);
       transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
     }
-    .btn-main:hover { background: #fff; color: #000; transform: translateY(-2px); box-shadow: 0 0 24px var(--red); }
+
+    .btn-main:hover {
+      background: #fff;
+      color: #000;
+      transform: translateY(-2px);
+      box-shadow: 0 0 24px var(--red);
+    }
 
     .btn-outline {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 1rem 2.5rem; border: 2px solid var(--cobalt); color: var(--cobalt);
-      font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.15em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2.5rem;
+      border: 2px solid var(--cobalt);
+      color: var(--cobalt);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.15em;
       text-decoration: none;
       clip-path: polygon(8% 0, 100% 0, 92% 100%, 0% 100%);
       transition: background 0.2s, color 0.2s, transform 0.2s;
     }
-    .btn-outline:hover { background: var(--cobalt); color: #000; transform: translateY(-2px); }
+
+    .btn-outline:hover {
+      background: var(--cobalt);
+      color: #000;
+      transform: translateY(-2px);
+    }
 
     .hero-logo-wrap {
       margin-bottom: 1.6rem;
-      display: inline-flex; flex-direction: column; align-items: center;
-      animation: heroLogoIn 1s cubic-bezier(0.16,1,0.3,1) both;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      animation: heroLogoIn 1s cubic-bezier(0.16, 1, 0.3, 1) both;
       align-self: center;
     }
+
     @keyframes heroLogoIn {
-      from { opacity: 0; transform: translateY(-18px) scale(0.94); filter: blur(6px); }
-      to   { opacity: 1; transform: none; filter: none; }
+      from {
+        opacity: 0;
+        transform: translateY(-18px) scale(0.94);
+        filter: blur(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+        filter: none;
+      }
     }
+
     .hero-logo-img {
       height: clamp(4.5rem, 11vw, 8.5rem);
       max-width: min(90vw, 680px);
@@ -229,223 +440,584 @@
       display: block;
       margin: 0 auto;
     }
+
     .hero-logo-rule {
-      display: flex; align-items: center; gap: 1rem; margin-top: 0.9rem; width: min(90vw, 480px);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.9rem;
+      width: min(90vw, 480px);
     }
+
     .hero-logo-rule::before,
     .hero-logo-rule::after {
-      content: ''; flex: 1; height: 1px;
-      background: linear-gradient(to right, transparent, rgba(160,16,16,0.55), transparent);
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(160, 16, 16, 0.55), transparent);
     }
+
     .hero-logo-tagline {
-      font-size: 0.48rem; font-weight: 800; letter-spacing: 0.45em;
-      text-transform: uppercase; color: rgba(255,255,255,0.4);
+      font-size: 0.48rem;
+      font-weight: 800;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.4);
       white-space: nowrap;
     }
 
-    .tech-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 2.5rem; justify-content: center; animation: fadeIn 1s 0.9s both; }
-    .badge {
-      font-size: 0.55rem; font-weight: 800; letter-spacing: 0.15em;
-      text-transform: uppercase; color: #fff;
-      background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.2); padding: 0.3rem 0.7rem;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    .tech-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 2.5rem;
+      justify-content: center;
+      animation: fadeIn 1s 0.9s both;
     }
 
-    section { padding: 8rem 4rem; }
-    .section-label {
-      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.35em;
-      text-transform: uppercase; color: var(--cobalt); margin-bottom: 0.8rem;
+    .badge {
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.3rem 0.7rem;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
     }
+
+    section {
+      padding: 8rem 4rem;
+    }
+
+    .section-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--cobalt);
+      margin-bottom: 0.8rem;
+    }
+
     .section-title {
       font-family: 'Metal Mania', cursive;
       font-size: clamp(2.5rem, 5vw, 4.5rem);
-      text-transform: uppercase; color: #fff; line-height: 1; margin-bottom: 1rem;
+      text-transform: uppercase;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 1rem;
     }
-    .section-title em { font-style: normal; color: var(--red-text); }
-    .section-header { border-left: 6px solid var(--red); padding-left: 1.5rem; margin-bottom: 4rem; }
 
-    #features { background: var(--graphite); }
-    .features-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      border: 1px solid var(--border); max-width: 1200px; margin: 0 auto;
+    .section-title em {
+      font-style: normal;
+      color: var(--red-text);
     }
+
+    .section-header {
+      border-left: 6px solid var(--red);
+      padding-left: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    #features {
+      background: var(--graphite);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      border: 1px solid var(--border);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
     .feature-card {
       background: linear-gradient(145deg, #161616, #0a0a0a);
-      padding: 2.5rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
-      position: relative; transition: background 0.3s;
+      padding: 2.5rem;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      transition: background 0.3s;
     }
-    .feature-card:hover { background: linear-gradient(145deg, #1e1e1e, #111); border-color: var(--cobalt); }
-    .feature-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0;
-      height: 3px; background: var(--red);
-    }
-    .feature-num {
-      font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem;
-      color: rgba(255,255,255,0.04); position: absolute; top: 0.8rem; right: 1rem; line-height: 1;
-    }
-    .feature-icon { display: block; margin-bottom: 1.2rem; color: var(--red-text); width: 24px; height: 24px; }
-    .feature-title {
-      font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
-      letter-spacing: 0.1em; color: #fff; text-transform: uppercase; margin-bottom: 0.8rem;
-    }
-    .feature-desc { font-size: 0.72rem; line-height: 1.8; color: var(--muted); }
 
-    #demo { background: var(--obsidian); }
-    .demo-wrapper { max-width: 1200px; margin: 0 auto; }
+    .feature-card:hover {
+      background: linear-gradient(145deg, #1e1e1e, #111);
+      border-color: var(--cobalt);
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--red);
+    }
+
+    .feature-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      color: rgba(255, 255, 255, 0.04);
+      position: absolute;
+      top: 0.8rem;
+      right: 1rem;
+      line-height: 1;
+    }
+
+    .feature-icon {
+      display: block;
+      margin-bottom: 1.2rem;
+      color: var(--red-text);
+      width: 24px;
+      height: 24px;
+    }
+
+    .feature-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.1em;
+      color: #fff;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    .feature-desc {
+      font-size: 0.72rem;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    #demo {
+      background: var(--obsidian);
+    }
+
+    .demo-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
     .demo-inner {
-      display: grid; grid-template-columns: 1fr 1.4fr;
-      gap: 4rem; margin-top: 3.5rem; align-items: center;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 4rem;
+      margin-top: 3.5rem;
+      align-items: center;
     }
+
     .demo-video-box {
-      position: relative; aspect-ratio: 9/16; max-width: 260px;
-      margin: 0 auto; border: 1px solid var(--border);
+      position: relative;
+      aspect-ratio: 9/16;
+      max-width: 260px;
+      margin: 0 auto;
+      border: 1px solid var(--border);
     }
+
     .demo-video-box::after {
-      content: ''; position: absolute; inset: -6px;
-      border: 1px solid rgba(230,57,70,0.25); pointer-events: none;
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border: 1px solid rgba(230, 57, 70, 0.25);
+      pointer-events: none;
     }
-    .demo-label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+
+    .demo-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
     .play-circle {
-      width: 60px; height: 60px; border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
       border: 2px solid var(--red);
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: transform 0.25s, background 0.25s;
     }
-    .play-circle svg { width: 20px; height: 20px; margin-left: 3px; }
-    .play-circle svg path { fill: var(--red); transition: fill 0.25s; }
-    .demo-text h3 {
-      font-family: 'Metal Mania', cursive; font-size: 2.2rem;
-      text-transform: uppercase; color: #fff; margin-bottom: 1rem; line-height: 1.1;
-    }
-    .demo-text h3 em { font-style: normal; color: var(--red-text); }
-    .demo-text p { font-size: 0.72rem; line-height: 1.9; color: var(--muted); margin-bottom: 2rem; }
-    .screens-strip { display: flex; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
-    .screen-thumb {
-      font-size: 0.55rem; font-weight: 800; letter-spacing: 0.1em;
-      color: var(--cobalt); border: 1px solid rgba(0,212,255,0.25);
-      padding: 0.3rem 0.6rem; text-transform: uppercase;
+
+    .play-circle svg {
+      width: 20px;
+      height: 20px;
+      margin-left: 3px;
     }
 
-    #download { background: var(--graphite); }
-    .download-wrapper { max-width: 1200px; margin: 0 auto; width: 100%; }
-    .download-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-top: 3.5rem; align-items: start; }
+    .play-circle svg path {
+      fill: var(--red);
+      transition: fill 0.25s;
+    }
+
+    .demo-text h3 {
+      font-family: 'Metal Mania', cursive;
+      font-size: 2.2rem;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+
+    .demo-text h3 em {
+      font-style: normal;
+      color: var(--red-text);
+    }
+
+    .demo-text p {
+      font-size: 0.72rem;
+      line-height: 1.9;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    .screens-strip {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .screen-thumb {
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: var(--cobalt);
+      border: 1px solid rgba(0, 212, 255, 0.25);
+      padding: 0.3rem 0.6rem;
+      text-transform: uppercase;
+    }
+
+    #download {
+      background: var(--graphite);
+    }
+
+    .download-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      margin-top: 3.5rem;
+      align-items: start;
+    }
+
     .req-item {
-      border-left: 3px solid var(--border); padding: 1rem 1.2rem;
-      background: #000; margin-bottom: 1px; transition: border-color 0.2s;
+      border-left: 3px solid var(--border);
+      padding: 1rem 1.2rem;
+      background: #000;
+      margin-bottom: 1px;
+      transition: border-color 0.2s;
     }
-    .req-item:hover { border-left-color: var(--red); }
-    .req-key { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em; color: var(--cobalt); text-transform: uppercase; margin-bottom: 0.3rem; }
-    .req-desc { font-size: 0.65rem; color: var(--muted); line-height: 1.6; }
-    .how-box { border: 1px solid var(--border); padding: 2rem; background: #000; position: relative; }
+
+    .req-item:hover {
+      border-left-color: var(--red);
+    }
+
+    .req-key {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: var(--cobalt);
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .req-desc {
+      font-size: 0.65rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .how-box {
+      border: 1px solid var(--border);
+      padding: 2rem;
+      background: #000;
+      position: relative;
+    }
+
     .how-box::before {
-      content: 'HOW TO INSTALL'; position: absolute; top: -1px; left: 1.5rem;
-      background: var(--red); color: #fff;
-      font-size: 0.5rem; font-weight: 800; letter-spacing: 0.2em;
-      padding: 0.2rem 0.8rem; transform: translateY(-50%);
+      content: 'HOW TO INSTALL';
+      position: absolute;
+      top: -1px;
+      left: 1.5rem;
+      background: var(--red);
+      color: #fff;
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      padding: 0.2rem 0.8rem;
+      transform: translateY(-50%);
     }
+
     .how-step {
-      display: grid; grid-template-columns: 2.5rem 1fr;
-      gap: 1rem; align-items: start; padding: 1rem 0;
+      display: grid;
+      grid-template-columns: 2.5rem 1fr;
+      gap: 1rem;
+      align-items: start;
+      padding: 1rem 0;
       border-bottom: 1px solid var(--border);
     }
-    .how-step:last-child { border-bottom: none; }
-    .how-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--dim); line-height: 1; }
-    .how-text { font-size: 0.65rem; line-height: 1.7; color: var(--muted); }
 
-    #install { background: var(--obsidian); }
-    .install-wrapper { max-width: 1200px; margin: 0 auto; width: 100%; }
-    .install-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-top: 3.5rem; }
-    .install-steps { display: flex; flex-direction: column; min-width: 0; }
+    .how-step:last-child {
+      border-bottom: none;
+    }
+
+    .how-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      color: var(--dim);
+      line-height: 1;
+    }
+
+    .how-text {
+      font-size: 0.65rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    #install {
+      background: var(--obsidian);
+    }
+
+    .install-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .install-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      margin-top: 3.5rem;
+    }
+
+    .install-steps {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
     .step {
-      display: grid; grid-template-columns: 3rem 1fr;
-      gap: 1.5rem; padding: 2rem 0;
-      border-bottom: 1px solid var(--border); align-items: start; min-width: 0;
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 1.5rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+      min-width: 0;
     }
-    .step:first-child { border-top: 1px solid var(--border); }
-    .step-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--dim); line-height: 1; }
-    .step-content { min-width: 0; }
+
+    .step:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .step-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.5rem;
+      color: var(--dim);
+      line-height: 1;
+    }
+
+    .step-content {
+      min-width: 0;
+    }
+
     .step-content h4 {
-      font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
-      letter-spacing: 0.1em; color: #fff; text-transform: uppercase; margin-bottom: 0.5rem;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: #fff;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
     }
-    .step-content p { font-size: 0.65rem; line-height: 1.8; color: var(--muted); }
+
+    .step-content p {
+      font-size: 0.65rem;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
     .code-block {
-      background: #000; border: 1px solid #333;
-      padding: 1.5rem; margin-top: 1rem; position: relative;
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      background: #000;
+      border: 1px solid #333;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      position: relative;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
+
     .code-block::after {
-      content: attr(data-label); position: absolute; bottom: -10px; right: 10px;
-      background: var(--red); color: #fff;
-      font-size: 0.5rem; font-weight: 800; letter-spacing: 0.15em;
-      text-transform: uppercase; padding: 2px 10px;
+      content: attr(data-label);
+      position: absolute;
+      bottom: -10px;
+      right: 10px;
+      background: var(--red);
+      color: #fff;
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 2px 10px;
     }
+
     .code-block code {
-      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
-      color: var(--cobalt); white-space: pre; display: block; line-height: 1.8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--cobalt);
+      white-space: pre;
+      display: block;
+      line-height: 1.8;
     }
-    .install-env { min-width: 0; }
+
+    .install-env {
+      min-width: 0;
+    }
+
     .install-env h4 {
-      font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
-      letter-spacing: 0.1em; color: #fff; text-transform: uppercase; margin-bottom: 1.5rem;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: #fff;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
     }
-    .env-vars { display: flex; flex-direction: column; gap: 1px; }
+
+    .env-vars {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
     .env-var {
-      display: flex; flex-direction: column; gap: 0.2rem;
-      padding: 1rem; background: #000; min-width: 0;
-      border-left: 3px solid var(--border); transition: border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 1rem;
+      background: #000;
+      min-width: 0;
+      border-left: 3px solid var(--border);
+      transition: border-color 0.2s;
     }
-    .env-var:hover { border-left-color: var(--red); }
+
+    .env-var:hover {
+      border-left-color: var(--red);
+    }
+
     .env-key {
-      font-size: 0.6rem; font-weight: 800; color: var(--cobalt);
-      letter-spacing: 0.05em; text-transform: uppercase; word-break: break-all;
+      font-size: 0.6rem;
+      font-weight: 800;
+      color: var(--cobalt);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      word-break: break-all;
     }
-    .env-desc { font-size: 0.6rem; color: var(--muted); line-height: 1.5; }
+
+    .env-desc {
+      font-size: 0.6rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
 
     footer {
-      border-top: 2px solid var(--red); padding: 2.5rem 4rem;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 1.5rem; background: #000;
+      border-top: 2px solid var(--red);
+      padding: 2.5rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      background: #000;
     }
-    .footer-links { display: flex; gap: 2rem; list-style: none; }
-    .footer-links a {
-      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s;
-    }
-    .footer-links a:hover { color: var(--cobalt); }
-    .footer-copy { font-size: 0.6rem; letter-spacing: 0.1em; color: var(--dim); text-transform: uppercase; }
 
-    .feature-card, .demo-video-box, .demo-text, .step, .step-num,
-    .how-step, .env-var, .section-header, footer { will-change: transform, opacity; }
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--cobalt);
+    }
+
+    .footer-copy {
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+
+    .feature-card,
+    .demo-video-box,
+    .demo-text,
+    .step,
+    .step-num,
+    .how-step,
+    .env-var,
+    .section-header,
+    footer {
+      will-change: transform, opacity;
+    }
 
     nav {
       padding-left: max(4rem, env(safe-area-inset-left));
       padding-right: max(4rem, env(safe-area-inset-right));
     }
+
     section {
       padding-left: max(4rem, env(safe-area-inset-left));
       padding-right: max(4rem, env(safe-area-inset-right));
     }
+
     footer {
       padding-left: max(2.5rem, env(safe-area-inset-left));
       padding-right: max(2.5rem, env(safe-area-inset-right));
       padding-bottom: max(2rem, env(safe-area-inset-bottom));
     }
+
     #hero {
       padding-left: max(4rem, env(safe-area-inset-left));
       padding-right: max(4rem, env(safe-area-inset-right));
     }
 
     @media (max-width: 768px) {
-      nav { padding: 1rem max(1.5rem, env(safe-area-inset-right)) 1rem max(1.5rem, env(safe-area-inset-left)); }
-      #hero-scroll-container { height: 100vh; }
-      .nav-links { display: none; }
+      nav {
+        padding: 1rem max(1.5rem, env(safe-area-inset-right)) 1rem max(1.5rem, env(safe-area-inset-left));
+      }
+
+      #hero-scroll-container {
+        height: 100vh;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
       section {
-        padding-top: 5rem; padding-bottom: 5rem;
+        padding-top: 5rem;
+        padding-bottom: 5rem;
         padding-left: max(1.5rem, env(safe-area-inset-left));
         padding-right: max(1.5rem, env(safe-area-inset-right));
       }
+
       #hero {
         padding-left: max(1.5rem, env(safe-area-inset-left));
         padding-right: max(1.5rem, env(safe-area-inset-right));
@@ -453,48 +1025,126 @@
         padding-top: max(4rem, calc(env(safe-area-inset-top) + 3.5rem));
         padding-bottom: 2rem;
       }
-      .hero-title { font-size: clamp(1.8rem, 10vw, 3rem); margin-bottom: 1rem; }
-      .hero-sub { font-size: 0.72rem; margin-bottom: 1.8rem; }
-      .hero-eyebrow { font-size: 0.55rem; margin-bottom: 1.2rem; }
-      .hero-ctas { gap: 0.8rem; }
-      .btn-main, .btn-outline { font-size: 1rem; padding: 0.8rem 1.8rem; }
-      .tech-badges { margin-top: 1.5rem; }
-      .download-grid { grid-template-columns: 1fr; gap: 2rem; }
-      #download .download-wrapper { width: 100%; overflow-x: hidden; }
-      .how-box { width: 100%; }
-      .demo-inner, .install-grid { grid-template-columns: 1fr; }
-      #install .install-wrapper, #download .download-wrapper { width: 100%; overflow-x: hidden; }
-      .install-grid { gap: 2rem; }
-      .step { grid-template-columns: 2.2rem 1fr; gap: 1rem; padding: 1.2rem 0; }
-      .step-num { font-size: 1.8rem; }
-      .code-block { padding: 1rem; }
-      .code-block code { font-size: 0.62rem; }
-      .env-key { font-size: 0.55rem; }
-      .env-var { padding: 0.8rem; }
+
+      .hero-title {
+        font-size: clamp(1.8rem, 10vw, 3rem);
+        margin-bottom: 1rem;
+      }
+
+      .hero-sub {
+        font-size: 0.72rem;
+        margin-bottom: 1.8rem;
+      }
+
+      .hero-eyebrow {
+        font-size: 0.55rem;
+        margin-bottom: 1.2rem;
+      }
+
+      .hero-ctas {
+        gap: 0.8rem;
+      }
+
+      .btn-main,
+      .btn-outline {
+        font-size: 1rem;
+        padding: 0.8rem 1.8rem;
+      }
+
+      .tech-badges {
+        margin-top: 1.5rem;
+      }
+
+      .download-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      #download .download-wrapper {
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      .how-box {
+        width: 100%;
+      }
+
+      .demo-inner,
+      .install-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #install .install-wrapper,
+      #download .download-wrapper {
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      .install-grid {
+        gap: 2rem;
+      }
+
+      .step {
+        grid-template-columns: 2.2rem 1fr;
+        gap: 1rem;
+        padding: 1.2rem 0;
+      }
+
+      .step-num {
+        font-size: 1.8rem;
+      }
+
+      .code-block {
+        padding: 1rem;
+      }
+
+      .code-block code {
+        font-size: 0.62rem;
+      }
+
+      .env-key {
+        font-size: 0.55rem;
+      }
+
+      .env-var {
+        padding: 0.8rem;
+      }
+
       footer {
-        flex-direction: column; text-align: center; gap: 1.5rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
         padding-left: max(1.5rem, env(safe-area-inset-left));
         padding-right: max(1.5rem, env(safe-area-inset-right));
         padding-bottom: max(2rem, env(safe-area-inset-bottom));
       }
-      .footer-links { justify-content: center; }
-      .feature-card, .demo-video-box, .demo-text,
-      .step, .how-step, .env-var { will-change: auto; }
+
+      .footer-links {
+        justify-content: center;
+      }
+
+      .feature-card,
+      .demo-video-box,
+      .demo-text,
+      .step,
+      .how-step,
+      .env-var {
+        will-change: auto;
+      }
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 </head>
+
 <body>
 
   <nav>
     <a href="#" class="nav-logo">
       <img id="nav-logo-img"
         src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png"
-        alt="CortoCrudo"
-        style="height:2rem;width:auto;object-fit:contain;display:block;"
-      />
+        alt="CortoCrudo" style="height:2rem;width:auto;object-fit:contain;display:block;" />
     </a>
     <ul class="nav-links">
       <li><a href="#features" data-i18n="nav_features">Funciones</a></li>
@@ -504,20 +1154,15 @@
       <li><a href="https://github.com/Pabl0Parra/RawCut" target="_blank">GitHub ↗</a></li>
     </ul>
     <div class="lang-switcher">
-      <button class="lang-btn" onclick="setLang('en')">EN</button>
-      <button class="lang-btn active" onclick="setLang('es')">ES</button>
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('es')">ES</button>
     </div>
   </nav>
 
   <div id="hero-scroll-container">
     <section id="hero">
-      <video
-        id="hero-video"
-        preload="metadata"
-        muted
-        playsinline
-        src="./assets/video/9089136-hd_1080_1920_30fps.mp4"
-      ></video>
+      <video id="hero-video" preload="metadata" muted playsinline
+        src="./assets/video/9089136-hd_1080_1920_30fps.mp4"></video>
       <div id="hero-video-placeholder">
         <span class="hero-video-loading">Loading...</span>
       </div>
@@ -527,9 +1172,7 @@
         <div class="hero-logo-wrap">
           <img id="hero-logo-img"
             src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png"
-            alt="CortoCrudo"
-            class="hero-logo-img"
-          />
+            alt="CortoCrudo" class="hero-logo-img" />
           <div class="hero-logo-rule">
             <span class="hero-logo-tagline" data-i18n="hero_eyebrow">Código Abierto · React Native · Expo</span>
           </div>
@@ -539,10 +1182,13 @@
           <span class="line"><span class="line-inner" data-i18n="hero_title_2">Comparte.</span></span>
           <span class="line"><span class="line-inner" data-i18n="hero_title_3">Recomienda.</span></span>
         </h1>
-        <p class="hero-sub" data-i18n="hero_sub">Una plataforma social cinematográfica para amantes del cine y las series. Explora títulos, crea tu lista de seguimiento y comparte recomendaciones con tu gente.</p>
+        <p class="hero-sub" data-i18n="hero_sub">Una plataforma social cinematográfica para amantes del cine y las
+          series. Explora títulos, crea tu lista de seguimiento y comparte recomendaciones con tu gente.</p>
         <div class="hero-ctas">
-          <a href="https://expo.dev/accounts/pabl0parra/projects/CortoCrudo/builds/214560ec-3a90-4305-b8b5-26f7e9d22385" class="btn-main" target="_blank" data-i18n="hero_cta1">⬇ &nbsp;Descargar APK</a>
-          <a href="https://youtu.be/SCV3KcW4htM" class="btn-outline" target="_blank" data-i18n="hero_cta2">▶ &nbsp;Ver Demo</a>
+          <a href="https://expo.dev/accounts/pabl0parra/projects/CortoCrudo/builds/214560ec-3a90-4305-b8b5-26f7e9d22385"
+            class="btn-main" target="_blank" data-i18n="hero_cta1">⬇ &nbsp;Descargar APK</a>
+          <a href="https://youtu.be/SCV3KcW4htM" class="btn-outline" target="_blank" data-i18n="hero_cta2">▶ &nbsp;Ver
+            Demo</a>
         </div>
         <div class="tech-badges">
           <span class="badge">React Native</span>
@@ -571,45 +1217,84 @@
     <div class="features-grid">
       <div class="feature-card reveal">
         <div class="feature-num">01</div>
-        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 2l-4 5-4-5"/><circle cx="12" cy="14" r="3"/></svg></span>
+        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" />
+            <path d="M16 2l-4 5-4-5" />
+            <circle cx="12" cy="14" r="3" />
+          </svg></span>
         <h3 class="feature-title" data-i18n="f1_title">Descubrimiento</h3>
-        <p class="feature-desc" data-i18n="f1_desc">Busca y explora miles de películas y series gracias a la API de TMDb. Mira tráilers, descubre títulos en tendencia y sumérgete en colecciones curadas.</p>
+        <p class="feature-desc" data-i18n="f1_desc">Busca y explora miles de películas y series gracias a la API de
+          TMDb. Mira tráilers, descubre títulos en tendencia y sumérgete en colecciones curadas.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-num">02</div>
-        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg></span>
+        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+            <rect x="9" y="3" width="6" height="4" rx="1" />
+            <path d="M9 12h6M9 16h4" />
+          </svg></span>
         <h3 class="feature-title" data-i18n="f2_title">Listas Personales</h3>
-        <p class="feature-desc" data-i18n="f2_desc">Mantén una colección de Favoritos y una Lista de Seguimiento. Registra lo que has visto, añade lo que quieres ver y nunca pierdas una recomendación.</p>
+        <p class="feature-desc" data-i18n="f2_desc">Mantén una colección de Favoritos y una Lista de Seguimiento.
+          Registra lo que has visto, añade lo que quieres ver y nunca pierdas una recomendación.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-num">03</div>
-        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg></span>
         <h3 class="feature-title" data-i18n="f3_title">Recomendaciones Sociales</h3>
-        <p class="feature-desc" data-i18n="f3_desc">Envía recomendaciones directas a tus amigos con un mensaje personal y sigue la conversación en hilos de comentarios en tiempo real.</p>
+        <p class="feature-desc" data-i18n="f3_desc">Envía recomendaciones directas a tus amigos con un mensaje personal
+          y sigue la conversación en hilos de comentarios en tiempo real.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-num">04</div>
-        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg></span>
         <h3 class="feature-title" data-i18n="f4_title">Actualizaciones en Tiempo Real</h3>
-        <p class="feature-desc" data-i18n="f4_desc">Comentarios, reacciones y notificaciones impulsados por Supabase Realtime. Interacción en vivo sin recargar la página.</p>
+        <p class="feature-desc" data-i18n="f4_desc">Comentarios, reacciones y notificaciones impulsados por Supabase
+          Realtime. Interacción en vivo sin recargar la página.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-num">05</div>
-        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg></span>
         <h3 class="feature-title" data-i18n="f5_title">Backend Seguro</h3>
-        <p class="feature-desc" data-i18n="f5_desc">PostgreSQL con Row Level Security (RLS) garantiza que cada usuario solo accede a lo que le corresponde. Autenticación con disparadores de perfil personalizados.</p>
+        <p class="feature-desc" data-i18n="f5_desc">PostgreSQL con Row Level Security (RLS) garantiza que cada usuario
+          solo accede a lo que le corresponde. Autenticación con disparadores de perfil personalizados.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-num">06</div>
-        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon
+              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg></span>
         <h3 class="feature-title" data-i18n="f6_title">Tu Puntuación, Tu Criterio</h3>
-        <p class="feature-desc" data-i18n="f6_desc">Cada película y serie muestra el rating oficial de TMDb junto a la puntuación de la comunidad de CortoCrudo. Dos perspectivas, una sola pantalla: la crítica global y el criterio de tu gente.</p>
+        <p class="feature-desc" data-i18n="f6_desc">Cada película y serie muestra el rating oficial de TMDb junto a la
+          puntuación de la comunidad de CortoCrudo. Dos perspectivas, una sola pantalla: la crítica global y el criterio
+          de tu gente.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-num">07</div>
-        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20c-2 0-3-1-3-2s1-2 1-3-2-2-4-2a5 5 0 0 1 0-10h.5"/><circle cx="7.5" cy="10.5" r="1" fill="currentColor"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/><circle cx="16.5" cy="10.5" r="1" fill="currentColor"/></svg></span>
+        <span class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2a10 10 0 0 1 0 20c-2 0-3-1-3-2s1-2 1-3-2-2-4-2a5 5 0 0 1 0-10h.5" />
+            <circle cx="7.5" cy="10.5" r="1" fill="currentColor" />
+            <circle cx="12" cy="7.5" r="1" fill="currentColor" />
+            <circle cx="16.5" cy="10.5" r="1" fill="currentColor" />
+          </svg></span>
         <h3 class="feature-title" data-i18n="f7_title">Interfaz Cinematográfica</h3>
-        <p class="feature-desc" data-i18n="f7_desc">Tema oscuro de alto contraste con estilos NativeWind (Tailwind CSS para React Native). Optimizado para legibilidad y engagement en cualquier dispositivo.</p>
+        <p class="feature-desc" data-i18n="f7_desc">Tema oscuro de alto contraste con estilos NativeWind (Tailwind CSS
+          para React Native). Optimizado para legibilidad y engagement en cualquier dispositivo.</p>
       </div>
     </div>
   </section>
@@ -624,12 +1309,15 @@
         <div class="demo-video-box">
           <a href="https://youtu.be/SCV3KcW4htM" target="_blank" style="display:block;height:100%;position:relative;">
             <img src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/screenshots/0.PNG"
-              alt="RawCut App Screenshot"
-              style="width:100%;height:100%;object-fit:cover;display:block;" />
-            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);transition:background 0.3s;"
-              onmouseover="this.style.background='rgba(0,0,0,0.65)'" onmouseout="this.style.background='rgba(0,0,0,0.45)'">
+              alt="RawCut App Screenshot" style="width:100%;height:100%;object-fit:cover;display:block;" />
+            <div
+              style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);transition:background 0.3s;"
+              onmouseover="this.style.background='rgba(0,0,0,0.65)'"
+              onmouseout="this.style.background='rgba(0,0,0,0.45)'">
               <div class="play-circle">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.14v14l11-7-11-7z"/></svg>
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M8 5.14v14l11-7-11-7z" />
+                </svg>
               </div>
               <span class="demo-label" style="margin-top:0.8rem;" data-i18n="demo_watch">Ver Demo</span>
             </div>
@@ -637,8 +1325,11 @@
         </div>
         <div class="demo-text">
           <h3 data-i18n="demo_h3">La experiencia completa,<br><em>en dos minutos.</em></h3>
-          <p data-i18n="demo_p">La demo recorre el onboarding, la exploración de títulos en tendencia, el visionado de tráilers, la creación de una lista y el envío de una recomendación a un amigo con hilos de comentarios en tiempo real — todo en un dispositivo físico.</p>
-          <a href="https://youtu.be/SCV3KcW4htM" target="_blank" class="btn-main" data-i18n="demo_yt">▶ &nbsp;Abrir en YouTube</a>
+          <p data-i18n="demo_p">La demo recorre el onboarding, la exploración de títulos en tendencia, el visionado de
+            tráilers, la creación de una lista y el envío de una recomendación a un amigo con hilos de comentarios en
+            tiempo real — todo en un dispositivo físico.</p>
+          <a href="https://youtu.be/SCV3KcW4htM" target="_blank" class="btn-main" data-i18n="demo_yt">▶ &nbsp;Abrir en
+            YouTube</a>
           <div class="screens-strip">
             <span class="screen-thumb">Home</span>
             <span class="screen-thumb">Discover</span>
@@ -660,43 +1351,57 @@
       </div>
       <div class="download-grid">
         <div>
-          <p style="font-size:0.72rem;line-height:1.9;color:var(--muted);margin-bottom:2rem;" data-i18n="dl_desc">No hace falta clonar el repositorio. Descarga el APK directamente desde el panel de Expo e instálalo en cualquier dispositivo Android. Sin Play Store.</p>
+          <p style="font-size:0.72rem;line-height:1.9;color:var(--muted);margin-bottom:2rem;" data-i18n="dl_desc">No
+            hace falta clonar el repositorio. Descarga el APK directamente desde el panel de Expo e instálalo en
+            cualquier dispositivo Android. Sin Play Store.</p>
           <div style="margin-bottom:2rem;">
             <div class="req-item">
               <p class="req-key" data-i18n="dl_req1_title">Requiere Android</p>
-              <p class="req-desc" data-i18n="dl_req1_desc">Activa "Instalar desde fuentes desconocidas" en los ajustes de tu dispositivo antes de instalar.</p>
+              <p class="req-desc" data-i18n="dl_req1_desc">Activa "Instalar desde fuentes desconocidas" en los ajustes
+                de tu dispositivo antes de instalar.</p>
             </div>
             <div class="req-item">
               <p class="req-key" data-i18n="dl_req2_title">Sin build para iOS aún</p>
-              <p class="req-desc" data-i18n="dl_req2_desc">Los usuarios de iOS pueden ejecutar la app con Expo Go clonando el repositorio e iniciando el servidor de desarrollo.</p>
+              <p class="req-desc" data-i18n="dl_req2_desc">Los usuarios de iOS pueden ejecutar la app con Expo Go
+                clonando el repositorio e iniciando el servidor de desarrollo.</p>
             </div>
             <div class="req-item" style="border-left-color: #2a6a2a;">
-              <p class="req-key" style="color: #6dbe6d;" data-i18n="dl_req3_title">✓ &nbsp;Sin permisos del dispositivo</p>
-              <p class="req-desc" data-i18n="dl_req3_desc">La app no solicita acceso a cámara, micrófono, contactos ni ningún otro permiso del sistema. Solo necesitas conexión a internet.</p>
+              <p class="req-key" style="color: #6dbe6d;" data-i18n="dl_req3_title">✓ &nbsp;Sin permisos del dispositivo
+              </p>
+              <p class="req-desc" data-i18n="dl_req3_desc">La app no solicita acceso a cámara, micrófono, contactos ni
+                ningún otro permiso del sistema. Solo necesitas conexión a internet.</p>
             </div>
           </div>
           <a href="https://expo.dev/accounts/pabl0parra/projects/CortoCrudo/builds/214560ec-3a90-4305-b8b5-26f7e9d22385"
-             target="_blank" class="btn-main">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16l-6-6h4V4h4v6h4l-6 6z"/><path d="M4 20h16v-2H4v2z"/></svg>
+            target="_blank" class="btn-main">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 16l-6-6h4V4h4v6h4l-6 6z" />
+              <path d="M4 20h16v-2H4v2z" />
+            </svg>
             <span data-i18n="dl_btn">Descargar APK</span>
           </a>
         </div>
         <div class="how-box">
           <div class="how-step">
             <span class="how-num">01</span>
-            <p class="how-text" data-i18n="dl_step1">Pulsa el botón <strong style="color:#fff">Descargar APK</strong> y abre la página de build en Expo.</p>
+            <p class="how-text" data-i18n="dl_step1">Pulsa el botón <strong style="color:#fff">Descargar APK</strong> y
+              abre la página de build en Expo.</p>
           </div>
           <div class="how-step">
             <span class="how-num">02</span>
-            <p class="how-text" data-i18n="dl_step2">Haz clic en <strong style="color:#fff">Download build artifact</strong> para obtener el archivo <code style="color:var(--cobalt)">.apk</code>.</p>
+            <p class="how-text" data-i18n="dl_step2">Haz clic en <strong style="color:#fff">Download build
+                artifact</strong> para obtener el archivo <code style="color:var(--cobalt)">.apk</code>.</p>
           </div>
           <div class="how-step">
             <span class="how-num">03</span>
-            <p class="how-text" data-i18n="dl_step3">Transfiere el archivo a tu móvil Android y ábrelo para instalarlo.</p>
+            <p class="how-text" data-i18n="dl_step3">Transfiere el archivo a tu móvil Android y ábrelo para instalarlo.
+            </p>
           </div>
           <div class="how-step">
             <span class="how-num">04</span>
-            <p class="how-text" data-i18n="dl_step4">Si se te solicita, permite la instalación desde fuentes desconocidas y listo.</p>
+            <p class="how-text" data-i18n="dl_step4">Si se te solicita, permite la instalación desde fuentes
+              desconocidas y listo.</p>
           </div>
         </div>
       </div>
@@ -737,7 +1442,8 @@ npm install</code>
             <span class="step-num">03</span>
             <div class="step-content">
               <h4 data-i18n="step3_title">Configurar la base de datos</h4>
-              <p data-i18n="step3_desc">Ejecuta <code style="color:var(--cobalt)">supabase/schema.sql</code> en el editor SQL de Supabase para crear las tablas, políticas RLS y triggers.</p>
+              <p data-i18n="step3_desc">Ejecuta <code style="color:var(--cobalt)">supabase/schema.sql</code> en el
+                editor SQL de Supabase para crear las tablas, políticas RLS y triggers.</p>
             </div>
           </div>
           <div class="step">
@@ -747,25 +1453,34 @@ npm install</code>
               <div class="code-block" data-label="terminal">
                 <code>npx expo start</code>
               </div>
-              <p style="margin-top:0.8rem;">Escanea el QR con Expo Go, o pulsa <span style="color:var(--cobalt)">a</span> / <span style="color:var(--cobalt)">i</span> / <span style="color:var(--cobalt)">w</span>.</p>
+              <p style="margin-top:0.8rem;">Escanea el QR con Expo Go, o pulsa <span
+                  style="color:var(--cobalt)">a</span> / <span style="color:var(--cobalt)">i</span> / <span
+                  style="color:var(--cobalt)">w</span>.</p>
             </div>
           </div>
         </div>
         <div class="install-env">
           <h4 data-i18n="env_title">Variables de entorno</h4>
           <div class="env-vars">
-            <div class="env-var"><span class="env-key">EXPO_PUBLIC_SUPABASE_URL</span><span class="env-desc">Tu URL del proyecto Supabase (Settings → API)</span></div>
-            <div class="env-var"><span class="env-key">EXPO_PUBLIC_SUPABASE_ANON_KEY</span><span class="env-desc">Clave anónima pública de Supabase</span></div>
-            <div class="env-var"><span class="env-key">EXPO_PUBLIC_TMDB_API_KEY</span><span class="env-desc">Clave API de TMDb v3 — gratis en themoviedb.org</span></div>
-            <div class="env-var"><span class="env-key">EXPO_PUBLIC_TMDB_IMAGE_BASE</span><span class="env-desc">https://image.tmdb.org/t/p/w500</span></div>
+            <div class="env-var"><span class="env-key">EXPO_PUBLIC_SUPABASE_URL</span><span class="env-desc">Tu URL del
+                proyecto Supabase (Settings → API)</span></div>
+            <div class="env-var"><span class="env-key">EXPO_PUBLIC_SUPABASE_ANON_KEY</span><span class="env-desc">Clave
+                anónima pública de Supabase</span></div>
+            <div class="env-var"><span class="env-key">EXPO_PUBLIC_TMDB_API_KEY</span><span class="env-desc">Clave API
+                de TMDb v3 — gratis en themoviedb.org</span></div>
+            <div class="env-var"><span class="env-key">EXPO_PUBLIC_TMDB_IMAGE_BASE</span><span
+                class="env-desc">https://image.tmdb.org/t/p/w500</span></div>
           </div>
           <div style="margin-top:2rem;">
             <p class="section-label" style="margin-bottom:0.5rem;">Requisitos previos</p>
             <div class="env-vars">
               <div class="env-var"><span class="env-key">Node.js 18+</span></div>
-              <div class="env-var"><span class="env-key">Expo Go</span><span class="env-desc">Para pruebas en dispositivo físico</span></div>
-              <div class="env-var"><span class="env-key">Proyecto Supabase</span><span class="env-desc">El plan gratuito es suficiente</span></div>
-              <div class="env-var"><span class="env-key">TMDb API key</span><span class="env-desc">Registro gratuito en themoviedb.org</span></div>
+              <div class="env-var"><span class="env-key">Expo Go</span><span class="env-desc">Para pruebas en
+                  dispositivo físico</span></div>
+              <div class="env-var"><span class="env-key">Proyecto Supabase</span><span class="env-desc">El plan gratuito
+                  es suficiente</span></div>
+              <div class="env-var"><span class="env-key">TMDb API key</span><span class="env-desc">Registro gratuito en
+                  themoviedb.org</span></div>
             </div>
           </div>
         </div>
@@ -776,9 +1491,7 @@ npm install</code>
   <footer>
     <img id="footer-logo-img"
       src="https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png"
-      alt="CortoCrudo"
-      style="height:1.8rem;width:auto;object-fit:contain;display:block;"
-    />
+      alt="CortoCrudo" style="height:1.8rem;width:auto;object-fit:contain;display:block;" />
     <ul class="footer-links">
       <li><a href="https://github.com/Pabl0Parra/RawCut" target="_blank">GitHub</a></li>
       <li><a href="https://youtu.be/SCV3KcW4htM" target="_blank">Demo</a></li>
@@ -790,7 +1503,7 @@ npm install</code>
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    const heroVideo       = document.getElementById('hero-video');
+    const heroVideo = document.getElementById('hero-video');
     const heroPlaceholder = document.getElementById('hero-video-placeholder');
 
     const initVideo = () => {
@@ -806,7 +1519,7 @@ npm install</code>
       heroVideo.addEventListener('loadedmetadata', initVideo);
     }
 
-    (async () => { try { await heroVideo.play(); } catch(e) {} })();
+    (async () => { try { await heroVideo.play(); } catch (e) { } })();
 
     const lenis = new Lenis({ smoothWheel: true });
     lenis.on('scroll', ScrollTrigger.update);
@@ -863,13 +1576,13 @@ npm install</code>
 
         let t = 0;
 
-        t = litSequence(l1, true, t);  t += HOLD;
+        t = litSequence(l1, true, t); t += HOLD;
         t = dimSequence(l1, false, t); t += HOLD;
 
         t = litSequence(l0, false, t); t += HOLD;
-        t = dimSequence(l0, true, t);  t += HOLD;
+        t = dimSequence(l0, true, t); t += HOLD;
 
-        t = litSequence(l2, true, t);  t += HOLD;
+        t = litSequence(l2, true, t); t += HOLD;
         t = dimSequence(l2, false, t); t += HOLD;
 
         letterAnimTimer = setTimeout(loop, t);
@@ -899,21 +1612,25 @@ npm install</code>
         });
       });
 
-      const demoImg  = document.querySelector('.demo-video-box');
+      const demoImg = document.querySelector('.demo-video-box');
       const demoText = document.querySelector('.demo-text');
       if (demoImg) {
-        gsap.from(demoImg, { y: 100, opacity: 0, duration: 1, ease: 'power3.out',
+        gsap.from(demoImg, {
+          y: 100, opacity: 0, duration: 1, ease: 'power3.out',
           scrollTrigger: { trigger: '#demo', start: 'top 80%', toggleActions: 'play none none reverse' }
         });
-        gsap.to(demoImg, { y: -50, ease: 'none',
+        gsap.to(demoImg, {
+          y: -50, ease: 'none',
           scrollTrigger: { trigger: '#demo', start: 'top bottom', end: 'bottom top', scrub: 1 }
         });
       }
       if (demoText) {
-        gsap.from(demoText, { y: 60, opacity: 0, duration: 1, delay: 0.15, ease: 'power3.out',
+        gsap.from(demoText, {
+          y: 60, opacity: 0, duration: 1, delay: 0.15, ease: 'power3.out',
           scrollTrigger: { trigger: '#demo', start: 'top 80%', toggleActions: 'play none none reverse' }
         });
-        gsap.to(demoText, { y: -90, ease: 'none',
+        gsap.to(demoText, {
+          y: -90, ease: 'none',
           scrollTrigger: { trigger: '#demo', start: 'top bottom', end: 'bottom top', scrub: 1 }
         });
       }
@@ -921,67 +1638,80 @@ npm install</code>
       if (window.innerWidth > 768) {
         const dlCols = document.querySelectorAll('#download .download-grid > div');
         if (dlCols[0]) {
-          gsap.from(dlCols[0], { x: -80, opacity: 0, duration: 1, ease: 'power3.out',
+          gsap.from(dlCols[0], {
+            x: -80, opacity: 0, duration: 1, ease: 'power3.out',
             scrollTrigger: { trigger: '#download', start: 'top 80%', toggleActions: 'play none none reverse' }
           });
-          gsap.to(dlCols[0], { x: -30, ease: 'none',
+          gsap.to(dlCols[0], {
+            x: -30, ease: 'none',
             scrollTrigger: { trigger: '#download', start: 'top bottom', end: 'bottom top', scrub: 2 }
           });
         }
         if (dlCols[1]) {
-          gsap.from(dlCols[1], { x: 80, opacity: 0, duration: 1, ease: 'power3.out',
+          gsap.from(dlCols[1], {
+            x: 80, opacity: 0, duration: 1, ease: 'power3.out',
             scrollTrigger: { trigger: '#download', start: 'top 80%', toggleActions: 'play none none reverse' }
           });
-          gsap.to(dlCols[1], { x: 30, ease: 'none',
+          gsap.to(dlCols[1], {
+            x: 30, ease: 'none',
             scrollTrigger: { trigger: '#download', start: 'top bottom', end: 'bottom top', scrub: 2 }
           });
         }
       } else {
         document.querySelectorAll('#download .download-grid > div').forEach((el, i) => {
-          gsap.from(el, { y: 40, opacity: 0, duration: 0.8, delay: i * 0.15, ease: 'power3.out',
+          gsap.from(el, {
+            y: 40, opacity: 0, duration: 0.8, delay: i * 0.15, ease: 'power3.out',
             scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' }
           });
         });
       }
 
       gsap.utils.toArray('.step').forEach((step, i) => {
-        gsap.from(step, { x: -50, opacity: 0, duration: 0.8, delay: i * 0.08, ease: 'power3.out',
+        gsap.from(step, {
+          x: -50, opacity: 0, duration: 0.8, delay: i * 0.08, ease: 'power3.out',
           scrollTrigger: { trigger: step, start: 'top 88%', toggleActions: 'play none none reverse' }
         });
         const num = step.querySelector('.step-num');
         if (num) {
-          gsap.to(num, { y: -40, ease: 'none',
+          gsap.to(num, {
+            y: -40, ease: 'none',
             scrollTrigger: { trigger: step, start: 'top bottom', end: 'bottom top', scrub: 1 }
           });
         }
       });
 
       gsap.utils.toArray('.env-var').forEach((el, i) => {
-        gsap.from(el, { x: 40, opacity: 0, duration: 0.6, delay: i * 0.05, ease: 'power2.out',
+        gsap.from(el, {
+          x: 40, opacity: 0, duration: 0.6, delay: i * 0.05, ease: 'power2.out',
           scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' }
         });
       });
 
       gsap.utils.toArray('.section-label').forEach(el => {
-        gsap.from(el, { scaleX: 0, opacity: 0, transformOrigin: 'left center',
+        gsap.from(el, {
+          scaleX: 0, opacity: 0, transformOrigin: 'left center',
           duration: 0.7, ease: 'power3.out',
           scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' }
         });
       });
 
-      gsap.to('nav', { backgroundPositionY: '100%', ease: 'none',
+      gsap.to('nav', {
+        backgroundPositionY: '100%', ease: 'none',
         scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 1 }
       });
 
-      gsap.from('footer', { y: 80, opacity: 0, duration: 1.2, ease: 'power3.out',
+      gsap.from('footer', {
+        y: 80, opacity: 0, duration: 1.2, ease: 'power3.out',
         scrollTrigger: { trigger: 'footer', start: 'top 95%', toggleActions: 'play none none reverse' }
       });
 
       gsap.utils.toArray('.how-step').forEach((el, i) => {
-        gsap.from(el, { y: 40, opacity: 0, duration: 0.7, delay: i * 0.1, ease: 'power2.out',
+        gsap.from(el, {
+          y: 40, opacity: 0, duration: 0.7, delay: i * 0.1, ease: 'power2.out',
           scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none reverse' }
         });
-        gsap.to(el, { y: -20, ease: 'none',
+        gsap.to(el, {
+          y: -20, ease: 'none',
           scrollTrigger: { trigger: '#download', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
         });
       });
@@ -994,72 +1724,72 @@ npm install</code>
 
     const translations = {
       en: {
-        nav_features:'Features', nav_demo:'Demo', nav_download:'Download', nav_install:'Install',
-        hero_eyebrow:'Open Source · React Native · Expo',
-        hero_title_1:'Discover.', hero_title_2:'Share.', hero_title_3:'Recommend.',
-        hero_sub:'A cinematic social platform for movie and TV enthusiasts. Browse titles, build your watchlist, and share recommendations with people whose taste you trust.',
-        hero_cta1:'⬇ \u00a0Download APK', hero_cta2:'▶ \u00a0Watch Demo',
-        feat_label:'What it does', feat_title:'Built for <em>cinephiles</em> who share.',
-        f1_title:'Media Discovery', f1_desc:'Search and browse thousands of movies and TV series powered by the TMDb API. Watch trailers, explore trending titles, and dive into curated collections.',
-        f2_title:'Personal Lists', f2_desc:"Maintain a Favorites collection and a Watchlist. Track what you've seen, queue what's next, and never lose a recommendation.",
-        f3_title:'Social Recommendations', f3_desc:'Send direct recommendations to friends with a personal note and keep the conversation going in real-time comment threads.',
-        f4_title:'Real-time Updates', f4_desc:'Comments, likes, and notifications powered by Supabase Realtime. Live interaction without manual refreshes.',
-        f5_title:'Secure Backend', f5_desc:"PostgreSQL with Row Level Security (RLS) ensures every user only sees what they're authorised to access. Auth with custom profile triggers.",
-        f6_title:'Your Rating, Your Taste', f6_desc:'Every movie and series displays the official TMDb rating alongside the CortoCrudo community score. Two perspectives, one screen: global critics and the people you trust.',
-        f7_title:'Cinematic UI', f7_desc:'High-contrast dark theme with NativeWind (Tailwind CSS for React Native) styling. Optimised for readability and engagement on any device.',
-        demo_label:'See it in action', demo_title:'<em>Live demo</em> on YouTube',
-        demo_watch:'Watch Demo', demo_h3:'The full experience,<br><em>in two minutes.</em>',
-        demo_p:'The demo walks through onboarding, browsing trending titles, watching trailers, building a watchlist, and sending a recommendation to a friend with real-time comment threads — all on a physical device.',
-        demo_yt:'▶ \u00a0Open on YouTube',
-        install_label:'Get started', install_title:'Up and running in <em>minutes.</em>',
-        step1_title:'Clone & install', step1_desc:'Clone the repository and install dependencies with npm.',
-        step2_title:'Configure environment', step2_desc:'Copy the example env file and fill in your Supabase and TMDb credentials.',
-        step3_title:'Set up the database', step3_desc:'Run <code style="color:var(--cobalt)">supabase/schema.sql</code> in your Supabase SQL editor to scaffold tables, RLS policies, and triggers.',
-        step4_title:'Start the dev server', env_title:'Environment variables',
-        dl_label:'Download', dl_title:'Try it on your <em>Android device.</em>',
-        dl_desc:'No need to clone the repo. Download the APK directly from the Expo build dashboard and install it on any Android device. No Play Store required.',
-        dl_req1_title:'Android required', dl_req1_desc:'Enable "Install from unknown sources" in your device settings before installing.',
-        dl_req2_title:'No iOS build yet', dl_req2_desc:'iOS users can run the app via Expo Go by cloning the repo and starting the dev server.',
-        dl_req3_title:'✓ \u00a0No device permissions', dl_req3_desc:'The app does not request access to your camera, microphone, contacts, or any other system permission. An internet connection is all it needs.',
-        dl_btn:'Download APK',
-        dl_step1:'Tap the <strong style="color:#fff">Download APK</strong> button and open the Expo build page.',
-        dl_step2:'Click <strong style="color:#fff">Download build artifact</strong> to get the <code style="color:var(--cobalt)">.apk</code> file.',
-        dl_step3:'Transfer the file to your Android phone and open it to install.',
-        dl_step4:"If prompted, allow installation from unknown sources and you're good to go.",
+        nav_features: 'Features', nav_demo: 'Demo', nav_download: 'Download', nav_install: 'Install',
+        hero_eyebrow: 'Open Source · React Native · Expo',
+        hero_title_1: 'Discover.', hero_title_2: 'Share.', hero_title_3: 'Recommend.',
+        hero_sub: 'A cinematic social platform for movie and TV enthusiasts. Browse titles, build your watchlist, and share recommendations with people whose taste you trust.',
+        hero_cta1: '⬇ \u00a0Download APK', hero_cta2: '▶ \u00a0Watch Demo',
+        feat_label: 'What it does', feat_title: 'Built for <em>cinephiles</em> who share.',
+        f1_title: 'Media Discovery', f1_desc: 'Search and browse thousands of movies and TV series powered by the TMDb API. Watch trailers, explore trending titles, and dive into curated collections.',
+        f2_title: 'Personal Lists', f2_desc: "Maintain a Favorites collection and a Watchlist. Track what you've seen, queue what's next, and never lose a recommendation.",
+        f3_title: 'Social Recommendations', f3_desc: 'Send direct recommendations to friends with a personal note and keep the conversation going in real-time comment threads.',
+        f4_title: 'Real-time Updates', f4_desc: 'Comments, likes, and notifications powered by Supabase Realtime. Live interaction without manual refreshes.',
+        f5_title: 'Secure Backend', f5_desc: "PostgreSQL with Row Level Security (RLS) ensures every user only sees what they're authorised to access. Auth with custom profile triggers.",
+        f6_title: 'Your Rating, Your Taste', f6_desc: 'Every movie and series displays the official TMDb rating alongside the CortoCrudo community score. Two perspectives, one screen: global critics and the people you trust.',
+        f7_title: 'Cinematic UI', f7_desc: 'High-contrast dark theme with NativeWind (Tailwind CSS for React Native) styling. Optimised for readability and engagement on any device.',
+        demo_label: 'See it in action', demo_title: '<em>Live demo</em> on YouTube',
+        demo_watch: 'Watch Demo', demo_h3: 'The full experience,<br><em>in two minutes.</em>',
+        demo_p: 'The demo walks through onboarding, browsing trending titles, watching trailers, building a watchlist, and sending a recommendation to a friend with real-time comment threads — all on a physical device.',
+        demo_yt: '▶ \u00a0Open on YouTube',
+        install_label: 'Get started', install_title: 'Up and running in <em>minutes.</em>',
+        step1_title: 'Clone & install', step1_desc: 'Clone the repository and install dependencies with npm.',
+        step2_title: 'Configure environment', step2_desc: 'Copy the example env file and fill in your Supabase and TMDb credentials.',
+        step3_title: 'Set up the database', step3_desc: 'Run <code style="color:var(--cobalt)">supabase/schema.sql</code> in your Supabase SQL editor to scaffold tables, RLS policies, and triggers.',
+        step4_title: 'Start the dev server', env_title: 'Environment variables',
+        dl_label: 'Download', dl_title: 'Try it on your <em>Android device.</em>',
+        dl_desc: 'No need to clone the repo. Download the APK directly from the Expo build dashboard and install it on any Android device. No Play Store required.',
+        dl_req1_title: 'Android required', dl_req1_desc: 'Enable "Install from unknown sources" in your device settings before installing.',
+        dl_req2_title: 'No iOS build yet', dl_req2_desc: 'iOS users can run the app via Expo Go by cloning the repo and starting the dev server.',
+        dl_req3_title: '✓ \u00a0No device permissions', dl_req3_desc: 'The app does not request access to your camera, microphone, contacts, or any other system permission. An internet connection is all it needs.',
+        dl_btn: 'Download APK',
+        dl_step1: 'Tap the <strong style="color:#fff">Download APK</strong> button and open the Expo build page.',
+        dl_step2: 'Click <strong style="color:#fff">Download build artifact</strong> to get the <code style="color:var(--cobalt)">.apk</code> file.',
+        dl_step3: 'Transfer the file to your Android phone and open it to install.',
+        dl_step4: "If prompted, allow installation from unknown sources and you're good to go.",
       },
       es: {
-        nav_features:'Funciones', nav_demo:'Demo', nav_download:'Descargar', nav_install:'Instalar',
-        hero_eyebrow:'Código Abierto · React Native · Expo',
-        hero_title_1:'Descubre.', hero_title_2:'Comparte.', hero_title_3:'Recomienda.',
-        hero_sub:'Una plataforma social cinematográfica para amantes del cine y las series. Explora títulos, crea tu lista de seguimiento y comparte recomendaciones con tu gente.',
-        hero_cta1:'⬇ \u00a0Descargar APK', hero_cta2:'▶ \u00a0Ver Demo',
-        feat_label:'Qué hace', feat_title:'Hecha para compartir entre <em>cinéfilos</em>.',
-        f1_title:'Descubrimiento', f1_desc:'Busca y explora miles de películas y series gracias a la API de TMDb. Mira tráilers, descubre títulos en tendencia y sumérgete en colecciones curadas.',
-        f2_title:'Listas Personales', f2_desc:'Mantén una colección de Favoritos y una Lista de Seguimiento. Registra lo que has visto, añade lo que quieres ver y nunca pierdas una recomendación.',
-        f3_title:'Recomendaciones Sociales', f3_desc:'Envía recomendaciones directas a tus amigos con un mensaje personal y sigue la conversación en hilos de comentarios en tiempo real.',
-        f4_title:'Actualizaciones en Tiempo Real', f4_desc:'Comentarios, reacciones y notificaciones impulsados por Supabase Realtime. Interacción en vivo sin recargar la página.',
-        f5_title:'Backend Seguro', f5_desc:'PostgreSQL con Row Level Security (RLS) garantiza que cada usuario solo accede a lo que le corresponde. Autenticación con disparadores de perfil personalizados.',
-        f6_title:'Tu Puntuación, Tu Criterio', f6_desc:'Cada película y serie muestra el rating oficial de TMDb junto a la puntuación de la comunidad de CortoCrudo. Dos perspectivas, una sola pantalla: la crítica global y el criterio de tu gente.',
-        f7_title:'Interfaz Cinematográfica', f7_desc:'Tema oscuro de alto contraste con estilos NativeWind (Tailwind CSS para React Native). Optimizado para legibilidad y engagement en cualquier dispositivo.',
-        demo_label:'En acción', demo_title:'<em>Demo en vivo</em> en YouTube',
-        demo_watch:'Ver Demo', demo_h3:'La experiencia completa,<br><em>en dos minutos.</em>',
-        demo_p:'La demo recorre el onboarding, la exploración de títulos en tendencia, el visionado de tráilers, la creación de una lista y el envío de una recomendación a un amigo con hilos de comentarios en tiempo real — todo en un dispositivo físico.',
-        demo_yt:'▶ \u00a0Abrir en YouTube',
-        install_label:'Empieza ya', install_title:'En marcha en <em>minutos.</em>',
-        step1_title:'Clonar e instalar', step1_desc:'Clona el repositorio e instala las dependencias con npm.',
-        step2_title:'Configurar el entorno', step2_desc:'Copia el archivo de ejemplo y rellena tus credenciales de Supabase y TMDb.',
-        step3_title:'Configurar la base de datos', step3_desc:'Ejecuta <code style="color:var(--cobalt)">supabase/schema.sql</code> en el editor SQL de Supabase para crear las tablas, políticas RLS y triggers.',
-        step4_title:'Arrancar el servidor', env_title:'Variables de entorno',
-        dl_label:'Descarga', dl_title:'Pruébala en tu <em>dispositivo Android.</em>',
-        dl_desc:'No hace falta clonar el repositorio. Descarga el APK directamente desde el panel de Expo e instálalo en cualquier dispositivo Android. Sin Play Store.',
-        dl_req1_title:'Requiere Android', dl_req1_desc:'Activa "Instalar desde fuentes desconocidas" en los ajustes de tu dispositivo antes de instalar.',
-        dl_req2_title:'Sin build para iOS aún', dl_req2_desc:'Los usuarios de iOS pueden ejecutar la app con Expo Go clonando el repositorio e iniciando el servidor de desarrollo.',
-        dl_req3_title:'✓ \u00a0Sin permisos del dispositivo', dl_req3_desc:'La app no solicita acceso a cámara, micrófono, contactos ni ningún otro permiso del sistema. Solo necesitas conexión a internet.',
-        dl_btn:'Descargar APK',
-        dl_step1:'Pulsa el botón <strong style="color:#fff">Descargar APK</strong> y abre la página de build en Expo.',
-        dl_step2:'Haz clic en <strong style="color:#fff">Download build artifact</strong> para obtener el archivo <code style="color:var(--cobalt)">.apk</code>.',
-        dl_step3:'Transfiere el archivo a tu móvil Android y ábrelo para instalarlo.',
-        dl_step4:'Si se te solicita, permite la instalación desde fuentes desconocidas y listo.',
+        nav_features: 'Funciones', nav_demo: 'Demo', nav_download: 'Descargar', nav_install: 'Instalar',
+        hero_eyebrow: 'Código Abierto · React Native · Expo',
+        hero_title_1: 'Descubre.', hero_title_2: 'Comparte.', hero_title_3: 'Recomienda.',
+        hero_sub: 'Una plataforma social cinematográfica para amantes del cine y las series. Explora títulos, crea tu lista de seguimiento y comparte recomendaciones con tu gente.',
+        hero_cta1: '⬇ \u00a0Descargar APK', hero_cta2: '▶ \u00a0Ver Demo',
+        feat_label: 'Qué hace', feat_title: 'Hecha para compartir entre <em>cinéfilos</em>.',
+        f1_title: 'Descubrimiento', f1_desc: 'Busca y explora miles de películas y series gracias a la API de TMDb. Mira tráilers, descubre títulos en tendencia y sumérgete en colecciones curadas.',
+        f2_title: 'Listas Personales', f2_desc: 'Mantén una colección de Favoritos y una Lista de Seguimiento. Registra lo que has visto, añade lo que quieres ver y nunca pierdas una recomendación.',
+        f3_title: 'Recomendaciones Sociales', f3_desc: 'Envía recomendaciones directas a tus amigos con un mensaje personal y sigue la conversación en hilos de comentarios en tiempo real.',
+        f4_title: 'Actualizaciones en Tiempo Real', f4_desc: 'Comentarios, reacciones y notificaciones impulsados por Supabase Realtime. Interacción en vivo sin recargar la página.',
+        f5_title: 'Backend Seguro', f5_desc: 'PostgreSQL con Row Level Security (RLS) garantiza que cada usuario solo accede a lo que le corresponde. Autenticación con disparadores de perfil personalizados.',
+        f6_title: 'Tu Puntuación, Tu Criterio', f6_desc: 'Cada película y serie muestra el rating oficial de TMDb junto a la puntuación de la comunidad de CortoCrudo. Dos perspectivas, una sola pantalla: la crítica global y el criterio de tu gente.',
+        f7_title: 'Interfaz Cinematográfica', f7_desc: 'Tema oscuro de alto contraste con estilos NativeWind (Tailwind CSS para React Native). Optimizado para legibilidad y engagement en cualquier dispositivo.',
+        demo_label: 'En acción', demo_title: '<em>Demo en vivo</em> en YouTube',
+        demo_watch: 'Ver Demo', demo_h3: 'La experiencia completa,<br><em>en dos minutos.</em>',
+        demo_p: 'La demo recorre el onboarding, la exploración de títulos en tendencia, el visionado de tráilers, la creación de una lista y el envío de una recomendación a un amigo con hilos de comentarios en tiempo real — todo en un dispositivo físico.',
+        demo_yt: '▶ \u00a0Abrir en YouTube',
+        install_label: 'Empieza ya', install_title: 'En marcha en <em>minutos.</em>',
+        step1_title: 'Clonar e instalar', step1_desc: 'Clona el repositorio e instala las dependencias con npm.',
+        step2_title: 'Configurar el entorno', step2_desc: 'Copia el archivo de ejemplo y rellena tus credenciales de Supabase y TMDb.',
+        step3_title: 'Configurar la base de datos', step3_desc: 'Ejecuta <code style="color:var(--cobalt)">supabase/schema.sql</code> en el editor SQL de Supabase para crear las tablas, políticas RLS y triggers.',
+        step4_title: 'Arrancar el servidor', env_title: 'Variables de entorno',
+        dl_label: 'Descarga', dl_title: 'Pruébala en tu <em>dispositivo Android.</em>',
+        dl_desc: 'No hace falta clonar el repositorio. Descarga el APK directamente desde el panel de Expo e instálalo en cualquier dispositivo Android. Sin Play Store.',
+        dl_req1_title: 'Requiere Android', dl_req1_desc: 'Activa "Instalar desde fuentes desconocidas" en los ajustes de tu dispositivo antes de instalar.',
+        dl_req2_title: 'Sin build para iOS aún', dl_req2_desc: 'Los usuarios de iOS pueden ejecutar la app con Expo Go clonando el repositorio e iniciando el servidor de desarrollo.',
+        dl_req3_title: '✓ \u00a0Sin permisos del dispositivo', dl_req3_desc: 'La app no solicita acceso a cámara, micrófono, contactos ni ningún otro permiso del sistema. Solo necesitas conexión a internet.',
+        dl_btn: 'Descargar APK',
+        dl_step1: 'Pulsa el botón <strong style="color:#fff">Descargar APK</strong> y abre la página de build en Expo.',
+        dl_step2: 'Haz clic en <strong style="color:#fff">Download build artifact</strong> para obtener el archivo <code style="color:var(--cobalt)">.apk</code>.',
+        dl_step3: 'Transfiere el archivo a tu móvil Android y ábrelo para instalarlo.',
+        dl_step4: 'Si se te solicita, permite la instalación desde fuentes desconocidas y listo.',
       }
     };
 
@@ -1078,7 +1808,7 @@ npm install</code>
         ? 'https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/cortocrudotextlogo.png'
         : 'https://raw.githubusercontent.com/Pabl0Parra/RawCut/main/assets/icons/rawcut-text-logo.png';
       const logoAlt = isEs ? 'CortoCrudo' : 'RawCut';
-      ['nav-logo-img','hero-logo-img','footer-logo-img'].forEach(id => {
+      ['nav-logo-img', 'hero-logo-img', 'footer-logo-img'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.src = logoSrc; el.alt = logoAlt; }
       });
@@ -1091,7 +1821,8 @@ npm install</code>
       runLetterLoop();
     }
 
-    setLang('es');
+    setLang('en');
   </script>
 </body>
+
 </html>
