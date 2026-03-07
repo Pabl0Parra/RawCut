@@ -1519,7 +1519,13 @@ npm install</code>
       heroVideo.addEventListener('loadedmetadata', initVideo);
     }
 
-    (async () => { try { await heroVideo.play(); } catch (e) { } })();
+    (async () => {
+      try {
+        await heroVideo.play();
+      } catch (e) {
+        console.error('Video autoplay failed:', e);
+      }
+    })();
 
     const lenis = new Lenis({ smoothWheel: true });
     lenis.on('scroll', ScrollTrigger.update);
@@ -1828,12 +1834,10 @@ npm install</code>
           } else {
             btn.ariaLabel = 'Switch to Spanish';
           }
+        } else if (bLang === 'es') {
+          btn.ariaLabel = 'Lenguaje actual: Español';
         } else {
-          if (bLang === 'es') {
-            btn.ariaLabel = 'Lenguaje actual: Español';
-          } else {
-            btn.ariaLabel = 'Cambiar a Inglés';
-          }
+          btn.ariaLabel = 'Cambiar a Inglés';
         }
       });
 
