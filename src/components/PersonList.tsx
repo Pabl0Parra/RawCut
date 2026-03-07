@@ -51,8 +51,12 @@ const PersonCard = React.memo(
     (prevProps, nextProps) => prevProps.item.id === nextProps.item.id && prevProps.item.subtitle === nextProps.item.subtitle
 );
 
+interface PersonListItemRenderInfo {
+    readonly item: PersonListItem;
+}
+
 export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix }) => {
-    const renderItem = React.useCallback(({ item }: { item: PersonListItem }) => {
+    const renderItem = React.useCallback(({ item }: PersonListItemRenderInfo) => {
         return <PersonCard item={item} />;
     }, []);
 
@@ -72,7 +76,7 @@ export const PersonList: React.FC<PersonListProps> = ({ items, title, keyPrefix 
             <Text style={detailScreenStyles.sectionTitle}>{title}</Text>
             <FlatList
                 data={items}
-                keyExtractor={(item, index) => `${keyPrefix}-${item.id}-${index}`}
+                keyExtractor={(item) => `${keyPrefix}-${item.id}`}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={detailScreenStyles.horizontalList}

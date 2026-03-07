@@ -66,12 +66,13 @@ const FollowButton: React.FC<FollowButtonProps> = ({ targetUserId, compact = fal
         if (!ok) Alert.alert(t("profile.alerts.errorTitle"), t("social.errorFollow"));
     };
 
-    const label =
-        status === "accepted"
-            ? t("social.following")
-            : status === "pending"
-                ? t("social.pending")
-                : t("social.follow");
+    const getFollowLabel = () => {
+        if (status === "accepted") return t("social.following");
+        if (status === "pending") return t("social.pending");
+        return t("social.follow");
+    };
+
+    const label = getFollowLabel();
 
     const buttonStyle = [
         styles.button,

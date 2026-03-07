@@ -28,7 +28,7 @@ interface ContentGridLayoutProps {
     readonly ListFooterComponent?: React.ComponentType<any> | React.ReactElement | null;
 }
 
-interface ContentGridItemRenderArgs {
+interface ContentGridItemRenderInfo {
     readonly item: EnrichedContentItem;
 }
 
@@ -105,7 +105,7 @@ export const ContentGridLayout = React.memo(function ContentGridLayout({
     isWatched,
     ListFooterComponent,
 }: Readonly<ContentGridLayoutProps>): JSX.Element {
-    const renderItem = useCallback(({ item }: ContentGridItemRenderArgs): JSX.Element => {
+    const renderItem = useCallback(({ item }: ContentGridItemRenderInfo): JSX.Element => {
         return (
             <GridMovieCard
                 item={item}

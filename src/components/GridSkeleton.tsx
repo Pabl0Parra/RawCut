@@ -7,8 +7,8 @@ const COLUMN_WIDTH = (width - 48) / 2;
 
 export const GridSkeleton = ({ rows = 3 }) => (
     <View style={styles.container}>
-        {[...Array(rows)].map((_, rowIndex) => (
-            <View key={rowIndex} style={styles.row}>
+        {new Array(rows).fill(null).map((_, rowIndex) => (
+            <View key={`skeleton-row-${rowIndex}`} style={styles.row}>
                 <View style={styles.item}>
                     <Skeleton width={COLUMN_WIDTH} height={COLUMN_WIDTH * 1.5} borderRadius={12} />
                     <Skeleton width={COLUMN_WIDTH * 0.8} height={20} borderRadius={4} style={{ marginTop: 8 }} />

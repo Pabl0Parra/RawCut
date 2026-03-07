@@ -101,7 +101,7 @@ interface ForYouRecommendation {
 type GridItem = Movie | TVShow | null;
 type GenreIdItem = number | string | null;
 
-interface GridItemRenderArgs {
+interface HomeGridItemRenderArgs {
     readonly item: GridItem;
 }
 
@@ -454,7 +454,7 @@ export default function HomeScreen(): JSX.Element {
     // ─── FlatList callbacks ──────────────────────────────────────────────
 
     const renderItem = useCallback(
-        ({ item }: GridItemRenderArgs): JSX.Element => {
+        ({ item }: HomeGridItemRenderArgs): JSX.Element => {
             if (!item) return <View style={styles.placeholderCard} />;
             return (
                 <MovieCardItem
