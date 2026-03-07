@@ -23,7 +23,7 @@ const LargeSecureStore = {
                 SecureStore.getItemAsync(`${key}.${i}`)
             )
         );
-        if (chunks.some((c) => c === null)) return null;
+        if (chunks.includes(null)) return null;
         return chunks.join("");
     },
 

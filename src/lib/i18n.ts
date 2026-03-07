@@ -29,13 +29,15 @@ const languageDetectorPlugin = {
         return callback('es'); // Default fallback
       }
     } catch (error) {
-      callback('es');
+       console.error('[i18n] Error detecting language:', error);
+       callback('es');
     }
   },
   cacheUserLanguage: async function (language: string) {
     try {
       await AsyncStorage.setItem(STORE_LANGUAGE_KEY, language);
     } catch (error) {
+       console.error('[i18n] Error caching language:', error);
     }
   }
 };
