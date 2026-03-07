@@ -1820,9 +1820,21 @@ npm install</code>
       const btns = document.querySelectorAll('.lang-btn');
       btns.forEach(btn => {
         const bLang = btn.textContent.trim().toLowerCase();
-        btn.ariaLabel = lang === 'en'
-          ? (bLang === 'en' ? 'Current language: English' : 'Switch to Spanish')
-          : (bLang === 'es' ? 'Lenguaje actual: Español' : 'Cambiar a Inglés');
+        const isActiveEn = lang === 'en';
+
+        if (isActiveEn) {
+          if (bLang === 'en') {
+            btn.ariaLabel = 'Current language: English';
+          } else {
+            btn.ariaLabel = 'Switch to Spanish';
+          }
+        } else {
+          if (bLang === 'es') {
+            btn.ariaLabel = 'Lenguaje actual: Español';
+          } else {
+            btn.ariaLabel = 'Cambiar a Inglés';
+          }
+        }
       });
 
       if (letterAnimTimer) clearTimeout(letterAnimTimer);
