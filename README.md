@@ -44,13 +44,17 @@ The application serves as a centralized hub for media enthusiasts to track their
 
 ---
 
-## Demo
+## 🎬 Demo
 
-## Demo
-
-[![CortoCrudo Demo](https://img.youtube.com/vi/SCV3KcW4htM/0.jpg)](https://youtu.be/SCV3KcW4htM)
-
----
+<p align="center">
+  <a href="https://youtu.be/SCV3KcW4htM">
+    <img src="https://img.youtube.com/vi/SCV3KcW4htM/0.jpg" alt="CortoCrudo Demo" width="800"/>
+    <!-- SVG play button overlay — rendered on top of the thumbnail on GitHub -->
+    <br/>
+    <img src="https://img.shields.io/badge/%E2%96%B6%20Watch%20the%20demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch the demo"/>
+  </a>
+</p>
+<p align="center"><sub>Click the image to watch the demo</sub></p>
 
 ## Screenshots
 
@@ -63,17 +67,11 @@ The application serves as a centralized hub for media enthusiasts to track their
       </td>
       <td align="center">
         <img src="./assets/screenshots/1.PNG" alt="Discover Screen" width="200"/>
-        <br/><sub><b>Discover</b></sub>
+        <br/><sub><b>Discover Movies</b></sub>
       </td>
       <td align="center">
         <img src="./assets/screenshots/1-b.PNG" alt="Detail View" width="200"/>
-        <br/><sub><b>Detail View</b></sub>
-      </td>
-    </tr>
-    <tr>
-      <td align="center">
-        <img src="./assets/screenshots/2.PNG" alt="Watchlist Screen" width="200"/>
-        <br/><sub><b>Watchlist</b></sub>
+        <br/><sub><b>Discover tv shows</b></sub>
       </td>
       <td align="center">
         <img src="./assets/screenshots/3.PNG" alt="Recommendations Screen" width="200"/>
@@ -81,23 +79,7 @@ The application serves as a centralized hub for media enthusiasts to track their
       </td>
       <td align="center">
         <img src="./assets/screenshots/4.PNG" alt="Profile Screen" width="200"/>
-        <br/><sub><b>Profile</b></sub>
-      </td>
-      <td align="center">
-        <img src="./assets/screenshots/5.PNG" alt="Profile Screen" width="200"/>
-        <br/><sub><b>Profile</b></sub>
-      </td>
-      <td align="center">
-        <img src="./assets/screenshots/6.PNG" alt="Profile Screen" width="200"/>
-        <br/><sub><b>Profile</b></sub>
-      </td>
-      <td align="center">
-        <img src="./assets/screenshots/7.PNG" alt="Profile Screen" width="200"/>
-        <br/><sub><b>Profile</b></sub>
-      </td>
-      <td align="center">
-        <img src="./assets/screenshots/8.PNG" alt="Profile Screen" width="200"/>
-        <br/><sub><b>Profile</b></sub>
+        <br/><sub><b>Messages</b></sub>
       </td>
       <td align="center">
         <img src="./assets/screenshots/9.PNG" alt="Profile Screen" width="200"/>
@@ -108,6 +90,9 @@ The application serves as a centralized hub for media enthusiasts to track their
         <br/><sub><b>Profile</b></sub>
       </td>
     </tr>
+    <tr>
+      
+      
   </table>
 </div>
 
@@ -125,6 +110,7 @@ The application serves as a centralized hub for media enthusiasts to track their
 ## Technical Architecture
 
 ### Frontend
+
 - Framework: React Native with Expo SDK 54.
 - Language: TypeScript (Strict Mode).
 - Navigation: Expo Router (File-based routing).
@@ -133,17 +119,20 @@ The application serves as a centralized hub for media enthusiasts to track their
 - Form Handling: React Hook Form with Zod validation.
 
 ### Backend
+
 - Platform: Supabase.
 - Database: PostgreSQL with Row Level Security (RLS).
 - Authentication: Supabase Auth with custom profile triggers.
 - Real-time: Supabase Realtime for comments and notifications.
 
 ### Data Sources
+
 - Media Metadata: TMDb (The Movie Database) API v3.
 
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (version 18 or higher recommended).
 - npm or yarn package manager.
 - Expo Go mobile application for physical device testing.
@@ -151,6 +140,7 @@ The application serves as a centralized hub for media enthusiasts to track their
 - A TMDb API key.
 
 ### Installation
+
 1. Clone the repository.
 2. Navigate to the project directory:
    ```bash
@@ -162,25 +152,33 @@ The application serves as a centralized hub for media enthusiasts to track their
    ```
 
 ### Environment Configuration
+
 Create a `.env` file in the root directory based on `.env.example`. Required variables include:
+
 - `EXPO_PUBLIC_SUPABASE_URL`: Your Supabase project URL.
 - `EXPO_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous API key.
 - `EXPO_PUBLIC_TMDB_API_KEY`: Your TMDb API key.
 - `EXPO_PUBLIC_TMDB_IMAGE_BASE`: Base URL for TMDb images (e.g., https://image.tmdb.org/t/p/w500).
 
 ### Database Setup
+
 To initialize the database, execute the SQL script located in `supabase/schema.sql` within the Supabase SQL Editor. This script configures:
+
 - Database tables (profiles, user_content, recommendations, etc.).
 - Robust Row Level Security (RLS) policies.
 - Automated triggers for profile creation and point calculations.
 - Real-time publication settings.
 
 ### Running the Application
+
 Start the development server:
+
 ```bash
 npx expo start
 ```
+
 Use the Expo Go app to scan the generated QR code or use the following commands:
+
 - Press `a` for Android Emulator.
 - Press `i` for iOS Simulator.
 - Press `w` for Web.
