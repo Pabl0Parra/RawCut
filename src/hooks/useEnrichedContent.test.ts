@@ -22,7 +22,7 @@ describe('useEnrichedContent Hook', () => {
     (tmdb.getTVShowDetails as jest.Mock).mockResolvedValue({
       name: 'Mock TV Show',
       poster_path: '/mock-tv.jpg',
-      vote_average: 9.0
+      vote_average: 9
     });
     
     // Suppress console.warn and console.error for missing items warnings
@@ -79,7 +79,7 @@ describe('useEnrichedContent Hook', () => {
       media_type: 'tv',
       title: 'Mock TV Show',
       poster_path: '/mock-tv.jpg',
-      vote_average: 9.0
+      vote_average: 9
     });
 
     expect(tmdb.getMovieDetails).toHaveBeenCalledWith(101);
