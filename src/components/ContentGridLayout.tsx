@@ -101,6 +101,18 @@ export const ContentGridLayout = React.memo(function ContentGridLayout({
     isWatched,
     ListFooterComponent,
 }: Readonly<ContentGridLayoutProps>): JSX.Element {
+    const renderItem = useCallback(({ item }: { item: EnrichedContentItem }): JSX.Element => {
+        return (
+            <GridMovieCard
+                item={item}
+                onToggleFavorite={onToggleFavorite}
+                onToggleWatchlist={onToggleWatchlist}
+                onToggleWatched={onToggleWatched}
+                onRecommend={onRecommend}
+            />
+        );
+    }, [onToggleFavorite, onToggleWatchlist, onToggleWatched, onRecommend]);
+
     if (!isAuthenticated) {
         return (
             <UnauthenticatedState
@@ -124,18 +136,6 @@ export const ContentGridLayout = React.memo(function ContentGridLayout({
             />
         );
     }
-
-    const renderItem = useCallback(({ item }: { item: EnrichedContentItem }): JSX.Element => {
-        return (
-            <GridMovieCard
-                item={item}
-                onToggleFavorite={onToggleFavorite}
-                onToggleWatchlist={onToggleWatchlist}
-                onToggleWatched={onToggleWatched}
-                onRecommend={onRecommend}
-            />
-        );
-    }, [onToggleFavorite, onToggleWatchlist, onToggleWatched, onRecommend]);
 
     return (
         <FlatList
