@@ -22,7 +22,6 @@ export default function WatchlistScreen() {
     const {
         fetchUserContent,
         fetchTVProgress,
-        toggleEpisodeWatched,
         isFavorite,
         isInWatchlist,
         isWatched,
@@ -122,6 +121,84 @@ export default function WatchlistScreen() {
         );
     }
 
+    const tvContent = continueWatching.length > 0 || upcoming.length > 0 ? (
+        <ScrollView key={activeTab} style={styles.content} showsVerticalScrollIndicator={false}>
+            {continueWatching.length > 0 && (
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="play-circle-outline" size={24} color={Colors.vibrantRed} />
+                        <Text style={styles.sectionTitle}>{t("home.continueWatching")}</Text>
+                    </View>
+                    <FlatList
+                        horizontal
+                        data={continueWatching}
+                        keyExtractor={(item) => `continue-${item.id}`}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={({ item }) => (
+                            <ContinueWatchingCard
+                                item={item}
+                                horizontal
+                                onPress={(showId) => router.push(`/tv/${showId}`)}
+                                nextEpisode={item.nextEpisode}
+                            />
+                        )}
+                        contentContainerStyle={styles.horizontalListContent}
+                    />
+                </View>
+            )}
+
+            <GestureDetector gesture={swipeGesture}>
+                <View style={{ flex: 1 }}>
+                    {upcoming.length > 0 && (
+                        <View style={styles.section}>
+                            <View style={styles.sectionHeader}>
+                                <Ionicons name="calendar-outline" size={22} color={Colors.vibrantRed} />
+                                <Text style={styles.sectionTitle}>{t("watchlist.upcomingReleases")}</Text>
+                            </View>
+                            {upcoming.map((item) => {
+                                const airDate = new Date(item.next_episode_to_air?.air_date || "");
+                                const diff = airDate.getTime() - new Date().getTime();
+                                const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                                return (
+                                    <UpcomingCard
+                                        key={item.internal_id}
+                                        item={item}
+                                        daysRemaining={days}
+                                        onPress={() => router.push(`/tv/${item.id}`)}
+                                        onRemindMe={() => { }}
+                                    />
+                                );
+                            })}
+                        </View>
+                    )}
+
+                    {statsSection}
+                </View>
+            </GestureDetector>
+        </ScrollView>
+    ) : (
+        <GestureDetector gesture={swipeGesture}>
+            <View style={{ flex: 1 }}>
+                <ContentGridLayout
+                    key={activeTab}
+                    data={tvData}
+                    isLoading={false}
+                    isAuthenticated={true}
+                    emptyTitle={t("watchlist.emptyTitle")}
+                    emptySubtitle={t("watchlist.emptySubtitle")}
+                    emptyIcon="💔"
+                    emptyAsset={EMPTY_WATCHLIST_ASSET}
+                    onToggleFavorite={handleToggleFavorite}
+                    onToggleWatchlist={handleToggleWatchlist}
+                    onToggleWatched={handleToggleWatched}
+                    isInWatchlist={isInWatchlist}
+                    isWatched={isWatched}
+                    ListFooterComponent={statsSection}
+                />
+            </View>
+        </GestureDetector>
+    );
+
     return (
         <View style={styles.safeArea}>
             <GestureDetector gesture={swipeGesture}>
@@ -135,83 +212,7 @@ export default function WatchlistScreen() {
             </GestureDetector>
 
             {activeTab === "tv" ? (
-                continueWatching.length > 0 || upcoming.length > 0 ? (
-                    <ScrollView key={activeTab} style={styles.content} showsVerticalScrollIndicator={false}>
-                        {continueWatching.length > 0 && (
-                            <View style={styles.section}>
-                                <View style={styles.sectionHeader}>
-                                    <Ionicons name="play-circle-outline" size={24} color={Colors.vibrantRed} />
-                                    <Text style={styles.sectionTitle}>{t("home.continueWatching")}</Text>
-                                </View>
-                                <FlatList
-                                    horizontal
-                                    data={continueWatching}
-                                    keyExtractor={(item) => `continue-${item.id}`}
-                                    showsHorizontalScrollIndicator={false}
-                                    renderItem={({ item }) => (
-                                        <ContinueWatchingCard
-                                            item={item}
-                                            horizontal
-                                            onPress={(showId) => router.push(`/tv/${showId}`)}
-                                            nextEpisode={item.nextEpisode}
-                                        />
-                                    )}
-                                    contentContainerStyle={styles.horizontalListContent}
-                                />
-                            </View>
-                        )}
-
-                        <GestureDetector gesture={swipeGesture}>
-                            <View style={{ flex: 1 }}>
-                                {upcoming.length > 0 && (
-                                    <View style={styles.section}>
-                                        <View style={styles.sectionHeader}>
-                                            <Ionicons name="calendar-outline" size={22} color={Colors.vibrantRed} />
-                                            <Text style={styles.sectionTitle}>{t("watchlist.upcomingReleases")}</Text>
-                                        </View>
-                                        {upcoming.map((item) => {
-                                            const airDate = new Date(item.next_episode_to_air?.air_date || "");
-                                            const diff = airDate.getTime() - new Date().getTime();
-                                            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                                            return (
-                                                <UpcomingCard
-                                                    key={item.internal_id}
-                                                    item={item}
-                                                    daysRemaining={days}
-                                                    onPress={() => router.push(`/tv/${item.id}`)}
-                                                    onRemindMe={() => { }}
-                                                />
-                                            );
-                                        })}
-                                    </View>
-                                )}
-
-                                {statsSection}
-                            </View>
-                        </GestureDetector>
-                    </ScrollView>
-                ) : (
-                    <GestureDetector gesture={swipeGesture}>
-                        <View style={{ flex: 1 }}>
-                            <ContentGridLayout
-                                key={activeTab}
-                                data={tvData}
-                                isLoading={false}
-                                isAuthenticated={true}
-                                emptyTitle={t("watchlist.emptyTitle")}
-                                emptySubtitle={t("watchlist.emptySubtitle")}
-                                emptyIcon="💔"
-                                emptyAsset={EMPTY_WATCHLIST_ASSET}
-                                onToggleFavorite={handleToggleFavorite}
-                                onToggleWatchlist={handleToggleWatchlist}
-                                onToggleWatched={handleToggleWatched}
-                                isInWatchlist={isInWatchlist}
-                                isWatched={isWatched}
-                                ListFooterComponent={statsSection}
-                            />
-                        </View>
-                    </GestureDetector>
-                )
+                tvContent
             ) : (
                 <GestureDetector gesture={swipeGesture}>
                     <View style={{ flex: 1 }}>
@@ -234,8 +235,7 @@ export default function WatchlistScreen() {
                         />
                     </View>
                 </GestureDetector>
-            )
-            }
+            )}
         </View >
     );
 }
