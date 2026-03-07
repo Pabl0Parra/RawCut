@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react-native";
+import { act } from "@testing-library/react-native";
 import { useSocialStore } from "./socialStore";
 import { useAuthStore } from "./authStore";
 import { supabase } from "../lib/supabase";

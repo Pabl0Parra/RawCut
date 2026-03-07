@@ -199,20 +199,15 @@ export const useRecommendationStore = create<RecommendationState>((set, get) => 
     },
 
     deleteComment: async (recommendationId: string, commentId: string) => {
-        const user = useAuthStore.getState().user;
-
         try {
-            const { error, count, data } = await supabase
+            const { error } = await supabase
                 .from("recommendation_comments")
-                .delete({ count: 'exact' })
+                .delete({ count: "exact" })
                 .eq("id", commentId)
                 .select();
 
             if (error) {
                 throw error;
-            }
-
-            if (count === 0) {
             }
 
             set((state) => ({
