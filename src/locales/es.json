@@ -1,4 +1,8 @@
 {
+    "vote": {
+        "title": "Tu puntuación",
+        "hint": "Toca para elegir · igual que la escala TMDB"
+    },
     "movieCard": {
         "posterAltText": "Póster de {{title}}",
         "noPosterAltText": "Sin póster para {{title}}",
@@ -51,8 +55,6 @@
     },
     "home": {
         "continueWatching": "Continuar viendo",
-        "bannerTitle": "¡Dale estilo a tu cuenta!",
-        "bannerSubtitle": "Cambia tu nombre de usuario genérico en tu perfil.",
         "becauseYouLiked": "Porque te gustó \"{{title}}\"",
         "popularMovies": "Películas Populares",
         "popularTV": "Series Populares",
@@ -164,6 +166,8 @@
     },
     "profile": {
         "title": "Perfil",
+        "bannerTitle": "¡Dale estilo a tu cuenta!",
+        "bannerSubtitle": "Cambia tu nombre de usuario genérico en tu perfil.",
         "avatar": {
             "takePhoto": "Tomar foto",
             "chooseGallery": "Elegir de galería",

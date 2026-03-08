@@ -9,6 +9,7 @@ import {
     type TextStyle,
 } from "react-native";
 
+import { useTranslation } from "react-i18next";
 import { Colors } from "../constants/Colors";
 
 const VOTE_OPTIONS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -22,11 +23,13 @@ export const VotePicker = memo(function VotePicker({
     onSelect: (v: number) => void;
     onClose: () => void;
 }) {
+    const { t } = useTranslation();
+
     return (
         <Modal transparent animationType="fade" onRequestClose={onClose}>
             <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose}>
                 <View style={styles.panel} onStartShouldSetResponder={() => true}>
-                    <Text style={styles.title}>Tu puntuación</Text>
+                    <Text style={styles.title}>{t("vote.title")}</Text>
                     <View style={styles.row}>
                         {VOTE_OPTIONS.map((n) => (
                             <TouchableOpacity
@@ -40,7 +43,7 @@ export const VotePicker = memo(function VotePicker({
                             </TouchableOpacity>
                         ))}
                     </View>
-                    <Text style={styles.hint}>Toca para elegir · igual que la escala TMDB</Text>
+                    <Text style={styles.hint}>{t("vote.hint")}</Text>
                 </View>
             </TouchableOpacity>
         </Modal>

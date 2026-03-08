@@ -1,4 +1,8 @@
 {
+    "vote": {
+        "title": "Your Rating",
+        "hint": "Tap to choose · same as TMDB scale"
+    },
     "movieCard": {
         "posterAltText": "{{title}} poster",
         "noPosterAltText": "No poster for {{title}}",
@@ -51,8 +55,6 @@
     },
     "home": {
         "continueWatching": "Continue Watching",
-        "bannerTitle": "Style your account!",
-        "bannerSubtitle": "Change your generic username in your profile.",
         "becauseYouLiked": "Because you liked \"{{title}}\"",
         "popularMovies": "Popular Movies",
         "popularTV": "Popular TV Shows",
@@ -164,6 +166,8 @@
     },
     "profile": {
         "title": "Profile",
+        "bannerTitle": "Update your username",
+        "bannerSubtitle": "Choose a unique username so friends can find you.",
         "avatar": {
             "takePhoto": "Take photo",
             "chooseGallery": "Choose from gallery",

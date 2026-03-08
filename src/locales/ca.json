@@ -1,4 +1,8 @@
 {
+    "vote": {
+        "title": "La teva puntuació",
+        "hint": "Toca per triar · igual que l'escala TMDB"
+    },
     "movieCard": {
         "posterAltText": "Pòster de {{title}}",
         "noPosterAltText": "Sense pòster per a {{title}}",
@@ -51,8 +55,6 @@
     },
     "home": {
         "continueWatching": "Continuar veient",
-        "bannerTitle": "Dóna estil al teu compte!",
-        "bannerSubtitle": "Canvia el teu nom d'usuari genèric al teu perfil.",
         "becauseYouLiked": "Perquè t'ha agradat \"{{title}}\"",
         "popularMovies": "Pel·lícules Populars",
         "popularTV": "Sèries Populars",
@@ -164,6 +166,8 @@
     },
     "profile": {
         "title": "Perfil",
+        "bannerTitle": "Dóna estil al teu compte!",
+        "bannerSubtitle": "Canvia el teu nom d'usuari genèric al teu perfil.",
         "avatar": {
             "takePhoto": "Fer foto",
             "chooseGallery": "Tancar de la galeria",
